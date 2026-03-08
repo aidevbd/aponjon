@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Lock, Phone, X, Loader2 } from "lucide-react";
+import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Lock, Phone, X, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   getChatSession, createChatSession, getChatContacts,
   sendMessage, getMessages, getUnreadCounts, uploadChatImage,
-  clearChatSession, type ChatSession,
+  clearChatSession, deleteMessage, type ChatSession,
 } from "@/lib/chatSession";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -222,6 +222,17 @@ const Chat = () => {
     }
   };
 
+  const handleDeleteMessage = async (msgId: string) => {
+    if (!session) return;
+    try {
+      await deleteMessage(session.token, msgId);
+      setMessages(prev => prev.filter(m => m.id !== msgId));
+      toast.success("মেসেজ ডিলিট হয়েছে");
+    } catch {
+      toast.error("ডিলিট করতে সমস্যা");
+    }
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !session || !selectedContact) return;
@@ -419,7 +430,12 @@ const Chat = () => {
                 {messages.map((msg) => {
                   const isMine = msg.sender_id === session.contactId;
                   return (
-                    <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+                    <div key={msg.id} className={`group flex ${isMine ? "justify-end" : "justify-start"}`}>
+                      {isMine && (
+                        <button onClick={() => handleDeleteMessage(msg.id)} className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-1.5 p-1 rounded-full hover:bg-destructive/10" title="ডিলিট">
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </button>
+                      )}
                       <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 ${isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
                         {msg.image_url && (
                           <img src={msg.image_url} alt="" className="rounded-lg max-w-full mb-1.5 cursor-pointer" onClick={() => window.open(msg.image_url!, "_blank")} />

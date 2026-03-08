@@ -98,6 +98,12 @@ export async function getUnreadCounts(token: string) {
   return (data || []) as { sender_id: string; unread_count: number }[];
 }
 
+export async function deleteMessage(token: string, messageId: string) {
+  const { data, error } = await supabase.rpc("delete_message", { p_token: token, p_message_id: messageId });
+  if (error) throw error;
+  return data as boolean;
+}
+
 export async function uploadChatImage(file: File): Promise<string> {
   // Compress image like PhotoUpload does
   const compressed = await compressChatImage(file);
