@@ -32,6 +32,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
