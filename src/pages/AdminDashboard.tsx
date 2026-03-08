@@ -476,16 +476,7 @@ const AdminDashboard = () => {
 
         {/* ===== চ্যাট ট্যাব ===== */}
         <TabsContent value="chat" className="mt-0">
-          <div className="glass-card p-8 text-center">
-            <MessageCircle className="h-12 w-12 text-primary mx-auto mb-4 opacity-60" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">চ্যাট</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              {totalUnread > 0 ? `${totalUnread}টি অপঠিত মেসেজ আছে` : "সব মেসেজ পড়া হয়েছে"}
-            </p>
-            <Button variant="hero" onClick={() => navigate("/admin/chat")} className="gap-2">
-              <MessageCircle className="h-4 w-4" /> চ্যাটে যান
-            </Button>
-          </div>
+          <EmbeddedAdminChat onUnreadChange={(count) => setTotalUnread(count)} />
         </TabsContent>
       </Tabs>
 
