@@ -238,6 +238,7 @@ const Chat = () => {
     if (hours < 24) return `${hours} ঘন্টা আগে`;
     const days = Math.floor(hours / 24);
     return `${days} দিন আগে`;
+  };
 
   // ============ LOGIN SCREEN ============
   if (!session) {
