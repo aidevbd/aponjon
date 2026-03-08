@@ -256,25 +256,31 @@ const AdminDashboard = () => {
 
       {/* Tab-Based Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="container mx-auto px-4 py-3">
-        <TabsList className="w-full grid grid-cols-3 h-10 mb-4">
-          <TabsTrigger value="dashboard" className="gap-1.5 text-xs sm:text-sm">
+        <TabsList className="w-full grid grid-cols-4 h-10 mb-4">
+          <TabsTrigger value="dashboard" className="gap-1 text-[11px] sm:text-sm">
             <LayoutDashboard className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">ড্যাশবোর্ড</span>
             <span className="sm:hidden">হোম</span>
           </TabsTrigger>
-          <TabsTrigger value="contacts" className="gap-1.5 text-xs sm:text-sm">
+          <TabsTrigger value="contacts" className="gap-1 text-[11px] sm:text-sm">
             <Users className="h-3.5 w-3.5" />
-            কন্টাক্ট
-            <span className="ml-1 text-[10px] bg-primary/10 text-primary rounded-full px-1.5">{stats.total}</span>
+            <span className="hidden sm:inline">কন্টাক্ট</span>
+            <span className="sm:hidden">কন্টাক্ট</span>
+            <span className="ml-0.5 text-[9px] bg-primary/10 text-primary rounded-full px-1">{stats.total}</span>
           </TabsTrigger>
-          <TabsTrigger value="chat" className="gap-1.5 text-xs sm:text-sm relative">
+          <TabsTrigger value="chat" className="gap-1 text-[11px] sm:text-sm relative">
             <MessageCircle className="h-3.5 w-3.5" />
             চ্যাট
             {totalUnread > 0 && (
-              <span className="ml-1 flex h-4 min-w-[16px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[9px] font-bold px-1">
+              <span className="ml-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[9px] font-bold px-1">
                 {totalUnread}
               </span>
             )}
+          </TabsTrigger>
+          <TabsTrigger value="logs" className="gap-1 text-[11px] sm:text-sm">
+            <Activity className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">লগ</span>
+            <span className="sm:hidden">লগ</span>
           </TabsTrigger>
         </TabsList>
 
