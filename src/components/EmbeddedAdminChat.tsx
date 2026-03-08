@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { uploadChatImage } from "@/lib/chatSession";
 import { toast } from "sonner";
 import { EmojiPicker } from "@/components/EmojiPicker";
+import { logAdminActivity } from "@/lib/adminLog";
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
 type Message = {
@@ -192,6 +193,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       if (error) throw error;
       setMessages(prev => prev.filter(m => m.id !== deleteTargetId));
       toast.success("মেসেজ ডিলিট হয়েছে");
+      logAdminActivity("message_delete", `মেসেজ ডিলিট করা হয়েছে`, deleteTargetId, "message");
     } catch {
       toast.error("ডিলিট করতে সমস্যা");
     } finally {
@@ -208,6 +210,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       if (error) throw error;
       setMessages(prev => prev.map(m => m.id === editingMsg.id ? { ...m, content: text, edited_at: new Date().toISOString(), original_content: m.original_content || m.content } : m));
       toast.success("মেসেজ এডিট হয়েছে");
+      logAdminActivity("message_edit", `মেসেজ এডিট করা হয়েছে`, editingMsg.id, "message");
     } catch {
       toast.error("এডিট করতে সমস্যা");
     } finally {
@@ -223,6 +226,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       if (error) throw error;
       setMessages(prev => prev.map(m => m.id === msgId ? { ...m, is_pinned: !m.is_pinned } : m));
       toast.success("পিন আপডেট হয়েছে");
+      logAdminActivity("message_pin", `মেসেজ পিন/আনপিন করা হয়েছে`, msgId, "message");
     } catch {
       toast.error("পিন করতে সমস্যা");
     }

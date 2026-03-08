@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, LogOut, Users, Heart, Download, Edit3, X, Cake, Gift, Plus,
   Droplets, Phone, MessageCircle, Mail, MapPin, Calendar, Lock, StickyNote,
-  Globe, LayoutDashboard, UserPlus, Facebook, LayoutGrid, List, Send
+  Globe, LayoutDashboard, UserPlus, Facebook, LayoutGrid, List, Send, Activity
 } from "lucide-react";
 import { PhoneWithMessengers, PhoneEntry, deriveMessengers, parseMessengersToPhones } from "@/components/PhoneWithMessengers";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,8 @@ import { getContacts, deleteContact, updateContact, saveContact, adminLogout, ge
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { EmbeddedAdminChat } from "@/components/EmbeddedAdminChat";
+import { AdminActivityLog } from "@/components/AdminActivityLog";
+import { logAdminActivity } from "@/lib/adminLog";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -59,6 +61,7 @@ const AdminDashboard = () => {
       if (!session) { navigate("/admin"); return; }
       await loadContacts();
       await loadUnreadCount();
+      logAdminActivity("login", "এডমিন ড্যাশবোর্ডে প্রবেশ করেছেন");
     };
     checkAuth();
 
@@ -158,6 +161,7 @@ const AdminDashboard = () => {
       });
       if (error) throw error;
       toast.success("নতুন কন্টাক্ট যোগ হয়েছে! 💕");
+      logAdminActivity("contact_add", `নতুন কন্টাক্ট যোগ: ${addForm.name} (${primaryPhone})`, undefined, "contact", { name: addForm.name, phone: primaryPhone });
       resetAddForm(); await loadContacts();
     } catch { toast.error("সেভ করতে সমস্যা হয়েছে"); }
   };
@@ -169,8 +173,12 @@ const AdminDashboard = () => {
   };
 
   const handleDelete = async (id: string) => {
+    const contact = contacts.find(c => c.id === id);
     if (confirm("আপনি কি নিশ্চিত এই কন্টাক্ট ডিলিট করতে চান?")) {
-      try { await deleteContact(id); await loadContacts(); toast.success("কন্টাক্ট ডিলিট হয়েছে"); }
+      try {
+        await deleteContact(id); await loadContacts(); toast.success("কন্টাক্ট ডিলিট হয়েছে");
+        logAdminActivity("contact_delete", `কন্টাক্ট ডিলিট: ${contact?.name || "অজানা"} (${contact?.phone || ""})`, id, "contact", { name: contact?.name, phone: contact?.phone });
+      }
       catch { toast.error("ডিলিট করতে সমস্যা হয়েছে"); }
     }
   };
@@ -195,6 +203,7 @@ const AdminDashboard = () => {
       });
       await loadContacts(); setEditingContact(null);
       toast.success("তথ্য আপডেট হয়েছে! 💕");
+      logAdminActivity("contact_edit", `কন্টাক্ট এডিট: ${editForm.name} (${editForm.phone})`, editingContact.id, "contact", { name: editForm.name, phone: editForm.phone });
     } catch { toast.error("আপডেট করতে সমস্যা হয়েছে"); }
   };
 
@@ -208,9 +217,11 @@ const AdminDashboard = () => {
     a.href = url; a.download = "aponjon-contacts.csv"; a.click();
     URL.revokeObjectURL(url);
     toast.success("CSV ডাউনলোড হচ্ছে...");
+    logAdminActivity("export_csv", `${contacts.length} টি কন্টাক্ট CSV এক্সপোর্ট করা হয়েছে`, undefined, "export", { count: contacts.length });
   };
 
   const handleLogout = async () => {
+    await logAdminActivity("logout", "এডমিন লগআউট করেছেন");
     await adminLogout(); navigate("/admin"); toast.info("লগআউট সফল");
   };
 
@@ -245,25 +256,31 @@ const AdminDashboard = () => {
 
       {/* Tab-Based Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="container mx-auto px-4 py-3">
-        <TabsList className="w-full grid grid-cols-3 h-10 mb-4">
-          <TabsTrigger value="dashboard" className="gap-1.5 text-xs sm:text-sm">
+        <TabsList className="w-full grid grid-cols-4 h-10 mb-4">
+          <TabsTrigger value="dashboard" className="gap-1 text-[11px] sm:text-sm">
             <LayoutDashboard className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">ড্যাশবোর্ড</span>
             <span className="sm:hidden">হোম</span>
           </TabsTrigger>
-          <TabsTrigger value="contacts" className="gap-1.5 text-xs sm:text-sm">
+          <TabsTrigger value="contacts" className="gap-1 text-[11px] sm:text-sm">
             <Users className="h-3.5 w-3.5" />
-            কন্টাক্ট
-            <span className="ml-1 text-[10px] bg-primary/10 text-primary rounded-full px-1.5">{stats.total}</span>
+            <span className="hidden sm:inline">কন্টাক্ট</span>
+            <span className="sm:hidden">কন্টাক্ট</span>
+            <span className="ml-0.5 text-[9px] bg-primary/10 text-primary rounded-full px-1">{stats.total}</span>
           </TabsTrigger>
-          <TabsTrigger value="chat" className="gap-1.5 text-xs sm:text-sm relative">
+          <TabsTrigger value="chat" className="gap-1 text-[11px] sm:text-sm relative">
             <MessageCircle className="h-3.5 w-3.5" />
             চ্যাট
             {totalUnread > 0 && (
-              <span className="ml-1 flex h-4 min-w-[16px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[9px] font-bold px-1">
+              <span className="ml-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[9px] font-bold px-1">
                 {totalUnread}
               </span>
             )}
+          </TabsTrigger>
+          <TabsTrigger value="logs" className="gap-1 text-[11px] sm:text-sm">
+            <Activity className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">লগ</span>
+            <span className="sm:hidden">লগ</span>
           </TabsTrigger>
         </TabsList>
 
@@ -477,6 +494,11 @@ const AdminDashboard = () => {
         {/* ===== চ্যাট ট্যাব ===== */}
         <TabsContent value="chat" className="mt-0">
           <EmbeddedAdminChat onUnreadChange={(count) => setTotalUnread(count)} />
+        </TabsContent>
+
+        {/* ===== লগ ট্যাব ===== */}
+        <TabsContent value="logs" className="mt-0">
+          <AdminActivityLog />
         </TabsContent>
       </Tabs>
 
