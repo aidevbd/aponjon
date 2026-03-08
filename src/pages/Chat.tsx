@@ -302,10 +302,26 @@ const Chat = () => {
 
   const formatTime = (dateStr: string) => {
     const d = new Date(dateStr);
+    return d.toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const getDateLabel = (dateStr: string) => {
+    const d = new Date(dateStr);
     const now = new Date();
-    const isToday = d.toDateString() === now.toDateString();
-    if (isToday) return d.toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" });
-    return d.toLocaleDateString("bn-BD", { day: "numeric", month: "short" }) + " " + d.toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" });
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const msgDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const diffDays = Math.floor((today.getTime() - msgDate.getTime()) / 86400000);
+    if (diffDays === 0) return "আজ";
+    if (diffDays === 1) return "গতকাল";
+    if (diffDays < 7) return d.toLocaleDateString("bn-BD", { weekday: "long" });
+    return d.toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" });
+  };
+
+  const shouldShowDateHeader = (msgs: Message[], idx: number) => {
+    if (idx === 0) return true;
+    const prev = new Date(msgs[idx - 1].created_at).toDateString();
+    const curr = new Date(msgs[idx].created_at).toDateString();
+    return prev !== curr;
   };
 
   const formatLastSeen = (presence?: { is_online: boolean; last_seen_at: string }) => {
@@ -495,62 +511,72 @@ const Chat = () => {
             </motion.div>
           ) : (
             <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
-              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
+              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
                 {filteredMessages.length === 0 && (
                   <div className="text-center py-16 text-muted-foreground">
                     <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
                     <p className="text-sm">{searchQuery ? "কোনো মেসেজ পাওয়া যায়নি" : "এখনো কোনো মেসেজ নেই"}</p>
                   </div>
                 )}
-                {filteredMessages.map((msg) => {
+                {filteredMessages.map((msg, idx) => {
                   const isMine = msg.sender_id === session.contactId;
+                  const showDateHeader = !searchQuery && shouldShowDateHeader(filteredMessages, idx);
                   return (
-                    <div key={msg.id} className={`group flex ${isMine ? "justify-end" : "justify-start"}`}>
-                      {isMine && (
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-1.5 flex items-center gap-0.5">
-                          <button onClick={() => handleStartEdit(msg)} className="p-1 rounded-full hover:bg-muted" title="এডিট">
-                            <Pencil className="h-3 w-3 text-muted-foreground" />
-                          </button>
-                          <button onClick={() => setDeleteTargetId(msg.id)} className="p-1 rounded-full hover:bg-destructive/10" title="ডিলিট">
-                            <Trash2 className="h-3 w-3 text-destructive" />
-                          </button>
+                    <div key={msg.id}>
+                      {showDateHeader && (
+                        <div className="flex justify-center my-3">
+                          <span className="text-[10px] text-muted-foreground bg-muted/60 px-3 py-0.5 rounded-full">{getDateLabel(msg.created_at)}</span>
                         </div>
                       )}
-                      <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 ${msg.is_pinned ? "ring-1 ring-primary/30" : ""} ${isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
-                        {msg.is_pinned && <p className="text-[9px] mb-0.5 opacity-70">📌 পিন করা</p>}
-                        {/* Reply preview */}
-                        {msg.reply_content && (
-                          <div className={`text-[10px] mb-1.5 px-2 py-1 rounded-lg border-l-2 ${isMine ? "bg-primary-foreground/10 border-primary-foreground/30" : "bg-muted border-primary/30"}`}>
-                            <span className="font-medium">{msg.reply_sender_id === session.contactId ? "আপনি" : selectedContact?.name}</span>
-                            <p className="truncate opacity-80">{msg.reply_content}</p>
+                      <div className={`group flex ${isMine ? "justify-end" : "justify-start"} relative`}>
+                        {isMine && (
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-1.5 flex items-center gap-0.5">
+                            <button onClick={() => handleStartEdit(msg)} className="p-1 rounded-full hover:bg-muted" title="এডিট">
+                              <Pencil className="h-3 w-3 text-muted-foreground" />
+                            </button>
+                            <button onClick={() => setDeleteTargetId(msg.id)} className="p-1 rounded-full hover:bg-destructive/10" title="ডিলিট">
+                              <Trash2 className="h-3 w-3 text-destructive" />
+                            </button>
                           </div>
                         )}
-                        {msg.image_url && (
-                          <img src={msg.image_url} alt="" className="rounded-lg max-w-full mb-1.5 cursor-pointer" onClick={() => window.open(msg.image_url!, "_blank")} />
-                        )}
-                        {msg.content && <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>}
-                        <div className={`flex items-center gap-1 mt-1 ${isMine ? "justify-end" : ""}`}>
-                          {msg.edited_at && <span className={`text-[9px] ${isMine ? "text-primary-foreground/50" : "text-muted-foreground"}`}>এডিটেড</span>}
-                          <p className={`text-[10px] ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                            {formatTime(msg.created_at)}
-                          </p>
-                          {isMine && (
-                            <span className={`text-[10px] ${msg.is_read ? "text-primary-foreground/80" : "text-primary-foreground/40"}`}>
-                              {msg.is_read ? "✓✓" : "✓"}
-                            </span>
+                        <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 ${msg.is_pinned ? "ring-1 ring-primary/30" : ""} ${isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
+                          {msg.is_pinned && <p className="text-[9px] mb-0.5 opacity-70">📌 পিন করা</p>}
+                          {msg.reply_content && (
+                            <div className={`text-[10px] mb-1.5 px-2 py-1 rounded-lg border-l-2 ${isMine ? "bg-primary-foreground/10 border-primary-foreground/30" : "bg-muted border-primary/30"}`}>
+                              <span className="font-medium">{msg.reply_sender_id === session.contactId ? "আপনি" : selectedContact?.name}</span>
+                              <p className="truncate opacity-80">{msg.reply_content}</p>
+                            </div>
                           )}
+                          {msg.image_url && (
+                            <img src={msg.image_url} alt="" className="rounded-lg max-w-full mb-1.5 cursor-pointer" onClick={() => window.open(msg.image_url!, "_blank")} />
+                          )}
+                          {msg.content && <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>}
+                          {msg.edited_at && (
+                            <span className={`text-[9px] ${isMine ? "text-primary-foreground/50" : "text-muted-foreground"}`}>এডিটেড</span>
+                          )}
+                          {/* Hover timestamp + read receipt */}
+                          <div className={`flex items-center gap-1 mt-0.5 overflow-hidden transition-all duration-200 max-h-0 opacity-0 group-hover:max-h-5 group-hover:opacity-100 ${isMine ? "justify-end" : ""}`}>
+                            <p className={`text-[10px] ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                              {formatTime(msg.created_at)}
+                            </p>
+                            {isMine && (
+                              <span className={`text-[10px] ${msg.is_read ? "text-primary-foreground/80" : "text-primary-foreground/40"}`}>
+                                {msg.is_read ? "✓✓" : "✓"}
+                              </span>
+                            )}
+                          </div>
                         </div>
+                        {!isMine && (
+                          <button onClick={() => handleStartReply(msg)} className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-1.5 p-1 rounded-full hover:bg-muted" title="রিপ্লাই">
+                            <Reply className="h-3 w-3 text-muted-foreground" />
+                          </button>
+                        )}
+                        {isMine && (
+                          <button onClick={() => handleStartReply(msg)} className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-0.5 p-1 rounded-full hover:bg-muted" title="রিপ্লাই">
+                            <Reply className="h-3 w-3 text-muted-foreground" />
+                          </button>
+                        )}
                       </div>
-                      {!isMine && (
-                        <button onClick={() => handleStartReply(msg)} className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-1.5 p-1 rounded-full hover:bg-muted" title="রিপ্লাই">
-                          <Reply className="h-3 w-3 text-muted-foreground" />
-                        </button>
-                      )}
-                      {isMine && (
-                        <button onClick={() => handleStartReply(msg)} className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-0.5 p-1 rounded-full hover:bg-muted" title="রিপ্লাই">
-                          <Reply className="h-3 w-3 text-muted-foreground" />
-                        </button>
-                      )}
                     </div>
                   );
                 })}
