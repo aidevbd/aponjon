@@ -124,9 +124,9 @@ const AdminDashboard = () => {
     const todayBdays = upcomingBirthdays.filter((b) => b.daysUntil === 0);
     const soonBdays = upcomingBirthdays.filter((b) => b.daysUntil > 0 && b.daysUntil <= 7);
     if (todayBdays.length > 0) {
-      toast("🎂 আজ জন্মদিন!", { description: todayBdays.map((b) => b.contact.name).join(", "), duration: 10000 });
+      toast("🎂 আজ জন্মদিন!", { description: todayBdays.map((b) => b.contact.name).join(", ") });
     } else if (soonBdays.length > 0) {
-      toast("🎂 আসন্ন জন্মদিন!", { description: soonBdays.map((b) => `${b.contact.name} (${b.daysUntil} দিন বাকি)`).join(", "), duration: 8000 });
+      toast("🎂 আসন্ন জন্মদিন!", { description: soonBdays.map((b) => `${b.contact.name} (${b.daysUntil} দিন বাকি)`).join(", ") });
     }
   }, [upcomingBirthdays]);
 
