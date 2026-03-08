@@ -85,7 +85,7 @@ export function ContactForm() {
         </motion.div>
         <h2 className="mb-2 text-2xl font-display font-semibold text-foreground">ধন্যবাদ! 💕</h2>
         <p className="mb-6 text-muted-foreground max-w-md">আপনার তথ্য সফলভাবে আপনজন ডাইরেক্টরিতে যুক্ত হয়েছে। আপনি আমাদের কাছে গুরুত্বপূর্ণ!</p>
-        <Button variant="outline" onClick={() => { setSubmitted(false); setStep(1); setForm({ name: "", phone: "", whatsapp: "", imo: "", email: "", category: "", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "" }); }}>
+        <Button variant="outline" onClick={() => { setSubmitted(false); setStep(1); setForm({ name: "", phone: "", whatsapp: "", imo: "", email: "", category: "", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" }); }}>
           আরেকজনের তথ্য যোগ করুন
         </Button>
       </motion.div>
