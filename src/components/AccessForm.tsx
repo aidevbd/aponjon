@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { PhotoUpload } from "@/components/PhotoUpload";
 import { Lock, Phone, Shield, Edit3, ArrowLeft, Heart, KeyRound, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
