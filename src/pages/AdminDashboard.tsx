@@ -225,6 +225,9 @@ const AdminDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="hero" size="sm" onClick={() => setShowAddModal(true)} className="gap-1.5">
+              <Plus className="h-4 w-4" /> যোগ করুন
+            </Button>
             <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-1.5">
               <Download className="h-4 w-4" /> CSV
             </Button>
