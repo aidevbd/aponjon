@@ -124,9 +124,9 @@ const AdminDashboard = () => {
     const todayBdays = upcomingBirthdays.filter((b) => b.daysUntil === 0);
     const soonBdays = upcomingBirthdays.filter((b) => b.daysUntil > 0 && b.daysUntil <= 7);
     if (todayBdays.length > 0) {
-      toast("🎂 আজ জন্মদিন!", { description: todayBdays.map((b) => b.contact.name).join(", "), duration: 10000 });
+      toast("🎂 আজ জন্মদিন!", { description: todayBdays.map((b) => b.contact.name).join(", ") });
     } else if (soonBdays.length > 0) {
-      toast("🎂 আসন্ন জন্মদিন!", { description: soonBdays.map((b) => `${b.contact.name} (${b.daysUntil} দিন বাকি)`).join(", "), duration: 8000 });
+      toast("🎂 আসন্ন জন্মদিন!", { description: soonBdays.map((b) => `${b.contact.name} (${b.daysUntil} দিন বাকি)`).join(", ") });
     }
   }, [upcomingBirthdays]);
 
@@ -286,58 +286,52 @@ const AdminDashboard = () => {
 
         {/* ===== ড্যাশবোর্ড ট্যাব ===== */}
         <TabsContent value="dashboard" className="space-y-4 mt-0">
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="glass-card p-3 text-center">
-              <Users className="h-4 w-4 text-primary mx-auto mb-1" />
-              <div className="text-xl font-bold text-foreground">{stats.total}</div>
-              <div className="text-[11px] text-muted-foreground">মোট কন্টাক্ট</div>
+          {/* Welcome + Quick Stats */}
+          <div className="glass-card p-4 flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl hero-gradient shadow-rose">
+              <Heart className="h-6 w-6 text-primary-foreground fill-current" />
             </div>
-            {Object.entries(stats.categoryCount).slice(0, 3).map(([cat, count]) => {
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base font-display font-bold text-foreground">আপনজন ড্যাশবোর্ড</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                মোট <span className="font-semibold text-primary">{stats.total}</span> জন কন্টাক্ট
+                {totalUnread > 0 && <> · <span className="font-semibold text-primary">{totalUnread}</span> অপঠিত মেসেজ</>}
+                {upcomingBirthdays.length > 0 && <> · <span className="font-semibold text-primary">{upcomingBirthdays.length}</span> আসন্ন জন্মদিন</>}
+              </p>
+            </div>
+          </div>
+
+          {/* Stats as compact pills */}
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(stats.categoryCount).map(([cat, count]) => {
               const catInfo = CATEGORIES.find((c) => c.value === cat);
               return (
-                <div key={cat} className="glass-card p-3 text-center">
-                  <div className="text-base mb-0.5">{catInfo?.icon || "✨"}</div>
-                  <div className="text-xl font-bold text-foreground">{count}</div>
-                  <div className="text-[11px] text-muted-foreground">{cat}</div>
-                </div>
+                <button
+                  key={cat}
+                  onClick={() => { setActiveTab("contacts"); setFilterCategory(cat); }}
+                  className="flex items-center gap-1.5 rounded-full bg-card border border-border/50 px-3 py-1.5 hover:border-primary/30 hover:bg-primary/5 transition-colors"
+                >
+                  <span className="text-sm">{catInfo?.icon || "✨"}</span>
+                  <span className="text-xs font-medium text-foreground">{cat}</span>
+                  <span className="text-[10px] font-bold text-primary bg-primary/10 rounded-full px-1.5 min-w-[20px] text-center">{count}</span>
+                </button>
               );
             })}
           </div>
 
-          {/* All Category Breakdown */}
-          {Object.entries(stats.categoryCount).length > 3 && (
-            <div className="glass-card p-4">
-              <h3 className="text-sm font-semibold text-foreground mb-3">📊 ক্যাটাগরি অনুযায়ী</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {Object.entries(stats.categoryCount).map(([cat, count]) => {
-                  const catInfo = CATEGORIES.find((c) => c.value === cat);
-                  return (
-                    <div key={cat} className="flex items-center justify-between rounded-lg bg-accent/40 px-3 py-2">
-                      <span className="text-xs text-foreground">{catInfo?.icon} {cat}</span>
-                      <span className="text-xs font-bold text-primary">{count}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Upcoming Birthdays */}
+          {/* Upcoming Birthdays - compact */}
           {upcomingBirthdays.length > 0 && (
-            <div className="glass-card p-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground mb-3">
-                <Cake className="h-4 w-4 text-primary" /> আসন্ন জন্মদিন 🎂
+            <div className="glass-card p-3">
+              <h3 className="flex items-center gap-1.5 text-xs font-semibold text-foreground mb-2">
+                <Cake className="h-3.5 w-3.5 text-primary" /> আসন্ন জন্মদিন
               </h3>
-              <div className="space-y-2">
-                {upcomingBirthdays.map(({ contact, daysUntil }) => (
-                  <div key={contact.id} className="flex items-center justify-between rounded-lg bg-primary/5 px-3 py-2">
-                    <div className="flex items-center gap-2">
-                      <Gift className="h-3.5 w-3.5 text-primary" />
-                      <span className="text-sm font-medium text-foreground">{contact.name}</span>
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {daysUntil === 0 ? "🎉 আজ!" : `${daysUntil} দিন বাকি`}
+              <div className="flex flex-wrap gap-1.5">
+                {upcomingBirthdays.slice(0, 6).map(({ contact, daysUntil }) => (
+                  <div key={contact.id} className="flex items-center gap-1.5 rounded-full bg-primary/5 border border-primary/10 px-2.5 py-1">
+                    <span className="text-xs">{daysUntil === 0 ? "🎉" : "🎂"}</span>
+                    <span className="text-xs font-medium text-foreground">{contact.name}</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {daysUntil === 0 ? "আজ!" : `${daysUntil}দিন`}
                     </span>
                   </div>
                 ))}
@@ -345,23 +339,57 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* Quick Actions */}
-          <div className="glass-card p-4">
-            <h3 className="text-sm font-semibold text-foreground mb-3">⚡ দ্রুত কাজ</h3>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" className="gap-2 h-10" onClick={() => { setActiveTab("contacts"); setShowAddModal(true); }}>
-                <UserPlus className="h-4 w-4" /> কন্টাক্ট যোগ
-              </Button>
-              <Button variant="outline" size="sm" className="gap-2 h-10" onClick={handleExportCSV}>
-                <Download className="h-4 w-4" /> CSV ডাউনলোড
-              </Button>
-              <Button variant="outline" size="sm" className="gap-2 h-10" onClick={() => setActiveTab("contacts")}>
-                <Users className="h-4 w-4" /> কন্টাক্ট দেখুন
-              </Button>
-              <Button variant="outline" size="sm" className="gap-2 h-10" onClick={() => navigate("/admin/chat")}>
-                <MessageCircle className="h-4 w-4" /> চ্যাটে যান
-              </Button>
-            </div>
+          {/* Quick Actions - 2x2 grid with icons */}
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => { setActiveTab("contacts"); setShowAddModal(true); }}
+              className="glass-card p-3 flex items-center gap-2.5 hover:border-primary/30 transition-colors text-left"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                <UserPlus className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-foreground">কন্টাক্ট যোগ</div>
+                <div className="text-[10px] text-muted-foreground">নতুন প্রিয়জন</div>
+              </div>
+            </button>
+            <button
+              onClick={handleExportCSV}
+              className="glass-card p-3 flex items-center gap-2.5 hover:border-primary/30 transition-colors text-left"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent">
+                <Download className="h-4 w-4 text-foreground" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-foreground">CSV ডাউনলোড</div>
+                <div className="text-[10px] text-muted-foreground">ব্যাকআপ নিন</div>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab("chat")}
+              className="glass-card p-3 flex items-center gap-2.5 hover:border-primary/30 transition-colors text-left"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 relative">
+                <MessageCircle className="h-4 w-4 text-primary" />
+                {totalUnread > 0 && <span className="absolute -top-1 -right-1 h-4 min-w-[16px] flex items-center justify-center rounded-full hero-gradient text-[9px] font-bold text-primary-foreground px-1">{totalUnread}</span>}
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-foreground">চ্যাট</div>
+                <div className="text-[10px] text-muted-foreground">মেসেজ দেখুন</div>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab("logs")}
+              className="glass-card p-3 flex items-center gap-2.5 hover:border-primary/30 transition-colors text-left"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent">
+                <Activity className="h-4 w-4 text-foreground" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-foreground">অ্যাক্টিভিটি</div>
+                <div className="text-[10px] text-muted-foreground">লগ দেখুন</div>
+              </div>
+            </button>
           </div>
         </TabsContent>
 
