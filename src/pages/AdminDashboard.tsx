@@ -1,15 +1,16 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, LogOut, Users, Heart, Filter, Download, Edit3, X, Cake, Gift } from "lucide-react";
+import { Search, LogOut, Users, Heart, Filter, Download, Edit3, X, Cake, Gift, Plus, Droplets, Phone, MessageCircle, Mail, MapPin, Calendar, Lock, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ContactCard } from "@/components/ContactCard";
+import { PhotoUpload } from "@/components/PhotoUpload";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
-import { getContacts, deleteContact, updateContact, adminLogout, getSession, type ContactRow } from "@/lib/store";
+import { getContacts, deleteContact, updateContact, saveContact, adminLogout, getSession, type ContactRow } from "@/lib/store";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,9 +19,17 @@ const AdminDashboard = () => {
   const [contacts, setContacts] = useState<ContactRow[]>([]);
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [filterBloodGroup, setFilterBloodGroup] = useState("all");
   const [editingContact, setEditingContact] = useState<ContactRow | null>(null);
   const [editForm, setEditForm] = useState<Partial<ContactRow>>({});
   const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const birthdayNotified = useRef(false);
+  const [addForm, setAddForm] = useState({
+    name: "", phone: "", whatsapp: "", imo: "", email: "",
+    category: "অন্যান্য", customCategory: "", note: "", address: "",
+    bloodGroup: "", birthday: "", secretCode: "", photoUrl: "",
+  });
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -57,12 +66,14 @@ const AdminDashboard = () => {
         !search ||
         c.name.toLowerCase().includes(search.toLowerCase()) ||
         c.phone.includes(search) ||
+        (c.blood_group && c.blood_group.toLowerCase().includes(search.toLowerCase())) ||
         (c.note && c.note.toLowerCase().includes(search.toLowerCase())) ||
         (c.address && c.address.toLowerCase().includes(search.toLowerCase()));
       const matchCategory = filterCategory === "all" || c.category === filterCategory;
-      return matchSearch && matchCategory;
+      const matchBlood = filterBloodGroup === "all" || c.blood_group === filterBloodGroup;
+      return matchSearch && matchCategory && matchBlood;
     });
-  }, [contacts, search, filterCategory]);
+  }, [contacts, search, filterCategory, filterBloodGroup]);
 
   const stats = useMemo(() => {
     const categoryCount: Record<string, number> = {};
@@ -85,6 +96,59 @@ const AdminDashboard = () => {
     });
     return upcoming.sort((a, b) => a.daysUntil - b.daysUntil);
   }, [contacts]);
+
+  // Birthday toast notification on load
+  useEffect(() => {
+    if (birthdayNotified.current || upcomingBirthdays.length === 0) return;
+    birthdayNotified.current = true;
+    const todayBdays = upcomingBirthdays.filter((b) => b.daysUntil === 0);
+    const soonBdays = upcomingBirthdays.filter((b) => b.daysUntil > 0 && b.daysUntil <= 7);
+    if (todayBdays.length > 0) {
+      toast("🎂 আজ জন্মদিন!", {
+        description: todayBdays.map((b) => b.contact.name).join(", "),
+        duration: 10000,
+      });
+    } else if (soonBdays.length > 0) {
+      toast("🎂 আসন্ন জন্মদিন!", {
+        description: soonBdays.map((b) => `${b.contact.name} (${b.daysUntil} দিন বাকি)`).join(", "),
+        duration: 8000,
+      });
+    }
+  }, [upcomingBirthdays]);
+
+  const handleAddContact = async () => {
+    if (!addForm.name.trim() || !addForm.phone.trim()) {
+      toast.error("নাম এবং ফোন নম্বর আবশ্যক");
+      return;
+    }
+    try {
+      await saveContact({
+        name: addForm.name,
+        phone: addForm.phone,
+        whatsapp: addForm.whatsapp || undefined,
+        imo: addForm.imo || undefined,
+        email: addForm.email || undefined,
+        category: addForm.category || "অন্যান্য",
+        custom_category: addForm.customCategory || undefined,
+        note: addForm.note || undefined,
+        address: addForm.address || undefined,
+        blood_group: addForm.bloodGroup || undefined,
+        birthday: addForm.birthday || undefined,
+        secret_code: addForm.secretCode || undefined,
+        photo_url: addForm.photoUrl || undefined,
+      });
+      toast.success("নতুন কন্টাক্ট যোগ হয়েছে! 💕");
+      setShowAddModal(false);
+      setAddForm({ name: "", phone: "", whatsapp: "", imo: "", email: "", category: "অন্যান্য", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" });
+      await loadContacts();
+    } catch (err: any) {
+      if (err?.message?.includes("duplicate") || err?.code === "23505") {
+        toast.error("এই ফোন নম্বরটি আগেই আছে!");
+      } else {
+        toast.error("সেভ করতে সমস্যা হয়েছে");
+      }
+    }
+  };
 
   const handleDelete = async (id: string) => {
     if (confirm("আপনি কি নিশ্চিত এই কন্টাক্ট ডিলিট করতে চান?")) {
@@ -161,6 +225,9 @@ const AdminDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="hero" size="sm" onClick={() => setShowAddModal(true)} className="gap-1.5">
+              <Plus className="h-4 w-4" /> যোগ করুন
+            </Button>
             <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-1.5">
               <Download className="h-4 w-4" /> CSV
             </Button>
@@ -225,6 +292,16 @@ const AdminDashboard = () => {
               {CATEGORIES.map((cat) => (<SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>))}
             </SelectContent>
           </Select>
+          <Select value={filterBloodGroup} onValueChange={setFilterBloodGroup}>
+            <SelectTrigger className="w-full sm:w-40 bg-card">
+              <Droplets className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="রক্তের গ্রুপ" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">সব রক্তের গ্রুপ</SelectItem>
+              {BLOOD_GROUPS.map((bg) => (<SelectItem key={bg} value={bg}>{bg}</SelectItem>))}
+            </SelectContent>
+          </Select>
         </div>
 
         {filtered.length === 0 ? (
@@ -253,16 +330,7 @@ const AdminDashboard = () => {
               </div>
               <div className="space-y-4">
                 <div className="flex justify-center">
-                  {editForm.photo_url ? (
-                    <div className="relative">
-                      <img src={editForm.photo_url} alt="" className="h-20 w-20 rounded-full object-cover border-2 border-primary/30" />
-                      <button onClick={() => setEditForm({ ...editForm, photo_url: null })} className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs">✕</button>
-                    </div>
-                  ) : (
-                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-2xl">
-                      {(editForm.name || "?").charAt(0)}
-                    </div>
-                  )}
+                  <PhotoUpload value={editForm.photo_url || undefined} onChange={(url) => setEditForm({ ...editForm, photo_url: url || null })} />
                 </div>
                 <div className="space-y-2"><Label>নাম</Label><Input value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="bg-card" /></div>
                 <div className="space-y-2"><Label>ফোন</Label><Input value={editForm.phone || ""} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="bg-card" /></div>
@@ -293,6 +361,60 @@ const AdminDashboard = () => {
               </div>
               <Button onClick={handleSaveEdit} variant="hero" className="w-full mt-6">
                 <Heart className="h-4 w-4 mr-1" /> সেভ করুন
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {showAddModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 backdrop-blur-sm p-4" onClick={() => setShowAddModal(false)}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="glass-card p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-display font-semibold flex items-center gap-2">
+                  <Plus className="h-5 w-5 text-primary" /> নতুন কন্টাক্ট যোগ করুন
+                </h3>
+                <Button variant="ghost" size="icon" onClick={() => setShowAddModal(false)}><X className="h-4 w-4" /></Button>
+              </div>
+              <div className="space-y-4">
+                <div className="flex justify-center">
+                  <PhotoUpload value={addForm.photoUrl || undefined} onChange={(url) => setAddForm({ ...addForm, photoUrl: url || "" })} />
+                </div>
+                <div className="space-y-2"><Label>নাম *</Label><Input value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} placeholder="পূর্ণ নাম" className="bg-card" /></div>
+                <div className="space-y-2"><Label>ফোন *</Label><Input value={addForm.phone} onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })} placeholder="01XXXXXXXXX" className="bg-card" /></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2"><Label>WhatsApp</Label><Input value={addForm.whatsapp} onChange={(e) => setAddForm({ ...addForm, whatsapp: e.target.value })} className="bg-card" /></div>
+                  <div className="space-y-2"><Label>IMO</Label><Input value={addForm.imo} onChange={(e) => setAddForm({ ...addForm, imo: e.target.value })} className="bg-card" /></div>
+                </div>
+                <div className="space-y-2"><Label>ইমেইল</Label><Input value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} type="email" className="bg-card" /></div>
+                <div className="space-y-2">
+                  <Label>ক্যাটাগরি</Label>
+                  <Select value={addForm.category} onValueChange={(v) => setAddForm({ ...addForm, category: v })}>
+                    <SelectTrigger className="bg-card"><SelectValue /></SelectTrigger>
+                    <SelectContent>{CATEGORIES.map((cat) => (<SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>))}</SelectContent>
+                  </Select>
+                </div>
+                {addForm.category === "অন্যান্য" && (
+                  <div className="space-y-2"><Label>কাস্টম ক্যাটাগরি</Label><Input value={addForm.customCategory} onChange={(e) => setAddForm({ ...addForm, customCategory: e.target.value })} className="bg-card" /></div>
+                )}
+                <div className="space-y-2"><Label>ঠিকানা</Label><Input value={addForm.address} onChange={(e) => setAddForm({ ...addForm, address: e.target.value })} className="bg-card" /></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>রক্তের গ্রুপ</Label>
+                    <Select value={addForm.bloodGroup} onValueChange={(v) => setAddForm({ ...addForm, bloodGroup: v })}>
+                      <SelectTrigger className="bg-card"><SelectValue placeholder="রক্তের গ্রুপ" /></SelectTrigger>
+                      <SelectContent>{BLOOD_GROUPS.map((bg) => (<SelectItem key={bg} value={bg}>{bg}</SelectItem>))}</SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2"><Label>জন্মদিন</Label><Input type="date" value={addForm.birthday} onChange={(e) => setAddForm({ ...addForm, birthday: e.target.value })} className="bg-card" /></div>
+                </div>
+                <div className="space-y-2"><Label>নোট</Label><Textarea value={addForm.note} onChange={(e) => setAddForm({ ...addForm, note: e.target.value })} className="bg-card" /></div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-primary" /> সিক্রেট কোড (ঐচ্ছিক)</Label>
+                  <Input value={addForm.secretCode} onChange={(e) => setAddForm({ ...addForm, secretCode: e.target.value })} placeholder="গোপন কোড" className="bg-card" />
+                </div>
+              </div>
+              <Button onClick={handleAddContact} variant="hero" className="w-full mt-6">
+                <Plus className="h-4 w-4 mr-1" /> কন্টাক্ট যোগ করুন
               </Button>
             </motion.div>
           </motion.div>
