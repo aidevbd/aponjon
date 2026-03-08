@@ -64,12 +64,13 @@ export async function getChatContacts(token: string) {
   return (data || []) as { id: string; name: string; phone: string; photo_url: string | null }[];
 }
 
-export async function sendMessage(token: string, receiverId: string, content?: string, imageUrl?: string) {
+export async function sendMessage(token: string, receiverId: string, content?: string, imageUrl?: string, replyToId?: string) {
   const { data, error } = await supabase.rpc("send_message", {
     p_token: token,
     p_receiver_id: receiverId,
     p_content: content || null,
     p_image_url: imageUrl || null,
+    p_reply_to_id: replyToId || null,
   });
   if (error) throw error;
   return data as string;
@@ -89,6 +90,12 @@ export async function getMessages(token: string, otherId: string) {
     image_url: string | null;
     is_read: boolean;
     created_at: string;
+    edited_at: string | null;
+    original_content: string | null;
+    reply_to_id: string | null;
+    reply_content: string | null;
+    reply_sender_id: string | null;
+    is_pinned: boolean;
   }[];
 }
 
@@ -104,8 +111,13 @@ export async function deleteMessage(token: string, messageId: string) {
   return data as boolean;
 }
 
+export async function editMessage(token: string, messageId: string, newContent: string) {
+  const { data, error } = await supabase.rpc("edit_message" as any, { p_token: token, p_message_id: messageId, p_new_content: newContent });
+  if (error) throw error;
+  return data as unknown as boolean;
+}
+
 export async function uploadChatImage(file: File): Promise<string> {
-  // Compress image like PhotoUpload does
   const compressed = await compressChatImage(file);
   const fileName = `chat/${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
   
