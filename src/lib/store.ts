@@ -74,6 +74,7 @@ export async function saveContact(contact: {
     p_blood_group: contact.blood_group || null,
     p_birthday: contact.birthday || null,
     p_secret_code: contact.secret_code || null,
+    p_photo_url: contact.photo_url || null,
   });
   if (error) throw error;
   return data;
