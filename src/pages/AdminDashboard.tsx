@@ -27,7 +27,7 @@ const AdminDashboard = () => {
   const [totalUnread, setTotalUnread] = useState(0);
   const birthdayNotified = useRef(false);
   const [addForm, setAddForm] = useState({
-    name: "", phone: "", whatsapp: "", imo: "", email: "",
+    name: "", phone: "", whatsapp: "", imo: "", telegram: "", facebook: "", email: "",
     category: "অন্যান্য", customCategory: "", note: "", address: "",
     bloodGroup: "", birthday: "", secretCode: "", photoUrl: "",
   });
