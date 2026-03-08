@@ -24,6 +24,7 @@ const AdminDashboard = () => {
   const [editForm, setEditForm] = useState<Partial<ContactRow>>({});
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [totalUnread, setTotalUnread] = useState(0);
   const birthdayNotified = useRef(false);
   const [addForm, setAddForm] = useState({
     name: "", phone: "", whatsapp: "", imo: "", email: "",
