@@ -14,10 +14,113 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      contacts: {
+        Row: {
+          address: string | null
+          birthday: string | null
+          blood_group: string | null
+          category: string
+          created_at: string
+          custom_category: string | null
+          email: string | null
+          id: string
+          imo: string | null
+          name: string
+          note: string | null
+          phone: string
+          secret_code: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          birthday?: string | null
+          blood_group?: string | null
+          category?: string
+          created_at?: string
+          custom_category?: string | null
+          email?: string | null
+          id?: string
+          imo?: string | null
+          name: string
+          note?: string | null
+          phone: string
+          secret_code?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          birthday?: string | null
+          blood_group?: string | null
+          category?: string
+          created_at?: string
+          custom_category?: string | null
+          email?: string | null
+          id?: string
+          imo?: string | null
+          name?: string
+          note?: string | null
+          phone?: string
+          secret_code?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      contacts_public: {
+        Row: {
+          address: string | null
+          birthday: string | null
+          blood_group: string | null
+          category: string | null
+          created_at: string | null
+          custom_category: string | null
+          email: string | null
+          id: string | null
+          imo: string | null
+          name: string | null
+          note: string | null
+          phone: string | null
+          updated_at: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          birthday?: string | null
+          blood_group?: string | null
+          category?: string | null
+          created_at?: string | null
+          custom_category?: string | null
+          email?: string | null
+          id?: string | null
+          imo?: string | null
+          name?: string | null
+          note?: string | null
+          phone?: string | null
+          updated_at?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          birthday?: string | null
+          blood_group?: string | null
+          category?: string | null
+          created_at?: string | null
+          custom_category?: string | null
+          email?: string | null
+          id?: string | null
+          imo?: string | null
+          name?: string | null
+          note?: string | null
+          phone?: string | null
+          updated_at?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
