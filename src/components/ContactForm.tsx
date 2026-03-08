@@ -98,6 +98,7 @@ export function ContactForm() {
         whatsapp: messengers.whatsapp || undefined,
         imo: messengers.imo || undefined,
         telegram: messengers.telegram || undefined,
+        facebook: form.facebook || undefined,
         email: form.email,
         category: form.category || "অন্যান্য",
         custom_category: form.customCategory,
