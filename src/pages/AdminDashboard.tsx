@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, LogOut, Users, Heart, Filter, Download, Edit3, X, Cake, Gift, Plus, Droplets, Phone, MessageCircle, Mail, MapPin, Calendar, Lock, StickyNote } from "lucide-react";
+import { Search, LogOut, Users, Heart, Filter, Download, Edit3, X, Cake, Gift, Plus, Droplets, Phone, MessageCircle, Mail, MapPin, Calendar, Lock, StickyNote, Globe } from "lucide-react";
+import { MessengerFields } from "@/components/MessengerFields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -155,6 +156,8 @@ const AdminDashboard = () => {
           phone: addForm.phone,
           whatsapp: addForm.whatsapp || null,
           imo: addForm.imo || null,
+          telegram: addForm.telegram || null,
+          facebook: addForm.facebook || null,
           email: addForm.email || null,
           category: addForm.category || "অন্যান্য",
           custom_category: addForm.customCategory || null,
@@ -223,7 +226,22 @@ const AdminDashboard = () => {
   const handleSaveEdit = async () => {
     if (editingContact) {
       try {
-        await updateContact(editingContact.id, editForm);
+        await updateContact(editingContact.id, {
+          name: editForm.name,
+          phone: editForm.phone,
+          whatsapp: editForm.whatsapp || null,
+          imo: editForm.imo || null,
+          telegram: editForm.telegram || null,
+          facebook: editForm.facebook || null,
+          email: editForm.email || null,
+          category: editForm.category,
+          custom_category: editForm.custom_category || null,
+          note: editForm.note || null,
+          address: editForm.address || null,
+          blood_group: editForm.blood_group || null,
+          birthday: editForm.birthday || null,
+          photo_url: editForm.photo_url || null,
+        });
         await loadContacts();
         setEditingContact(null);
         toast.success("তথ্য আপডেট হয়েছে! 💕");
@@ -395,13 +413,16 @@ const AdminDashboard = () => {
                 </div>
                 <div className="space-y-2"><Label>নাম</Label><Input value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="bg-card" /></div>
                 <div className="space-y-2"><Label>ফোন</Label><Input value={editForm.phone || ""} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="bg-card" /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2"><Label>WhatsApp</Label><Input value={editForm.whatsapp || ""} onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })} className="bg-card" /></div>
-                  <div className="space-y-2"><Label>IMO</Label><Input value={editForm.imo || ""} onChange={(e) => setEditForm({ ...editForm, imo: e.target.value })} className="bg-card" /></div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2"><Label>Telegram</Label><Input value={editForm.telegram || ""} onChange={(e) => setEditForm({ ...editForm, telegram: e.target.value })} className="bg-card" /></div>
-                  <div className="space-y-2"><Label>🌐 ফেসবুক</Label><Input value={editForm.facebook || ""} onChange={(e) => setEditForm({ ...editForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card" /></div>
+                <MessengerFields
+                  phone={editForm.phone || ""}
+                  whatsapp={editForm.whatsapp || ""}
+                  imo={editForm.imo || ""}
+                  telegram={editForm.telegram || ""}
+                  onChange={(field, value) => setEditForm({ ...editForm, [field]: value })}
+                />
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2"><Globe className="h-3.5 w-3.5 text-blue-600" /> ফেসবুক</Label>
+                  <Input value={editForm.facebook || ""} onChange={(e) => setEditForm({ ...editForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card" />
                 </div>
                 <div className="space-y-2"><Label>ইমেইল</Label><Input value={editForm.email || ""} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="bg-card" /></div>
                 <div className="space-y-2">
@@ -446,13 +467,16 @@ const AdminDashboard = () => {
                 </div>
                 <div className="space-y-2"><Label>নাম *</Label><Input value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} placeholder="পূর্ণ নাম" className="bg-card" /></div>
                 <div className="space-y-2"><Label>ফোন *</Label><Input value={addForm.phone} onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })} placeholder="01XXXXXXXXX" className="bg-card" /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2"><Label>WhatsApp</Label><Input value={addForm.whatsapp} onChange={(e) => setAddForm({ ...addForm, whatsapp: e.target.value })} className="bg-card" /></div>
-                  <div className="space-y-2"><Label>IMO</Label><Input value={addForm.imo} onChange={(e) => setAddForm({ ...addForm, imo: e.target.value })} className="bg-card" /></div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2"><Label>Telegram</Label><Input value={addForm.telegram || ""} onChange={(e) => setAddForm({ ...addForm, telegram: e.target.value })} className="bg-card" /></div>
-                  <div className="space-y-2"><Label>🌐 ফেসবুক</Label><Input value={addForm.facebook || ""} onChange={(e) => setAddForm({ ...addForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card" /></div>
+                <MessengerFields
+                  phone={addForm.phone}
+                  whatsapp={addForm.whatsapp}
+                  imo={addForm.imo}
+                  telegram={addForm.telegram}
+                  onChange={(field, value) => setAddForm({ ...addForm, [field]: value })}
+                />
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2"><Globe className="h-3.5 w-3.5 text-blue-600" /> ফেসবুক</Label>
+                  <Input value={addForm.facebook || ""} onChange={(e) => setAddForm({ ...addForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card" />
                 </div>
                 <div className="space-y-2"><Label>ইমেইল</Label><Input value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} type="email" className="bg-card" /></div>
                 <div className="space-y-2">
