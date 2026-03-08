@@ -173,8 +173,12 @@ const AdminDashboard = () => {
   };
 
   const handleDelete = async (id: string) => {
+    const contact = contacts.find(c => c.id === id);
     if (confirm("আপনি কি নিশ্চিত এই কন্টাক্ট ডিলিট করতে চান?")) {
-      try { await deleteContact(id); await loadContacts(); toast.success("কন্টাক্ট ডিলিট হয়েছে"); }
+      try {
+        await deleteContact(id); await loadContacts(); toast.success("কন্টাক্ট ডিলিট হয়েছে");
+        logAdminActivity("contact_delete", `কন্টাক্ট ডিলিট: ${contact?.name || "অজানা"} (${contact?.phone || ""})`, id, "contact", { name: contact?.name, phone: contact?.phone });
+      }
       catch { toast.error("ডিলিট করতে সমস্যা হয়েছে"); }
     }
   };
