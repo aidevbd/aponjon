@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Lock, Phone, X, Loader2, Trash2 } from "lucide-react";
+import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Lock, Phone, X, Loader2, Trash2, Pencil, Reply, Search, Pin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
@@ -9,14 +9,21 @@ import { Label } from "@/components/ui/label";
 import {
   getChatSession, createChatSession, getChatContacts,
   sendMessage, getMessages, getUnreadCounts, uploadChatImage,
-  clearChatSession, deleteMessage, type ChatSession,
+  clearChatSession, deleteMessage, editMessage, type ChatSession,
 } from "@/lib/chatSession";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
+import { EmojiPicker } from "@/components/EmojiPicker";
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
-type Message = { id: string; sender_id: string; receiver_id: string; content: string | null; image_url: string | null; is_read: boolean; created_at: string };
+type Message = {
+  id: string; sender_id: string; receiver_id: string; content: string | null;
+  image_url: string | null; is_read: boolean; created_at: string;
+  edited_at?: string | null; original_content?: string | null;
+  reply_to_id?: string | null; reply_content?: string | null; reply_sender_id?: string | null;
+  is_pinned?: boolean;
+};
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -35,18 +42,21 @@ const Chat = () => {
   const [presenceMap, setPresenceMap] = useState<Record<string, { is_online: boolean; last_seen_at: string }>>({});
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
+  const [editingMsg, setEditingMsg] = useState<Message | null>(null);
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Check existing session on mount
   useEffect(() => {
     const existing = getChatSession();
     if (existing) setSession(existing);
   }, []);
 
-  // Load contacts & unread when session ready + heartbeat + presence polling
   useEffect(() => {
     if (!session) return;
     loadContacts();
@@ -59,7 +69,6 @@ const Chat = () => {
     return () => clearInterval(heartbeat);
   }, [session]);
 
-  // Poll presence for contacts
   useEffect(() => {
     if (!session || contacts.length === 0) return;
     const fetchPresence = async () => {
@@ -78,21 +87,18 @@ const Chat = () => {
     return () => clearInterval(interval);
   }, [session, contacts]);
 
-  // Realtime subscription for new messages
   useEffect(() => {
     if (!session) return;
     const channel = supabase
       .channel("chat-messages")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
         const msg = payload.new as Message;
-        // If message is for current conversation
         if (selectedContact && (
           (msg.sender_id === selectedContact.id && msg.receiver_id === session.contactId) ||
           (msg.sender_id === session.contactId && msg.receiver_id === selectedContact.id)
         )) {
           setMessages((prev) => [...prev, msg]);
         }
-        // Update unread if not in that conversation
         if (msg.receiver_id === session.contactId && msg.sender_id !== selectedContact?.id) {
           setUnreadMap((prev) => ({ ...prev, [msg.sender_id]: (prev[msg.sender_id] || 0) + 1 }));
         }
@@ -101,7 +107,6 @@ const Chat = () => {
     return () => { supabase.removeChannel(channel); };
   }, [session, selectedContact]);
 
-  // Typing indicator via broadcast
   useEffect(() => {
     if (!session || !selectedContact) { setIsOtherTyping(false); return; }
     const channelName = `typing:${[session.contactId, selectedContact.id].sort().join(":")}`;
@@ -126,7 +131,6 @@ const Chat = () => {
     supabase.channel(channelName).send({ type: "broadcast", event: "typing", payload: { sender_id: session.contactId } });
   };
 
-  // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -135,7 +139,6 @@ const Chat = () => {
     if (!session) return;
     try {
       const data = await getChatContacts(session.token);
-      // If no contacts returned, verify session is still valid
       if (data.length === 0) {
         const { data: valid } = await supabase.rpc("validate_chat_session", { p_token: session.token });
         if (!valid) {
@@ -158,7 +161,7 @@ const Chat = () => {
       const map: Record<string, number> = {};
       data.forEach((d) => { map[d.sender_id] = d.unread_count; });
       setUnreadMap(map);
-    } catch { /* ignore */ }
+    } catch {}
   };
 
   const loadMessages = useCallback(async (contact: ChatContact) => {
@@ -206,10 +209,30 @@ const Chat = () => {
     if (!session || !selectedContact || (!msgInput.trim() && !uploading)) return;
     const text = msgInput.trim();
     if (!text) return;
+
+    // If editing
+    if (editingMsg) {
+      setSending(true);
+      setMsgInput("");
+      try {
+        await editMessage(session.token, editingMsg.id, text);
+        setMessages(prev => prev.map(m => m.id === editingMsg.id ? { ...m, content: text, edited_at: new Date().toISOString(), original_content: m.original_content || m.content } : m));
+        toast.success("মেসেজ এডিট হয়েছে");
+      } catch {
+        toast.error("এডিট করতে সমস্যা");
+        setMsgInput(text);
+      } finally {
+        setSending(false);
+        setEditingMsg(null);
+      }
+      return;
+    }
+
     setSending(true);
     setMsgInput("");
     try {
-      await sendMessage(session.token, selectedContact.id, text);
+      await sendMessage(session.token, selectedContact.id, text, undefined, replyingTo?.id);
+      setReplyingTo(null);
     } catch (err: any) {
       if (err?.message?.includes("Invalid session")) {
         clearChatSession();
@@ -237,6 +260,20 @@ const Chat = () => {
     }
   };
 
+  const handleStartEdit = (msg: Message) => {
+    setEditingMsg(msg);
+    setMsgInput(msg.content || "");
+    setReplyingTo(null);
+    inputRef.current?.focus();
+  };
+
+  const handleStartReply = (msg: Message) => {
+    setReplyingTo(msg);
+    setEditingMsg(null);
+    setMsgInput("");
+    inputRef.current?.focus();
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !session || !selectedContact) return;
@@ -244,7 +281,8 @@ const Chat = () => {
     setUploading(true);
     try {
       const url = await uploadChatImage(file);
-      await sendMessage(session.token, selectedContact.id, undefined, url);
+      await sendMessage(session.token, selectedContact.id, undefined, url, replyingTo?.id);
+      setReplyingTo(null);
     } catch {
       toast.error("ছবি পাঠাতে সমস্যা");
     } finally {
@@ -282,6 +320,11 @@ const Chat = () => {
     const days = Math.floor(hours / 24);
     return `${days} দিন আগে`;
   };
+
+  const pinnedMessages = messages.filter(m => m.is_pinned);
+  const filteredMessages = searchQuery
+    ? messages.filter(m => m.content?.toLowerCase().includes(searchQuery.toLowerCase()))
+    : messages;
 
   // ============ LOGIN SCREEN ============
   if (!session) {
@@ -324,12 +367,11 @@ const Chat = () => {
   // ============ CHAT INTERFACE ============
   return (
     <div className="min-h-screen warm-gradient flex flex-col">
-      {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             {selectedContact ? (
-              <button onClick={() => setSelectedContact(null)} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
+              <button onClick={() => { setSelectedContact(null); setSearchOpen(false); setSearchQuery(""); }} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
                 <ArrowLeft className="h-5 w-5" />
                 <div className="flex items-center gap-2">
                   <div className="relative">
@@ -364,7 +406,12 @@ const Chat = () => {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            {selectedContact && (
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
+                <Search className="h-4 w-4" />
+              </Button>
+            )}
             <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-xs gap-1">
               <Heart className="h-3.5 w-3.5" /> হোম
             </Button>
@@ -376,15 +423,41 @@ const Chat = () => {
       </header>
 
       <div className="flex-1 flex flex-col container mx-auto max-w-2xl">
+        {/* Search bar */}
+        {searchOpen && (
+          <div className="px-4 pt-2">
+            <div className="flex items-center gap-2">
+              <Input placeholder="মেসেজ খুঁজুন..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-card h-8 text-sm" autoFocus />
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            {searchQuery && <p className="text-[10px] text-muted-foreground mt-1">{filteredMessages.length} টি মেসেজ পাওয়া গেছে</p>}
+          </div>
+        )}
+
+        {/* Pinned messages */}
+        {selectedContact && pinnedMessages.length > 0 && !searchOpen && (
+          <div className="px-4 pt-2">
+            <div className="bg-accent/50 rounded-lg p-2 border border-border/50">
+              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
+                <Pin className="h-3 w-3" /> পিন করা মেসেজ
+              </div>
+              {pinnedMessages.slice(0, 2).map(pm => (
+                <p key={pm.id} className="text-xs text-foreground truncate">📌 {pm.content || "ছবি"}</p>
+              ))}
+            </div>
+          </div>
+        )}
+
         <AnimatePresence mode="wait">
           {!selectedContact ? (
-            // ============ CONTACT LIST ============
             <motion.div key="contacts" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 px-4 py-4">
               {contacts.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground">
                   <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                <p className="text-sm">অ্যাডমিন এখনো চ্যাট সেটআপ করেননি</p>
-                   <p className="text-xs mt-1">অ্যাডমিন সেটআপ করলেই মেসেজ করতে পারবেন</p>
+                  <p className="text-sm">অ্যাডমিন এখনো চ্যাট সেটআপ করেননি</p>
+                  <p className="text-xs mt-1">অ্যাডমিন সেটআপ করলেই মেসেজ করতে পারবেন</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -421,31 +494,43 @@ const Chat = () => {
               )}
             </motion.div>
           ) : (
-            // ============ MESSAGE THREAD ============
             <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
               <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
-                {messages.length === 0 && (
+                {filteredMessages.length === 0 && (
                   <div className="text-center py-16 text-muted-foreground">
                     <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">এখনো কোনো মেসেজ নেই</p>
-                    <p className="text-xs mt-1">প্রথম মেসেজ পাঠান! 💬</p>
+                    <p className="text-sm">{searchQuery ? "কোনো মেসেজ পাওয়া যায়নি" : "এখনো কোনো মেসেজ নেই"}</p>
                   </div>
                 )}
-                {messages.map((msg) => {
+                {filteredMessages.map((msg) => {
                   const isMine = msg.sender_id === session.contactId;
                   return (
                     <div key={msg.id} className={`group flex ${isMine ? "justify-end" : "justify-start"}`}>
                       {isMine && (
-                        <button onClick={() => setDeleteTargetId(msg.id)} className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-1.5 p-1 rounded-full hover:bg-destructive/10" title="ডিলিট">
-                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                        </button>
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-1.5 flex items-center gap-0.5">
+                          <button onClick={() => handleStartEdit(msg)} className="p-1 rounded-full hover:bg-muted" title="এডিট">
+                            <Pencil className="h-3 w-3 text-muted-foreground" />
+                          </button>
+                          <button onClick={() => setDeleteTargetId(msg.id)} className="p-1 rounded-full hover:bg-destructive/10" title="ডিলিট">
+                            <Trash2 className="h-3 w-3 text-destructive" />
+                          </button>
+                        </div>
                       )}
-                      <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 ${isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
+                      <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 ${msg.is_pinned ? "ring-1 ring-primary/30" : ""} ${isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
+                        {msg.is_pinned && <p className="text-[9px] mb-0.5 opacity-70">📌 পিন করা</p>}
+                        {/* Reply preview */}
+                        {msg.reply_content && (
+                          <div className={`text-[10px] mb-1.5 px-2 py-1 rounded-lg border-l-2 ${isMine ? "bg-primary-foreground/10 border-primary-foreground/30" : "bg-muted border-primary/30"}`}>
+                            <span className="font-medium">{msg.reply_sender_id === session.contactId ? "আপনি" : selectedContact?.name}</span>
+                            <p className="truncate opacity-80">{msg.reply_content}</p>
+                          </div>
+                        )}
                         {msg.image_url && (
                           <img src={msg.image_url} alt="" className="rounded-lg max-w-full mb-1.5 cursor-pointer" onClick={() => window.open(msg.image_url!, "_blank")} />
                         )}
                         {msg.content && <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>}
                         <div className={`flex items-center gap-1 mt-1 ${isMine ? "justify-end" : ""}`}>
+                          {msg.edited_at && <span className={`text-[9px] ${isMine ? "text-primary-foreground/50" : "text-muted-foreground"}`}>এডিটেড</span>}
                           <p className={`text-[10px] ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
                             {formatTime(msg.created_at)}
                           </p>
@@ -456,23 +541,55 @@ const Chat = () => {
                           )}
                         </div>
                       </div>
+                      {!isMine && (
+                        <button onClick={() => handleStartReply(msg)} className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-1.5 p-1 rounded-full hover:bg-muted" title="রিপ্লাই">
+                          <Reply className="h-3 w-3 text-muted-foreground" />
+                        </button>
+                      )}
+                      {isMine && (
+                        <button onClick={() => handleStartReply(msg)} className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-0.5 p-1 rounded-full hover:bg-muted" title="রিপ্লাই">
+                          <Reply className="h-3 w-3 text-muted-foreground" />
+                        </button>
+                      )}
                     </div>
                   );
                 })}
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Typing indicator */}
               {isOtherTyping && (
                 <div className="px-4 pb-1">
                   <span className="text-xs text-muted-foreground italic animate-pulse">লিখছে...</span>
                 </div>
               )}
 
-              {/* Message Input */}
+              {/* Edit/Reply bar */}
+              {(editingMsg || replyingTo) && (
+                <div className="px-4 pt-2">
+                  <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-1.5 text-xs">
+                    {editingMsg && (
+                      <>
+                        <Pencil className="h-3 w-3 text-primary shrink-0" />
+                        <span className="truncate flex-1">এডিট করছেন: {editingMsg.content}</span>
+                      </>
+                    )}
+                    {replyingTo && (
+                      <>
+                        <Reply className="h-3 w-3 text-primary shrink-0" />
+                        <span className="truncate flex-1">রিপ্লাই: {replyingTo.content || "ছবি"}</span>
+                      </>
+                    )}
+                    <button onClick={() => { setEditingMsg(null); setReplyingTo(null); setMsgInput(""); }} className="shrink-0">
+                      <X className="h-3.5 w-3.5 text-muted-foreground" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-4 py-3">
                 <div className="flex items-center gap-2">
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  <EmojiPicker onSelect={(emoji) => setMsgInput(prev => prev + emoji)} />
                   <Button
                     variant="ghost" size="icon"
                     className="h-9 w-9 shrink-0"
@@ -482,7 +599,8 @@ const Chat = () => {
                     {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4 text-primary" />}
                   </Button>
                   <Input
-                    placeholder="মেসেজ লিখুন..."
+                    ref={inputRef}
+                    placeholder={editingMsg ? "এডিট করুন..." : "মেসেজ লিখুন..."}
                     value={msgInput}
                     onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
                     onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}

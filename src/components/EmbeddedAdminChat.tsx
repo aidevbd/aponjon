@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Loader2, Settings, Trash2 } from "lucide-react";
+import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Loader2, Settings, Trash2, Pencil, Reply, Search, Pin, X, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,16 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadChatImage } from "@/lib/chatSession";
 import { toast } from "sonner";
+import { EmojiPicker } from "@/components/EmojiPicker";
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
-type Message = { id: string; sender_id: string; receiver_id: string; content: string | null; image_url: string | null; is_read: boolean; created_at: string; deleted_by_sender?: boolean };
+type Message = {
+  id: string; sender_id: string; receiver_id: string; content: string | null;
+  image_url: string | null; is_read: boolean; created_at: string;
+  deleted_by_sender?: boolean; edited_at?: string | null; original_content?: string | null;
+  reply_to_id?: string | null; reply_content?: string | null; reply_sender_id?: string | null;
+  is_pinned?: boolean;
+};
 
 interface EmbeddedAdminChatProps {
   onUnreadChange?: (count: number) => void;
@@ -33,10 +40,16 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const [uploading, setUploading] = useState(false);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [editingMsg, setEditingMsg] = useState<Message | null>(null);
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewOriginal, setViewOriginal] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -56,7 +69,6 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     if (!adminContactId) return;
     loadChatUsers();
     loadUnread();
-    // Admin heartbeat
     const sendHeartbeat = async () => { try { await supabase.rpc("update_admin_presence"); } catch {} };
     sendHeartbeat();
     const heartbeat = setInterval(sendHeartbeat, 30000);
@@ -84,7 +96,6 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     return () => { supabase.removeChannel(channel); };
   }, [adminContactId, selectedUser]);
 
-  // Typing indicator via broadcast
   useEffect(() => {
     if (!adminContactId || !selectedUser) { setIsOtherTyping(false); return; }
     const channelName = `typing:${[adminContactId, selectedUser.id].sort().join(":")}`;
@@ -124,7 +135,6 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       if (error) throw error;
       const users = (data || []) as ChatUser[];
       setChatUsers(users);
-      // Load presence for these users
       if (users.length > 0) {
         const ids = users.map(u => u.id);
         const { data: pData } = await supabase.rpc("get_user_presence", { p_contact_ids: ids });
@@ -144,7 +154,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       const map: Record<string, number> = {};
       (data || []).forEach((d: any) => { map[d.sender_id] = d.unread_count; });
       setUnreadMap(map);
-    } catch { /* ignore */ }
+    } catch {}
   };
 
   const loadMessages = useCallback(async (user: ChatUser) => {
@@ -188,16 +198,68 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     }
   };
 
+  const handleEditMessage = async () => {
+    if (!editingMsg || !msgInput.trim()) return;
+    const text = msgInput.trim();
+    setSending(true);
+    try {
+      const { error } = await supabase.rpc("edit_admin_message" as any, { p_message_id: editingMsg.id, p_new_content: text });
+      if (error) throw error;
+      setMessages(prev => prev.map(m => m.id === editingMsg.id ? { ...m, content: text, edited_at: new Date().toISOString(), original_content: m.original_content || m.content } : m));
+      toast.success("মেসেজ এডিট হয়েছে");
+    } catch {
+      toast.error("এডিট করতে সমস্যা");
+    } finally {
+      setSending(false);
+      setEditingMsg(null);
+      setMsgInput("");
+    }
+  };
+
+  const handleTogglePin = async (msgId: string) => {
+    try {
+      const { error } = await supabase.rpc("toggle_pin_message" as any, { p_message_id: msgId });
+      if (error) throw error;
+      setMessages(prev => prev.map(m => m.id === msgId ? { ...m, is_pinned: !m.is_pinned } : m));
+      toast.success("পিন আপডেট হয়েছে");
+    } catch {
+      toast.error("পিন করতে সমস্যা");
+    }
+  };
+
   const handleSend = async () => {
+    if (editingMsg) {
+      handleEditMessage();
+      return;
+    }
     if (!selectedUser || !msgInput.trim()) return;
     const text = msgInput.trim();
     setSending(true);
     setMsgInput("");
     try {
-      const { error } = await supabase.rpc("send_admin_message", { p_receiver_id: selectedUser.id, p_content: text });
+      const { error } = await supabase.rpc("send_admin_message", {
+        p_receiver_id: selectedUser.id,
+        p_content: text,
+        p_reply_to_id: replyingTo?.id || null,
+      } as any);
       if (error) throw error;
+      setReplyingTo(null);
     } catch { toast.error("মেসেজ পাঠাতে সমস্যা"); setMsgInput(text); }
     finally { setSending(false); }
+  };
+
+  const handleStartEdit = (msg: Message) => {
+    setEditingMsg(msg);
+    setMsgInput(msg.content || "");
+    setReplyingTo(null);
+    inputRef.current?.focus();
+  };
+
+  const handleStartReply = (msg: Message) => {
+    setReplyingTo(msg);
+    setEditingMsg(null);
+    setMsgInput("");
+    inputRef.current?.focus();
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -207,8 +269,13 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     setUploading(true);
     try {
       const url = await uploadChatImage(file);
-      const { error } = await supabase.rpc("send_admin_message", { p_receiver_id: selectedUser.id, p_image_url: url });
+      const { error } = await supabase.rpc("send_admin_message", {
+        p_receiver_id: selectedUser.id,
+        p_image_url: url,
+        p_reply_to_id: replyingTo?.id || null,
+      } as any);
       if (error) throw error;
+      setReplyingTo(null);
     } catch { toast.error("ছবি পাঠাতে সমস্যা"); }
     finally { setUploading(false); if (fileInputRef.current) fileInputRef.current.value = ""; }
   };
@@ -235,6 +302,11 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     const diffDay = Math.floor(diffHr / 24);
     return `${diffDay} দিন আগে`;
   };
+
+  const pinnedMessages = messages.filter(m => m.is_pinned);
+  const filteredMessages = searchQuery
+    ? messages.filter(m => m.content?.toLowerCase().includes(searchQuery.toLowerCase()))
+    : messages;
 
   if (loading) {
     return (
@@ -319,9 +391,9 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
           <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
             {/* Thread Header */}
             <div className="flex items-center gap-2 pb-3 border-b border-border/50">
-              <button onClick={() => setSelectedUser(null)} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
-                <ArrowLeft className="h-4 w-4" />
-                <div className="relative">
+              <button onClick={() => { setSelectedUser(null); setSearchOpen(false); setSearchQuery(""); }} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors flex-1 min-w-0">
+                <ArrowLeft className="h-4 w-4 shrink-0" />
+                <div className="relative shrink-0">
                   {selectedUser.photo_url ? (
                     <img src={selectedUser.photo_url} alt="" className="h-8 w-8 rounded-full object-cover border border-primary/20" />
                   ) : (
@@ -331,7 +403,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                     <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
                   )}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <span className="font-semibold text-sm">{selectedUser.name}</span>
                   <div className="text-[10px] text-muted-foreground">
                     {(() => {
@@ -343,33 +415,99 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                   </div>
                 </div>
               </button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
+                <Search className="h-4 w-4" />
+              </Button>
             </div>
+
+            {/* Search bar */}
+            {searchOpen && (
+              <div className="pt-2 px-1">
+                <div className="flex items-center gap-2">
+                  <Input placeholder="মেসেজ খুঁজুন..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-card h-8 text-sm" autoFocus />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                {searchQuery && <p className="text-[10px] text-muted-foreground mt-1">{filteredMessages.length} টি মেসেজ পাওয়া গেছে</p>}
+              </div>
+            )}
+
+            {/* Pinned messages */}
+            {pinnedMessages.length > 0 && !searchOpen && (
+              <div className="pt-2 px-1">
+                <div className="bg-accent/50 rounded-lg p-2 border border-border/50">
+                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
+                    <Pin className="h-3 w-3" /> পিন করা মেসেজ
+                  </div>
+                  {pinnedMessages.slice(0, 2).map(pm => (
+                    <p key={pm.id} className="text-xs text-foreground truncate">📌 {pm.content || "ছবি"}</p>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto py-3 space-y-2">
-              {messages.length === 0 && (
+              {filteredMessages.length === 0 && (
                 <div className="text-center py-12 text-muted-foreground">
                   <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                  <p className="text-xs">এখনো কোনো মেসেজ নেই</p>
+                  <p className="text-xs">{searchQuery ? "কোনো মেসেজ পাওয়া যায়নি" : "এখনো কোনো মেসেজ নেই"}</p>
                 </div>
               )}
-              {messages.map((msg) => {
+              {filteredMessages.map((msg) => {
                 const isMine = msg.sender_id === adminContactId;
                 return (
                   <div key={msg.id} className={`group flex ${isMine ? "justify-end" : "justify-start"}`}>
+                    {/* Action buttons (left side for own messages) */}
                     {isMine && (
-                      <button onClick={() => setDeleteTargetId(msg.id)} className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-1.5 p-1 rounded-full hover:bg-destructive/10" title="ডিলিট">
-                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                      </button>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-1 flex items-center gap-0.5">
+                        <button onClick={() => handleTogglePin(msg.id)} className="p-1 rounded-full hover:bg-muted" title={msg.is_pinned ? "আনপিন" : "পিন"}>
+                          <Pin className={`h-3 w-3 ${msg.is_pinned ? "text-primary" : "text-muted-foreground"}`} />
+                        </button>
+                        {!msg.deleted_by_sender && (
+                          <button onClick={() => handleStartEdit(msg)} className="p-1 rounded-full hover:bg-muted" title="এডিট">
+                            <Pencil className="h-3 w-3 text-muted-foreground" />
+                          </button>
+                        )}
+                        <button onClick={() => setDeleteTargetId(msg.id)} className="p-1 rounded-full hover:bg-destructive/10" title="ডিলিট">
+                          <Trash2 className="h-3 w-3 text-destructive" />
+                        </button>
+                      </div>
                     )}
-                    <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 ${msg.deleted_by_sender ? "opacity-50 border border-dashed border-destructive/30 bg-destructive/5 rounded-bl-md" : isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
+                    <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 ${msg.is_pinned ? "ring-1 ring-primary/30" : ""} ${msg.deleted_by_sender ? "opacity-50 border border-dashed border-destructive/30 bg-destructive/5 rounded-bl-md" : isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
+                      {msg.is_pinned && <p className="text-[9px] mb-0.5 opacity-70">📌 পিন করা</p>}
                       {msg.deleted_by_sender && (
                         <p className="text-[10px] text-destructive font-medium mb-1 flex items-center gap-1"><Trash2 className="h-3 w-3" /> ইউজার ডিলিট করেছে</p>
+                      )}
+                      {/* Reply preview */}
+                      {msg.reply_content && (
+                        <div className={`text-[10px] mb-1.5 px-2 py-1 rounded-lg border-l-2 ${isMine && !msg.deleted_by_sender ? "bg-primary-foreground/10 border-primary-foreground/30" : "bg-muted border-primary/30"}`}>
+                          <span className="font-medium">{msg.reply_sender_id === adminContactId ? "আপনি" : selectedUser?.name}</span>
+                          <p className="truncate opacity-80">{msg.reply_content}</p>
+                        </div>
                       )}
                       {msg.image_url && (
                         <img src={msg.image_url} alt="" className="rounded-lg max-w-full mb-1.5 cursor-pointer" onClick={() => window.open(msg.image_url!, "_blank")} />
                       )}
                       {msg.content && <p className={`text-sm whitespace-pre-wrap break-words ${msg.deleted_by_sender ? "text-muted-foreground" : ""}`}>{msg.content}</p>}
+                      {/* Edit indicator + view original for admin */}
+                      {msg.edited_at && (
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <span className={`text-[9px] ${isMine && !msg.deleted_by_sender ? "text-primary-foreground/50" : "text-muted-foreground"}`}>এডিটেড</span>
+                          {msg.original_content && !isMine && (
+                            <button onClick={() => setViewOriginal(viewOriginal === msg.id ? null : msg.id)} className="text-[9px] text-primary underline">
+                              {viewOriginal === msg.id ? "বন্ধ করুন" : "আসল দেখুন"}
+                            </button>
+                          )}
+                        </div>
+                      )}
+                      {viewOriginal === msg.id && msg.original_content && (
+                        <div className="mt-1 px-2 py-1 rounded bg-muted/50 border border-border/30">
+                          <p className="text-[10px] text-muted-foreground mb-0.5 flex items-center gap-1"><Eye className="h-3 w-3" /> আসল মেসেজ:</p>
+                          <p className="text-xs text-foreground/70">{msg.original_content}</p>
+                        </div>
+                      )}
                       <div className={`flex items-center gap-1 mt-1 ${isMine ? "justify-end" : ""}`}>
                         <p className={`text-[10px] ${isMine && !msg.deleted_by_sender ? "text-primary-foreground/60" : "text-muted-foreground"}`}>{formatTime(msg.created_at)}</p>
                         {isMine && !msg.deleted_by_sender && (
@@ -379,16 +517,54 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                         )}
                       </div>
                     </div>
+                    {/* Action buttons (right side for other's messages) */}
+                    {!isMine && (
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-1 flex items-center gap-0.5">
+                        <button onClick={() => handleStartReply(msg)} className="p-1 rounded-full hover:bg-muted" title="রিপ্লাই">
+                          <Reply className="h-3 w-3 text-muted-foreground" />
+                        </button>
+                        <button onClick={() => handleTogglePin(msg.id)} className="p-1 rounded-full hover:bg-muted" title={msg.is_pinned ? "আনপিন" : "পিন"}>
+                          <Pin className={`h-3 w-3 ${msg.is_pinned ? "text-primary" : "text-muted-foreground"}`} />
+                        </button>
+                      </div>
+                    )}
+                    {isMine && (
+                      <button onClick={() => handleStartReply(msg)} className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-0.5 p-1 rounded-full hover:bg-muted" title="রিপ্লাই">
+                        <Reply className="h-3 w-3 text-muted-foreground" />
+                      </button>
+                    )}
                   </div>
                 );
               })}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Typing indicator */}
             {isOtherTyping && (
               <div className="pb-1">
                 <span className="text-xs text-muted-foreground italic animate-pulse">লিখছে...</span>
+              </div>
+            )}
+
+            {/* Edit/Reply bar */}
+            {(editingMsg || replyingTo) && (
+              <div className="pt-2 px-1">
+                <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-1.5 text-xs">
+                  {editingMsg && (
+                    <>
+                      <Pencil className="h-3 w-3 text-primary shrink-0" />
+                      <span className="truncate flex-1">এডিট করছেন: {editingMsg.content}</span>
+                    </>
+                  )}
+                  {replyingTo && (
+                    <>
+                      <Reply className="h-3 w-3 text-primary shrink-0" />
+                      <span className="truncate flex-1">রিপ্লাই: {replyingTo.content || "ছবি"}</span>
+                    </>
+                  )}
+                  <button onClick={() => { setEditingMsg(null); setReplyingTo(null); setMsgInput(""); }} className="shrink-0">
+                    <X className="h-3.5 w-3.5 text-muted-foreground" />
+                  </button>
+                </div>
               </div>
             )}
 
@@ -396,11 +572,13 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
             <div className="border-t border-border/50 pt-3">
               <div className="flex items-center gap-2">
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                <EmojiPicker onSelect={(emoji) => setMsgInput(prev => prev + emoji)} />
                 <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                   {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4 text-primary" />}
                 </Button>
                 <Input
-                  placeholder="উত্তর লিখুন..."
+                  ref={inputRef}
+                  placeholder={editingMsg ? "এডিট করুন..." : "উত্তর লিখুন..."}
                   value={msgInput}
                   onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
