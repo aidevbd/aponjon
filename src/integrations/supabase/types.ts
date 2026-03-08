@@ -447,6 +447,7 @@ export type Database = {
           phone: string
           photo_url: string
           rate_limited: boolean
+          telegram: string
           updated_at: string
           whatsapp: string
         }[]
