@@ -30,6 +30,7 @@ export function ContactForm() {
   const [form, setForm] = useState({
     name: "",
     email: "",
+    facebook: "",
     category: "",
     customCategory: "",
     note: "",
@@ -97,6 +98,7 @@ export function ContactForm() {
         whatsapp: messengers.whatsapp || undefined,
         imo: messengers.imo || undefined,
         telegram: messengers.telegram || undefined,
+        facebook: form.facebook || undefined,
         email: form.email,
         category: form.category || "অন্যান্য",
         custom_category: form.customCategory,
@@ -128,7 +130,7 @@ export function ContactForm() {
         </motion.div>
         <h2 className="mb-2 text-2xl font-display font-semibold text-foreground">ধন্যবাদ! 💕</h2>
         <p className="mb-6 text-muted-foreground max-w-md">আপনার তথ্য সফলভাবে আপনজন ডাইরেক্টরিতে যুক্ত হয়েছে। আপনি আমাদের কাছে গুরুত্বপূর্ণ!</p>
-        <Button variant="outline" onClick={() => { setSubmitted(false); setStep(1); setForm({ name: "", email: "", category: "", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" }); setPhones([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]); }}>
+        <Button variant="outline" onClick={() => { setSubmitted(false); setStep(1); setForm({ name: "", email: "", facebook: "", category: "", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" }); setPhones([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]); }}>
           আরেকজনের তথ্য যোগ করুন
         </Button>
       </motion.div>
@@ -221,6 +223,10 @@ export function ContactForm() {
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-primary" /> ইমেইল</Label>
               <Input id="email" type="email" placeholder="email@example.com" value={form.email} onChange={(e) => updateForm("email", e.target.value)} className="bg-card" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="facebook" className="flex items-center gap-2">🌐 ফেসবুক</Label>
+              <Input id="facebook" placeholder="ফেসবুক প্রোফাইল লিংক বা ইউজারনেম" value={form.facebook} onChange={(e) => updateForm("facebook", e.target.value)} className="bg-card" />
             </div>
             <Button onClick={() => { if (!form.name.trim() || !phones[0]?.number.trim()) { toast.error("নাম এবং ফোন নম্বর আবশ্যক"); return; } setStep(2); }} className="w-full" variant="hero" size="lg">পরবর্তী ধাপ →</Button>
           </motion.div>

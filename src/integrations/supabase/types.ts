@@ -63,6 +63,7 @@ export type Database = {
           created_at: string
           custom_category: string | null
           email: string | null
+          facebook: string | null
           id: string
           imo: string | null
           is_admin: boolean
@@ -85,6 +86,7 @@ export type Database = {
           created_at?: string
           custom_category?: string | null
           email?: string | null
+          facebook?: string | null
           id?: string
           imo?: string | null
           is_admin?: boolean
@@ -107,6 +109,7 @@ export type Database = {
           created_at?: string
           custom_category?: string | null
           email?: string | null
+          facebook?: string | null
           id?: string
           imo?: string | null
           is_admin?: boolean
@@ -240,11 +243,13 @@ export type Database = {
           created_at: string | null
           custom_category: string | null
           email: string | null
+          facebook: string | null
           id: string | null
           imo: string | null
           name: string | null
           note: string | null
           phone: string | null
+          telegram: string | null
           updated_at: string | null
           whatsapp: string | null
         }
@@ -256,11 +261,13 @@ export type Database = {
           created_at?: string | null
           custom_category?: string | null
           email?: string | null
+          facebook?: string | null
           id?: string | null
           imo?: string | null
           name?: string | null
           note?: string | null
           phone?: string | null
+          telegram?: string | null
           updated_at?: string | null
           whatsapp?: string | null
         }
@@ -272,11 +279,13 @@ export type Database = {
           created_at?: string | null
           custom_category?: string | null
           email?: string | null
+          facebook?: string | null
           id?: string | null
           imo?: string | null
           name?: string | null
           note?: string | null
           phone?: string | null
+          telegram?: string | null
           updated_at?: string | null
           whatsapp?: string | null
         }
@@ -381,12 +390,14 @@ export type Database = {
               p_category?: string
               p_custom_category?: string
               p_email?: string
+              p_facebook?: string
               p_imo?: string
               p_name: string
               p_note?: string
               p_phone: string
               p_photo_url?: string
               p_secret_code?: string
+              p_telegram?: string
               p_whatsapp?: string
             }
             Returns: string
@@ -412,23 +423,43 @@ export type Database = {
         Args: { p_name: string; p_phone?: string }
         Returns: string
       }
-      update_verified_contact: {
-        Args: {
-          p_address?: string
-          p_birthday?: string
-          p_blood_group?: string
-          p_category?: string
-          p_custom_category?: string
-          p_email?: string
-          p_imo?: string
-          p_name?: string
-          p_note?: string
-          p_phone: string
-          p_secret_code: string
-          p_whatsapp?: string
-        }
-        Returns: boolean
-      }
+      update_verified_contact:
+        | {
+            Args: {
+              p_address?: string
+              p_birthday?: string
+              p_blood_group?: string
+              p_category?: string
+              p_custom_category?: string
+              p_email?: string
+              p_imo?: string
+              p_name?: string
+              p_note?: string
+              p_phone: string
+              p_secret_code: string
+              p_whatsapp?: string
+            }
+            Returns: boolean
+          }
+        | {
+            Args: {
+              p_address?: string
+              p_birthday?: string
+              p_blood_group?: string
+              p_category?: string
+              p_custom_category?: string
+              p_email?: string
+              p_facebook?: string
+              p_imo?: string
+              p_name?: string
+              p_note?: string
+              p_phone: string
+              p_secret_code: string
+              p_telegram?: string
+              p_whatsapp?: string
+            }
+            Returns: boolean
+          }
       validate_chat_session: { Args: { p_token: string }; Returns: string }
       verify_and_get_contact: {
         Args: { p_phone: string; p_secret_code: string }
@@ -440,6 +471,7 @@ export type Database = {
           created_at: string
           custom_category: string
           email: string
+          facebook: string
           id: string
           imo: string
           name: string

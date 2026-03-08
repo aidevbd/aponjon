@@ -7,6 +7,7 @@ export interface ContactRow {
   whatsapp: string | null;
   imo: string | null;
   telegram: string | null;
+  facebook: string | null;
   email: string | null;
   category: string;
   custom_category: string | null;
@@ -53,6 +54,7 @@ export async function saveContact(contact: {
   whatsapp?: string;
   imo?: string;
   telegram?: string;
+  facebook?: string;
   email?: string;
   category: string;
   custom_category?: string;
@@ -69,6 +71,7 @@ export async function saveContact(contact: {
     p_whatsapp: contact.whatsapp || null,
     p_imo: contact.imo || null,
     p_telegram: contact.telegram || null,
+    p_facebook: contact.facebook || null,
     p_email: contact.email || null,
     p_category: contact.category || "অন্যান্য",
     p_custom_category: contact.custom_category || null,
@@ -123,6 +126,7 @@ export async function updateVerifiedContact(
     whatsapp?: string;
     imo?: string;
     telegram?: string;
+    facebook?: string;
     email?: string;
     category?: string;
     custom_category?: string;
@@ -139,6 +143,7 @@ export async function updateVerifiedContact(
     p_whatsapp: updates.whatsapp || null,
     p_imo: updates.imo || null,
     p_telegram: updates.telegram || null,
+    p_facebook: updates.facebook || null,
     p_email: updates.email || null,
     p_category: updates.category || null,
     p_custom_category: updates.custom_category || null,

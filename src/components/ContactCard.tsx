@@ -26,6 +26,11 @@ export function ContactCard({ contact, onEdit, onDelete, index = 0 }: ContactCar
     window.open(`https://t.me/${number.replace(/[^0-9]/g, "")}`, "_blank");
   };
 
+  const openFacebook = (fb: string) => {
+    const url = fb.startsWith("http") ? fb : `https://facebook.com/${fb}`;
+    window.open(url, "_blank");
+  };
+
   const callPhone = (number: string) => {
     window.open(`tel:${number}`, "_self");
   };
@@ -100,6 +105,11 @@ export function ContactCard({ contact, onEdit, onDelete, index = 0 }: ContactCar
           <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground hover:bg-accent/80 transition-colors">
             <Mail className="h-3.5 w-3.5" /> ইমেইল
           </a>
+        )}
+        {contact.facebook && (
+          <button onClick={() => openFacebook(contact.facebook!)} className="flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-200 transition-colors">
+            🌐 Facebook
+          </button>
         )}
       </div>
 
