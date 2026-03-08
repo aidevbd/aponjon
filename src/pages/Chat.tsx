@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import {
   getChatSession, createChatSession, getChatContacts,
   sendMessage, getMessages, getUnreadCounts, uploadChatImage,
-  clearChatSession, type ChatSession,
+  clearChatSession, deleteMessage, type ChatSession,
 } from "@/lib/chatSession";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
