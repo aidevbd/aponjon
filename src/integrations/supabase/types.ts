@@ -74,6 +74,54 @@ export type Database = {
         }
         Relationships: []
       }
+      otp_codes: {
+        Row: {
+          code: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          phone: string
+          used: boolean | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          phone: string
+          used?: boolean | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          phone?: string
+          used?: boolean | null
+        }
+        Relationships: []
+      }
+      rate_limit_attempts: {
+        Row: {
+          action_type: string
+          attempted_at: string
+          id: string
+          key: string
+        }
+        Insert: {
+          action_type: string
+          attempted_at?: string
+          id?: string
+          key: string
+        }
+        Update: {
+          action_type?: string
+          attempted_at?: string
+          id?: string
+          key?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       contacts_public: {
@@ -129,7 +177,15 @@ export type Database = {
       }
     }
     Functions: {
+      check_rate_limit: {
+        Args: { p_action_type: string; p_key: string }
+        Returns: boolean
+      }
       generate_otp: { Args: { p_phone: string }; Returns: string }
+      reset_rate_limit: {
+        Args: { p_action_type: string; p_key: string }
+        Returns: undefined
+      }
       save_contact_with_hash:
         | {
             Args: {
