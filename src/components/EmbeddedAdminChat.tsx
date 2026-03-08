@@ -30,6 +30,9 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isOtherTyping, setIsOtherTyping] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastTypingRef = useRef(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -78,6 +81,31 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [adminContactId, selectedUser]);
+
+  // Typing indicator via broadcast
+  useEffect(() => {
+    if (!adminContactId || !selectedUser) { setIsOtherTyping(false); return; }
+    const channelName = `typing:${[adminContactId, selectedUser.id].sort().join(":")}`;
+    const channel = supabase.channel(channelName)
+      .on("broadcast", { event: "typing" }, (payload) => {
+        if (payload.payload?.sender_id === selectedUser.id) {
+          setIsOtherTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setIsOtherTyping(false), 3000);
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); setIsOtherTyping(false); };
+  }, [adminContactId, selectedUser]);
+
+  const emitTyping = () => {
+    if (!adminContactId || !selectedUser) return;
+    const now = Date.now();
+    if (now - lastTypingRef.current < 2000) return;
+    lastTypingRef.current = now;
+    const channelName = `typing:${[adminContactId, selectedUser.id].sort().join(":")}`;
+    supabase.channel(channelName).send({ type: "broadcast", event: "typing", payload: { sender_id: adminContactId } });
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -333,6 +361,13 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Typing indicator */}
+            {isOtherTyping && (
+              <div className="pb-1">
+                <span className="text-xs text-muted-foreground italic animate-pulse">লিখছে...</span>
+              </div>
+            )}
+
             {/* Input */}
             <div className="border-t border-border/50 pt-3">
               <div className="flex items-center gap-2">
@@ -343,7 +378,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                 <Input
                   placeholder="উত্তর লিখুন..."
                   value={msgInput}
-                  onChange={(e) => setMsgInput(e.target.value)}
+                  onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                   className="bg-card h-9 text-sm"
                   disabled={sending}
