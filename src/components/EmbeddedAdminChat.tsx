@@ -233,28 +233,41 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
               </div>
             ) : (
               <div className="space-y-1">
-                {chatUsers.map((u) => (
-                  <button
-                    key={u.id}
-                    onClick={() => handleSelectUser(u)}
-                    className="w-full flex items-center gap-3 rounded-xl p-3 hover:bg-card/80 transition-colors text-left border border-transparent hover:border-border/50"
-                  >
-                    {u.photo_url ? (
-                      <img src={u.photo_url} alt="" className="h-10 w-10 rounded-full object-cover border border-primary/20 shrink-0" />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm shrink-0">{u.name.charAt(0)}</div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-foreground text-sm">{u.name}</div>
-                      <div className="text-xs text-muted-foreground truncate">{u.phone}</div>
-                    </div>
-                    {unreadMap[u.id] && (
-                      <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[10px] font-bold px-1.5">
-                        {unreadMap[u.id]}
+                {chatUsers.map((u) => {
+                  const presence = presenceMap[u.id];
+                  const lastSeenText = formatLastSeen(presence);
+                  return (
+                    <button
+                      key={u.id}
+                      onClick={() => handleSelectUser(u)}
+                      className="w-full flex items-center gap-3 rounded-xl p-3 hover:bg-card/80 transition-colors text-left border border-transparent hover:border-border/50"
+                    >
+                      <div className="relative shrink-0">
+                        {u.photo_url ? (
+                          <img src={u.photo_url} alt="" className="h-10 w-10 rounded-full object-cover border border-primary/20" />
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{u.name.charAt(0)}</div>
+                        )}
+                        {presence?.isOnline && (
+                          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card" />
+                        )}
                       </div>
-                    )}
-                  </button>
-                ))}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-foreground text-sm">{u.name}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {lastSeenText ? (
+                            <span className={presence?.isOnline ? "text-green-600" : ""}>{lastSeenText}</span>
+                          ) : u.phone}
+                        </div>
+                      </div>
+                      {unreadMap[u.id] && (
+                        <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[10px] font-bold px-1.5">
+                          {unreadMap[u.id]}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </motion.div>
