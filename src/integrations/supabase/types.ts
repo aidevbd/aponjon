@@ -359,6 +359,7 @@ export type Database = {
         Returns: {
           content: string
           created_at: string
+          deleted_by_sender: boolean
           id: string
           image_url: string
           is_read: boolean
