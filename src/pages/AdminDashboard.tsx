@@ -72,6 +72,20 @@ const AdminDashboard = () => {
     return { total: contacts.length, categoryCount };
   }, [contacts]);
 
+  const upcomingBirthdays = useMemo(() => {
+    const today = new Date();
+    const upcoming: { contact: ContactRow; daysUntil: number }[] = [];
+    contacts.forEach((c) => {
+      if (!c.birthday) return;
+      const bday = new Date(c.birthday);
+      const thisYear = new Date(today.getFullYear(), bday.getMonth(), bday.getDate());
+      if (thisYear < today) thisYear.setFullYear(today.getFullYear() + 1);
+      const diff = Math.ceil((thisYear.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      if (diff <= 30) upcoming.push({ contact: c, daysUntil: diff });
+    });
+    return upcoming.sort((a, b) => a.daysUntil - b.daysUntil);
+  }, [contacts]);
+
   const handleDelete = async (id: string) => {
     if (confirm("আপনি কি নিশ্চিত এই কন্টাক্ট ডিলিট করতে চান?")) {
       try {
