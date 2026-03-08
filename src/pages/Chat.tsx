@@ -40,11 +40,18 @@ const Chat = () => {
     if (existing) setSession(existing);
   }, []);
 
-  // Load contacts & unread when session ready
+  // Load contacts & unread when session ready + heartbeat
   useEffect(() => {
     if (!session) return;
     loadContacts();
     loadUnread();
+    // User presence heartbeat
+    const sendHeartbeat = async () => {
+      try { await supabase.rpc("update_presence", { p_contact_id: session.contactId }); } catch {}
+    };
+    sendHeartbeat();
+    const heartbeat = setInterval(sendHeartbeat, 30000);
+    return () => clearInterval(heartbeat);
   }, [session]);
 
   // Realtime subscription for new messages
