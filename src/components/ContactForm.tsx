@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
 import { saveContact } from "@/lib/store";
+import { PhotoUpload } from "@/components/PhotoUpload";
 import { toast } from "sonner";
 
 export function ContactForm() {
