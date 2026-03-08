@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
 import { saveContact } from "@/lib/store";
+import { PhotoUpload } from "@/components/PhotoUpload";
 import { toast } from "sonner";
 
 export function ContactForm() {
@@ -28,6 +29,7 @@ export function ContactForm() {
     bloodGroup: "",
     birthday: "",
     secretCode: "",
+    photoUrl: "",
   });
 
   const updateForm = (field: string, value: string) => {
@@ -60,6 +62,7 @@ export function ContactForm() {
         blood_group: form.bloodGroup,
         birthday: form.birthday,
         secret_code: form.secretCode,
+        photo_url: form.photoUrl,
       });
       setSubmitted(true);
       toast.success("আপনার তথ্য সফলভাবে সেভ হয়েছে! 💕");
@@ -82,7 +85,7 @@ export function ContactForm() {
         </motion.div>
         <h2 className="mb-2 text-2xl font-display font-semibold text-foreground">ধন্যবাদ! 💕</h2>
         <p className="mb-6 text-muted-foreground max-w-md">আপনার তথ্য সফলভাবে আপনজন ডাইরেক্টরিতে যুক্ত হয়েছে। আপনি আমাদের কাছে গুরুত্বপূর্ণ!</p>
-        <Button variant="outline" onClick={() => { setSubmitted(false); setStep(1); setForm({ name: "", phone: "", whatsapp: "", imo: "", email: "", category: "", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "" }); }}>
+        <Button variant="outline" onClick={() => { setSubmitted(false); setStep(1); setForm({ name: "", phone: "", whatsapp: "", imo: "", email: "", category: "", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" }); }}>
           আরেকজনের তথ্য যোগ করুন
         </Button>
       </motion.div>
@@ -108,6 +111,9 @@ export function ContactForm() {
             <div className="text-center mb-6">
               <h3 className="text-lg font-display font-semibold text-foreground">মূল তথ্য</h3>
               <p className="text-sm text-muted-foreground">আপনার নাম ও যোগাযোগের তথ্য দিন</p>
+            </div>
+            <div className="flex justify-center">
+              <PhotoUpload value={form.photoUrl || undefined} onChange={(url) => updateForm("photoUrl", url || "")} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="name" className="flex items-center gap-2"><Heart className="h-3.5 w-3.5 text-primary" /> আপনার নাম *</Label>

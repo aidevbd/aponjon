@@ -252,6 +252,18 @@ const AdminDashboard = () => {
                 <Button variant="ghost" size="icon" onClick={() => setEditingContact(null)}><X className="h-4 w-4" /></Button>
               </div>
               <div className="space-y-4">
+                <div className="flex justify-center">
+                  {editForm.photo_url ? (
+                    <div className="relative">
+                      <img src={editForm.photo_url} alt="" className="h-20 w-20 rounded-full object-cover border-2 border-primary/30" />
+                      <button onClick={() => setEditForm({ ...editForm, photo_url: null })} className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs">✕</button>
+                    </div>
+                  ) : (
+                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-2xl">
+                      {(editForm.name || "?").charAt(0)}
+                    </div>
+                  )}
+                </div>
                 <div className="space-y-2"><Label>নাম</Label><Input value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="bg-card" /></div>
                 <div className="space-y-2"><Label>ফোন</Label><Input value={editForm.phone || ""} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="bg-card" /></div>
                 <div className="grid grid-cols-2 gap-3">

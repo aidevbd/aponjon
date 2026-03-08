@@ -34,16 +34,25 @@ export function ContactCard({ contact, onEdit, onDelete, index = 0 }: ContactCar
       className="glass-card p-5 hover:shadow-rose transition-shadow duration-300"
     >
       <div className="flex items-start justify-between mb-3">
-        <div>
-          <h3 className="font-semibold text-foreground text-lg">{contact.name}</h3>
-          {category && (
-            <span className="love-badge mt-1">
-              {category.icon} {category.value}
-            </span>
+        <div className="flex items-center gap-3">
+          {contact.photo_url ? (
+            <img src={contact.photo_url} alt={contact.name} className="h-12 w-12 rounded-full object-cover border-2 border-primary/20 shrink-0" />
+          ) : (
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-lg shrink-0">
+              {contact.name.charAt(0)}
+            </div>
           )}
-          {contact.custom_category && (
-            <span className="love-badge mt-1 ml-1">✨ {contact.custom_category}</span>
-          )}
+          <div>
+            <h3 className="font-semibold text-foreground text-lg">{contact.name}</h3>
+            {category && (
+              <span className="love-badge mt-1">
+                {category.icon} {category.value}
+              </span>
+            )}
+            {contact.custom_category && (
+              <span className="love-badge mt-1 ml-1">✨ {contact.custom_category}</span>
+            )}
+          </div>
         </div>
         {(onEdit || onDelete) && (
           <div className="flex gap-1">

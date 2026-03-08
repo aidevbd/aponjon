@@ -15,6 +15,7 @@ export interface ContactRow {
   birthday: string | null;
   secret_code: string | null;
   secret_code_hash?: string | null;
+  photo_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -58,6 +59,7 @@ export async function saveContact(contact: {
   blood_group?: string;
   birthday?: string;
   secret_code?: string;
+  photo_url?: string;
 }) {
   // Use the hashed version via RPC
   const { data, error } = await supabase.rpc("save_contact_with_hash", {
@@ -73,6 +75,7 @@ export async function saveContact(contact: {
     p_blood_group: contact.blood_group || null,
     p_birthday: contact.birthday || null,
     p_secret_code: contact.secret_code || null,
+    p_photo_url: contact.photo_url || null,
   });
   if (error) throw error;
   return data;

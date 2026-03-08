@@ -28,6 +28,7 @@ export type Database = {
           name: string
           note: string | null
           phone: string
+          photo_url: string | null
           secret_code: string | null
           updated_at: string
           whatsapp: string | null
@@ -45,6 +46,7 @@ export type Database = {
           name: string
           note?: string | null
           phone: string
+          photo_url?: string | null
           secret_code?: string | null
           updated_at?: string
           whatsapp?: string | null
@@ -62,6 +64,7 @@ export type Database = {
           name?: string
           note?: string | null
           phone?: string
+          photo_url?: string | null
           secret_code?: string | null
           updated_at?: string
           whatsapp?: string | null
@@ -124,23 +127,42 @@ export type Database = {
     }
     Functions: {
       generate_otp: { Args: { p_phone: string }; Returns: string }
-      save_contact_with_hash: {
-        Args: {
-          p_address?: string
-          p_birthday?: string
-          p_blood_group?: string
-          p_category?: string
-          p_custom_category?: string
-          p_email?: string
-          p_imo?: string
-          p_name: string
-          p_note?: string
-          p_phone: string
-          p_secret_code?: string
-          p_whatsapp?: string
-        }
-        Returns: string
-      }
+      save_contact_with_hash:
+        | {
+            Args: {
+              p_address?: string
+              p_birthday?: string
+              p_blood_group?: string
+              p_category?: string
+              p_custom_category?: string
+              p_email?: string
+              p_imo?: string
+              p_name: string
+              p_note?: string
+              p_phone: string
+              p_secret_code?: string
+              p_whatsapp?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_address?: string
+              p_birthday?: string
+              p_blood_group?: string
+              p_category?: string
+              p_custom_category?: string
+              p_email?: string
+              p_imo?: string
+              p_name: string
+              p_note?: string
+              p_phone: string
+              p_photo_url?: string
+              p_secret_code?: string
+              p_whatsapp?: string
+            }
+            Returns: string
+          }
       update_verified_contact: {
         Args: {
           p_address?: string
