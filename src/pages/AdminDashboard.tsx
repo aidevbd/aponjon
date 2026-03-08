@@ -97,6 +97,59 @@ const AdminDashboard = () => {
     return upcoming.sort((a, b) => a.daysUntil - b.daysUntil);
   }, [contacts]);
 
+  // Birthday toast notification on load
+  useEffect(() => {
+    if (birthdayNotified.current || upcomingBirthdays.length === 0) return;
+    birthdayNotified.current = true;
+    const todayBdays = upcomingBirthdays.filter((b) => b.daysUntil === 0);
+    const soonBdays = upcomingBirthdays.filter((b) => b.daysUntil > 0 && b.daysUntil <= 7);
+    if (todayBdays.length > 0) {
+      toast("🎂 আজ জন্মদিন!", {
+        description: todayBdays.map((b) => b.contact.name).join(", "),
+        duration: 10000,
+      });
+    } else if (soonBdays.length > 0) {
+      toast("🎂 আসন্ন জন্মদিন!", {
+        description: soonBdays.map((b) => `${b.contact.name} (${b.daysUntil} দিন বাকি)`).join(", "),
+        duration: 8000,
+      });
+    }
+  }, [upcomingBirthdays]);
+
+  const handleAddContact = async () => {
+    if (!addForm.name.trim() || !addForm.phone.trim()) {
+      toast.error("নাম এবং ফোন নম্বর আবশ্যক");
+      return;
+    }
+    try {
+      await saveContact({
+        name: addForm.name,
+        phone: addForm.phone,
+        whatsapp: addForm.whatsapp || undefined,
+        imo: addForm.imo || undefined,
+        email: addForm.email || undefined,
+        category: addForm.category || "অন্যান্য",
+        custom_category: addForm.customCategory || undefined,
+        note: addForm.note || undefined,
+        address: addForm.address || undefined,
+        blood_group: addForm.bloodGroup || undefined,
+        birthday: addForm.birthday || undefined,
+        secret_code: addForm.secretCode || undefined,
+        photo_url: addForm.photoUrl || undefined,
+      });
+      toast.success("নতুন কন্টাক্ট যোগ হয়েছে! 💕");
+      setShowAddModal(false);
+      setAddForm({ name: "", phone: "", whatsapp: "", imo: "", email: "", category: "অন্যান্য", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" });
+      await loadContacts();
+    } catch (err: any) {
+      if (err?.message?.includes("duplicate") || err?.code === "23505") {
+        toast.error("এই ফোন নম্বরটি আগেই আছে!");
+      } else {
+        toast.error("সেভ করতে সমস্যা হয়েছে");
+      }
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (confirm("আপনি কি নিশ্চিত এই কন্টাক্ট ডিলিট করতে চান?")) {
       try {
