@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { Lock, Phone, Shield, Edit3, ArrowLeft, Heart, KeyRound, AlertTriangle } from "lucide-react";
