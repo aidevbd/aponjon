@@ -31,6 +31,7 @@ const Chat = () => {
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [presenceMap, setPresenceMap] = useState<Record<string, { is_online: boolean; last_seen_at: string }>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -40,12 +41,11 @@ const Chat = () => {
     if (existing) setSession(existing);
   }, []);
 
-  // Load contacts & unread when session ready + heartbeat
+  // Load contacts & unread when session ready + heartbeat + presence polling
   useEffect(() => {
     if (!session) return;
     loadContacts();
     loadUnread();
-    // User presence heartbeat
     const sendHeartbeat = async () => {
       try { await supabase.rpc("update_presence", { p_contact_id: session.contactId }); } catch {}
     };
@@ -53,6 +53,25 @@ const Chat = () => {
     const heartbeat = setInterval(sendHeartbeat, 30000);
     return () => clearInterval(heartbeat);
   }, [session]);
+
+  // Poll presence for contacts
+  useEffect(() => {
+    if (!session || contacts.length === 0) return;
+    const fetchPresence = async () => {
+      try {
+        const ids = contacts.map(c => c.id);
+        const { data } = await supabase.rpc("get_user_presence", { p_contact_ids: ids });
+        if (data) {
+          const map: Record<string, { is_online: boolean; last_seen_at: string }> = {};
+          (data as any[]).forEach(p => { map[p.contact_id] = { is_online: p.is_online, last_seen_at: p.last_seen_at }; });
+          setPresenceMap(map);
+        }
+      } catch {}
+    };
+    fetchPresence();
+    const interval = setInterval(fetchPresence, 30000);
+    return () => clearInterval(interval);
+  }, [session, contacts]);
 
   // Realtime subscription for new messages
   useEffect(() => {
@@ -208,6 +227,19 @@ const Chat = () => {
     return d.toLocaleDateString("bn-BD", { day: "numeric", month: "short" }) + " " + d.toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" });
   };
 
+  const formatLastSeen = (presence?: { is_online: boolean; last_seen_at: string }) => {
+    if (!presence) return null;
+    if (presence.is_online) return "এখন অনলাইন";
+    const diff = Date.now() - new Date(presence.last_seen_at).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "এইমাত্র অনলাইন ছিলেন";
+    if (mins < 60) return `${mins} মিনিট আগে`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours} ঘন্টা আগে`;
+    const days = Math.floor(hours / 24);
+    return `${days} দিন আগে`;
+  };
+
   // ============ LOGIN SCREEN ============
   if (!session) {
     return (
@@ -257,12 +289,24 @@ const Chat = () => {
               <button onClick={() => setSelectedContact(null)} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
                 <ArrowLeft className="h-5 w-5" />
                 <div className="flex items-center gap-2">
-                  {selectedContact.photo_url ? (
-                    <img src={selectedContact.photo_url} alt="" className="h-8 w-8 rounded-full object-cover border border-primary/20" />
-                  ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedContact.name.charAt(0)}</div>
-                  )}
-                  <span className="font-semibold text-sm">{selectedContact.name}</span>
+                  <div className="relative">
+                    {selectedContact.photo_url ? (
+                      <img src={selectedContact.photo_url} alt="" className="h-8 w-8 rounded-full object-cover border border-primary/20" />
+                    ) : (
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedContact.name.charAt(0)}</div>
+                    )}
+                    {presenceMap[selectedContact.id]?.is_online && (
+                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
+                    )}
+                  </div>
+                  <div>
+                    <span className="font-semibold text-sm">{selectedContact.name}</span>
+                    {presenceMap[selectedContact.id] && (
+                      <p className={`text-[10px] ${presenceMap[selectedContact.id].is_online ? "text-green-500" : "text-muted-foreground"}`}>
+                        {formatLastSeen(presenceMap[selectedContact.id])}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </button>
             ) : (
@@ -307,14 +351,21 @@ const Chat = () => {
                       onClick={() => handleSelectContact(c)}
                       className="w-full flex items-center gap-3 rounded-xl p-3 hover:bg-card/80 transition-colors text-left border border-transparent hover:border-border/50"
                     >
-                      {c.photo_url ? (
-                        <img src={c.photo_url} alt="" className="h-11 w-11 rounded-full object-cover border border-primary/20 shrink-0" />
-                      ) : (
-                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">{c.name.charAt(0)}</div>
-                      )}
+                      <div className="relative shrink-0">
+                        {c.photo_url ? (
+                          <img src={c.photo_url} alt="" className="h-11 w-11 rounded-full object-cover border border-primary/20" />
+                        ) : (
+                          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">{c.name.charAt(0)}</div>
+                        )}
+                        {presenceMap[c.id]?.is_online && (
+                          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card" />
+                        )}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-foreground text-sm">{c.name} <span className="text-[10px] love-badge ml-1">এডমিন</span></div>
-                        <div className="text-xs text-muted-foreground truncate">ট্যাপ করে মেসেজ করুন</div>
+                        <div className={`text-xs truncate ${presenceMap[c.id]?.is_online ? "text-green-500" : "text-muted-foreground"}`}>
+                          {formatLastSeen(presenceMap[c.id]) || "ট্যাপ করে মেসেজ করুন"}
+                        </div>
                       </div>
                       {unreadMap[c.id] && (
                         <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[10px] font-bold px-1.5">
