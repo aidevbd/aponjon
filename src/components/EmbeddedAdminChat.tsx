@@ -177,6 +177,21 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     return d.toLocaleDateString("bn-BD", { day: "numeric", month: "short" }) + " " + d.toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" });
   };
 
+  const formatLastSeen = (presence: { lastSeen: string; isOnline: boolean } | undefined) => {
+    if (!presence) return null;
+    if (presence.isOnline) return "এখন অনলাইন";
+    const d = new Date(presence.lastSeen);
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return "এইমাত্র অ্যাক্টিভ ছিল";
+    if (diffMin < 60) return `${diffMin} মিনিট আগে`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr} ঘণ্টা আগে`;
+    const diffDay = Math.floor(diffHr / 24);
+    return `${diffDay} দিন আগে`;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
