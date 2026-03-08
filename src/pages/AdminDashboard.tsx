@@ -27,7 +27,7 @@ const AdminDashboard = () => {
   const [totalUnread, setTotalUnread] = useState(0);
   const birthdayNotified = useRef(false);
   const [addForm, setAddForm] = useState({
-    name: "", phone: "", whatsapp: "", imo: "", email: "",
+    name: "", phone: "", whatsapp: "", imo: "", telegram: "", facebook: "", email: "",
     category: "অন্যান্য", customCategory: "", note: "", address: "",
     bloodGroup: "", birthday: "", secretCode: "", photoUrl: "",
   });
@@ -166,7 +166,7 @@ const AdminDashboard = () => {
         });
         toast.success("কন্টাক্ট আপডেট হয়েছে! ✅");
         setShowAddModal(false);
-        setAddForm({ name: "", phone: "", whatsapp: "", imo: "", email: "", category: "অন্যান্য", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" });
+        setAddForm({ name: "", phone: "", whatsapp: "", imo: "", telegram: "", facebook: "", email: "", category: "অন্যান্য", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" });
         await loadContacts();
       } catch {
         toast.error("আপডেট করতে সমস্যা হয়েছে");
@@ -181,6 +181,8 @@ const AdminDashboard = () => {
         phone: addForm.phone,
         whatsapp: addForm.whatsapp || null,
         imo: addForm.imo || null,
+        telegram: addForm.telegram || null,
+        facebook: addForm.facebook || null,
         email: addForm.email || null,
         category: addForm.category || "অন্যান্য",
         custom_category: addForm.customCategory || null,
@@ -194,7 +196,7 @@ const AdminDashboard = () => {
       if (error) throw error;
       toast.success("নতুন কন্টাক্ট যোগ হয়েছে! 💕");
       setShowAddModal(false);
-      setAddForm({ name: "", phone: "", whatsapp: "", imo: "", email: "", category: "অন্যান্য", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" });
+      setAddForm({ name: "", phone: "", whatsapp: "", imo: "", telegram: "", facebook: "", email: "", category: "অন্যান্য", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" });
       await loadContacts();
     } catch (err: any) {
       toast.error("সেভ করতে সমস্যা হয়েছে");
@@ -397,6 +399,10 @@ const AdminDashboard = () => {
                   <div className="space-y-2"><Label>WhatsApp</Label><Input value={editForm.whatsapp || ""} onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })} className="bg-card" /></div>
                   <div className="space-y-2"><Label>IMO</Label><Input value={editForm.imo || ""} onChange={(e) => setEditForm({ ...editForm, imo: e.target.value })} className="bg-card" /></div>
                 </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2"><Label>Telegram</Label><Input value={editForm.telegram || ""} onChange={(e) => setEditForm({ ...editForm, telegram: e.target.value })} className="bg-card" /></div>
+                  <div className="space-y-2"><Label>🌐 ফেসবুক</Label><Input value={editForm.facebook || ""} onChange={(e) => setEditForm({ ...editForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card" /></div>
+                </div>
                 <div className="space-y-2"><Label>ইমেইল</Label><Input value={editForm.email || ""} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="bg-card" /></div>
                 <div className="space-y-2">
                   <Label>ক্যাটাগরি</Label>
@@ -443,6 +449,10 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2"><Label>WhatsApp</Label><Input value={addForm.whatsapp} onChange={(e) => setAddForm({ ...addForm, whatsapp: e.target.value })} className="bg-card" /></div>
                   <div className="space-y-2"><Label>IMO</Label><Input value={addForm.imo} onChange={(e) => setAddForm({ ...addForm, imo: e.target.value })} className="bg-card" /></div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2"><Label>Telegram</Label><Input value={addForm.telegram || ""} onChange={(e) => setAddForm({ ...addForm, telegram: e.target.value })} className="bg-card" /></div>
+                  <div className="space-y-2"><Label>🌐 ফেসবুক</Label><Input value={addForm.facebook || ""} onChange={(e) => setAddForm({ ...addForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card" /></div>
                 </div>
                 <div className="space-y-2"><Label>ইমেইল</Label><Input value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} type="email" className="bg-card" /></div>
                 <div className="space-y-2">
