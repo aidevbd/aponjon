@@ -166,7 +166,7 @@ const AdminDashboard = () => {
         });
         toast.success("কন্টাক্ট আপডেট হয়েছে! ✅");
         setShowAddModal(false);
-        setAddForm({ name: "", phone: "", whatsapp: "", imo: "", email: "", category: "অন্যান্য", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" });
+        setAddForm({ name: "", phone: "", whatsapp: "", imo: "", telegram: "", facebook: "", email: "", category: "অন্যান্য", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" });
         await loadContacts();
       } catch {
         toast.error("আপডেট করতে সমস্যা হয়েছে");
