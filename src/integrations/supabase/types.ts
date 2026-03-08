@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_sessions: {
+        Row: {
+          contact_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          session_token: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          session_token: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          session_token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_sessions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_sessions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           address: string | null
@@ -73,6 +112,65 @@ export type Database = {
           whatsapp?: string | null
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          is_read: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_read?: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_read?: boolean
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "contacts_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "contacts_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       otp_codes: {
         Row: {
@@ -181,7 +279,39 @@ export type Database = {
         Args: { p_action_type: string; p_key: string }
         Returns: boolean
       }
+      create_chat_session: {
+        Args: { p_phone: string; p_secret_code: string }
+        Returns: Json
+      }
       generate_otp: { Args: { p_phone: string }; Returns: string }
+      get_chat_contacts: {
+        Args: { p_token: string }
+        Returns: {
+          id: string
+          name: string
+          phone: string
+          photo_url: string
+        }[]
+      }
+      get_messages: {
+        Args: { p_other_id: string; p_token: string }
+        Returns: {
+          content: string
+          created_at: string
+          id: string
+          image_url: string
+          is_read: boolean
+          receiver_id: string
+          sender_id: string
+        }[]
+      }
+      get_unread_counts: {
+        Args: { p_token: string }
+        Returns: {
+          sender_id: string
+          unread_count: number
+        }[]
+      }
       reset_rate_limit: {
         Args: { p_action_type: string; p_key: string }
         Returns: undefined
@@ -222,6 +352,15 @@ export type Database = {
             }
             Returns: string
           }
+      send_message: {
+        Args: {
+          p_content?: string
+          p_image_url?: string
+          p_receiver_id: string
+          p_token: string
+        }
+        Returns: string
+      }
       update_verified_contact: {
         Args: {
           p_address?: string
@@ -239,6 +378,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      validate_chat_session: { Args: { p_token: string }; Returns: string }
       verify_and_get_contact: {
         Args: { p_phone: string; p_secret_code: string }
         Returns: {

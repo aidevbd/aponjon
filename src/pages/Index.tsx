@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Heart, UserPlus, Shield, Search } from "lucide-react";
+import { Heart, UserPlus, Shield, Search, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
@@ -51,6 +51,11 @@ const Index = () => {
               <Link to="/access">
                 <Button variant="outline" size="lg" className="gap-2 text-base px-8">
                   <Shield className="h-5 w-5" /> আমার তথ্য দেখুন
+                </Button>
+              </Link>
+              <Link to="/chat">
+                <Button variant="warm" size="lg" className="gap-2 text-base px-8">
+                  <MessageCircle className="h-5 w-5" /> মেসেজ করুন
                 </Button>
               </Link>
             </div>

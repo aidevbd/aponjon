@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { PhotoUpload } from "@/components/PhotoUpload";
-import { Lock, Phone, Shield, Edit3, ArrowLeft, Heart, KeyRound, AlertTriangle } from "lucide-react";
+import { Lock, Phone, Shield, Edit3, ArrowLeft, Heart, KeyRound, AlertTriangle, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,7 @@ import { toast } from "sonner";
 type AccessStep = "choose" | "phone-input" | "secret-input" | "verify-phone" | "otp-input" | "edit";
 
 export function AccessForm() {
+  const navigate = useNavigate();
   const [step, setStep] = useState<AccessStep>("choose");
   const [phoneInput, setPhoneInput] = useState("");
   const [secretInput, setSecretInput] = useState("");
@@ -360,6 +362,9 @@ export function AccessForm() {
             </div>
             <Button onClick={handleSaveEdit} variant="hero" className="w-full" disabled={loading}>
               <Heart className="h-4 w-4 mr-1" /> {loading ? "আপডেট হচ্ছে..." : "আপডেট সেভ করুন"}
+            </Button>
+            <Button onClick={() => navigate("/chat")} variant="outline" className="w-full gap-2">
+              <MessageCircle className="h-4 w-4 text-primary" /> প্রাইভেট মেসেজ করুন
             </Button>
           </motion.div>
         )}
