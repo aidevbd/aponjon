@@ -45,6 +45,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewOriginal, setViewOriginal] = useState<string | null>(null);
+  const [tappedMsgId, setTappedMsgId] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);

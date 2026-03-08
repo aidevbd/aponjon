@@ -46,6 +46,7 @@ const Chat = () => {
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [tappedMsgId, setTappedMsgId] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
