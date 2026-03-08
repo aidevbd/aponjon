@@ -330,16 +330,7 @@ const AdminDashboard = () => {
               </div>
               <div className="space-y-4">
                 <div className="flex justify-center">
-                  {editForm.photo_url ? (
-                    <div className="relative">
-                      <img src={editForm.photo_url} alt="" className="h-20 w-20 rounded-full object-cover border-2 border-primary/30" />
-                      <button onClick={() => setEditForm({ ...editForm, photo_url: null })} className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs">✕</button>
-                    </div>
-                  ) : (
-                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-2xl">
-                      {(editForm.name || "?").charAt(0)}
-                    </div>
-                  )}
+                  <PhotoUpload value={editForm.photo_url || undefined} onChange={(url) => setEditForm({ ...editForm, photo_url: url || null })} />
                 </div>
                 <div className="space-y-2"><Label>নাম</Label><Input value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="bg-card" /></div>
                 <div className="space-y-2"><Label>ফোন</Label><Input value={editForm.phone || ""} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="bg-card" /></div>
@@ -370,6 +361,60 @@ const AdminDashboard = () => {
               </div>
               <Button onClick={handleSaveEdit} variant="hero" className="w-full mt-6">
                 <Heart className="h-4 w-4 mr-1" /> সেভ করুন
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {showAddModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 backdrop-blur-sm p-4" onClick={() => setShowAddModal(false)}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="glass-card p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-display font-semibold flex items-center gap-2">
+                  <Plus className="h-5 w-5 text-primary" /> নতুন কন্টাক্ট যোগ করুন
+                </h3>
+                <Button variant="ghost" size="icon" onClick={() => setShowAddModal(false)}><X className="h-4 w-4" /></Button>
+              </div>
+              <div className="space-y-4">
+                <div className="flex justify-center">
+                  <PhotoUpload value={addForm.photoUrl || undefined} onChange={(url) => setAddForm({ ...addForm, photoUrl: url || "" })} />
+                </div>
+                <div className="space-y-2"><Label>নাম *</Label><Input value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} placeholder="পূর্ণ নাম" className="bg-card" /></div>
+                <div className="space-y-2"><Label>ফোন *</Label><Input value={addForm.phone} onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })} placeholder="01XXXXXXXXX" className="bg-card" /></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2"><Label>WhatsApp</Label><Input value={addForm.whatsapp} onChange={(e) => setAddForm({ ...addForm, whatsapp: e.target.value })} className="bg-card" /></div>
+                  <div className="space-y-2"><Label>IMO</Label><Input value={addForm.imo} onChange={(e) => setAddForm({ ...addForm, imo: e.target.value })} className="bg-card" /></div>
+                </div>
+                <div className="space-y-2"><Label>ইমেইল</Label><Input value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} type="email" className="bg-card" /></div>
+                <div className="space-y-2">
+                  <Label>ক্যাটাগরি</Label>
+                  <Select value={addForm.category} onValueChange={(v) => setAddForm({ ...addForm, category: v })}>
+                    <SelectTrigger className="bg-card"><SelectValue /></SelectTrigger>
+                    <SelectContent>{CATEGORIES.map((cat) => (<SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>))}</SelectContent>
+                  </Select>
+                </div>
+                {addForm.category === "অন্যান্য" && (
+                  <div className="space-y-2"><Label>কাস্টম ক্যাটাগরি</Label><Input value={addForm.customCategory} onChange={(e) => setAddForm({ ...addForm, customCategory: e.target.value })} className="bg-card" /></div>
+                )}
+                <div className="space-y-2"><Label>ঠিকানা</Label><Input value={addForm.address} onChange={(e) => setAddForm({ ...addForm, address: e.target.value })} className="bg-card" /></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>রক্তের গ্রুপ</Label>
+                    <Select value={addForm.bloodGroup} onValueChange={(v) => setAddForm({ ...addForm, bloodGroup: v })}>
+                      <SelectTrigger className="bg-card"><SelectValue placeholder="রক্তের গ্রুপ" /></SelectTrigger>
+                      <SelectContent>{BLOOD_GROUPS.map((bg) => (<SelectItem key={bg} value={bg}>{bg}</SelectItem>))}</SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2"><Label>জন্মদিন</Label><Input type="date" value={addForm.birthday} onChange={(e) => setAddForm({ ...addForm, birthday: e.target.value })} className="bg-card" /></div>
+                </div>
+                <div className="space-y-2"><Label>নোট</Label><Textarea value={addForm.note} onChange={(e) => setAddForm({ ...addForm, note: e.target.value })} className="bg-card" /></div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-primary" /> সিক্রেট কোড (ঐচ্ছিক)</Label>
+                  <Input value={addForm.secretCode} onChange={(e) => setAddForm({ ...addForm, secretCode: e.target.value })} placeholder="গোপন কোড" className="bg-card" />
+                </div>
+              </div>
+              <Button onClick={handleAddContact} variant="hero" className="w-full mt-6">
+                <Plus className="h-4 w-4 mr-1" /> কন্টাক্ট যোগ করুন
               </Button>
             </motion.div>
           </motion.div>
