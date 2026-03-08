@@ -452,13 +452,16 @@ const AdminDashboard = () => {
                 </div>
                 <div className="space-y-2"><Label>নাম *</Label><Input value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} placeholder="পূর্ণ নাম" className="bg-card" /></div>
                 <div className="space-y-2"><Label>ফোন *</Label><Input value={addForm.phone} onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })} placeholder="01XXXXXXXXX" className="bg-card" /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2"><Label>WhatsApp</Label><Input value={addForm.whatsapp} onChange={(e) => setAddForm({ ...addForm, whatsapp: e.target.value })} className="bg-card" /></div>
-                  <div className="space-y-2"><Label>IMO</Label><Input value={addForm.imo} onChange={(e) => setAddForm({ ...addForm, imo: e.target.value })} className="bg-card" /></div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2"><Label>Telegram</Label><Input value={addForm.telegram || ""} onChange={(e) => setAddForm({ ...addForm, telegram: e.target.value })} className="bg-card" /></div>
-                  <div className="space-y-2"><Label>🌐 ফেসবুক</Label><Input value={addForm.facebook || ""} onChange={(e) => setAddForm({ ...addForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card" /></div>
+                <MessengerFields
+                  phone={addForm.phone}
+                  whatsapp={addForm.whatsapp}
+                  imo={addForm.imo}
+                  telegram={addForm.telegram}
+                  onChange={(field, value) => setAddForm({ ...addForm, [field]: value })}
+                />
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2"><Globe className="h-3.5 w-3.5 text-blue-600" /> ফেসবুক</Label>
+                  <Input value={addForm.facebook || ""} onChange={(e) => setAddForm({ ...addForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card" />
                 </div>
                 <div className="space-y-2"><Label>ইমেইল</Label><Input value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} type="email" className="bg-card" /></div>
                 <div className="space-y-2">

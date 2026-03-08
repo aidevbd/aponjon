@@ -342,10 +342,17 @@ export function AccessForm() {
                 onChange={(url) => setEditForm({ ...editForm, photo_url: url })}
               />
               <div className="space-y-2"><Label>নাম</Label><Input value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="bg-card" /></div>
-              <div className="space-y-2"><Label>WhatsApp নম্বর</Label><Input placeholder="একাধিক হলে কমা দিয়ে আলাদা করুন" value={editForm.whatsapp || ""} onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })} className="bg-card" /></div>
-              <div className="space-y-2"><Label>IMO নম্বর</Label><Input placeholder="একাধিক হলে কমা দিয়ে আলাদা করুন" value={editForm.imo || ""} onChange={(e) => setEditForm({ ...editForm, imo: e.target.value })} className="bg-card" /></div>
-              <div className="space-y-2"><Label>Telegram নম্বর</Label><Input placeholder="একাধিক হলে কমা দিয়ে আলাদা করুন" value={editForm.telegram || ""} onChange={(e) => setEditForm({ ...editForm, telegram: e.target.value })} className="bg-card" /></div>
-              <div className="space-y-2"><Label>ফেসবুক</Label><Input placeholder="প্রোফাইল লিংক বা ইউজারনেম" value={editForm.facebook || ""} onChange={(e) => setEditForm({ ...editForm, facebook: e.target.value })} className="bg-card" /></div>
+              <MessengerFields
+                phone={currentContact?.phone || ""}
+                whatsapp={editForm.whatsapp || ""}
+                imo={editForm.imo || ""}
+                telegram={editForm.telegram || ""}
+                onChange={(field, value) => setEditForm({ ...editForm, [field]: value })}
+              />
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2"><Globe className="h-3.5 w-3.5 text-blue-600" /> ফেসবুক</Label>
+                <Input placeholder="প্রোফাইল লিংক বা ইউজারনেম" value={editForm.facebook || ""} onChange={(e) => setEditForm({ ...editForm, facebook: e.target.value })} className="bg-card" />
+              </div>
               <div className="space-y-2"><Label>ইমেইল</Label><Input value={editForm.email || ""} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="bg-card" /></div>
               <div className="space-y-2">
                 <Label>ক্যাটাগরি</Label>
