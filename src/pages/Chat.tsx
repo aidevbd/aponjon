@@ -350,14 +350,21 @@ const Chat = () => {
                       onClick={() => handleSelectContact(c)}
                       className="w-full flex items-center gap-3 rounded-xl p-3 hover:bg-card/80 transition-colors text-left border border-transparent hover:border-border/50"
                     >
-                      {c.photo_url ? (
-                        <img src={c.photo_url} alt="" className="h-11 w-11 rounded-full object-cover border border-primary/20 shrink-0" />
-                      ) : (
-                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">{c.name.charAt(0)}</div>
-                      )}
+                      <div className="relative shrink-0">
+                        {c.photo_url ? (
+                          <img src={c.photo_url} alt="" className="h-11 w-11 rounded-full object-cover border border-primary/20" />
+                        ) : (
+                          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">{c.name.charAt(0)}</div>
+                        )}
+                        {presenceMap[c.id]?.is_online && (
+                          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card" />
+                        )}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-foreground text-sm">{c.name} <span className="text-[10px] love-badge ml-1">এডমিন</span></div>
-                        <div className="text-xs text-muted-foreground truncate">ট্যাপ করে মেসেজ করুন</div>
+                        <div className={`text-xs truncate ${presenceMap[c.id]?.is_online ? "text-green-500" : "text-muted-foreground"}`}>
+                          {formatLastSeen(presenceMap[c.id]) || "ট্যাপ করে মেসেজ করুন"}
+                        </div>
                       </div>
                       {unreadMap[c.id] && (
                         <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[10px] font-bold px-1.5">
