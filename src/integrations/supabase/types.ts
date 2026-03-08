@@ -254,6 +254,7 @@ export type Database = {
           name: string
           note: string
           phone: string
+          photo_url: string
           rate_limited: boolean
           updated_at: string
           whatsapp: string
