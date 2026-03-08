@@ -156,6 +156,8 @@ const AdminDashboard = () => {
           phone: addForm.phone,
           whatsapp: addForm.whatsapp || null,
           imo: addForm.imo || null,
+          telegram: addForm.telegram || null,
+          facebook: addForm.facebook || null,
           email: addForm.email || null,
           category: addForm.category || "অন্যান্য",
           custom_category: addForm.customCategory || null,
