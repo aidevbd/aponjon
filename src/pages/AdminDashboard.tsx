@@ -210,6 +210,7 @@ const AdminDashboard = () => {
           </div>
         )}
 
+        <div className="mb-6 flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="নাম, নম্বর বা কি-ওয়ার্ড দিয়ে সার্চ করুন..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-card" />
