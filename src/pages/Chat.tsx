@@ -222,6 +222,17 @@ const Chat = () => {
     }
   };
 
+  const handleDeleteMessage = async (msgId: string) => {
+    if (!session) return;
+    try {
+      await deleteMessage(session.token, msgId);
+      setMessages(prev => prev.filter(m => m.id !== msgId));
+      toast.success("মেসেজ ডিলিট হয়েছে");
+    } catch {
+      toast.error("ডিলিট করতে সমস্যা");
+    }
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !session || !selectedContact) return;
