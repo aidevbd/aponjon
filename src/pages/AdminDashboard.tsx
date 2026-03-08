@@ -448,6 +448,10 @@ const AdminDashboard = () => {
                   <div className="space-y-2"><Label>WhatsApp</Label><Input value={addForm.whatsapp} onChange={(e) => setAddForm({ ...addForm, whatsapp: e.target.value })} className="bg-card" /></div>
                   <div className="space-y-2"><Label>IMO</Label><Input value={addForm.imo} onChange={(e) => setAddForm({ ...addForm, imo: e.target.value })} className="bg-card" /></div>
                 </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2"><Label>Telegram</Label><Input value={addForm.telegram || ""} onChange={(e) => setAddForm({ ...addForm, telegram: e.target.value })} className="bg-card" /></div>
+                  <div className="space-y-2"><Label>🌐 ফেসবুক</Label><Input value={addForm.facebook || ""} onChange={(e) => setAddForm({ ...addForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card" /></div>
+                </div>
                 <div className="space-y-2"><Label>ইমেইল</Label><Input value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} type="email" className="bg-card" /></div>
                 <div className="space-y-2">
                   <Label>ক্যাটাগরি</Label>
