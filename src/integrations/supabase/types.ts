@@ -123,7 +123,62 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      update_verified_contact: {
+        Args: {
+          p_address?: string
+          p_birthday?: string
+          p_blood_group?: string
+          p_category?: string
+          p_custom_category?: string
+          p_email?: string
+          p_imo?: string
+          p_name?: string
+          p_note?: string
+          p_phone: string
+          p_secret_code: string
+          p_whatsapp?: string
+        }
+        Returns: boolean
+      }
+      verify_and_get_contact: {
+        Args: { p_phone: string; p_secret_code: string }
+        Returns: {
+          address: string | null
+          birthday: string | null
+          blood_group: string | null
+          category: string | null
+          created_at: string | null
+          custom_category: string | null
+          email: string | null
+          id: string | null
+          imo: string | null
+          name: string | null
+          note: string | null
+          phone: string | null
+          updated_at: string | null
+          whatsapp: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "contacts_public"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      verify_contact_by_phone: {
+        Args: { p_phone: string }
+        Returns: {
+          has_secret_code: boolean
+          id: string
+        }[]
+      }
+      verify_secret_code: {
+        Args: { p_secret_code: string }
+        Returns: {
+          id: string
+          masked_phone: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
