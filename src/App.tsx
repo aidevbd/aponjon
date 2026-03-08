@@ -27,6 +27,7 @@ const App = () => (
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/admin/chat" element={<AdminChat />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
