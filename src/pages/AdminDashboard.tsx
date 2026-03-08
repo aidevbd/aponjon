@@ -217,6 +217,7 @@ const AdminDashboard = () => {
     a.href = url; a.download = "aponjon-contacts.csv"; a.click();
     URL.revokeObjectURL(url);
     toast.success("CSV ডাউনলোড হচ্ছে...");
+    logAdminActivity("export_csv", `${contacts.length} টি কন্টাক্ট CSV এক্সপোর্ট করা হয়েছে`, undefined, "export", { count: contacts.length });
   };
 
   const handleLogout = async () => {
