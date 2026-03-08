@@ -51,6 +51,12 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     if (!adminContactId) return;
     loadChatUsers();
     loadUnread();
+    // Admin heartbeat
+    supabase.rpc("update_admin_presence").catch(() => {});
+    const heartbeat = setInterval(() => {
+      supabase.rpc("update_admin_presence").catch(() => {});
+    }, 30000);
+    return () => clearInterval(heartbeat);
   }, [adminContactId]);
 
   useEffect(() => {
