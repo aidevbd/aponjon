@@ -203,6 +203,7 @@ const AdminDashboard = () => {
       });
       await loadContacts(); setEditingContact(null);
       toast.success("তথ্য আপডেট হয়েছে! 💕");
+      logAdminActivity("contact_edit", `কন্টাক্ট এডিট: ${editForm.name} (${editForm.phone})`, editingContact.id, "contact", { name: editForm.name, phone: editForm.phone });
     } catch { toast.error("আপডেট করতে সমস্যা হয়েছে"); }
   };
 
