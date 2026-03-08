@@ -226,7 +226,22 @@ const AdminDashboard = () => {
   const handleSaveEdit = async () => {
     if (editingContact) {
       try {
-        await updateContact(editingContact.id, editForm);
+        await updateContact(editingContact.id, {
+          name: editForm.name,
+          phone: editForm.phone,
+          whatsapp: editForm.whatsapp || null,
+          imo: editForm.imo || null,
+          telegram: editForm.telegram || null,
+          facebook: editForm.facebook || null,
+          email: editForm.email || null,
+          category: editForm.category,
+          custom_category: editForm.custom_category || null,
+          note: editForm.note || null,
+          address: editForm.address || null,
+          blood_group: editForm.blood_group || null,
+          birthday: editForm.birthday || null,
+          photo_url: editForm.photo_url || null,
+        });
         await loadContacts();
         setEditingContact(null);
         toast.success("তথ্য আপডেট হয়েছে! 💕");
