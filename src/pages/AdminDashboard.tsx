@@ -20,6 +20,8 @@ import { getContacts, deleteContact, updateContact, saveContact, adminLogout, ge
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { EmbeddedAdminChat } from "@/components/EmbeddedAdminChat";
+import { AdminActivityLog } from "@/components/AdminActivityLog";
+import { logAdminActivity } from "@/lib/adminLog";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
