@@ -311,9 +311,16 @@ const AdminChat = () => {
                           <img src={msg.image_url} alt="" className="rounded-lg max-w-full mb-1.5 cursor-pointer" onClick={() => window.open(msg.image_url!, "_blank")} />
                         )}
                         {msg.content && <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>}
-                        <p className={`text-[10px] mt-1 ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                          {formatTime(msg.created_at)}
-                        </p>
+                        <div className={`flex items-center gap-1 mt-1 ${isMine ? "justify-end" : ""}`}>
+                          <p className={`text-[10px] ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                            {formatTime(msg.created_at)}
+                          </p>
+                          {isMine && (
+                            <span className={`text-[10px] ${msg.is_read ? "text-primary-foreground/80" : "text-primary-foreground/40"}`}>
+                              {msg.is_read ? "✓✓" : "✓"}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );

@@ -24,12 +24,21 @@ const AdminDashboard = () => {
   const [editForm, setEditForm] = useState<Partial<ContactRow>>({});
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [totalUnread, setTotalUnread] = useState(0);
   const birthdayNotified = useRef(false);
   const [addForm, setAddForm] = useState({
     name: "", phone: "", whatsapp: "", imo: "", email: "",
     category: "অন্যান্য", customCategory: "", note: "", address: "",
     bloodGroup: "", birthday: "", secretCode: "", photoUrl: "",
   });
+
+  const loadUnreadCount = async () => {
+    try {
+      const { data } = await supabase.rpc("get_admin_unread_counts");
+      const total = (data || []).reduce((sum: number, d: any) => sum + d.unread_count, 0);
+      setTotalUnread(total);
+    } catch { /* ignore */ }
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -39,13 +48,23 @@ const AdminDashboard = () => {
         return;
       }
       await loadContacts();
+      await loadUnreadCount();
     };
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") navigate("/admin");
     });
-    return () => subscription.unsubscribe();
+
+    // Realtime unread updates
+    const channel = supabase
+      .channel("dashboard-unread")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () => {
+        loadUnreadCount();
+      })
+      .subscribe();
+
+    return () => { subscription.unsubscribe(); supabase.removeChannel(channel); };
   }, [navigate]);
 
   const loadContacts = async () => {
@@ -225,8 +244,13 @@ const AdminDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/chat")} className="gap-1.5">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/chat")} className="gap-1.5 relative">
               <MessageCircle className="h-4 w-4" /> চ্যাট
+              {totalUnread > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[9px] font-bold px-1">
+                  {totalUnread}
+                </span>
+              )}
             </Button>
             <Button variant="hero" size="sm" onClick={() => setShowAddModal(true)} className="gap-1.5">
               <Plus className="h-4 w-4" /> যোগ করুন
