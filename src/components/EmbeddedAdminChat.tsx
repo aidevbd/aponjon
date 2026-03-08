@@ -361,6 +361,13 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Typing indicator */}
+            {isOtherTyping && (
+              <div className="pb-1">
+                <span className="text-xs text-muted-foreground italic animate-pulse">লিখছে...</span>
+              </div>
+            )}
+
             {/* Input */}
             <div className="border-t border-border/50 pt-3">
               <div className="flex items-center gap-2">
