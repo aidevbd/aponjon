@@ -56,6 +56,7 @@ export type Database = {
       contacts: {
         Row: {
           address: string | null
+          auth_user_id: string | null
           birthday: string | null
           blood_group: string | null
           category: string
@@ -64,6 +65,7 @@ export type Database = {
           email: string | null
           id: string
           imo: string | null
+          is_admin: boolean
           name: string
           note: string | null
           phone: string
@@ -75,6 +77,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          auth_user_id?: string | null
           birthday?: string | null
           blood_group?: string | null
           category?: string
@@ -83,6 +86,7 @@ export type Database = {
           email?: string | null
           id?: string
           imo?: string | null
+          is_admin?: boolean
           name: string
           note?: string | null
           phone: string
@@ -94,6 +98,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          auth_user_id?: string | null
           birthday?: string | null
           blood_group?: string | null
           category?: string
@@ -102,6 +107,7 @@ export type Database = {
           email?: string | null
           id?: string
           imo?: string | null
+          is_admin?: boolean
           name?: string
           note?: string | null
           phone?: string
@@ -284,6 +290,36 @@ export type Database = {
         Returns: Json
       }
       generate_otp: { Args: { p_phone: string }; Returns: string }
+      get_admin_chat_users: {
+        Args: never
+        Returns: {
+          id: string
+          last_message_at: string
+          name: string
+          phone: string
+          photo_url: string
+        }[]
+      }
+      get_admin_contact_id: { Args: never; Returns: string }
+      get_admin_messages: {
+        Args: { p_other_id: string }
+        Returns: {
+          content: string
+          created_at: string
+          id: string
+          image_url: string
+          is_read: boolean
+          receiver_id: string
+          sender_id: string
+        }[]
+      }
+      get_admin_unread_counts: {
+        Args: never
+        Returns: {
+          sender_id: string
+          unread_count: number
+        }[]
+      }
       get_chat_contacts: {
         Args: { p_token: string }
         Returns: {
@@ -352,6 +388,14 @@ export type Database = {
             }
             Returns: string
           }
+      send_admin_message: {
+        Args: {
+          p_content?: string
+          p_image_url?: string
+          p_receiver_id: string
+        }
+        Returns: string
+      }
       send_message: {
         Args: {
           p_content?: string
@@ -359,6 +403,10 @@ export type Database = {
           p_receiver_id: string
           p_token: string
         }
+        Returns: string
+      }
+      setup_admin_contact: {
+        Args: { p_name: string; p_phone?: string }
         Returns: string
       }
       update_verified_contact: {

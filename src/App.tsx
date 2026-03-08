@@ -9,6 +9,7 @@ import AccessData from "./pages/AccessData";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import Chat from "./pages/Chat";
+import AdminChat from "./pages/AdminChat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/admin/chat" element={<AdminChat />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
