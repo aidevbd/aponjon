@@ -32,6 +32,14 @@ const AdminDashboard = () => {
     bloodGroup: "", birthday: "", secretCode: "", photoUrl: "",
   });
 
+  const loadUnreadCount = async () => {
+    try {
+      const { data } = await supabase.rpc("get_admin_unread_counts");
+      const total = (data || []).reduce((sum: number, d: any) => sum + d.unread_count, 0);
+      setTotalUnread(total);
+    } catch { /* ignore */ }
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
       const session = await getSession();
@@ -40,13 +48,23 @@ const AdminDashboard = () => {
         return;
       }
       await loadContacts();
+      await loadUnreadCount();
     };
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") navigate("/admin");
     });
-    return () => subscription.unsubscribe();
+
+    // Realtime unread updates
+    const channel = supabase
+      .channel("dashboard-unread")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () => {
+        loadUnreadCount();
+      })
+      .subscribe();
+
+    return () => { subscription.unsubscribe(); supabase.removeChannel(channel); };
   }, [navigate]);
 
   const loadContacts = async () => {
