@@ -106,6 +106,11 @@ export function ContactCard({ contact, onEdit, onDelete, index = 0 }: ContactCar
             <Mail className="h-3.5 w-3.5" /> ইমেইল
           </a>
         )}
+        {contact.facebook && (
+          <button onClick={() => openFacebook(contact.facebook!)} className="flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-200 transition-colors">
+            🌐 Facebook
+          </button>
+        )}
       </div>
 
       <div className="space-y-1.5 text-sm text-muted-foreground">
