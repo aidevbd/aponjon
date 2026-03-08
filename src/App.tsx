@@ -8,6 +8,7 @@ import AddContact from "./pages/AddContact";
 import AccessData from "./pages/AccessData";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
