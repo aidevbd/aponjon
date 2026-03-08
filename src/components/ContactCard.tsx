@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
 import { Phone, MessageCircle, Mail, MapPin, Droplets, Calendar, Edit3, Trash2, StickyNote } from "lucide-react";
-import { Contact, CATEGORIES } from "@/lib/types";
+import { CATEGORIES } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { type ContactRow } from "@/lib/store";
 
 interface ContactCardProps {
-  contact: Contact;
-  onEdit?: (contact: Contact) => void;
+  contact: ContactRow;
+  onEdit?: (contact: ContactRow) => void;
   onDelete?: (id: string) => void;
   index?: number;
 }
@@ -40,8 +41,8 @@ export function ContactCard({ contact, onEdit, onDelete, index = 0 }: ContactCar
               {category.icon} {category.value}
             </span>
           )}
-          {contact.customCategory && (
-            <span className="love-badge mt-1 ml-1">✨ {contact.customCategory}</span>
+          {contact.custom_category && (
+            <span className="love-badge mt-1 ml-1">✨ {contact.custom_category}</span>
           )}
         </div>
         {(onEdit || onDelete) && (
@@ -60,7 +61,6 @@ export function ContactCard({ contact, onEdit, onDelete, index = 0 }: ContactCar
         )}
       </div>
 
-      {/* Quick Actions */}
       <div className="flex flex-wrap gap-2 mb-3">
         <button
           onClick={() => callPhone(contact.phone)}
@@ -68,51 +68,32 @@ export function ContactCard({ contact, onEdit, onDelete, index = 0 }: ContactCar
         >
           <Phone className="h-3.5 w-3.5" /> {contact.phone}
         </button>
-
         {contact.whatsapp && (
-          <button
-            onClick={() => openWhatsApp(contact.whatsapp!)}
-            className="flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-200 transition-colors"
-          >
+          <button onClick={() => openWhatsApp(contact.whatsapp!)} className="flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-200 transition-colors">
             <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
           </button>
         )}
-
         {contact.imo && (
-          <button
-            onClick={() => openIMO(contact.imo!)}
-            className="flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors"
-          >
+          <button onClick={() => openIMO(contact.imo!)} className="flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors">
             <Phone className="h-3.5 w-3.5" /> IMO
           </button>
         )}
-
         {contact.email && (
-          <a
-            href={`mailto:${contact.email}`}
-            className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground hover:bg-accent/80 transition-colors"
-          >
+          <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground hover:bg-accent/80 transition-colors">
             <Mail className="h-3.5 w-3.5" /> ইমেইল
           </a>
         )}
       </div>
 
-      {/* Details */}
       <div className="space-y-1.5 text-sm text-muted-foreground">
         {contact.address && (
-          <div className="flex items-center gap-2">
-            <MapPin className="h-3.5 w-3.5 text-primary/60" /> {contact.address}
-          </div>
+          <div className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-primary/60" /> {contact.address}</div>
         )}
-        {contact.bloodGroup && (
-          <div className="flex items-center gap-2">
-            <Droplets className="h-3.5 w-3.5 text-red-400" /> রক্তের গ্রুপ: {contact.bloodGroup}
-          </div>
+        {contact.blood_group && (
+          <div className="flex items-center gap-2"><Droplets className="h-3.5 w-3.5 text-red-400" /> রক্তের গ্রুপ: {contact.blood_group}</div>
         )}
         {contact.birthday && (
-          <div className="flex items-center gap-2">
-            <Calendar className="h-3.5 w-3.5 text-primary/60" /> জন্মদিন: {new Date(contact.birthday).toLocaleDateString("bn-BD")}
-          </div>
+          <div className="flex items-center gap-2"><Calendar className="h-3.5 w-3.5 text-primary/60" /> জন্মদিন: {new Date(contact.birthday).toLocaleDateString("bn-BD")}</div>
         )}
         {contact.note && (
           <div className="flex items-start gap-2 mt-2 rounded-lg bg-accent/40 p-2.5">

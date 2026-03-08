@@ -1,24 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, Heart } from "lucide-react";
+import { Lock, Heart, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Header } from "@/components/Header";
-import { adminLogin } from "@/lib/store";
+import { adminLogin, getSession } from "@/lib/store";
 import { toast } from "sonner";
 
 const AdminLogin = () => {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    if (adminLogin(password)) {
+  useEffect(() => {
+    getSession().then((session) => {
+      if (session) navigate("/admin/dashboard");
+    });
+  }, [navigate]);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      toast.error("ইমেইল এবং পাসওয়ার্ড দিন");
+      return;
+    }
+    setLoading(true);
+    try {
+      await adminLogin(email, password);
       toast.success("স্বাগতম, অ্যাডমিন! 🎉");
       navigate("/admin/dashboard");
-    } else {
-      toast.error("পাসওয়ার্ড ভুল হয়েছে");
+    } catch (err: any) {
+      toast.error(err?.message || "লগইন ব্যর্থ হয়েছে");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,6 +58,19 @@ const AdminLogin = () => {
 
             <div className="space-y-4">
               <div className="space-y-2">
+                <Label htmlFor="email" className="flex items-center gap-2">
+                  <Mail className="h-3.5 w-3.5 text-primary" /> ইমেইল
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="admin@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-card"
+                />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="password">পাসওয়ার্ড</Label>
                 <Input
                   id="password"
@@ -53,8 +82,8 @@ const AdminLogin = () => {
                   className="bg-card"
                 />
               </div>
-              <Button onClick={handleLogin} variant="hero" className="w-full">
-                <Heart className="h-4 w-4 mr-1" /> লগইন করুন
+              <Button onClick={handleLogin} variant="hero" className="w-full" disabled={loading}>
+                <Heart className="h-4 w-4 mr-1" /> {loading ? "লগইন হচ্ছে..." : "লগইন করুন"}
               </Button>
             </div>
           </div>
