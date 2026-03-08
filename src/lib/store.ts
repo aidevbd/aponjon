@@ -126,6 +126,7 @@ export async function updateVerifiedContact(
     whatsapp?: string;
     imo?: string;
     telegram?: string;
+    facebook?: string;
     email?: string;
     category?: string;
     custom_category?: string;
@@ -142,6 +143,7 @@ export async function updateVerifiedContact(
     p_whatsapp: updates.whatsapp || null,
     p_imo: updates.imo || null,
     p_telegram: updates.telegram || null,
+    p_facebook: updates.facebook || null,
     p_email: updates.email || null,
     p_category: updates.category || null,
     p_custom_category: updates.custom_category || null,
