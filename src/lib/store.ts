@@ -14,7 +14,7 @@ export interface ContactRow {
   blood_group: string | null;
   birthday: string | null;
   secret_code: string | null;
-  secret_code_hash: string | null;
+  secret_code_hash?: string | null;
   created_at: string;
   updated_at: string;
 }
