@@ -357,14 +357,17 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                         <Trash2 className="h-3.5 w-3.5 text-destructive" />
                       </button>
                     )}
-                    <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 ${isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
+                    <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 ${msg.deleted_by_sender ? "opacity-50 border border-dashed border-destructive/30 bg-destructive/5 rounded-bl-md" : isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
+                      {msg.deleted_by_sender && (
+                        <p className="text-[10px] text-destructive font-medium mb-1 flex items-center gap-1"><Trash2 className="h-3 w-3" /> ইউজার ডিলিট করেছে</p>
+                      )}
                       {msg.image_url && (
                         <img src={msg.image_url} alt="" className="rounded-lg max-w-full mb-1.5 cursor-pointer" onClick={() => window.open(msg.image_url!, "_blank")} />
                       )}
-                      {msg.content && <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>}
+                      {msg.content && <p className={`text-sm whitespace-pre-wrap break-words ${msg.deleted_by_sender ? "text-muted-foreground" : ""}`}>{msg.content}</p>}
                       <div className={`flex items-center gap-1 mt-1 ${isMine ? "justify-end" : ""}`}>
-                        <p className={`text-[10px] ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>{formatTime(msg.created_at)}</p>
-                        {isMine && (
+                        <p className={`text-[10px] ${isMine && !msg.deleted_by_sender ? "text-primary-foreground/60" : "text-muted-foreground"}`}>{formatTime(msg.created_at)}</p>
+                        {isMine && !msg.deleted_by_sender && (
                           <span className={`text-[10px] ${msg.is_read ? "text-primary-foreground/80" : "text-primary-foreground/40"}`}>
                             {msg.is_read ? "✓✓" : "✓"}
                           </span>
