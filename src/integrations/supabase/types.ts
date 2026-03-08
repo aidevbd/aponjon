@@ -133,30 +133,42 @@ export type Database = {
           content: string | null
           created_at: string
           deleted_by_sender: boolean
+          edited_at: string | null
           id: string
           image_url: string | null
+          is_pinned: boolean
           is_read: boolean
+          original_content: string | null
           receiver_id: string
+          reply_to_id: string | null
           sender_id: string
         }
         Insert: {
           content?: string | null
           created_at?: string
           deleted_by_sender?: boolean
+          edited_at?: string | null
           id?: string
           image_url?: string | null
+          is_pinned?: boolean
           is_read?: boolean
+          original_content?: string | null
           receiver_id: string
+          reply_to_id?: string | null
           sender_id: string
         }
         Update: {
           content?: string | null
           created_at?: string
           deleted_by_sender?: boolean
+          edited_at?: string | null
           id?: string
           image_url?: string | null
+          is_pinned?: boolean
           is_read?: boolean
+          original_content?: string | null
           receiver_id?: string
+          reply_to_id?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -345,6 +357,14 @@ export type Database = {
         Args: { p_message_id: string; p_token: string }
         Returns: boolean
       }
+      edit_admin_message: {
+        Args: { p_message_id: string; p_new_content: string }
+        Returns: boolean
+      }
+      edit_message: {
+        Args: { p_message_id: string; p_new_content: string; p_token: string }
+        Returns: boolean
+      }
       generate_otp: { Args: { p_phone: string }; Returns: string }
       get_admin_chat_users: {
         Args: never
@@ -467,27 +487,49 @@ export type Database = {
             }
             Returns: string
           }
-      send_admin_message: {
-        Args: {
-          p_content?: string
-          p_image_url?: string
-          p_receiver_id: string
-        }
-        Returns: string
-      }
-      send_message: {
-        Args: {
-          p_content?: string
-          p_image_url?: string
-          p_receiver_id: string
-          p_token: string
-        }
-        Returns: string
-      }
+      send_admin_message:
+        | {
+            Args: {
+              p_content?: string
+              p_image_url?: string
+              p_receiver_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_content?: string
+              p_image_url?: string
+              p_receiver_id: string
+              p_reply_to_id?: string
+            }
+            Returns: string
+          }
+      send_message:
+        | {
+            Args: {
+              p_content?: string
+              p_image_url?: string
+              p_receiver_id: string
+              p_token: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_content?: string
+              p_image_url?: string
+              p_receiver_id: string
+              p_reply_to_id?: string
+              p_token: string
+            }
+            Returns: string
+          }
       setup_admin_contact: {
         Args: { p_name: string; p_phone?: string }
         Returns: string
       }
+      toggle_pin_message: { Args: { p_message_id: string }; Returns: boolean }
       update_admin_presence: { Args: never; Returns: undefined }
       update_presence: { Args: { p_contact_id: string }; Returns: undefined }
       update_verified_contact:
