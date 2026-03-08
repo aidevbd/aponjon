@@ -244,8 +244,13 @@ const AdminDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/chat")} className="gap-1.5">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/chat")} className="gap-1.5 relative">
               <MessageCircle className="h-4 w-4" /> চ্যাট
+              {totalUnread > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[9px] font-bold px-1">
+                  {totalUnread}
+                </span>
+              )}
             </Button>
             <Button variant="hero" size="sm" onClick={() => setShowAddModal(true)} className="gap-1.5">
               <Plus className="h-4 w-4" /> যোগ করুন
