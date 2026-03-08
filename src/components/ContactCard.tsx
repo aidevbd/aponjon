@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Phone, MessageCircle, Mail, MapPin, Droplets, Calendar, Edit3, Trash2, StickyNote } from "lucide-react";
+import { Phone, MessageCircle, Mail, MapPin, Droplets, Calendar, Edit3, Trash2, StickyNote, Send } from "lucide-react";
 import { CATEGORIES } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { type ContactRow } from "@/lib/store";
@@ -20,6 +20,10 @@ export function ContactCard({ contact, onEdit, onDelete, index = 0 }: ContactCar
 
   const openIMO = (number: string) => {
     window.open(`https://imoapp.com/${number.replace(/[^0-9]/g, "")}`, "_blank");
+  };
+
+  const openTelegram = (number: string) => {
+    window.open(`https://t.me/${number.replace(/[^0-9]/g, "")}`, "_blank");
   };
 
   const callPhone = (number: string) => {
@@ -77,16 +81,21 @@ export function ContactCard({ contact, onEdit, onDelete, index = 0 }: ContactCar
         >
           <Phone className="h-3.5 w-3.5" /> {contact.phone}
         </button>
-        {contact.whatsapp && (
-          <button onClick={() => openWhatsApp(contact.whatsapp!)} className="flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-200 transition-colors">
-            <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+        {contact.whatsapp && contact.whatsapp.split(",").map((num, i) => (
+          <button key={`wa-${i}`} onClick={() => openWhatsApp(num.trim())} className="flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-200 transition-colors">
+            <MessageCircle className="h-3.5 w-3.5" /> WhatsApp {contact.whatsapp!.includes(",") ? num.trim().slice(-4) : ""}
           </button>
-        )}
-        {contact.imo && (
-          <button onClick={() => openIMO(contact.imo!)} className="flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors">
-            <Phone className="h-3.5 w-3.5" /> IMO
+        ))}
+        {contact.imo && contact.imo.split(",").map((num, i) => (
+          <button key={`imo-${i}`} onClick={() => openIMO(num.trim())} className="flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors">
+            <Phone className="h-3.5 w-3.5" /> IMO {contact.imo!.includes(",") ? num.trim().slice(-4) : ""}
           </button>
-        )}
+        ))}
+        {contact.telegram && contact.telegram.split(",").map((num, i) => (
+          <button key={`tg-${i}`} onClick={() => openTelegram(num.trim())} className="flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-200 transition-colors">
+            <Send className="h-3.5 w-3.5" /> Telegram {contact.telegram!.includes(",") ? num.trim().slice(-4) : ""}
+          </button>
+        ))}
         {contact.email && (
           <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground hover:bg-accent/80 transition-colors">
             <Mail className="h-3.5 w-3.5" /> ইমেইল

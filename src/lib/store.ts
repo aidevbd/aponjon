@@ -122,6 +122,7 @@ export async function updateVerifiedContact(
     name?: string;
     whatsapp?: string;
     imo?: string;
+    telegram?: string;
     email?: string;
     category?: string;
     custom_category?: string;
@@ -137,6 +138,7 @@ export async function updateVerifiedContact(
     p_name: updates.name || null,
     p_whatsapp: updates.whatsapp || null,
     p_imo: updates.imo || null,
+    p_telegram: updates.telegram || null,
     p_email: updates.email || null,
     p_category: updates.category || null,
     p_custom_category: updates.custom_category || null,
@@ -144,7 +146,7 @@ export async function updateVerifiedContact(
     p_address: updates.address || null,
     p_blood_group: updates.blood_group || null,
     p_birthday: updates.birthday || null,
-  });
+  } as any);
   if (error) throw error;
   return data;
 }

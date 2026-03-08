@@ -1,26 +1,34 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Phone, MessageCircle, Mail, MapPin, Droplets, Calendar, Lock, Info, CheckCircle2 } from "lucide-react";
+import { Heart, Phone, Mail, MapPin, Droplets, Calendar, Lock, Info, CheckCircle2, Plus, Trash2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
 import { saveContact } from "@/lib/store";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { toast } from "sonner";
 
+interface PhoneEntry {
+  number: string;
+  hasWhatsApp: boolean;
+  hasIMO: boolean;
+  hasTelegram: boolean;
+}
+
 export function ContactForm() {
   const [step, setStep] = useState(1);
   const [showSecretWarning, setShowSecretWarning] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [phones, setPhones] = useState<PhoneEntry[]>([
+    { number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false },
+  ]);
   const [form, setForm] = useState({
     name: "",
-    phone: "",
-    whatsapp: "",
-    imo: "",
     email: "",
     category: "",
     customCategory: "",
@@ -41,19 +49,54 @@ export function ContactForm() {
     }
   };
 
+  const updatePhone = (index: number, updates: Partial<PhoneEntry>) => {
+    setPhones((prev) => prev.map((p, i) => (i === index ? { ...p, ...updates } : p)));
+  };
+
+  const addPhone = () => {
+    if (phones.length < 3) {
+      setPhones((prev) => [...prev, { number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]);
+    }
+  };
+
+  const removePhone = (index: number) => {
+    if (phones.length > 1) {
+      setPhones((prev) => prev.filter((_, i) => i !== index));
+    }
+  };
+
+  // Derive whatsapp/imo/telegram from phone entries
+  const deriveMessengerNumbers = () => {
+    const whatsappNums = phones.filter((p) => p.hasWhatsApp && p.number.trim()).map((p) => p.number.trim());
+    const imoNums = phones.filter((p) => p.hasIMO && p.number.trim()).map((p) => p.number.trim());
+    const telegramNums = phones.filter((p) => p.hasTelegram && p.number.trim()).map((p) => p.number.trim());
+    return {
+      whatsapp: whatsappNums.join(", ") || null,
+      imo: imoNums.join(", ") || null,
+      telegram: telegramNums.join(", ") || null,
+    };
+  };
+
   const handleSubmit = async () => {
-    if (!form.name.trim() || !form.phone.trim()) {
+    const primaryPhone = phones[0]?.number.trim();
+    if (!form.name.trim() || !primaryPhone) {
       toast.error("নাম এবং ফোন নম্বর আবশ্যক");
       return;
     }
 
     setLoading(true);
     try {
+      const messengers = deriveMessengerNumbers();
+      // Store all phone numbers: primary + additional
+      const allPhones = phones.map((p) => p.number.trim()).filter(Boolean);
+      const primaryNum = allPhones[0];
+
       await saveContact({
         name: form.name,
-        phone: form.phone,
-        whatsapp: form.whatsapp,
-        imo: form.imo,
+        phone: primaryNum,
+        whatsapp: messengers.whatsapp || undefined,
+        imo: messengers.imo || undefined,
+        telegram: messengers.telegram || undefined,
         email: form.email,
         category: form.category || "অন্যান্য",
         custom_category: form.customCategory,
@@ -85,7 +128,7 @@ export function ContactForm() {
         </motion.div>
         <h2 className="mb-2 text-2xl font-display font-semibold text-foreground">ধন্যবাদ! 💕</h2>
         <p className="mb-6 text-muted-foreground max-w-md">আপনার তথ্য সফলভাবে আপনজন ডাইরেক্টরিতে যুক্ত হয়েছে। আপনি আমাদের কাছে গুরুত্বপূর্ণ!</p>
-        <Button variant="outline" onClick={() => { setSubmitted(false); setStep(1); setForm({ name: "", phone: "", whatsapp: "", imo: "", email: "", category: "", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" }); }}>
+        <Button variant="outline" onClick={() => { setSubmitted(false); setStep(1); setForm({ name: "", email: "", category: "", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" }); setPhones([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]); }}>
           আরেকজনের তথ্য যোগ করুন
         </Button>
       </motion.div>
@@ -119,25 +162,67 @@ export function ContactForm() {
               <Label htmlFor="name" className="flex items-center gap-2"><Heart className="h-3.5 w-3.5 text-primary" /> আপনার নাম *</Label>
               <Input id="name" placeholder="আপনার পূর্ণ নাম" value={form.name} onChange={(e) => updateForm("name", e.target.value)} className="bg-card" />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone" className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-primary" /> মোবাইল নম্বর *</Label>
-              <Input id="phone" placeholder="01XXXXXXXXX" value={form.phone} onChange={(e) => updateForm("phone", e.target.value)} className="bg-card" />
+
+            {/* Phone numbers with messenger checkboxes */}
+            <div className="space-y-4">
+              <Label className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-primary" /> মোবাইল নম্বর *</Label>
+              {phones.map((phone, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="rounded-xl border border-border bg-card/50 p-4 space-y-3"
+                >
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder={index === 0 ? "01XXXXXXXXX (প্রধান নম্বর)" : "অতিরিক্ত নম্বর"}
+                      value={phone.number}
+                      onChange={(e) => updatePhone(index, { number: e.target.value })}
+                      className="bg-card"
+                    />
+                    {index > 0 && (
+                      <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive hover:text-destructive shrink-0" onClick={() => removePhone(index)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-x-5 gap-y-2 pl-1">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={phone.hasWhatsApp}
+                        onCheckedChange={(checked) => updatePhone(index, { hasWhatsApp: !!checked })}
+                      />
+                      <span className="text-green-600 font-medium">WhatsApp</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={phone.hasIMO}
+                        onCheckedChange={(checked) => updatePhone(index, { hasIMO: !!checked })}
+                      />
+                      <span className="text-blue-500 font-medium">IMO</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={phone.hasTelegram}
+                        onCheckedChange={(checked) => updatePhone(index, { hasTelegram: !!checked })}
+                      />
+                      <span className="text-sky-500 font-medium">Telegram</span>
+                    </label>
+                  </div>
+                </motion.div>
+              ))}
+              {phones.length < 3 && (
+                <Button variant="outline" size="sm" onClick={addPhone} className="w-full gap-2 text-muted-foreground">
+                  <Plus className="h-4 w-4" /> আরেকটি নম্বর যোগ করুন
+                </Button>
+              )}
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="whatsapp" className="flex items-center gap-2"><MessageCircle className="h-3.5 w-3.5 text-green-600" /> WhatsApp</Label>
-                <Input id="whatsapp" placeholder="WhatsApp নম্বর" value={form.whatsapp} onChange={(e) => updateForm("whatsapp", e.target.value)} className="bg-card" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="imo" className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-blue-500" /> IMO</Label>
-                <Input id="imo" placeholder="IMO নম্বর" value={form.imo} onChange={(e) => updateForm("imo", e.target.value)} className="bg-card" />
-              </div>
-            </div>
+
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-primary" /> ইমেইল</Label>
               <Input id="email" type="email" placeholder="email@example.com" value={form.email} onChange={(e) => updateForm("email", e.target.value)} className="bg-card" />
             </div>
-            <Button onClick={() => { if (!form.name.trim() || !form.phone.trim()) { toast.error("নাম এবং ফোন নম্বর আবশ্যক"); return; } setStep(2); }} className="w-full" variant="hero" size="lg">পরবর্তী ধাপ →</Button>
+            <Button onClick={() => { if (!form.name.trim() || !phones[0]?.number.trim()) { toast.error("নাম এবং ফোন নম্বর আবশ্যক"); return; } setStep(2); }} className="w-full" variant="hero" size="lg">পরবর্তী ধাপ →</Button>
           </motion.div>
         )}
 
