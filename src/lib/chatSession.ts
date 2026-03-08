@@ -112,9 +112,9 @@ export async function deleteMessage(token: string, messageId: string) {
 }
 
 export async function editMessage(token: string, messageId: string, newContent: string) {
-  const { data, error } = await supabase.rpc("edit_message", { p_token: token, p_message_id: messageId, p_new_content: newContent });
+  const { data, error } = await supabase.rpc("edit_message" as any, { p_token: token, p_message_id: messageId, p_new_content: newContent });
   if (error) throw error;
-  return data as boolean;
+  return data as unknown as boolean;
 }
 
 export async function uploadChatImage(file: File): Promise<string> {
