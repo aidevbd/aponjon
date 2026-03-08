@@ -330,9 +330,8 @@ export function AccessForm() {
             </div>
             <div className="space-y-4">
               <PhotoUpload
-                currentPhotoUrl={editForm.photo_url || null}
-                onPhotoUploaded={(url) => setEditForm({ ...editForm, photo_url: url })}
-                onPhotoRemoved={() => setEditForm({ ...editForm, photo_url: null })}
+                value={editForm.photo_url || undefined}
+                onChange={(url) => setEditForm({ ...editForm, photo_url: url })}
               />
               <div className="space-y-2"><Label>নাম</Label><Input value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="bg-card" /></div>
               <div className="space-y-2"><Label>WhatsApp</Label><Input value={editForm.whatsapp || ""} onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })} className="bg-card" /></div>
