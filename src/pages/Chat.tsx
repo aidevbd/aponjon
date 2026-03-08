@@ -99,6 +99,31 @@ const Chat = () => {
     return () => { supabase.removeChannel(channel); };
   }, [session, selectedContact]);
 
+  // Typing indicator via broadcast
+  useEffect(() => {
+    if (!session || !selectedContact) { setIsOtherTyping(false); return; }
+    const channelName = `typing:${[session.contactId, selectedContact.id].sort().join(":")}`;
+    const channel = supabase.channel(channelName)
+      .on("broadcast", { event: "typing" }, (payload) => {
+        if (payload.payload?.sender_id === selectedContact.id) {
+          setIsOtherTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setIsOtherTyping(false), 3000);
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); setIsOtherTyping(false); };
+  }, [session, selectedContact]);
+
+  const emitTyping = () => {
+    if (!session || !selectedContact) return;
+    const now = Date.now();
+    if (now - lastTypingRef.current < 2000) return;
+    lastTypingRef.current = now;
+    const channelName = `typing:${[session.contactId, selectedContact.id].sort().join(":")}`;
+    supabase.channel(channelName).send({ type: "broadcast", event: "typing", payload: { sender_id: session.contactId } });
+  };
+
   // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
