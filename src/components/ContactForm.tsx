@@ -112,8 +112,8 @@ export function ContactForm() {
       setSubmitted(true);
       toast.success("আপনার তথ্য সফলভাবে সেভ হয়েছে! 💕");
     } catch (err: any) {
-      if (err?.message?.includes("duplicate") || err?.message?.includes("unique") || err?.code === "23505") {
-        toast.error("এই ফোন নম্বরটি আগেই যুক্ত করা হয়েছে! 📱 অন্য নম্বর দিয়ে চেষ্টা করুন অথবা 'আমার তথ্য' থেকে আপডেট করুন।");
+      if (err?.message?.includes("DUPLICATE_USER_ENTRY") || err?.message?.includes("duplicate") || err?.code === "23505") {
+        toast.error("এই নম্বরটি আপনি ইতিমধ্যে যুক্ত করেছেন! 📱 'আমার তথ্য' থেকে আপডেট করুন।");
       } else {
         toast.error("তথ্য সেভ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
       }
