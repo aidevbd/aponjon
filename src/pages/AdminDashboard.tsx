@@ -292,6 +292,16 @@ const AdminDashboard = () => {
               {CATEGORIES.map((cat) => (<SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>))}
             </SelectContent>
           </Select>
+          <Select value={filterBloodGroup} onValueChange={setFilterBloodGroup}>
+            <SelectTrigger className="w-full sm:w-40 bg-card">
+              <Droplets className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="রক্তের গ্রুপ" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">সব রক্তের গ্রুপ</SelectItem>
+              {BLOOD_GROUPS.map((bg) => (<SelectItem key={bg} value={bg}>{bg}</SelectItem>))}
+            </SelectContent>
+          </Select>
         </div>
 
         {filtered.length === 0 ? (
