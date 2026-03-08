@@ -442,6 +442,13 @@ const Chat = () => {
                 <div ref={messagesEndRef} />
               </div>
 
+              {/* Typing indicator */}
+              {isOtherTyping && (
+                <div className="px-4 pb-1">
+                  <span className="text-xs text-muted-foreground italic animate-pulse">লিখছে...</span>
+                </div>
+              )}
+
               {/* Message Input */}
               <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-4 py-3">
                 <div className="flex items-center gap-2">
