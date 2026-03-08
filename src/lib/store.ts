@@ -14,6 +14,7 @@ export interface ContactRow {
   blood_group: string | null;
   birthday: string | null;
   secret_code: string | null;
+  secret_code_hash: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -58,21 +59,23 @@ export async function saveContact(contact: {
   birthday?: string;
   secret_code?: string;
 }) {
-  const { error } = await supabase.from("contacts").insert({
-    name: contact.name,
-    phone: contact.phone,
-    whatsapp: contact.whatsapp || null,
-    imo: contact.imo || null,
-    email: contact.email || null,
-    category: contact.category || "অন্যান্য",
-    custom_category: contact.custom_category || null,
-    note: contact.note || null,
-    address: contact.address || null,
-    blood_group: contact.blood_group || null,
-    birthday: contact.birthday || null,
-    secret_code: contact.secret_code || null,
+  // Use the hashed version via RPC
+  const { data, error } = await supabase.rpc("save_contact_with_hash", {
+    p_name: contact.name,
+    p_phone: contact.phone,
+    p_whatsapp: contact.whatsapp || null,
+    p_imo: contact.imo || null,
+    p_email: contact.email || null,
+    p_category: contact.category || "অন্যান্য",
+    p_custom_category: contact.custom_category || null,
+    p_note: contact.note || null,
+    p_address: contact.address || null,
+    p_blood_group: contact.blood_group || null,
+    p_birthday: contact.birthday || null,
+    p_secret_code: contact.secret_code || null,
   });
   if (error) throw error;
+  return data;
 }
 
 export async function updateContact(id: string, updates: Partial<ContactRow>) {
@@ -137,6 +140,19 @@ export async function updateVerifiedContact(
     p_blood_group: updates.blood_group || null,
     p_birthday: updates.birthday || null,
   });
+  if (error) throw error;
+  return data;
+}
+
+// ---------- OTP ----------
+export async function generateOtp(phone: string) {
+  const { data, error } = await supabase.rpc("generate_otp", { p_phone: phone });
+  if (error) throw error;
+  return data; // Returns OTP code, 'RATE_LIMITED', 'NOT_FOUND', or 'DAILY_LIMIT'
+}
+
+export async function verifyOtp(phone: string, code: string) {
+  const { data, error } = await supabase.rpc("verify_otp", { p_phone: phone, p_code: code });
   if (error) throw error;
   return data;
 }

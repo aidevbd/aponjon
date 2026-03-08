@@ -64,8 +64,8 @@ export function ContactForm() {
       setSubmitted(true);
       toast.success("আপনার তথ্য সফলভাবে সেভ হয়েছে! 💕");
     } catch (err: any) {
-      if (err?.code === "23505") {
-        toast.error("এই ফোন নম্বরটি আগেই যুক্ত করা হয়েছে!");
+      if (err?.message?.includes("duplicate") || err?.message?.includes("unique") || err?.code === "23505") {
+        toast.error("এই ফোন নম্বরটি আগেই যুক্ত করা হয়েছে! 📱 অন্য নম্বর দিয়ে চেষ্টা করুন অথবা 'আমার তথ্য' থেকে আপডেট করুন।");
       } else {
         toast.error("তথ্য সেভ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
       }
@@ -76,23 +76,12 @@ export function ContactForm() {
 
   if (submitted) {
     return (
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="flex flex-col items-center justify-center py-16 text-center"
-      >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: "spring" }}
-          className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10"
-        >
+      <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center justify-center py-16 text-center">
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring" }} className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
           <CheckCircle2 className="h-10 w-10 text-primary" />
         </motion.div>
         <h2 className="mb-2 text-2xl font-display font-semibold text-foreground">ধন্যবাদ! 💕</h2>
-        <p className="mb-6 text-muted-foreground max-w-md">
-          আপনার তথ্য সফলভাবে আপনজন ডাইরেক্টরিতে যুক্ত হয়েছে। আপনি আমাদের কাছে গুরুত্বপূর্ণ!
-        </p>
+        <p className="mb-6 text-muted-foreground max-w-md">আপনার তথ্য সফলভাবে আপনজন ডাইরেক্টরিতে যুক্ত হয়েছে। আপনি আমাদের কাছে গুরুত্বপূর্ণ!</p>
         <Button variant="outline" onClick={() => { setSubmitted(false); setStep(1); setForm({ name: "", phone: "", whatsapp: "", imo: "", email: "", category: "", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "" }); }}>
           আরেকজনের তথ্য যোগ করুন
         </Button>
@@ -102,25 +91,13 @@ export function ContactForm() {
 
   return (
     <div className="mx-auto max-w-lg">
-      {/* Progress */}
       <div className="mb-8 flex items-center justify-center gap-2">
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex items-center gap-2">
-            <button
-              onClick={() => setStep(s)}
-              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all ${
-                s === step
-                  ? "hero-gradient text-primary-foreground shadow-rose"
-                  : s < step
-                  ? "bg-primary/20 text-primary"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
+            <button onClick={() => setStep(s)} className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all ${s === step ? "hero-gradient text-primary-foreground shadow-rose" : s < step ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}`}>
               {s}
             </button>
-            {s < 3 && (
-              <div className={`h-0.5 w-8 rounded ${s < step ? "bg-primary/40" : "bg-border"}`} />
-            )}
+            {s < 3 && <div className={`h-0.5 w-8 rounded ${s < step ? "bg-primary/40" : "bg-border"}`} />}
           </div>
         ))}
       </div>
