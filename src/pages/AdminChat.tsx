@@ -209,7 +209,7 @@ const AdminChat = () => {
               {setupLoading ? "সেটআপ হচ্ছে..." : "সেটআপ করুন"}
             </Button>
           </div>
-          <Button variant="ghost" className="w-full mt-3 text-xs" onClick={() => navigate("/dashboard")}>
+          <Button variant="ghost" className="w-full mt-3 text-xs" onClick={() => navigate("/admin/dashboard")}>
             <ArrowLeft className="h-3.5 w-3.5 mr-1" /> ড্যাশবোর্ডে ফিরুন
           </Button>
         </motion.div>
