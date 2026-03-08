@@ -161,6 +161,7 @@ const AdminDashboard = () => {
       });
       if (error) throw error;
       toast.success("নতুন কন্টাক্ট যোগ হয়েছে! 💕");
+      logAdminActivity("contact_add", `নতুন কন্টাক্ট যোগ: ${addForm.name} (${primaryPhone})`, undefined, "contact", { name: addForm.name, phone: primaryPhone });
       resetAddForm(); await loadContacts();
     } catch { toast.error("সেভ করতে সমস্যা হয়েছে"); }
   };
