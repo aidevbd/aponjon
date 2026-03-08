@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, LogOut, Users, Heart, Filter, Download, Edit3, X } from "lucide-react";
+import { Search, LogOut, Users, Heart, Filter, Download, Edit3, X, Cake, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -70,6 +70,20 @@ const AdminDashboard = () => {
       categoryCount[c.category] = (categoryCount[c.category] || 0) + 1;
     });
     return { total: contacts.length, categoryCount };
+  }, [contacts]);
+
+  const upcomingBirthdays = useMemo(() => {
+    const today = new Date();
+    const upcoming: { contact: ContactRow; daysUntil: number }[] = [];
+    contacts.forEach((c) => {
+      if (!c.birthday) return;
+      const bday = new Date(c.birthday);
+      const thisYear = new Date(today.getFullYear(), bday.getMonth(), bday.getDate());
+      if (thisYear < today) thisYear.setFullYear(today.getFullYear() + 1);
+      const diff = Math.ceil((thisYear.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      if (diff <= 30) upcoming.push({ contact: c, daysUntil: diff });
+    });
+    return upcoming.sort((a, b) => a.daysUntil - b.daysUntil);
   }, [contacts]);
 
   const handleDelete = async (id: string) => {
@@ -175,6 +189,26 @@ const AdminDashboard = () => {
             );
           })}
         </div>
+
+        {/* Birthday Reminders */}
+        {upcomingBirthdays.length > 0 && (
+          <div className="mb-6 glass-card p-4">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground mb-3">
+              <Cake className="h-4 w-4 text-primary" /> আসন্ন জন্মদিন 🎂
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {upcomingBirthdays.map(({ contact, daysUntil }) => (
+                <div key={contact.id} className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs">
+                  <Gift className="h-3.5 w-3.5 text-primary" />
+                  <span className="font-medium text-foreground">{contact.name}</span>
+                  <span className="text-muted-foreground">
+                    {daysUntil === 0 ? "🎉 আজ!" : `${daysUntil} দিন বাকি`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mb-6 flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
