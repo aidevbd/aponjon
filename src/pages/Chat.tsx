@@ -464,7 +464,7 @@ const Chat = () => {
                   <Input
                     placeholder="মেসেজ লিখুন..."
                     value={msgInput}
-                    onChange={(e) => setMsgInput(e.target.value)}
+                    onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
                     onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                     className="bg-background/50 text-sm"
                     disabled={sending}
