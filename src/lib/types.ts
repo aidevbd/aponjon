@@ -5,6 +5,7 @@ export interface Contact {
   whatsapp?: string;
   imo?: string;
   telegram?: string;
+  facebook?: string;
   email?: string;
   category: string;
   customCategory?: string;
