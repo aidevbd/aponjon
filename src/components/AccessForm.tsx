@@ -15,6 +15,7 @@ import { toast } from "sonner";
 type AccessStep = "choose" | "phone-input" | "secret-input" | "verify-phone" | "otp-input" | "edit";
 
 export function AccessForm() {
+  const navigate = useNavigate();
   const [step, setStep] = useState<AccessStep>("choose");
   const [phoneInput, setPhoneInput] = useState("");
   const [secretInput, setSecretInput] = useState("");
