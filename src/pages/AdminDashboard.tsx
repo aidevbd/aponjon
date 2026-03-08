@@ -1,15 +1,16 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, LogOut, Users, Heart, Filter, Download, Edit3, X, Cake, Gift } from "lucide-react";
+import { Search, LogOut, Users, Heart, Filter, Download, Edit3, X, Cake, Gift, Plus, Droplets, Phone, MessageCircle, Mail, MapPin, Calendar, Lock, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ContactCard } from "@/components/ContactCard";
+import { PhotoUpload } from "@/components/PhotoUpload";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
-import { getContacts, deleteContact, updateContact, adminLogout, getSession, type ContactRow } from "@/lib/store";
+import { getContacts, deleteContact, updateContact, saveContact, adminLogout, getSession, type ContactRow } from "@/lib/store";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
