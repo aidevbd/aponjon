@@ -30,6 +30,7 @@ export function ContactForm() {
   const [form, setForm] = useState({
     name: "",
     email: "",
+    facebook: "",
     category: "",
     customCategory: "",
     note: "",
