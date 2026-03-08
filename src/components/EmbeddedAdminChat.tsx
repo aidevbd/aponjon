@@ -210,6 +210,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       if (error) throw error;
       setMessages(prev => prev.map(m => m.id === editingMsg.id ? { ...m, content: text, edited_at: new Date().toISOString(), original_content: m.original_content || m.content } : m));
       toast.success("মেসেজ এডিট হয়েছে");
+      logAdminActivity("message_edit", `মেসেজ এডিট করা হয়েছে`, editingMsg.id, "message");
     } catch {
       toast.error("এডিট করতে সমস্যা");
     } finally {
