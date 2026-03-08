@@ -337,6 +337,11 @@ export type Database = {
         Args: { p_phone: string; p_secret_code: string }
         Returns: Json
       }
+      delete_admin_message: { Args: { p_message_id: string }; Returns: boolean }
+      delete_message: {
+        Args: { p_message_id: string; p_token: string }
+        Returns: boolean
+      }
       generate_otp: { Args: { p_phone: string }; Returns: string }
       get_admin_chat_users: {
         Args: never
