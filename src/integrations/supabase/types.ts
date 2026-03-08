@@ -55,6 +55,7 @@ export type Database = {
       }
       contacts: {
         Row: {
+          added_by: string
           address: string | null
           auth_user_id: string | null
           birthday: string | null
@@ -78,6 +79,7 @@ export type Database = {
           whatsapp: string | null
         }
         Insert: {
+          added_by?: string
           address?: string | null
           auth_user_id?: string | null
           birthday?: string | null
@@ -101,6 +103,7 @@ export type Database = {
           whatsapp?: string | null
         }
         Update: {
+          added_by?: string
           address?: string | null
           auth_user_id?: string | null
           birthday?: string | null
