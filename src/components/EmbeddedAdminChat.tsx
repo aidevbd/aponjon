@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Loader2, Settings, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +32,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -172,14 +174,17 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     finally { setSetupLoading(false); }
   };
 
-  const handleDeleteMessage = async (msgId: string) => {
+  const handleDeleteMessage = async () => {
+    if (!deleteTargetId) return;
     try {
-      const { error } = await supabase.rpc("delete_admin_message", { p_message_id: msgId });
+      const { error } = await supabase.rpc("delete_admin_message", { p_message_id: deleteTargetId });
       if (error) throw error;
-      setMessages(prev => prev.filter(m => m.id !== msgId));
+      setMessages(prev => prev.filter(m => m.id !== deleteTargetId));
       toast.success("মেসেজ ডিলিট হয়েছে");
     } catch {
       toast.error("ডিলিট করতে সমস্যা");
+    } finally {
+      setDeleteTargetId(null);
     }
   };
 
@@ -353,7 +358,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                 return (
                   <div key={msg.id} className={`group flex ${isMine ? "justify-end" : "justify-start"}`}>
                     {isMine && (
-                      <button onClick={() => handleDeleteMessage(msg.id)} className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-1.5 p-1 rounded-full hover:bg-destructive/10" title="ডিলিট">
+                      <button onClick={() => setDeleteTargetId(msg.id)} className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-1.5 p-1 rounded-full hover:bg-destructive/10" title="ডিলিট">
                         <Trash2 className="h-3.5 w-3.5 text-destructive" />
                       </button>
                     )}
@@ -410,6 +415,19 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AlertDialog open={!!deleteTargetId} onOpenChange={(open) => !open && setDeleteTargetId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>মেসেজ ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogDescription>এই মেসেজটি স্থায়ীভাবে মুছে যাবে।</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>বাতিল</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteMessage} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">ডিলিট করুন</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

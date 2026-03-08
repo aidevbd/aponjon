@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Lock, Phone, X, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -32,6 +33,7 @@ const Chat = () => {
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [presenceMap, setPresenceMap] = useState<Record<string, { is_online: boolean; last_seen_at: string }>>({});
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
@@ -222,14 +224,16 @@ const Chat = () => {
     }
   };
 
-  const handleDeleteMessage = async (msgId: string) => {
-    if (!session) return;
+  const handleDeleteMessage = async () => {
+    if (!session || !deleteTargetId) return;
     try {
-      await deleteMessage(session.token, msgId);
-      setMessages(prev => prev.filter(m => m.id !== msgId));
+      await deleteMessage(session.token, deleteTargetId);
+      setMessages(prev => prev.filter(m => m.id !== deleteTargetId));
       toast.success("মেসেজ ডিলিট হয়েছে");
     } catch {
       toast.error("ডিলিট করতে সমস্যা");
+    } finally {
+      setDeleteTargetId(null);
     }
   };
 
@@ -432,7 +436,7 @@ const Chat = () => {
                   return (
                     <div key={msg.id} className={`group flex ${isMine ? "justify-end" : "justify-start"}`}>
                       {isMine && (
-                        <button onClick={() => handleDeleteMessage(msg.id)} className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-1.5 p-1 rounded-full hover:bg-destructive/10" title="ডিলিট">
+                        <button onClick={() => setDeleteTargetId(msg.id)} className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-1.5 p-1 rounded-full hover:bg-destructive/10" title="ডিলিট">
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </button>
                       )}
@@ -499,6 +503,19 @@ const Chat = () => {
           )}
         </AnimatePresence>
       </div>
+
+      <AlertDialog open={!!deleteTargetId} onOpenChange={(open) => !open && setDeleteTargetId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>মেসেজ ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogDescription>এই মেসেজটি আপনার চ্যাট থেকে মুছে যাবে। এটি পূর্বাবস্থায় ফেরানো যাবে না।</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>বাতিল</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteMessage} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">ডিলিট করুন</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
