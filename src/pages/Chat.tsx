@@ -296,7 +296,7 @@ const Chat = () => {
                         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">{c.name.charAt(0)}</div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-foreground text-sm">{c.name}</div>
+                        <div className="font-medium text-foreground text-sm">{c.name} <span className="text-[10px] love-badge ml-1">এডমিন</span></div>
                         <div className="text-xs text-muted-foreground truncate">ট্যাপ করে মেসেজ করুন</div>
                       </div>
                       {unreadMap[c.id] && (
