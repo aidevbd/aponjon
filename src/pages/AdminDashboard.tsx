@@ -398,13 +398,16 @@ const AdminDashboard = () => {
                 </div>
                 <div className="space-y-2"><Label>নাম</Label><Input value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="bg-card" /></div>
                 <div className="space-y-2"><Label>ফোন</Label><Input value={editForm.phone || ""} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="bg-card" /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2"><Label>WhatsApp</Label><Input value={editForm.whatsapp || ""} onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })} className="bg-card" /></div>
-                  <div className="space-y-2"><Label>IMO</Label><Input value={editForm.imo || ""} onChange={(e) => setEditForm({ ...editForm, imo: e.target.value })} className="bg-card" /></div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2"><Label>Telegram</Label><Input value={editForm.telegram || ""} onChange={(e) => setEditForm({ ...editForm, telegram: e.target.value })} className="bg-card" /></div>
-                  <div className="space-y-2"><Label>🌐 ফেসবুক</Label><Input value={editForm.facebook || ""} onChange={(e) => setEditForm({ ...editForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card" /></div>
+                <MessengerFields
+                  phone={editForm.phone || ""}
+                  whatsapp={editForm.whatsapp || ""}
+                  imo={editForm.imo || ""}
+                  telegram={editForm.telegram || ""}
+                  onChange={(field, value) => setEditForm({ ...editForm, [field]: value })}
+                />
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2"><Globe className="h-3.5 w-3.5 text-blue-600" /> ফেসবুক</Label>
+                  <Input value={editForm.facebook || ""} onChange={(e) => setEditForm({ ...editForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card" />
                 </div>
                 <div className="space-y-2"><Label>ইমেইল</Label><Input value={editForm.email || ""} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="bg-card" /></div>
                 <div className="space-y-2">
