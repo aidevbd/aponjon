@@ -53,6 +53,11 @@ const Index = () => {
                   <Shield className="h-5 w-5" /> আমার তথ্য দেখুন
                 </Button>
               </Link>
+              <Link to="/chat">
+                <Button variant="warm" size="lg" className="gap-2 text-base px-8">
+                  <MessageCircle className="h-5 w-5" /> মেসেজ করুন
+                </Button>
+              </Link>
             </div>
           </motion.div>
         </div>
