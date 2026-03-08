@@ -1,64 +1,147 @@
-import { Contact } from "./types";
+import { supabase } from "@/integrations/supabase/client";
 
-const STORAGE_KEY = "aponjon_contacts";
-const ADMIN_KEY = "aponjon_admin";
-
-export function getContacts(): Contact[] {
-  const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
+export interface ContactRow {
+  id: string;
+  name: string;
+  phone: string;
+  whatsapp: string | null;
+  imo: string | null;
+  email: string | null;
+  category: string;
+  custom_category: string | null;
+  note: string | null;
+  address: string | null;
+  blood_group: string | null;
+  birthday: string | null;
+  secret_code: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
-export function saveContact(contact: Contact): void {
-  const contacts = getContacts();
-  contacts.push(contact);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
+// ---------- Admin Auth ----------
+export async function adminLogin(email: string, password: string) {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  return data;
 }
 
-export function updateContact(id: string, updates: Partial<Contact>): void {
-  const contacts = getContacts();
-  const index = contacts.findIndex((c) => c.id === id);
-  if (index !== -1) {
-    contacts[index] = { ...contacts[index], ...updates, updatedAt: new Date().toISOString() };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
+export async function adminLogout() {
+  await supabase.auth.signOut();
+}
+
+export async function getSession() {
+  const { data } = await supabase.auth.getSession();
+  return data.session;
+}
+
+// ---------- Contacts (Admin – authenticated) ----------
+export async function getContacts(): Promise<ContactRow[]> {
+  const { data, error } = await supabase
+    .from("contacts")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+export async function saveContact(contact: {
+  name: string;
+  phone: string;
+  whatsapp?: string;
+  imo?: string;
+  email?: string;
+  category: string;
+  custom_category?: string;
+  note?: string;
+  address?: string;
+  blood_group?: string;
+  birthday?: string;
+  secret_code?: string;
+}) {
+  const { error } = await supabase.from("contacts").insert({
+    name: contact.name,
+    phone: contact.phone,
+    whatsapp: contact.whatsapp || null,
+    imo: contact.imo || null,
+    email: contact.email || null,
+    category: contact.category || "অন্যান্য",
+    custom_category: contact.custom_category || null,
+    note: contact.note || null,
+    address: contact.address || null,
+    blood_group: contact.blood_group || null,
+    birthday: contact.birthday || null,
+    secret_code: contact.secret_code || null,
+  });
+  if (error) throw error;
+}
+
+export async function updateContact(id: string, updates: Partial<ContactRow>) {
+  const { error } = await supabase.from("contacts").update(updates).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteContact(id: string) {
+  const { error } = await supabase.from("contacts").delete().eq("id", id);
+  if (error) throw error;
+}
+
+// ---------- Public verification (RPC functions) ----------
+export async function verifyContactByPhone(phone: string) {
+  const { data, error } = await supabase.rpc("verify_contact_by_phone", { p_phone: phone });
+  if (error) throw error;
+  return data?.[0] || null;
+}
+
+export async function verifySecretCode(secretCode: string) {
+  const { data, error } = await supabase.rpc("verify_secret_code", { p_secret_code: secretCode });
+  if (error) throw error;
+  return data || [];
+}
+
+export async function verifyAndGetContact(phone: string, secretCode: string) {
+  const { data, error } = await supabase.rpc("verify_and_get_contact", {
+    p_phone: phone,
+    p_secret_code: secretCode,
+  });
+  if (error) throw error;
+  return data?.[0] || null;
+}
+
+export async function updateVerifiedContact(
+  phone: string,
+  secretCode: string,
+  updates: {
+    name?: string;
+    whatsapp?: string;
+    imo?: string;
+    email?: string;
+    category?: string;
+    custom_category?: string;
+    note?: string;
+    address?: string;
+    blood_group?: string;
+    birthday?: string;
   }
-}
-
-export function deleteContact(id: string): void {
-  const contacts = getContacts().filter((c) => c.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
-}
-
-export function findContactByPhone(phone: string): Contact | undefined {
-  return getContacts().find((c) => c.phone === phone);
-}
-
-export function findContactsBySecretCode(code: string): Contact[] {
-  return getContacts().filter((c) => c.secretCode === code);
+) {
+  const { data, error } = await supabase.rpc("update_verified_contact", {
+    p_phone: phone,
+    p_secret_code: secretCode,
+    p_name: updates.name || null,
+    p_whatsapp: updates.whatsapp || null,
+    p_imo: updates.imo || null,
+    p_email: updates.email || null,
+    p_category: updates.category || null,
+    p_custom_category: updates.custom_category || null,
+    p_note: updates.note || null,
+    p_address: updates.address || null,
+    p_blood_group: updates.blood_group || null,
+    p_birthday: updates.birthday || null,
+  });
+  if (error) throw error;
+  return data;
 }
 
 export function maskPhone(phone: string): string {
   if (phone.length <= 4) return "****";
   return phone.slice(0, 3) + "****" + phone.slice(-2);
-}
-
-// Simple admin auth with localStorage
-export function isAdminLoggedIn(): boolean {
-  return localStorage.getItem(ADMIN_KEY) === "true";
-}
-
-export function adminLogin(password: string): boolean {
-  // Default admin password - should be changed
-  if (password === "aponjon2024") {
-    localStorage.setItem(ADMIN_KEY, "true");
-    return true;
-  }
-  return false;
-}
-
-export function adminLogout(): void {
-  localStorage.removeItem(ADMIN_KEY);
-}
-
-export function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
