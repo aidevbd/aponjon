@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_activity_logs: {
+        Row: {
+          action_type: string
+          admin_user_id: string | null
+          created_at: string
+          description: string
+          id: string
+          metadata: Json | null
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action_type: string
+          admin_user_id?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action_type?: string
+          admin_user_id?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
       chat_sessions: {
         Row: {
           contact_id: string
@@ -366,6 +399,18 @@ export type Database = {
         Returns: boolean
       }
       generate_otp: { Args: { p_phone: string }; Returns: string }
+      get_admin_activity_logs: {
+        Args: { p_action_type?: string; p_limit?: number; p_offset?: number }
+        Returns: {
+          action_type: string
+          created_at: string
+          description: string
+          id: string
+          metadata: Json
+          target_id: string
+          target_type: string
+        }[]
+      }
       get_admin_chat_users: {
         Args: never
         Returns: {
@@ -444,6 +489,16 @@ export type Database = {
           is_online: boolean
           last_seen_at: string
         }[]
+      }
+      log_admin_activity: {
+        Args: {
+          p_action_type: string
+          p_description: string
+          p_metadata?: Json
+          p_target_id?: string
+          p_target_type?: string
+        }
+        Returns: string
       }
       reset_rate_limit: {
         Args: { p_action_type: string; p_key: string }
