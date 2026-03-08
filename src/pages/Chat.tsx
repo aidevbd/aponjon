@@ -288,12 +288,24 @@ const Chat = () => {
               <button onClick={() => setSelectedContact(null)} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
                 <ArrowLeft className="h-5 w-5" />
                 <div className="flex items-center gap-2">
-                  {selectedContact.photo_url ? (
-                    <img src={selectedContact.photo_url} alt="" className="h-8 w-8 rounded-full object-cover border border-primary/20" />
-                  ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedContact.name.charAt(0)}</div>
-                  )}
-                  <span className="font-semibold text-sm">{selectedContact.name}</span>
+                  <div className="relative">
+                    {selectedContact.photo_url ? (
+                      <img src={selectedContact.photo_url} alt="" className="h-8 w-8 rounded-full object-cover border border-primary/20" />
+                    ) : (
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedContact.name.charAt(0)}</div>
+                    )}
+                    {presenceMap[selectedContact.id]?.is_online && (
+                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
+                    )}
+                  </div>
+                  <div>
+                    <span className="font-semibold text-sm">{selectedContact.name}</span>
+                    {presenceMap[selectedContact.id] && (
+                      <p className={`text-[10px] ${presenceMap[selectedContact.id].is_online ? "text-green-500" : "text-muted-foreground"}`}>
+                        {formatLastSeen(presenceMap[selectedContact.id])}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </button>
             ) : (
