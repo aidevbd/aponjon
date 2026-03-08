@@ -363,10 +363,16 @@ export type Database = {
           content: string
           created_at: string
           deleted_by_sender: boolean
+          edited_at: string
           id: string
           image_url: string
+          is_pinned: boolean
           is_read: boolean
+          original_content: string
           receiver_id: string
+          reply_content: string
+          reply_sender_id: string
+          reply_to_id: string
           sender_id: string
         }[]
       }
@@ -391,10 +397,16 @@ export type Database = {
         Returns: {
           content: string
           created_at: string
+          edited_at: string
           id: string
           image_url: string
+          is_pinned: boolean
           is_read: boolean
+          original_content: string
           receiver_id: string
+          reply_content: string
+          reply_sender_id: string
+          reply_to_id: string
           sender_id: string
         }[]
       }
