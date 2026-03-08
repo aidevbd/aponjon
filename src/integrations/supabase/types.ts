@@ -235,6 +235,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_presence: {
+        Row: {
+          contact_id: string
+          is_online: boolean
+          last_seen_at: string
+        }
+        Insert: {
+          contact_id: string
+          is_online?: boolean
+          last_seen_at?: string
+        }
+        Update: {
+          contact_id?: string
+          is_online?: boolean
+          last_seen_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_presence_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: true
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_presence_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: true
+            referencedRelation: "contacts_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       contacts_public: {
@@ -363,6 +396,14 @@ export type Database = {
           unread_count: number
         }[]
       }
+      get_user_presence: {
+        Args: { p_contact_ids: string[] }
+        Returns: {
+          contact_id: string
+          is_online: boolean
+          last_seen_at: string
+        }[]
+      }
       reset_rate_limit: {
         Args: { p_action_type: string; p_key: string }
         Returns: undefined
@@ -426,6 +467,8 @@ export type Database = {
         Args: { p_name: string; p_phone?: string }
         Returns: string
       }
+      update_admin_presence: { Args: never; Returns: undefined }
+      update_presence: { Args: { p_contact_id: string }; Returns: undefined }
       update_verified_contact:
         | {
             Args: {

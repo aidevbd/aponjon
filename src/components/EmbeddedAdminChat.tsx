@@ -24,6 +24,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
   const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
+  const [presenceMap, setPresenceMap] = useState<Record<string, { lastSeen: string; isOnline: boolean }>>({});
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [msgInput, setMsgInput] = useState("");
@@ -50,6 +51,11 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     if (!adminContactId) return;
     loadChatUsers();
     loadUnread();
+    // Admin heartbeat
+    const sendHeartbeat = async () => { try { await supabase.rpc("update_admin_presence"); } catch {} };
+    sendHeartbeat();
+    const heartbeat = setInterval(sendHeartbeat, 30000);
+    return () => clearInterval(heartbeat);
   }, [adminContactId]);
 
   useEffect(() => {
@@ -86,7 +92,18 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     try {
       const { data, error } = await supabase.rpc("get_admin_chat_users");
       if (error) throw error;
-      setChatUsers((data || []) as ChatUser[]);
+      const users = (data || []) as ChatUser[];
+      setChatUsers(users);
+      // Load presence for these users
+      if (users.length > 0) {
+        const ids = users.map(u => u.id);
+        const { data: pData } = await supabase.rpc("get_user_presence", { p_contact_ids: ids });
+        if (pData) {
+          const pMap: Record<string, { lastSeen: string; isOnline: boolean }> = {};
+          (pData as any[]).forEach((p: any) => { pMap[p.contact_id] = { lastSeen: p.last_seen_at, isOnline: p.is_online }; });
+          setPresenceMap(pMap);
+        }
+      }
     } catch { toast.error("চ্যাট ইউজার লোড করতে সমস্যা"); }
   };
 
@@ -160,6 +177,21 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     return d.toLocaleDateString("bn-BD", { day: "numeric", month: "short" }) + " " + d.toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" });
   };
 
+  const formatLastSeen = (presence: { lastSeen: string; isOnline: boolean } | undefined) => {
+    if (!presence) return null;
+    if (presence.isOnline) return "এখন অনলাইন";
+    const d = new Date(presence.lastSeen);
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return "এইমাত্র অ্যাক্টিভ ছিল";
+    if (diffMin < 60) return `${diffMin} মিনিট আগে`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr} ঘণ্টা আগে`;
+    const diffDay = Math.floor(diffHr / 24);
+    return `${diffDay} দিন আগে`;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -201,28 +233,41 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
               </div>
             ) : (
               <div className="space-y-1">
-                {chatUsers.map((u) => (
-                  <button
-                    key={u.id}
-                    onClick={() => handleSelectUser(u)}
-                    className="w-full flex items-center gap-3 rounded-xl p-3 hover:bg-card/80 transition-colors text-left border border-transparent hover:border-border/50"
-                  >
-                    {u.photo_url ? (
-                      <img src={u.photo_url} alt="" className="h-10 w-10 rounded-full object-cover border border-primary/20 shrink-0" />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm shrink-0">{u.name.charAt(0)}</div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-foreground text-sm">{u.name}</div>
-                      <div className="text-xs text-muted-foreground truncate">{u.phone}</div>
-                    </div>
-                    {unreadMap[u.id] && (
-                      <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[10px] font-bold px-1.5">
-                        {unreadMap[u.id]}
+                {chatUsers.map((u) => {
+                  const presence = presenceMap[u.id];
+                  const lastSeenText = formatLastSeen(presence);
+                  return (
+                    <button
+                      key={u.id}
+                      onClick={() => handleSelectUser(u)}
+                      className="w-full flex items-center gap-3 rounded-xl p-3 hover:bg-card/80 transition-colors text-left border border-transparent hover:border-border/50"
+                    >
+                      <div className="relative shrink-0">
+                        {u.photo_url ? (
+                          <img src={u.photo_url} alt="" className="h-10 w-10 rounded-full object-cover border border-primary/20" />
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{u.name.charAt(0)}</div>
+                        )}
+                        {presence?.isOnline && (
+                          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card" />
+                        )}
                       </div>
-                    )}
-                  </button>
-                ))}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-foreground text-sm">{u.name}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {lastSeenText ? (
+                            <span className={presence?.isOnline ? "text-green-600" : ""}>{lastSeenText}</span>
+                          ) : u.phone}
+                        </div>
+                      </div>
+                      {unreadMap[u.id] && (
+                        <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[10px] font-bold px-1.5">
+                          {unreadMap[u.id]}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </motion.div>
@@ -232,14 +277,26 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
             <div className="flex items-center gap-2 pb-3 border-b border-border/50">
               <button onClick={() => setSelectedUser(null)} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
                 <ArrowLeft className="h-4 w-4" />
-                {selectedUser.photo_url ? (
-                  <img src={selectedUser.photo_url} alt="" className="h-8 w-8 rounded-full object-cover border border-primary/20" />
-                ) : (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</div>
-                )}
+                <div className="relative">
+                  {selectedUser.photo_url ? (
+                    <img src={selectedUser.photo_url} alt="" className="h-8 w-8 rounded-full object-cover border border-primary/20" />
+                  ) : (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</div>
+                  )}
+                  {presenceMap[selectedUser.id]?.isOnline && (
+                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
+                  )}
+                </div>
                 <div>
                   <span className="font-semibold text-sm">{selectedUser.name}</span>
-                  <span className="text-[10px] text-muted-foreground ml-2">{selectedUser.phone}</span>
+                  <div className="text-[10px] text-muted-foreground">
+                    {(() => {
+                      const p = presenceMap[selectedUser.id];
+                      const txt = formatLastSeen(p);
+                      if (!txt) return selectedUser.phone;
+                      return <span className={p?.isOnline ? "text-green-600" : ""}>{txt}</span>;
+                    })()}
+                  </div>
                 </div>
               </button>
             </div>
