@@ -174,14 +174,17 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     finally { setSetupLoading(false); }
   };
 
-  const handleDeleteMessage = async (msgId: string) => {
+  const handleDeleteMessage = async () => {
+    if (!deleteTargetId) return;
     try {
-      const { error } = await supabase.rpc("delete_admin_message", { p_message_id: msgId });
+      const { error } = await supabase.rpc("delete_admin_message", { p_message_id: deleteTargetId });
       if (error) throw error;
-      setMessages(prev => prev.filter(m => m.id !== msgId));
+      setMessages(prev => prev.filter(m => m.id !== deleteTargetId));
       toast.success("মেসেজ ডিলিট হয়েছে");
     } catch {
       toast.error("ডিলিট করতে সমস্যা");
+    } finally {
+      setDeleteTargetId(null);
     }
   };
 
