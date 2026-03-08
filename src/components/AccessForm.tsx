@@ -175,6 +175,7 @@ export function AccessForm() {
           name: editForm.name,
           whatsapp: editForm.whatsapp,
           imo: editForm.imo,
+          telegram: editForm.telegram,
           email: editForm.email,
           category: editForm.category,
           custom_category: editForm.custom_category,
