@@ -61,6 +61,7 @@ const AdminDashboard = () => {
       if (!session) { navigate("/admin"); return; }
       await loadContacts();
       await loadUnreadCount();
+      logAdminActivity("login", "এডমিন ড্যাশবোর্ডে প্রবেশ করেছেন");
     };
     checkAuth();
 
