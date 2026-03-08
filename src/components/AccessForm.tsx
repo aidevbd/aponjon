@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { PhotoUpload } from "@/components/PhotoUpload";
 import { Lock, Phone, Shield, Edit3, ArrowLeft, Heart, KeyRound, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -179,6 +180,7 @@ export function AccessForm() {
           address: editForm.address,
           blood_group: editForm.blood_group,
           birthday: editForm.birthday,
+          photo_url: editForm.photo_url,
         }).eq("id", currentContact.id);
         if (error) throw error;
       } else {
@@ -328,6 +330,10 @@ export function AccessForm() {
               <h3 className="text-lg font-display font-semibold">তথ্য আপডেট করুন</h3>
             </div>
             <div className="space-y-4">
+              <PhotoUpload
+                value={editForm.photo_url || undefined}
+                onChange={(url) => setEditForm({ ...editForm, photo_url: url })}
+              />
               <div className="space-y-2"><Label>নাম</Label><Input value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="bg-card" /></div>
               <div className="space-y-2"><Label>WhatsApp</Label><Input value={editForm.whatsapp || ""} onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })} className="bg-card" /></div>
               <div className="space-y-2"><Label>IMO</Label><Input value={editForm.imo || ""} onChange={(e) => setEditForm({ ...editForm, imo: e.target.value })} className="bg-card" /></div>
