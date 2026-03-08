@@ -472,7 +472,7 @@ const AdminDashboard = () => {
                   <Input value={addForm.secretCode} onChange={(e) => setAddForm({ ...addForm, secretCode: e.target.value })} placeholder="গোপন কোড" className="bg-card" />
                 </div>
               </div>
-              <Button onClick={handleAddContact} variant="hero" className="w-full mt-6">
+              <Button onClick={() => handleAddContact()} variant="hero" className="w-full mt-6">
                 <Plus className="h-4 w-4 mr-1" /> কন্টাক্ট যোগ করুন
               </Button>
             </motion.div>
