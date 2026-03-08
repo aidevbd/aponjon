@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { Lock, Phone, Shield, Edit3, ArrowLeft, Heart, KeyRound, AlertTriangle, MessageCircle, Globe } from "lucide-react";
-import { MessengerFields } from "@/components/MessengerFields";
+import { PhoneWithMessengers, PhoneEntry, deriveMessengers, parseMessengersToPhones } from "@/components/PhoneWithMessengers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,10 +24,18 @@ export function AccessForm() {
   const [fullPhoneInput, setFullPhoneInput] = useState("");
   const [currentContact, setCurrentContact] = useState<any>(null);
   const [editForm, setEditForm] = useState<any>({});
+  const [editPhones, setEditPhones] = useState<PhoneEntry[]>([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]);
   const [loading, setLoading] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [otpPhone, setOtpPhone] = useState("");
   const [noSecretCode, setNoSecretCode] = useState(false);
+
+  const initEditFromContact = (contact: any) => {
+    setCurrentContact(contact);
+    setEditForm(contact);
+    setEditPhones(parseMessengersToPhones(contact.phone, contact.whatsapp, contact.imo, contact.telegram));
+    setStep("edit");
+  };
 
   const handlePhoneSubmit = async () => {
     setLoading(true);
@@ -44,7 +52,6 @@ export function AccessForm() {
       if (!result.has_secret_code) {
         setNoSecretCode(true);
         setOtpPhone(phoneInput);
-        // OTP generation - for now show message about SMS
         toast.info("সিক্রেট কোড সেট করা হয়নি। OTP ভেরিফিকেশন প্রয়োজন।");
         
         const otpResult = await generateOtp(phoneInput);
@@ -56,7 +63,6 @@ export function AccessForm() {
           toast.error("আজকের জন্য OTP সীমা শেষ। আগামীকাল আবার চেষ্টা করুন।");
           return;
         }
-        // In production, OTP would be sent via SMS. For now, show it in toast for testing.
         toast.info(`🔑 আপনার OTP: ${otpResult} (টেস্টিং মোড — প্রোডাকশনে SMS এ যাবে)`);
         setStep("otp-input");
         return;
@@ -75,21 +81,14 @@ export function AccessForm() {
     try {
       const result = await verifyOtp(otpPhone, otpCode);
       if (result) {
-        // OTP verified - get contact data (we need admin-level access for this)
-        // For OTP-verified users, we'll let them edit limited fields
         toast.success("OTP ভেরিফিকেশন সফল! 🎉");
-        // Since no secret code, we need a different approach to get contact
-        // We'll use verifyAndGetContact with a special flow
-        // For now, redirect to a simplified edit
         const { data } = await (await import("@/integrations/supabase/client")).supabase
           .from("contacts_public")
           .select("*")
           .eq("phone", otpPhone)
           .single();
         if (data) {
-          setCurrentContact(data);
-          setEditForm(data);
-          setStep("edit");
+          initEditFromContact(data);
         } else {
           toast.error("তথ্য পাওয়া যায়নি");
         }
@@ -116,9 +115,7 @@ export function AccessForm() {
           toast.error("সিক্রেট কোড ভুল হয়েছে");
           return;
         }
-        setCurrentContact(contact);
-        setEditForm(contact);
-        setStep("edit");
+        initEditFromContact(contact);
         toast.success("ভেরিফিকেশন সফল! 🎉");
         return;
       }
@@ -151,9 +148,7 @@ export function AccessForm() {
           toast.error("অনেকবার চেষ্টা করেছেন। ৩০ মিনিট পর আবার চেষ্টা করুন। 🔒");
           return;
         }
-        setCurrentContact(contact);
-        setEditForm(contact);
-        setStep("edit");
+        initEditFromContact(contact);
         toast.success("ভেরিফিকেশন সফল! 🎉");
       } else {
         toast.error("নম্বরটি মিলছে না");
@@ -168,15 +163,14 @@ export function AccessForm() {
   const handleSaveEdit = async () => {
     setLoading(true);
     try {
+      const messengers = deriveMessengers(editPhones);
       if (noSecretCode) {
-        // OTP-verified users - update via direct table (need RPC or admin)
-        // For now use the contacts_public approach
         const { supabase } = await import("@/integrations/supabase/client");
         const { error } = await supabase.from("contacts").update({
           name: editForm.name,
-          whatsapp: editForm.whatsapp,
-          imo: editForm.imo,
-          telegram: editForm.telegram,
+          whatsapp: messengers.whatsapp,
+          imo: messengers.imo,
+          telegram: messengers.telegram,
           facebook: editForm.facebook,
           email: editForm.email,
           category: editForm.category,
@@ -192,9 +186,9 @@ export function AccessForm() {
         const phone = currentContact.phone;
         await updateVerifiedContact(phone, secretInput, {
           name: editForm.name,
-          whatsapp: editForm.whatsapp,
-          imo: editForm.imo,
-          telegram: editForm.telegram,
+          whatsapp: messengers.whatsapp,
+          imo: messengers.imo,
+          telegram: messengers.telegram,
           facebook: editForm.facebook,
           email: editForm.email,
           category: editForm.category,
@@ -222,6 +216,7 @@ export function AccessForm() {
     setFullPhoneInput("");
     setCurrentContact(null);
     setEditForm({});
+    setEditPhones([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]);
     setOtpCode("");
     setOtpPhone("");
     setNoSecretCode(false);
@@ -342,12 +337,10 @@ export function AccessForm() {
                 onChange={(url) => setEditForm({ ...editForm, photo_url: url })}
               />
               <div className="space-y-2"><Label>নাম</Label><Input value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="bg-card" /></div>
-              <MessengerFields
-                phone={currentContact?.phone || ""}
-                whatsapp={editForm.whatsapp || ""}
-                imo={editForm.imo || ""}
-                telegram={editForm.telegram || ""}
-                onChange={(field, value) => setEditForm({ ...editForm, [field]: value })}
+              <PhoneWithMessengers
+                phones={editPhones}
+                onChange={setEditPhones}
+                firstPhoneReadOnly={true}
               />
               <div className="space-y-2">
                 <Label className="flex items-center gap-2"><Globe className="h-3.5 w-3.5 text-blue-600" /> ফেসবুক</Label>

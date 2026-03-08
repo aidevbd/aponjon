@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, LogOut, Users, Heart, Filter, Download, Edit3, X, Cake, Gift, Plus, Droplets, Phone, MessageCircle, Mail, MapPin, Calendar, Lock, StickyNote, Globe } from "lucide-react";
-import { MessengerFields } from "@/components/MessengerFields";
+import { PhoneWithMessengers, PhoneEntry, deriveMessengers, parseMessengersToPhones } from "@/components/PhoneWithMessengers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,15 +23,19 @@ const AdminDashboard = () => {
   const [filterBloodGroup, setFilterBloodGroup] = useState("all");
   const [editingContact, setEditingContact] = useState<ContactRow | null>(null);
   const [editForm, setEditForm] = useState<Partial<ContactRow>>({});
+  const [editPhones, setEditPhones] = useState<PhoneEntry[]>([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
   const birthdayNotified = useRef(false);
   const [addForm, setAddForm] = useState({
-    name: "", phone: "", whatsapp: "", imo: "", telegram: "", facebook: "", email: "",
+    name: "", facebook: "", email: "",
     category: "অন্যান্য", customCategory: "", note: "", address: "",
     bloodGroup: "", birthday: "", secretCode: "", photoUrl: "",
   });
+  const [addPhones, setAddPhones] = useState<PhoneEntry[]>([
+    { number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false },
+  ]);
 
   const loadUnreadCount = async () => {
     try {
@@ -57,7 +61,6 @@ const AdminDashboard = () => {
       if (event === "SIGNED_OUT") navigate("/admin");
     });
 
-    // Realtime unread updates
     const channel = supabase
       .channel("dashboard-unread")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () => {
@@ -117,7 +120,6 @@ const AdminDashboard = () => {
     return upcoming.sort((a, b) => a.daysUntil - b.daysUntil);
   }, [contacts]);
 
-  // Birthday toast notification on load
   useEffect(() => {
     if (birthdayNotified.current || upcomingBirthdays.length === 0) return;
     birthdayNotified.current = true;
@@ -137,26 +139,27 @@ const AdminDashboard = () => {
   }, [upcomingBirthdays]);
 
   const handleAddContact = async (forceUpdate = false) => {
-    if (!addForm.name.trim() || !addForm.phone.trim()) {
+    const primaryPhone = addPhones[0]?.number.trim();
+    if (!addForm.name.trim() || !primaryPhone) {
       toast.error("নাম এবং ফোন নম্বর আবশ্যক");
       return;
     }
 
-    // Check for existing phone number
-    const existing = contacts.find((c) => c.phone === addForm.phone.trim());
+    const messengers = deriveMessengers(addPhones);
+
+    const existing = contacts.find((c) => c.phone === primaryPhone);
     if (existing && !forceUpdate) {
       const confirmed = confirm(
-        `⚠️ এই নম্বর (${addForm.phone}) দিয়ে "${existing.name}" ইতিমধ্যে আছে।\n\nআপডেট করতে চান?`
+        `⚠️ এই নম্বর (${primaryPhone}) দিয়ে "${existing.name}" ইতিমধ্যে আছে।\n\nআপডেট করতে চান?`
       );
       if (!confirmed) return;
-      // Update existing contact
       try {
         await updateContact(existing.id, {
           name: addForm.name,
-          phone: addForm.phone,
-          whatsapp: addForm.whatsapp || null,
-          imo: addForm.imo || null,
-          telegram: addForm.telegram || null,
+          phone: primaryPhone,
+          whatsapp: messengers.whatsapp,
+          imo: messengers.imo,
+          telegram: messengers.telegram,
           facebook: addForm.facebook || null,
           email: addForm.email || null,
           category: addForm.category || "অন্যান্য",
@@ -168,8 +171,7 @@ const AdminDashboard = () => {
           photo_url: addForm.photoUrl || null,
         });
         toast.success("কন্টাক্ট আপডেট হয়েছে! ✅");
-        setShowAddModal(false);
-        setAddForm({ name: "", phone: "", whatsapp: "", imo: "", telegram: "", facebook: "", email: "", category: "অন্যান্য", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" });
+        resetAddForm();
         await loadContacts();
       } catch {
         toast.error("আপডেট করতে সমস্যা হয়েছে");
@@ -178,13 +180,12 @@ const AdminDashboard = () => {
     }
 
     try {
-      // Admin adds → directly insert with added_by = 'admin'
       const { error } = await supabase.from("contacts").insert({
         name: addForm.name,
-        phone: addForm.phone,
-        whatsapp: addForm.whatsapp || null,
-        imo: addForm.imo || null,
-        telegram: addForm.telegram || null,
+        phone: primaryPhone,
+        whatsapp: messengers.whatsapp,
+        imo: messengers.imo,
+        telegram: messengers.telegram,
         facebook: addForm.facebook || null,
         email: addForm.email || null,
         category: addForm.category || "অন্যান্য",
@@ -198,12 +199,17 @@ const AdminDashboard = () => {
       });
       if (error) throw error;
       toast.success("নতুন কন্টাক্ট যোগ হয়েছে! 💕");
-      setShowAddModal(false);
-      setAddForm({ name: "", phone: "", whatsapp: "", imo: "", telegram: "", facebook: "", email: "", category: "অন্যান্য", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" });
+      resetAddForm();
       await loadContacts();
     } catch (err: any) {
       toast.error("সেভ করতে সমস্যা হয়েছে");
     }
+  };
+
+  const resetAddForm = () => {
+    setShowAddModal(false);
+    setAddForm({ name: "", facebook: "", email: "", category: "অন্যান্য", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" });
+    setAddPhones([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]);
   };
 
   const handleDelete = async (id: string) => {
@@ -221,17 +227,19 @@ const AdminDashboard = () => {
   const handleEdit = (contact: ContactRow) => {
     setEditingContact(contact);
     setEditForm(contact);
+    setEditPhones(parseMessengersToPhones(contact.phone, contact.whatsapp, contact.imo, contact.telegram));
   };
 
   const handleSaveEdit = async () => {
     if (editingContact) {
       try {
+        const messengers = deriveMessengers(editPhones);
         await updateContact(editingContact.id, {
           name: editForm.name,
           phone: editForm.phone,
-          whatsapp: editForm.whatsapp || null,
-          imo: editForm.imo || null,
-          telegram: editForm.telegram || null,
+          whatsapp: messengers.whatsapp,
+          imo: messengers.imo,
+          telegram: messengers.telegram,
           facebook: editForm.facebook || null,
           email: editForm.email || null,
           category: editForm.category,
@@ -252,8 +260,8 @@ const AdminDashboard = () => {
   };
 
   const handleExportCSV = () => {
-    const headers = ["নাম", "ফোন", "WhatsApp", "IMO", "ইমেইল", "ক্যাটাগরি", "ঠিকানা", "রক্তের গ্রুপ", "জন্মদিন", "নোট"];
-    const rows = contacts.map((c) => [c.name, c.phone, c.whatsapp || "", c.imo || "", c.email || "", c.category, c.address || "", c.blood_group || "", c.birthday || "", c.note || ""]);
+    const headers = ["নাম", "ফোন", "WhatsApp", "IMO", "Telegram", "Facebook", "ইমেইল", "ক্যাটাগরি", "ঠিকানা", "রক্তের গ্রুপ", "জন্মদিন", "নোট"];
+    const rows = contacts.map((c) => [c.name, c.phone, c.whatsapp || "", c.imo || "", c.telegram || "", c.facebook || "", c.email || "", c.category, c.address || "", c.blood_group || "", c.birthday || "", c.note || ""]);
     const csv = [headers.join(","), ...rows.map((r) => r.map((v) => `"${v}"`).join(","))].join("\n");
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -336,7 +344,6 @@ const AdminDashboard = () => {
           })}
         </div>
 
-        {/* Birthday Reminders */}
         {upcomingBirthdays.length > 0 && (
           <div className="mb-6 glass-card p-4">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground mb-3">
@@ -412,13 +419,10 @@ const AdminDashboard = () => {
                   <PhotoUpload value={editForm.photo_url || undefined} onChange={(url) => setEditForm({ ...editForm, photo_url: url || null })} />
                 </div>
                 <div className="space-y-2"><Label>নাম</Label><Input value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="bg-card" /></div>
-                <div className="space-y-2"><Label>ফোন</Label><Input value={editForm.phone || ""} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="bg-card" /></div>
-                <MessengerFields
-                  phone={editForm.phone || ""}
-                  whatsapp={editForm.whatsapp || ""}
-                  imo={editForm.imo || ""}
-                  telegram={editForm.telegram || ""}
-                  onChange={(field, value) => setEditForm({ ...editForm, [field]: value })}
+                <PhoneWithMessengers
+                  phones={editPhones}
+                  onChange={setEditPhones}
+                  firstPhoneReadOnly={false}
                 />
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2"><Globe className="h-3.5 w-3.5 text-blue-600" /> ফেসবুক</Label>
@@ -466,13 +470,9 @@ const AdminDashboard = () => {
                   <PhotoUpload value={addForm.photoUrl || undefined} onChange={(url) => setAddForm({ ...addForm, photoUrl: url || "" })} />
                 </div>
                 <div className="space-y-2"><Label>নাম *</Label><Input value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} placeholder="পূর্ণ নাম" className="bg-card" /></div>
-                <div className="space-y-2"><Label>ফোন *</Label><Input value={addForm.phone} onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })} placeholder="01XXXXXXXXX" className="bg-card" /></div>
-                <MessengerFields
-                  phone={addForm.phone}
-                  whatsapp={addForm.whatsapp}
-                  imo={addForm.imo}
-                  telegram={addForm.telegram}
-                  onChange={(field, value) => setAddForm({ ...addForm, [field]: value })}
+                <PhoneWithMessengers
+                  phones={addPhones}
+                  onChange={setAddPhones}
                 />
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2"><Globe className="h-3.5 w-3.5 text-blue-600" /> ফেসবুক</Label>
