@@ -58,6 +58,7 @@ export async function saveContact(contact: {
   blood_group?: string;
   birthday?: string;
   secret_code?: string;
+  photo_url?: string;
 }) {
   // Use the hashed version via RPC
   const { data, error } = await supabase.rpc("save_contact_with_hash", {
