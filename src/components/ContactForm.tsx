@@ -29,6 +29,7 @@ export function ContactForm() {
     bloodGroup: "",
     birthday: "",
     secretCode: "",
+    photoUrl: "",
   });
 
   const updateForm = (field: string, value: string) => {
