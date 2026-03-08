@@ -62,6 +62,7 @@ export function ContactForm() {
         blood_group: form.bloodGroup,
         birthday: form.birthday,
         secret_code: form.secretCode,
+        photo_url: form.photoUrl,
       });
       setSubmitted(true);
       toast.success("আপনার তথ্য সফলভাবে সেভ হয়েছে! 💕");
