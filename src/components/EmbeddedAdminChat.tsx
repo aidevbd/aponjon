@@ -193,6 +193,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       if (error) throw error;
       setMessages(prev => prev.filter(m => m.id !== deleteTargetId));
       toast.success("মেসেজ ডিলিট হয়েছে");
+      logAdminActivity("message_delete", `মেসেজ ডিলিট করা হয়েছে`, deleteTargetId, "message");
     } catch {
       toast.error("ডিলিট করতে সমস্যা");
     } finally {
