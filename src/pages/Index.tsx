@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Heart, UserPlus, Shield, Search } from "lucide-react";
+import { Heart, UserPlus, Shield, Search, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
