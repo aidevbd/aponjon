@@ -26,6 +26,11 @@ export function ContactCard({ contact, onEdit, onDelete, index = 0 }: ContactCar
     window.open(`https://t.me/${number.replace(/[^0-9]/g, "")}`, "_blank");
   };
 
+  const openFacebook = (fb: string) => {
+    const url = fb.startsWith("http") ? fb : `https://facebook.com/${fb}`;
+    window.open(url, "_blank");
+  };
+
   const callPhone = (number: string) => {
     window.open(`tel:${number}`, "_self");
   };

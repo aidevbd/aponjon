@@ -224,6 +224,10 @@ export function ContactForm() {
               <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-primary" /> ইমেইল</Label>
               <Input id="email" type="email" placeholder="email@example.com" value={form.email} onChange={(e) => updateForm("email", e.target.value)} className="bg-card" />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="facebook" className="flex items-center gap-2">🌐 ফেসবুক</Label>
+              <Input id="facebook" placeholder="ফেসবুক প্রোফাইল লিংক বা ইউজারনেম" value={form.facebook} onChange={(e) => updateForm("facebook", e.target.value)} className="bg-card" />
+            </div>
             <Button onClick={() => { if (!form.name.trim() || !phones[0]?.number.trim()) { toast.error("নাম এবং ফোন নম্বর আবশ্যক"); return; } setStep(2); }} className="w-full" variant="hero" size="lg">পরবর্তী ধাপ →</Button>
           </motion.div>
         )}
