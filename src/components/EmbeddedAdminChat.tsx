@@ -82,6 +82,31 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     return () => { supabase.removeChannel(channel); };
   }, [adminContactId, selectedUser]);
 
+  // Typing indicator via broadcast
+  useEffect(() => {
+    if (!adminContactId || !selectedUser) { setIsOtherTyping(false); return; }
+    const channelName = `typing:${[adminContactId, selectedUser.id].sort().join(":")}`;
+    const channel = supabase.channel(channelName)
+      .on("broadcast", { event: "typing" }, (payload) => {
+        if (payload.payload?.sender_id === selectedUser.id) {
+          setIsOtherTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setIsOtherTyping(false), 3000);
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); setIsOtherTyping(false); };
+  }, [adminContactId, selectedUser]);
+
+  const emitTyping = () => {
+    if (!adminContactId || !selectedUser) return;
+    const now = Date.now();
+    if (now - lastTypingRef.current < 2000) return;
+    lastTypingRef.current = now;
+    const channelName = `typing:${[adminContactId, selectedUser.id].sort().join(":")}`;
+    supabase.channel(channelName).send({ type: "broadcast", event: "typing", payload: { sender_id: adminContactId } });
+  };
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
