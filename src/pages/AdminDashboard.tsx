@@ -14,6 +14,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactCard } from "@/components/ContactCard";
+import { ContactListItem } from "@/components/ContactListItem";
+import { ContactFilters } from "@/components/ContactFilters";
+import { DashboardHome } from "@/components/DashboardHome";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
 import { getContacts, deleteContact, updateContact, saveContact, adminLogout, getSession, type ContactRow } from "@/lib/store";
@@ -237,7 +240,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen warm-gradient">
+    <div className="min-h-screen warm-gradient relative">
       {/* Compact Header */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md">
         <div className="container mx-auto flex h-12 items-center justify-between px-4">
@@ -285,121 +288,23 @@ const AdminDashboard = () => {
         </TabsList>
 
         {/* ===== ড্যাশবোর্ড ট্যাব ===== */}
-        <TabsContent value="dashboard" className="space-y-4 mt-0">
-          {/* Welcome + Quick Stats */}
-          <div className="glass-card p-4 flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl hero-gradient shadow-rose">
-              <Heart className="h-6 w-6 text-primary-foreground fill-current" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-base font-display font-bold text-foreground">আপনজন ড্যাশবোর্ড</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                মোট <span className="font-semibold text-primary">{stats.total}</span> জন কন্টাক্ট
-                {totalUnread > 0 && <> · <span className="font-semibold text-primary">{totalUnread}</span> অপঠিত মেসেজ</>}
-                {upcomingBirthdays.length > 0 && <> · <span className="font-semibold text-primary">{upcomingBirthdays.length}</span> আসন্ন জন্মদিন</>}
-              </p>
-            </div>
-          </div>
-
-          {/* Stats as compact pills */}
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(stats.categoryCount).map(([cat, count]) => {
-              const catInfo = CATEGORIES.find((c) => c.value === cat);
-              return (
-                <button
-                  key={cat}
-                  onClick={() => { setActiveTab("contacts"); setFilterCategory(cat); }}
-                  className="flex items-center gap-1.5 rounded-full bg-card border border-border/50 px-3 py-1.5 hover:border-primary/30 hover:bg-primary/5 transition-colors"
-                >
-                  <span className="text-sm">{catInfo?.icon || "✨"}</span>
-                  <span className="text-xs font-medium text-foreground">{cat}</span>
-                  <span className="text-[10px] font-bold text-primary bg-primary/10 rounded-full px-1.5 min-w-[20px] text-center">{count}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Upcoming Birthdays - compact */}
-          {upcomingBirthdays.length > 0 && (
-            <div className="glass-card p-3">
-              <h3 className="flex items-center gap-1.5 text-xs font-semibold text-foreground mb-2">
-                <Cake className="h-3.5 w-3.5 text-primary" /> আসন্ন জন্মদিন
-              </h3>
-              <div className="flex flex-wrap gap-1.5">
-                {upcomingBirthdays.slice(0, 6).map(({ contact, daysUntil }) => (
-                  <div key={contact.id} className="flex items-center gap-1.5 rounded-full bg-primary/5 border border-primary/10 px-2.5 py-1">
-                    <span className="text-xs">{daysUntil === 0 ? "🎉" : "🎂"}</span>
-                    <span className="text-xs font-medium text-foreground">{contact.name}</span>
-                    <span className="text-[10px] text-muted-foreground">
-                      {daysUntil === 0 ? "আজ!" : `${daysUntil}দিন`}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Quick Actions - 2x2 grid with icons */}
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => { setActiveTab("contacts"); setShowAddModal(true); }}
-              className="glass-card p-3 flex items-center gap-2.5 hover:border-primary/30 transition-colors text-left"
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                <UserPlus className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <div className="text-xs font-semibold text-foreground">কন্টাক্ট যোগ</div>
-                <div className="text-[10px] text-muted-foreground">নতুন প্রিয়জন</div>
-              </div>
-            </button>
-            <button
-              onClick={handleExportCSV}
-              className="glass-card p-3 flex items-center gap-2.5 hover:border-primary/30 transition-colors text-left"
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent">
-                <Download className="h-4 w-4 text-foreground" />
-              </div>
-              <div>
-                <div className="text-xs font-semibold text-foreground">CSV ডাউনলোড</div>
-                <div className="text-[10px] text-muted-foreground">ব্যাকআপ নিন</div>
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab("chat")}
-              className="glass-card p-3 flex items-center gap-2.5 hover:border-primary/30 transition-colors text-left"
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 relative">
-                <MessageCircle className="h-4 w-4 text-primary" />
-                {totalUnread > 0 && <span className="absolute -top-1 -right-1 h-4 min-w-[16px] flex items-center justify-center rounded-full hero-gradient text-[9px] font-bold text-primary-foreground px-1">{totalUnread}</span>}
-              </div>
-              <div>
-                <div className="text-xs font-semibold text-foreground">চ্যাট</div>
-                <div className="text-[10px] text-muted-foreground">মেসেজ দেখুন</div>
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab("logs")}
-              className="glass-card p-3 flex items-center gap-2.5 hover:border-primary/30 transition-colors text-left"
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent">
-                <Activity className="h-4 w-4 text-foreground" />
-              </div>
-              <div>
-                <div className="text-xs font-semibold text-foreground">অ্যাক্টিভিটি</div>
-                <div className="text-[10px] text-muted-foreground">লগ দেখুন</div>
-              </div>
-            </button>
-          </div>
+        <TabsContent value="dashboard" className="mt-0">
+          <DashboardHome
+            stats={stats}
+            totalUnread={totalUnread}
+            upcomingBirthdays={upcomingBirthdays}
+            onCategoryClick={(cat) => { setActiveTab("contacts"); setFilterCategory(cat); }}
+            onAddContact={() => { setActiveTab("contacts"); setShowAddModal(true); }}
+            onExportCSV={handleExportCSV}
+            onOpenChat={() => setActiveTab("chat")}
+            onOpenLogs={() => setActiveTab("logs")}
+          />
         </TabsContent>
 
         {/* ===== কন্টাক্ট ট্যাব ===== */}
         <TabsContent value="contacts" className="space-y-3 mt-0">
-          {/* Action Bar */}
+          {/* Top bar: CSV + View toggle */}
           <div className="flex items-center gap-2">
-            <Button variant="hero" size="sm" onClick={() => setShowAddModal(true)} className="gap-1.5 shrink-0">
-              <Plus className="h-4 w-4" /> যোগ করুন
-            </Button>
             <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-1.5 shrink-0">
               <Download className="h-4 w-4" /> CSV
             </Button>
@@ -419,33 +324,16 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Search & Filters */}
-          <div className="flex flex-col gap-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="নাম, নম্বর বা কি-ওয়ার্ড..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-card h-9 text-sm" />
-            </div>
-            <div className="flex gap-2">
-              <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger className="flex-1 bg-card h-9 text-xs">
-                  <SelectValue placeholder="ক্যাটাগরি" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">সব ক্যাটাগরি</SelectItem>
-                  {CATEGORIES.map((cat) => (<SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>))}
-                </SelectContent>
-              </Select>
-              <Select value={filterBloodGroup} onValueChange={setFilterBloodGroup}>
-                <SelectTrigger className="flex-1 bg-card h-9 text-xs">
-                  <SelectValue placeholder="রক্তের গ্রুপ" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">সব গ্রুপ</SelectItem>
-                  {BLOOD_GROUPS.map((bg) => (<SelectItem key={bg} value={bg}>{bg}</SelectItem>))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          {/* Filters with pill categories */}
+          <ContactFilters
+            search={search}
+            onSearchChange={setSearch}
+            filterCategory={filterCategory}
+            onCategoryChange={setFilterCategory}
+            filterBloodGroup={filterBloodGroup}
+            onBloodGroupChange={setFilterBloodGroup}
+            categoryCount={stats.categoryCount}
+          />
 
           {/* Results Count */}
           <div className="text-xs text-muted-foreground">
@@ -454,11 +342,31 @@ const AdminDashboard = () => {
               : `${filtered.length}/${contacts.length} জন দেখাচ্ছে`}
           </div>
 
-          {/* Contact List */}
-          {filtered.length === 0 ? (
+          {/* Contact List / Empty State */}
+          {contacts.length === 0 ? (
+            /* Empty state CTA - no contacts at all */
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-16"
+            >
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <Users className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-lg font-display font-semibold text-foreground mb-1">কোনো কন্টাক্ট নেই</h3>
+              <p className="text-sm text-muted-foreground mb-4">আপনার প্রিয়জনদের তথ্য যোগ করা শুরু করুন!</p>
+              <Button variant="hero" size="lg" onClick={() => setShowAddModal(true)} className="gap-2">
+                <UserPlus className="h-5 w-5" /> প্রথম কন্টাক্ট যোগ করুন
+              </Button>
+            </motion.div>
+          ) : filtered.length === 0 ? (
+            /* Filter returned nothing */
             <div className="text-center py-12 text-muted-foreground">
-              <Users className="h-10 w-10 mx-auto mb-3 opacity-30" />
+              <Search className="h-10 w-10 mx-auto mb-3 opacity-30" />
               <p className="text-sm">কোনো কন্টাক্ট পাওয়া যায়নি</p>
+              <button onClick={() => { setSearch(""); setFilterCategory("all"); setFilterBloodGroup("all"); }} className="text-xs text-primary mt-2 hover:underline">
+                ফিল্টার রিসেট করুন
+              </button>
             </div>
           ) : viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -468,53 +376,9 @@ const AdminDashboard = () => {
             </div>
           ) : (
             <div className="space-y-1">
-              {filtered.map((contact, i) => {
-                const category = CATEGORIES.find((c) => c.value === contact.category);
-                return (
-                  <motion.div
-                    key={contact.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.02 }}
-                    className="glass-card p-3 flex items-center gap-3 hover:shadow-rose transition-shadow"
-                  >
-                    {/* Avatar */}
-                    {contact.photo_url ? (
-                      <img src={contact.photo_url} alt={contact.name} className="h-9 w-9 rounded-full object-cover border border-primary/20 shrink-0" />
-                    ) : (
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm shrink-0">
-                        {contact.name.charAt(0)}
-                      </div>
-                    )}
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-foreground truncate">{contact.name}</span>
-                        {category && <span className="text-[10px] bg-primary/10 text-primary rounded-full px-1.5 py-0.5 shrink-0">{category.icon}</span>}
-                        {contact.blood_group && <span className="text-[10px] bg-destructive/10 text-destructive rounded-full px-1.5 py-0.5 shrink-0">{contact.blood_group}</span>}
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                        <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{contact.phone}</span>
-                        {contact.whatsapp && <MessageCircle className="h-3 w-3 text-green-600" />}
-                        {contact.imo && <Phone className="h-3 w-3 text-blue-600" />}
-                        {contact.telegram && <Send className="h-3 w-3 text-sky-500" />}
-                        {contact.address && <span className="truncate flex items-center gap-0.5"><MapPin className="h-3 w-3" />{contact.address}</span>}
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-0.5 shrink-0">
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEdit(contact)}>
-                        <Edit3 className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleDelete(contact.id)}>
-                        <X className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </motion.div>
-                );
-              })}
+              {filtered.map((contact, i) => (
+                <ContactListItem key={contact.id} contact={contact} index={i} onEdit={handleEdit} onDelete={handleDelete} />
+              ))}
             </div>
           )}
         </TabsContent>
@@ -529,6 +393,20 @@ const AdminDashboard = () => {
           <AdminActivityLog />
         </TabsContent>
       </Tabs>
+
+      {/* ===== Floating Add Button (FAB) ===== */}
+      {activeTab === "contacts" && (
+        <motion.button
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowAddModal(true)}
+          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full hero-gradient shadow-rose shadow-lg"
+        >
+          <Plus className="h-6 w-6 text-primary-foreground" />
+        </motion.button>
+      )}
 
       {/* ===== Modals ===== */}
       <AnimatePresence>
