@@ -180,6 +180,7 @@ export function AccessForm() {
           address: editForm.address,
           blood_group: editForm.blood_group,
           birthday: editForm.birthday,
+          photo_url: editForm.photo_url,
         }).eq("id", currentContact.id);
         if (error) throw error;
       } else {
