@@ -9,7 +9,7 @@ import { uploadChatImage } from "@/lib/chatSession";
 import { toast } from "sonner";
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
-type Message = { id: string; sender_id: string; receiver_id: string; content: string | null; image_url: string | null; is_read: boolean; created_at: string };
+type Message = { id: string; sender_id: string; receiver_id: string; content: string | null; image_url: string | null; is_read: boolean; created_at: string; deleted_by_sender?: boolean };
 
 interface EmbeddedAdminChatProps {
   onUnreadChange?: (count: number) => void;
