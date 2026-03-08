@@ -92,7 +92,18 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     try {
       const { data, error } = await supabase.rpc("get_admin_chat_users");
       if (error) throw error;
-      setChatUsers((data || []) as ChatUser[]);
+      const users = (data || []) as ChatUser[];
+      setChatUsers(users);
+      // Load presence for these users
+      if (users.length > 0) {
+        const ids = users.map(u => u.id);
+        const { data: pData } = await supabase.rpc("get_user_presence", { p_contact_ids: ids });
+        if (pData) {
+          const pMap: Record<string, { lastSeen: string; isOnline: boolean }> = {};
+          (pData as any[]).forEach((p: any) => { pMap[p.contact_id] = { lastSeen: p.last_seen_at, isOnline: p.is_online }; });
+          setPresenceMap(pMap);
+        }
+      }
     } catch { toast.error("চ্যাট ইউজার লোড করতে সমস্যা"); }
   };
 
