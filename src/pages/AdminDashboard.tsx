@@ -19,6 +19,7 @@ import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
 import { getContacts, deleteContact, updateContact, saveContact, adminLogout, getSession, type ContactRow } from "@/lib/store";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { EmbeddedAdminChat } from "@/components/EmbeddedAdminChat";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
