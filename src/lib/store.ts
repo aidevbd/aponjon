@@ -54,6 +54,7 @@ export async function saveContact(contact: {
   whatsapp?: string;
   imo?: string;
   telegram?: string;
+  facebook?: string;
   email?: string;
   category: string;
   custom_category?: string;
@@ -70,6 +71,7 @@ export async function saveContact(contact: {
     p_whatsapp: contact.whatsapp || null,
     p_imo: contact.imo || null,
     p_telegram: contact.telegram || null,
+    p_facebook: contact.facebook || null,
     p_email: contact.email || null,
     p_category: contact.category || "অন্যান্য",
     p_custom_category: contact.custom_category || null,
