@@ -135,37 +135,69 @@ const AdminDashboard = () => {
     }
   }, [upcomingBirthdays]);
 
-  const handleAddContact = async () => {
+  const handleAddContact = async (forceUpdate = false) => {
     if (!addForm.name.trim() || !addForm.phone.trim()) {
       toast.error("নাম এবং ফোন নম্বর আবশ্যক");
       return;
     }
+
+    // Check for existing phone number
+    const existing = contacts.find((c) => c.phone === addForm.phone.trim());
+    if (existing && !forceUpdate) {
+      const confirmed = confirm(
+        `⚠️ এই নম্বর (${addForm.phone}) দিয়ে "${existing.name}" ইতিমধ্যে আছে।\n\nআপডেট করতে চান?`
+      );
+      if (!confirmed) return;
+      // Update existing contact
+      try {
+        await updateContact(existing.id, {
+          name: addForm.name,
+          phone: addForm.phone,
+          whatsapp: addForm.whatsapp || null,
+          imo: addForm.imo || null,
+          email: addForm.email || null,
+          category: addForm.category || "অন্যান্য",
+          custom_category: addForm.customCategory || null,
+          note: addForm.note || null,
+          address: addForm.address || null,
+          blood_group: addForm.bloodGroup || null,
+          birthday: addForm.birthday || null,
+          photo_url: addForm.photoUrl || null,
+        });
+        toast.success("কন্টাক্ট আপডেট হয়েছে! ✅");
+        setShowAddModal(false);
+        setAddForm({ name: "", phone: "", whatsapp: "", imo: "", email: "", category: "অন্যান্য", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" });
+        await loadContacts();
+      } catch {
+        toast.error("আপডেট করতে সমস্যা হয়েছে");
+      }
+      return;
+    }
+
     try {
-      await saveContact({
+      // Admin adds → directly insert with added_by = 'admin'
+      const { error } = await supabase.from("contacts").insert({
         name: addForm.name,
         phone: addForm.phone,
-        whatsapp: addForm.whatsapp || undefined,
-        imo: addForm.imo || undefined,
-        email: addForm.email || undefined,
+        whatsapp: addForm.whatsapp || null,
+        imo: addForm.imo || null,
+        email: addForm.email || null,
         category: addForm.category || "অন্যান্য",
-        custom_category: addForm.customCategory || undefined,
-        note: addForm.note || undefined,
-        address: addForm.address || undefined,
-        blood_group: addForm.bloodGroup || undefined,
-        birthday: addForm.birthday || undefined,
-        secret_code: addForm.secretCode || undefined,
-        photo_url: addForm.photoUrl || undefined,
+        custom_category: addForm.customCategory || null,
+        note: addForm.note || null,
+        address: addForm.address || null,
+        blood_group: addForm.bloodGroup || null,
+        birthday: addForm.birthday || null,
+        photo_url: addForm.photoUrl || null,
+        added_by: "admin",
       });
+      if (error) throw error;
       toast.success("নতুন কন্টাক্ট যোগ হয়েছে! 💕");
       setShowAddModal(false);
       setAddForm({ name: "", phone: "", whatsapp: "", imo: "", email: "", category: "অন্যান্য", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" });
       await loadContacts();
     } catch (err: any) {
-      if (err?.message?.includes("duplicate") || err?.code === "23505") {
-        toast.error("এই ফোন নম্বরটি আগেই আছে!");
-      } else {
-        toast.error("সেভ করতে সমস্যা হয়েছে");
-      }
+      toast.error("সেভ করতে সমস্যা হয়েছে");
     }
   };
 
