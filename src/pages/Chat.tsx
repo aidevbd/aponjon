@@ -224,14 +224,16 @@ const Chat = () => {
     }
   };
 
-  const handleDeleteMessage = async (msgId: string) => {
-    if (!session) return;
+  const handleDeleteMessage = async () => {
+    if (!session || !deleteTargetId) return;
     try {
-      await deleteMessage(session.token, msgId);
-      setMessages(prev => prev.filter(m => m.id !== msgId));
+      await deleteMessage(session.token, deleteTargetId);
+      setMessages(prev => prev.filter(m => m.id !== deleteTargetId));
       toast.success("মেসেজ ডিলিট হয়েছে");
     } catch {
       toast.error("ডিলিট করতে সমস্যা");
+    } finally {
+      setDeleteTargetId(null);
     }
   };
 
