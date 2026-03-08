@@ -66,12 +66,14 @@ const AdminDashboard = () => {
         !search ||
         c.name.toLowerCase().includes(search.toLowerCase()) ||
         c.phone.includes(search) ||
+        (c.blood_group && c.blood_group.toLowerCase().includes(search.toLowerCase())) ||
         (c.note && c.note.toLowerCase().includes(search.toLowerCase())) ||
         (c.address && c.address.toLowerCase().includes(search.toLowerCase()));
       const matchCategory = filterCategory === "all" || c.category === filterCategory;
-      return matchSearch && matchCategory;
+      const matchBlood = filterBloodGroup === "all" || c.blood_group === filterBloodGroup;
+      return matchSearch && matchCategory && matchBlood;
     });
-  }, [contacts, search, filterCategory]);
+  }, [contacts, search, filterCategory, filterBloodGroup]);
 
   const stats = useMemo(() => {
     const categoryCount: Record<string, number> = {};
