@@ -282,10 +282,26 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
   const formatTime = (dateStr: string) => {
     const d = new Date(dateStr);
+    return d.toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const getDateLabel = (dateStr: string) => {
+    const d = new Date(dateStr);
     const now = new Date();
-    const isToday = d.toDateString() === now.toDateString();
-    if (isToday) return d.toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" });
-    return d.toLocaleDateString("bn-BD", { day: "numeric", month: "short" }) + " " + d.toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" });
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const msgDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const diffDays = Math.floor((today.getTime() - msgDate.getTime()) / 86400000);
+    if (diffDays === 0) return "আজ";
+    if (diffDays === 1) return "গতকাল";
+    if (diffDays < 7) return d.toLocaleDateString("bn-BD", { weekday: "long" });
+    return d.toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" });
+  };
+
+  const shouldShowDateHeader = (msgs: Message[], idx: number) => {
+    if (idx === 0) return true;
+    const prev = new Date(msgs[idx - 1].created_at).toDateString();
+    const curr = new Date(msgs[idx].created_at).toDateString();
+    return prev !== curr;
   };
 
   const formatLastSeen = (presence: { lastSeen: string; isOnline: boolean } | undefined) => {
