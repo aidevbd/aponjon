@@ -33,6 +33,7 @@ const AdminDashboard = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
   const [activeTab, setActiveTab] = useState("contacts");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const birthdayNotified = useRef(false);
   const [addForm, setAddForm] = useState({
     name: "", facebook: "", email: "",
