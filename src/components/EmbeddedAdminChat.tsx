@@ -378,7 +378,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                 <Input
                   placeholder="উত্তর লিখুন..."
                   value={msgInput}
-                  onChange={(e) => setMsgInput(e.target.value)}
+                  onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                   className="bg-card h-9 text-sm"
                   disabled={sending}
