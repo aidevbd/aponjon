@@ -348,15 +348,29 @@ const AdminDashboard = () => {
         </TabsContent>
 
         {/* ===== কন্টাক্ট ট্যাব ===== */}
-        <TabsContent value="contacts" className="space-y-4 mt-0">
+        <TabsContent value="contacts" className="space-y-3 mt-0">
           {/* Action Bar */}
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <Button variant="hero" size="sm" onClick={() => setShowAddModal(true)} className="gap-1.5 shrink-0">
               <Plus className="h-4 w-4" /> যোগ করুন
             </Button>
             <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-1.5 shrink-0">
               <Download className="h-4 w-4" /> CSV
             </Button>
+            <div className="ml-auto flex border border-border rounded-lg overflow-hidden">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-1.5 transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}
+              >
+                <List className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-1.5 transition-colors ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           {/* Search & Filters */}
@@ -400,11 +414,61 @@ const AdminDashboard = () => {
               <Users className="h-10 w-10 mx-auto mb-3 opacity-30" />
               <p className="text-sm">কোনো কন্টাক্ট পাওয়া যায়নি</p>
             </div>
-          ) : (
+          ) : viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {filtered.map((contact, i) => (
                 <ContactCard key={contact.id} contact={contact} index={i} onEdit={handleEdit} onDelete={handleDelete} />
               ))}
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {filtered.map((contact, i) => {
+                const category = CATEGORIES.find((c) => c.value === contact.category);
+                return (
+                  <motion.div
+                    key={contact.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.02 }}
+                    className="glass-card p-3 flex items-center gap-3 hover:shadow-rose transition-shadow"
+                  >
+                    {/* Avatar */}
+                    {contact.photo_url ? (
+                      <img src={contact.photo_url} alt={contact.name} className="h-9 w-9 rounded-full object-cover border border-primary/20 shrink-0" />
+                    ) : (
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm shrink-0">
+                        {contact.name.charAt(0)}
+                      </div>
+                    )}
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-sm text-foreground truncate">{contact.name}</span>
+                        {category && <span className="text-[10px] bg-primary/10 text-primary rounded-full px-1.5 py-0.5 shrink-0">{category.icon}</span>}
+                        {contact.blood_group && <span className="text-[10px] bg-destructive/10 text-destructive rounded-full px-1.5 py-0.5 shrink-0">{contact.blood_group}</span>}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                        <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{contact.phone}</span>
+                        {contact.whatsapp && <MessageCircle className="h-3 w-3 text-green-600" />}
+                        {contact.imo && <Phone className="h-3 w-3 text-blue-600" />}
+                        {contact.telegram && <Send className="h-3 w-3 text-sky-500" />}
+                        {contact.address && <span className="truncate flex items-center gap-0.5"><MapPin className="h-3 w-3" />{contact.address}</span>}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-0.5 shrink-0">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEdit(contact)}>
+                        <Edit3 className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleDelete(contact.id)}>
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </TabsContent>
