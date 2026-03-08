@@ -41,12 +41,11 @@ const Chat = () => {
     if (existing) setSession(existing);
   }, []);
 
-  // Load contacts & unread when session ready + heartbeat
+  // Load contacts & unread when session ready + heartbeat + presence polling
   useEffect(() => {
     if (!session) return;
     loadContacts();
     loadUnread();
-    // User presence heartbeat
     const sendHeartbeat = async () => {
       try { await supabase.rpc("update_presence", { p_contact_id: session.contactId }); } catch {}
     };
@@ -54,6 +53,25 @@ const Chat = () => {
     const heartbeat = setInterval(sendHeartbeat, 30000);
     return () => clearInterval(heartbeat);
   }, [session]);
+
+  // Poll presence for contacts
+  useEffect(() => {
+    if (!session || contacts.length === 0) return;
+    const fetchPresence = async () => {
+      try {
+        const ids = contacts.map(c => c.id);
+        const { data } = await supabase.rpc("get_user_presence", { p_contact_ids: ids });
+        if (data) {
+          const map: Record<string, { is_online: boolean; last_seen_at: string }> = {};
+          (data as any[]).forEach(p => { map[p.contact_id] = { is_online: p.is_online, last_seen_at: p.last_seen_at }; });
+          setPresenceMap(map);
+        }
+      } catch {}
+    };
+    fetchPresence();
+    const interval = setInterval(fetchPresence, 30000);
+    return () => clearInterval(interval);
+  }, [session, contacts]);
 
   // Realtime subscription for new messages
   useEffect(() => {
