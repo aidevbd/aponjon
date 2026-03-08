@@ -363,6 +363,9 @@ export function AccessForm() {
             <Button onClick={handleSaveEdit} variant="hero" className="w-full" disabled={loading}>
               <Heart className="h-4 w-4 mr-1" /> {loading ? "আপডেট হচ্ছে..." : "আপডেট সেভ করুন"}
             </Button>
+            <Button onClick={() => navigate("/chat")} variant="outline" className="w-full gap-2">
+              <MessageCircle className="h-4 w-4 text-primary" /> প্রাইভেট মেসেজ করুন
+            </Button>
           </motion.div>
         )}
       </AnimatePresence>
