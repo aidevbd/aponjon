@@ -226,6 +226,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       if (error) throw error;
       setMessages(prev => prev.map(m => m.id === msgId ? { ...m, is_pinned: !m.is_pinned } : m));
       toast.success("পিন আপডেট হয়েছে");
+      logAdminActivity("message_pin", `মেসেজ পিন/আনপিন করা হয়েছে`, msgId, "message");
     } catch {
       toast.error("পিন করতে সমস্যা");
     }
