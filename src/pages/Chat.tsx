@@ -86,6 +86,16 @@ const Chat = () => {
     if (!session) return;
     try {
       const data = await getChatContacts(session.token);
+      // If no contacts returned, verify session is still valid
+      if (data.length === 0) {
+        const { data: valid } = await supabase.rpc("validate_chat_session", { p_token: session.token });
+        if (!valid) {
+          clearChatSession();
+          setSession(null);
+          toast.error("সেশন শেষ হয়ে গেছে। আবার লগইন করুন। 🔒");
+          return;
+        }
+      }
       setContacts(data);
     } catch {
       toast.error("কন্টাক্ট লোড করতে সমস্যা");
