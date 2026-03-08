@@ -30,6 +30,7 @@ export type Database = {
           phone: string
           photo_url: string | null
           secret_code: string | null
+          secret_code_hash: string | null
           updated_at: string
           whatsapp: string | null
         }
@@ -48,6 +49,7 @@ export type Database = {
           phone: string
           photo_url?: string | null
           secret_code?: string | null
+          secret_code_hash?: string | null
           updated_at?: string
           whatsapp?: string | null
         }
@@ -66,6 +68,7 @@ export type Database = {
           phone?: string
           photo_url?: string | null
           secret_code?: string | null
+          secret_code_hash?: string | null
           updated_at?: string
           whatsapp?: string | null
         }
