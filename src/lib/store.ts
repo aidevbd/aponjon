@@ -15,6 +15,7 @@ export interface ContactRow {
   birthday: string | null;
   secret_code: string | null;
   secret_code_hash?: string | null;
+  photo_url: string | null;
   created_at: string;
   updated_at: string;
 }

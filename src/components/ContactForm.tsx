@@ -112,6 +112,9 @@ export function ContactForm() {
               <h3 className="text-lg font-display font-semibold text-foreground">মূল তথ্য</h3>
               <p className="text-sm text-muted-foreground">আপনার নাম ও যোগাযোগের তথ্য দিন</p>
             </div>
+            <div className="flex justify-center">
+              <PhotoUpload value={form.photoUrl || undefined} onChange={(url) => updateForm("photoUrl", url || "")} />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="name" className="flex items-center gap-2"><Heart className="h-3.5 w-3.5 text-primary" /> আপনার নাম *</Label>
               <Input id="name" placeholder="আপনার পূর্ণ নাম" value={form.name} onChange={(e) => updateForm("name", e.target.value)} className="bg-card" />
