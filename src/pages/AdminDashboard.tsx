@@ -1,13 +1,18 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, LogOut, Users, Heart, Filter, Download, Edit3, X, Cake, Gift, Plus, Droplets, Phone, MessageCircle, Mail, MapPin, Calendar, Lock, StickyNote, Globe } from "lucide-react";
+import {
+  Search, LogOut, Users, Heart, Download, Edit3, X, Cake, Gift, Plus,
+  Droplets, Phone, MessageCircle, Mail, MapPin, Calendar, Lock, StickyNote,
+  Globe, LayoutDashboard, UserPlus, Facebook
+} from "lucide-react";
 import { PhoneWithMessengers, PhoneEntry, deriveMessengers, parseMessengersToPhones } from "@/components/PhoneWithMessengers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactCard } from "@/components/ContactCard";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
@@ -27,6 +32,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
+  const [activeTab, setActiveTab] = useState("contacts");
   const birthdayNotified = useRef(false);
   const [addForm, setAddForm] = useState({
     name: "", facebook: "", email: "",
@@ -48,10 +54,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const session = await getSession();
-      if (!session) {
-        navigate("/admin");
-        return;
-      }
+      if (!session) { navigate("/admin"); return; }
       await loadContacts();
       await loadUnreadCount();
     };
@@ -63,9 +66,7 @@ const AdminDashboard = () => {
 
     const channel = supabase
       .channel("dashboard-unread")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () => {
-        loadUnreadCount();
-      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () => loadUnreadCount())
       .subscribe();
 
     return () => { subscription.unsubscribe(); supabase.removeChannel(channel); };
@@ -73,20 +74,14 @@ const AdminDashboard = () => {
 
   const loadContacts = async () => {
     setLoading(true);
-    try {
-      const data = await getContacts();
-      setContacts(data);
-    } catch {
-      toast.error("ডাটা লোড করতে সমস্যা হয়েছে");
-    } finally {
-      setLoading(false);
-    }
+    try { setContacts(await getContacts()); }
+    catch { toast.error("ডাটা লোড করতে সমস্যা হয়েছে"); }
+    finally { setLoading(false); }
   };
 
   const filtered = useMemo(() => {
     return contacts.filter((c) => {
-      const matchSearch =
-        !search ||
+      const matchSearch = !search ||
         c.name.toLowerCase().includes(search.toLowerCase()) ||
         c.phone.includes(search) ||
         (c.blood_group && c.blood_group.toLowerCase().includes(search.toLowerCase())) ||
@@ -100,9 +95,7 @@ const AdminDashboard = () => {
 
   const stats = useMemo(() => {
     const categoryCount: Record<string, number> = {};
-    contacts.forEach((c) => {
-      categoryCount[c.category] = (categoryCount[c.category] || 0) + 1;
-    });
+    contacts.forEach((c) => { categoryCount[c.category] = (categoryCount[c.category] || 0) + 1; });
     return { total: contacts.length, categoryCount };
   }, [contacts]);
 
@@ -126,84 +119,45 @@ const AdminDashboard = () => {
     const todayBdays = upcomingBirthdays.filter((b) => b.daysUntil === 0);
     const soonBdays = upcomingBirthdays.filter((b) => b.daysUntil > 0 && b.daysUntil <= 7);
     if (todayBdays.length > 0) {
-      toast("🎂 আজ জন্মদিন!", {
-        description: todayBdays.map((b) => b.contact.name).join(", "),
-        duration: 10000,
-      });
+      toast("🎂 আজ জন্মদিন!", { description: todayBdays.map((b) => b.contact.name).join(", "), duration: 10000 });
     } else if (soonBdays.length > 0) {
-      toast("🎂 আসন্ন জন্মদিন!", {
-        description: soonBdays.map((b) => `${b.contact.name} (${b.daysUntil} দিন বাকি)`).join(", "),
-        duration: 8000,
-      });
+      toast("🎂 আসন্ন জন্মদিন!", { description: soonBdays.map((b) => `${b.contact.name} (${b.daysUntil} দিন বাকি)`).join(", "), duration: 8000 });
     }
   }, [upcomingBirthdays]);
 
   const handleAddContact = async (forceUpdate = false) => {
     const primaryPhone = addPhones[0]?.number.trim();
-    if (!addForm.name.trim() || !primaryPhone) {
-      toast.error("নাম এবং ফোন নম্বর আবশ্যক");
-      return;
-    }
-
+    if (!addForm.name.trim() || !primaryPhone) { toast.error("নাম এবং ফোন নম্বর আবশ্যক"); return; }
     const messengers = deriveMessengers(addPhones);
-
     const existing = contacts.find((c) => c.phone === primaryPhone);
     if (existing && !forceUpdate) {
-      const confirmed = confirm(
-        `⚠️ এই নম্বর (${primaryPhone}) দিয়ে "${existing.name}" ইতিমধ্যে আছে।\n\nআপডেট করতে চান?`
-      );
+      const confirmed = confirm(`⚠️ এই নম্বর (${primaryPhone}) দিয়ে "${existing.name}" ইতিমধ্যে আছে।\n\nআপডেট করতে চান?`);
       if (!confirmed) return;
       try {
         await updateContact(existing.id, {
-          name: addForm.name,
-          phone: primaryPhone,
-          whatsapp: messengers.whatsapp,
-          imo: messengers.imo,
-          telegram: messengers.telegram,
-          facebook: addForm.facebook || null,
-          email: addForm.email || null,
-          category: addForm.category || "অন্যান্য",
-          custom_category: addForm.customCategory || null,
-          note: addForm.note || null,
-          address: addForm.address || null,
-          blood_group: addForm.bloodGroup || null,
-          birthday: addForm.birthday || null,
-          photo_url: addForm.photoUrl || null,
+          name: addForm.name, phone: primaryPhone, whatsapp: messengers.whatsapp, imo: messengers.imo,
+          telegram: messengers.telegram, facebook: addForm.facebook || null, email: addForm.email || null,
+          category: addForm.category || "অন্যান্য", custom_category: addForm.customCategory || null,
+          note: addForm.note || null, address: addForm.address || null, blood_group: addForm.bloodGroup || null,
+          birthday: addForm.birthday || null, photo_url: addForm.photoUrl || null,
         });
         toast.success("কন্টাক্ট আপডেট হয়েছে! ✅");
-        resetAddForm();
-        await loadContacts();
-      } catch {
-        toast.error("আপডেট করতে সমস্যা হয়েছে");
-      }
+        resetAddForm(); await loadContacts();
+      } catch { toast.error("আপডেট করতে সমস্যা হয়েছে"); }
       return;
     }
-
     try {
       const { error } = await supabase.from("contacts").insert({
-        name: addForm.name,
-        phone: primaryPhone,
-        whatsapp: messengers.whatsapp,
-        imo: messengers.imo,
-        telegram: messengers.telegram,
-        facebook: addForm.facebook || null,
-        email: addForm.email || null,
-        category: addForm.category || "অন্যান্য",
-        custom_category: addForm.customCategory || null,
-        note: addForm.note || null,
-        address: addForm.address || null,
-        blood_group: addForm.bloodGroup || null,
-        birthday: addForm.birthday || null,
-        photo_url: addForm.photoUrl || null,
-        added_by: "admin",
+        name: addForm.name, phone: primaryPhone, whatsapp: messengers.whatsapp, imo: messengers.imo,
+        telegram: messengers.telegram, facebook: addForm.facebook || null, email: addForm.email || null,
+        category: addForm.category || "অন্যান্য", custom_category: addForm.customCategory || null,
+        note: addForm.note || null, address: addForm.address || null, blood_group: addForm.bloodGroup || null,
+        birthday: addForm.birthday || null, photo_url: addForm.photoUrl || null, added_by: "admin",
       });
       if (error) throw error;
       toast.success("নতুন কন্টাক্ট যোগ হয়েছে! 💕");
-      resetAddForm();
-      await loadContacts();
-    } catch (err: any) {
-      toast.error("সেভ করতে সমস্যা হয়েছে");
-    }
+      resetAddForm(); await loadContacts();
+    } catch { toast.error("সেভ করতে সমস্যা হয়েছে"); }
   };
 
   const resetAddForm = () => {
@@ -214,13 +168,8 @@ const AdminDashboard = () => {
 
   const handleDelete = async (id: string) => {
     if (confirm("আপনি কি নিশ্চিত এই কন্টাক্ট ডিলিট করতে চান?")) {
-      try {
-        await deleteContact(id);
-        await loadContacts();
-        toast.success("কন্টাক্ট ডিলিট হয়েছে");
-      } catch {
-        toast.error("ডিলিট করতে সমস্যা হয়েছে");
-      }
+      try { await deleteContact(id); await loadContacts(); toast.success("কন্টাক্ট ডিলিট হয়েছে"); }
+      catch { toast.error("ডিলিট করতে সমস্যা হয়েছে"); }
     }
   };
 
@@ -231,32 +180,20 @@ const AdminDashboard = () => {
   };
 
   const handleSaveEdit = async () => {
-    if (editingContact) {
-      try {
-        const messengers = deriveMessengers(editPhones);
-        await updateContact(editingContact.id, {
-          name: editForm.name,
-          phone: editForm.phone,
-          whatsapp: messengers.whatsapp,
-          imo: messengers.imo,
-          telegram: messengers.telegram,
-          facebook: editForm.facebook || null,
-          email: editForm.email || null,
-          category: editForm.category,
-          custom_category: editForm.custom_category || null,
-          note: editForm.note || null,
-          address: editForm.address || null,
-          blood_group: editForm.blood_group || null,
-          birthday: editForm.birthday || null,
-          photo_url: editForm.photo_url || null,
-        });
-        await loadContacts();
-        setEditingContact(null);
-        toast.success("তথ্য আপডেট হয়েছে! 💕");
-      } catch {
-        toast.error("আপডেট করতে সমস্যা হয়েছে");
-      }
-    }
+    if (!editingContact) return;
+    try {
+      const messengers = deriveMessengers(editPhones);
+      await updateContact(editingContact.id, {
+        name: editForm.name, phone: editForm.phone, whatsapp: messengers.whatsapp, imo: messengers.imo,
+        telegram: messengers.telegram, facebook: editForm.facebook || null, email: editForm.email || null,
+        category: editForm.category, custom_category: editForm.custom_category || null,
+        note: editForm.note || null, address: editForm.address || null,
+        blood_group: editForm.blood_group || null, birthday: editForm.birthday || null,
+        photo_url: editForm.photo_url || null,
+      });
+      await loadContacts(); setEditingContact(null);
+      toast.success("তথ্য আপডেট হয়েছে! 💕");
+    } catch { toast.error("আপডেট করতে সমস্যা হয়েছে"); }
   };
 
   const handleExportCSV = () => {
@@ -266,17 +203,13 @@ const AdminDashboard = () => {
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url;
-    a.download = "aponjon-contacts.csv";
-    a.click();
+    a.href = url; a.download = "aponjon-contacts.csv"; a.click();
     URL.revokeObjectURL(url);
     toast.success("CSV ডাউনলোড হচ্ছে...");
   };
 
   const handleLogout = async () => {
-    await adminLogout();
-    navigate("/admin");
-    toast.info("লগআউট সফল");
+    await adminLogout(); navigate("/admin"); toast.info("লগআউট সফল");
   };
 
   if (loading) {
@@ -292,164 +225,247 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen warm-gradient">
+      {/* Compact Header */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <div className="container mx-auto flex h-12 items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full hero-gradient shadow-rose">
-              <Heart className="h-4 w-4 text-primary-foreground fill-current" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-full hero-gradient shadow-rose">
+              <Heart className="h-3.5 w-3.5 text-primary-foreground fill-current" />
             </div>
-            <div>
-              <span className="text-lg font-display font-semibold text-foreground">আপনজন</span>
-              <span className="ml-2 love-badge">অ্যাডমিন</span>
-            </div>
+            <span className="text-sm font-display font-semibold text-foreground">আপনজন</span>
+            <span className="love-badge text-[10px]">অ্যাডমিন</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/chat")} className="gap-1.5 relative">
-              <MessageCircle className="h-4 w-4" /> চ্যাট
-              {totalUnread > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[9px] font-bold px-1">
-                  {totalUnread}
-                </span>
-              )}
-            </Button>
-            <Button variant="hero" size="sm" onClick={() => setShowAddModal(true)} className="gap-1.5">
-              <Plus className="h-4 w-4" /> যোগ করুন
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-1.5">
-              <Download className="h-4 w-4" /> CSV
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-1.5 text-destructive hover:text-destructive">
-              <LogOut className="h-4 w-4" /> লগআউট
-            </Button>
-          </div>
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-1.5 text-destructive hover:text-destructive h-8 text-xs">
+            <LogOut className="h-3.5 w-3.5" /> লগআউট
+          </Button>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6">
-        <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="glass-card p-4 text-center">
-            <Users className="h-5 w-5 text-primary mx-auto mb-1" />
-            <div className="text-2xl font-bold text-foreground">{stats.total}</div>
-            <div className="text-xs text-muted-foreground">মোট কন্টাক্ট</div>
-          </div>
-          {Object.entries(stats.categoryCount).slice(0, 3).map(([cat, count]) => {
-            const catInfo = CATEGORIES.find((c) => c.value === cat);
-            return (
-              <div key={cat} className="glass-card p-4 text-center">
-                <div className="text-lg mb-1">{catInfo?.icon || "✨"}</div>
-                <div className="text-2xl font-bold text-foreground">{count}</div>
-                <div className="text-xs text-muted-foreground">{cat}</div>
-              </div>
-            );
-          })}
-        </div>
+      {/* Tab-Based Content */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="container mx-auto px-4 py-3">
+        <TabsList className="w-full grid grid-cols-3 h-10 mb-4">
+          <TabsTrigger value="dashboard" className="gap-1.5 text-xs sm:text-sm">
+            <LayoutDashboard className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">ড্যাশবোর্ড</span>
+            <span className="sm:hidden">হোম</span>
+          </TabsTrigger>
+          <TabsTrigger value="contacts" className="gap-1.5 text-xs sm:text-sm">
+            <Users className="h-3.5 w-3.5" />
+            কন্টাক্ট
+            <span className="ml-1 text-[10px] bg-primary/10 text-primary rounded-full px-1.5">{stats.total}</span>
+          </TabsTrigger>
+          <TabsTrigger value="chat" className="gap-1.5 text-xs sm:text-sm relative">
+            <MessageCircle className="h-3.5 w-3.5" />
+            চ্যাট
+            {totalUnread > 0 && (
+              <span className="ml-1 flex h-4 min-w-[16px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[9px] font-bold px-1">
+                {totalUnread}
+              </span>
+            )}
+          </TabsTrigger>
+        </TabsList>
 
-        {upcomingBirthdays.length > 0 && (
-          <div className="mb-6 glass-card p-4">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground mb-3">
-              <Cake className="h-4 w-4 text-primary" /> আসন্ন জন্মদিন 🎂
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {upcomingBirthdays.map(({ contact, daysUntil }) => (
-                <div key={contact.id} className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs">
-                  <Gift className="h-3.5 w-3.5 text-primary" />
-                  <span className="font-medium text-foreground">{contact.name}</span>
-                  <span className="text-muted-foreground">
-                    {daysUntil === 0 ? "🎉 আজ!" : `${daysUntil} দিন বাকি`}
-                  </span>
+        {/* ===== ড্যাশবোর্ড ট্যাব ===== */}
+        <TabsContent value="dashboard" className="space-y-4 mt-0">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="glass-card p-3 text-center">
+              <Users className="h-4 w-4 text-primary mx-auto mb-1" />
+              <div className="text-xl font-bold text-foreground">{stats.total}</div>
+              <div className="text-[11px] text-muted-foreground">মোট কন্টাক্ট</div>
+            </div>
+            {Object.entries(stats.categoryCount).slice(0, 3).map(([cat, count]) => {
+              const catInfo = CATEGORIES.find((c) => c.value === cat);
+              return (
+                <div key={cat} className="glass-card p-3 text-center">
+                  <div className="text-base mb-0.5">{catInfo?.icon || "✨"}</div>
+                  <div className="text-xl font-bold text-foreground">{count}</div>
+                  <div className="text-[11px] text-muted-foreground">{cat}</div>
                 </div>
-              ))}
+              );
+            })}
+          </div>
+
+          {/* All Category Breakdown */}
+          {Object.entries(stats.categoryCount).length > 3 && (
+            <div className="glass-card p-4">
+              <h3 className="text-sm font-semibold text-foreground mb-3">📊 ক্যাটাগরি অনুযায়ী</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {Object.entries(stats.categoryCount).map(([cat, count]) => {
+                  const catInfo = CATEGORIES.find((c) => c.value === cat);
+                  return (
+                    <div key={cat} className="flex items-center justify-between rounded-lg bg-accent/40 px-3 py-2">
+                      <span className="text-xs text-foreground">{catInfo?.icon} {cat}</span>
+                      <span className="text-xs font-bold text-primary">{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Upcoming Birthdays */}
+          {upcomingBirthdays.length > 0 && (
+            <div className="glass-card p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground mb-3">
+                <Cake className="h-4 w-4 text-primary" /> আসন্ন জন্মদিন 🎂
+              </h3>
+              <div className="space-y-2">
+                {upcomingBirthdays.map(({ contact, daysUntil }) => (
+                  <div key={contact.id} className="flex items-center justify-between rounded-lg bg-primary/5 px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <Gift className="h-3.5 w-3.5 text-primary" />
+                      <span className="text-sm font-medium text-foreground">{contact.name}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {daysUntil === 0 ? "🎉 আজ!" : `${daysUntil} দিন বাকি`}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Quick Actions */}
+          <div className="glass-card p-4">
+            <h3 className="text-sm font-semibold text-foreground mb-3">⚡ দ্রুত কাজ</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" size="sm" className="gap-2 h-10" onClick={() => { setActiveTab("contacts"); setShowAddModal(true); }}>
+                <UserPlus className="h-4 w-4" /> কন্টাক্ট যোগ
+              </Button>
+              <Button variant="outline" size="sm" className="gap-2 h-10" onClick={handleExportCSV}>
+                <Download className="h-4 w-4" /> CSV ডাউনলোড
+              </Button>
+              <Button variant="outline" size="sm" className="gap-2 h-10" onClick={() => setActiveTab("contacts")}>
+                <Users className="h-4 w-4" /> কন্টাক্ট দেখুন
+              </Button>
+              <Button variant="outline" size="sm" className="gap-2 h-10" onClick={() => navigate("/admin/chat")}>
+                <MessageCircle className="h-4 w-4" /> চ্যাটে যান
+              </Button>
             </div>
           </div>
-        )}
+        </TabsContent>
 
-        <div className="mb-6 flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="নাম, নম্বর বা কি-ওয়ার্ড দিয়ে সার্চ করুন..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-card" />
+        {/* ===== কন্টাক্ট ট্যাব ===== */}
+        <TabsContent value="contacts" className="space-y-4 mt-0">
+          {/* Action Bar */}
+          <div className="flex gap-2">
+            <Button variant="hero" size="sm" onClick={() => setShowAddModal(true)} className="gap-1.5 shrink-0">
+              <Plus className="h-4 w-4" /> যোগ করুন
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-1.5 shrink-0">
+              <Download className="h-4 w-4" /> CSV
+            </Button>
           </div>
-          <Select value={filterCategory} onValueChange={setFilterCategory}>
-            <SelectTrigger className="w-full sm:w-48 bg-card">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="ফিল্টার" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">সব ক্যাটাগরি</SelectItem>
-              {CATEGORIES.map((cat) => (<SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>))}
-            </SelectContent>
-          </Select>
-          <Select value={filterBloodGroup} onValueChange={setFilterBloodGroup}>
-            <SelectTrigger className="w-full sm:w-40 bg-card">
-              <Droplets className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="রক্তের গ্রুপ" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">সব রক্তের গ্রুপ</SelectItem>
-              {BLOOD_GROUPS.map((bg) => (<SelectItem key={bg} value={bg}>{bg}</SelectItem>))}
-            </SelectContent>
-          </Select>
-        </div>
 
-        {filtered.length === 0 ? (
-          <div className="text-center py-16 text-muted-foreground">
-            <Users className="h-12 w-12 mx-auto mb-4 opacity-30" />
-            <p>কোনো কন্টাক্ট পাওয়া যায়নি</p>
+          {/* Search & Filters */}
+          <div className="flex flex-col gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="নাম, নম্বর বা কি-ওয়ার্ড..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-card h-9 text-sm" />
+            </div>
+            <div className="flex gap-2">
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger className="flex-1 bg-card h-9 text-xs">
+                  <SelectValue placeholder="ক্যাটাগরি" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">সব ক্যাটাগরি</SelectItem>
+                  {CATEGORIES.map((cat) => (<SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>))}
+                </SelectContent>
+              </Select>
+              <Select value={filterBloodGroup} onValueChange={setFilterBloodGroup}>
+                <SelectTrigger className="flex-1 bg-card h-9 text-xs">
+                  <SelectValue placeholder="রক্তের গ্রুপ" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">সব গ্রুপ</SelectItem>
+                  {BLOOD_GROUPS.map((bg) => (<SelectItem key={bg} value={bg}>{bg}</SelectItem>))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map((contact, i) => (
-              <ContactCard key={contact.id} contact={contact} index={i} onEdit={handleEdit} onDelete={handleDelete} />
-            ))}
-          </div>
-        )}
-      </main>
 
+          {/* Results Count */}
+          <div className="text-xs text-muted-foreground">
+            {filtered.length === contacts.length
+              ? `মোট ${contacts.length} জন`
+              : `${filtered.length}/${contacts.length} জন দেখাচ্ছে`}
+          </div>
+
+          {/* Contact List */}
+          {filtered.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Users className="h-10 w-10 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">কোনো কন্টাক্ট পাওয়া যায়নি</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {filtered.map((contact, i) => (
+                <ContactCard key={contact.id} contact={contact} index={i} onEdit={handleEdit} onDelete={handleDelete} />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* ===== চ্যাট ট্যাব ===== */}
+        <TabsContent value="chat" className="mt-0">
+          <div className="glass-card p-8 text-center">
+            <MessageCircle className="h-12 w-12 text-primary mx-auto mb-4 opacity-60" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">চ্যাট</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {totalUnread > 0 ? `${totalUnread}টি অপঠিত মেসেজ আছে` : "সব মেসেজ পড়া হয়েছে"}
+            </p>
+            <Button variant="hero" onClick={() => navigate("/admin/chat")} className="gap-2">
+              <MessageCircle className="h-4 w-4" /> চ্যাটে যান
+            </Button>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* ===== Modals ===== */}
       <AnimatePresence>
         {editingContact && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 backdrop-blur-sm p-4" onClick={() => setEditingContact(null)}>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="glass-card p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="glass-card p-5 w-full max-w-md max-h-[85vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-display font-semibold flex items-center gap-2">
-                  <Edit3 className="h-5 w-5 text-primary" /> তথ্য সম্পাদনা
+                <h3 className="text-base font-display font-semibold flex items-center gap-2">
+                  <Edit3 className="h-4 w-4 text-primary" /> তথ্য সম্পাদনা
                 </h3>
-                <Button variant="ghost" size="icon" onClick={() => setEditingContact(null)}><X className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditingContact(null)}><X className="h-4 w-4" /></Button>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="flex justify-center">
                   <PhotoUpload value={editForm.photo_url || undefined} onChange={(url) => setEditForm({ ...editForm, photo_url: url || null })} />
                 </div>
-                <div className="space-y-2"><Label>নাম</Label><Input value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="bg-card" /></div>
-                <PhoneWithMessengers
-                  phones={editPhones}
-                  onChange={setEditPhones}
-                  firstPhoneReadOnly={false}
-                />
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2"><Globe className="h-3.5 w-3.5 text-blue-600" /> ফেসবুক</Label>
-                  <Input value={editForm.facebook || ""} onChange={(e) => setEditForm({ ...editForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card" />
+                <div className="space-y-1.5"><Label className="text-xs">নাম</Label><Input value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="bg-card h-9" /></div>
+                <PhoneWithMessengers phones={editPhones} onChange={setEditPhones} firstPhoneReadOnly={false} />
+                <div className="space-y-1.5">
+                  <Label className="text-xs flex items-center gap-1.5"><Facebook className="h-3 w-3 text-blue-600" /> ফেসবুক</Label>
+                  <Input value={editForm.facebook || ""} onChange={(e) => setEditForm({ ...editForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card h-9" />
                 </div>
-                <div className="space-y-2"><Label>ইমেইল</Label><Input value={editForm.email || ""} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="bg-card" /></div>
-                <div className="space-y-2">
-                  <Label>ক্যাটাগরি</Label>
+                <div className="space-y-1.5"><Label className="text-xs flex items-center gap-1.5"><Mail className="h-3 w-3" /> ইমেইল</Label><Input value={editForm.email || ""} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="bg-card h-9" /></div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">ক্যাটাগরি</Label>
                   <Select value={editForm.category || ""} onValueChange={(v) => setEditForm({ ...editForm, category: v })}>
-                    <SelectTrigger className="bg-card"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="bg-card h-9"><SelectValue /></SelectTrigger>
                     <SelectContent>{CATEGORIES.map((cat) => (<SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>))}</SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2"><Label>ঠিকানা</Label><Input value={editForm.address || ""} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} className="bg-card" /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>রক্তের গ্রুপ</Label>
+                <div className="space-y-1.5"><Label className="text-xs">ঠিকানা</Label><Input value={editForm.address || ""} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} className="bg-card h-9" /></div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">রক্তের গ্রুপ</Label>
                     <Select value={editForm.blood_group || ""} onValueChange={(v) => setEditForm({ ...editForm, blood_group: v })}>
-                      <SelectTrigger className="bg-card"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="bg-card h-9"><SelectValue /></SelectTrigger>
                       <SelectContent>{BLOOD_GROUPS.map((bg) => (<SelectItem key={bg} value={bg}>{bg}</SelectItem>))}</SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2"><Label>জন্মদিন</Label><Input type="date" value={editForm.birthday || ""} onChange={(e) => setEditForm({ ...editForm, birthday: e.target.value })} className="bg-card" /></div>
+                  <div className="space-y-1.5"><Label className="text-xs">জন্মদিন</Label><Input type="date" value={editForm.birthday || ""} onChange={(e) => setEditForm({ ...editForm, birthday: e.target.value })} className="bg-card h-9" /></div>
                 </div>
-                <div className="space-y-2"><Label>নোট</Label><Textarea value={editForm.note || ""} onChange={(e) => setEditForm({ ...editForm, note: e.target.value })} className="bg-card" /></div>
+                <div className="space-y-1.5"><Label className="text-xs">নোট</Label><Textarea value={editForm.note || ""} onChange={(e) => setEditForm({ ...editForm, note: e.target.value })} className="bg-card min-h-[60px]" /></div>
               </div>
-              <Button onClick={handleSaveEdit} variant="hero" className="w-full mt-6">
+              <Button onClick={handleSaveEdit} variant="hero" className="w-full mt-4 h-9">
                 <Heart className="h-4 w-4 mr-1" /> সেভ করুন
               </Button>
             </motion.div>
@@ -458,55 +474,52 @@ const AdminDashboard = () => {
 
         {showAddModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 backdrop-blur-sm p-4" onClick={() => setShowAddModal(false)}>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="glass-card p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="glass-card p-5 w-full max-w-md max-h-[85vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-display font-semibold flex items-center gap-2">
-                  <Plus className="h-5 w-5 text-primary" /> নতুন কন্টাক্ট যোগ করুন
+                <h3 className="text-base font-display font-semibold flex items-center gap-2">
+                  <Plus className="h-4 w-4 text-primary" /> নতুন কন্টাক্ট
                 </h3>
-                <Button variant="ghost" size="icon" onClick={() => setShowAddModal(false)}><X className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowAddModal(false)}><X className="h-4 w-4" /></Button>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="flex justify-center">
                   <PhotoUpload value={addForm.photoUrl || undefined} onChange={(url) => setAddForm({ ...addForm, photoUrl: url || "" })} />
                 </div>
-                <div className="space-y-2"><Label>নাম *</Label><Input value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} placeholder="পূর্ণ নাম" className="bg-card" /></div>
-                <PhoneWithMessengers
-                  phones={addPhones}
-                  onChange={setAddPhones}
-                />
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2"><Globe className="h-3.5 w-3.5 text-blue-600" /> ফেসবুক</Label>
-                  <Input value={addForm.facebook || ""} onChange={(e) => setAddForm({ ...addForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card" />
+                <div className="space-y-1.5"><Label className="text-xs">নাম *</Label><Input value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} placeholder="পূর্ণ নাম" className="bg-card h-9" /></div>
+                <PhoneWithMessengers phones={addPhones} onChange={setAddPhones} />
+                <div className="space-y-1.5">
+                  <Label className="text-xs flex items-center gap-1.5"><Facebook className="h-3 w-3 text-blue-600" /> ফেসবুক</Label>
+                  <Input value={addForm.facebook || ""} onChange={(e) => setAddForm({ ...addForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card h-9" />
                 </div>
-                <div className="space-y-2"><Label>ইমেইল</Label><Input value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} type="email" className="bg-card" /></div>
-                <div className="space-y-2">
-                  <Label>ক্যাটাগরি</Label>
+                <div className="space-y-1.5"><Label className="text-xs flex items-center gap-1.5"><Mail className="h-3 w-3" /> ইমেইল</Label><Input value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} type="email" className="bg-card h-9" /></div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">ক্যাটাগরি</Label>
                   <Select value={addForm.category} onValueChange={(v) => setAddForm({ ...addForm, category: v })}>
-                    <SelectTrigger className="bg-card"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="bg-card h-9"><SelectValue /></SelectTrigger>
                     <SelectContent>{CATEGORIES.map((cat) => (<SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>))}</SelectContent>
                   </Select>
                 </div>
                 {addForm.category === "অন্যান্য" && (
-                  <div className="space-y-2"><Label>কাস্টম ক্যাটাগরি</Label><Input value={addForm.customCategory} onChange={(e) => setAddForm({ ...addForm, customCategory: e.target.value })} className="bg-card" /></div>
+                  <div className="space-y-1.5"><Label className="text-xs">কাস্টম ক্যাটাগরি</Label><Input value={addForm.customCategory} onChange={(e) => setAddForm({ ...addForm, customCategory: e.target.value })} className="bg-card h-9" /></div>
                 )}
-                <div className="space-y-2"><Label>ঠিকানা</Label><Input value={addForm.address} onChange={(e) => setAddForm({ ...addForm, address: e.target.value })} className="bg-card" /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>রক্তের গ্রুপ</Label>
+                <div className="space-y-1.5"><Label className="text-xs">ঠিকানা</Label><Input value={addForm.address} onChange={(e) => setAddForm({ ...addForm, address: e.target.value })} className="bg-card h-9" /></div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">রক্তের গ্রুপ</Label>
                     <Select value={addForm.bloodGroup} onValueChange={(v) => setAddForm({ ...addForm, bloodGroup: v })}>
-                      <SelectTrigger className="bg-card"><SelectValue placeholder="রক্তের গ্রুপ" /></SelectTrigger>
+                      <SelectTrigger className="bg-card h-9"><SelectValue placeholder="রক্তের গ্রুপ" /></SelectTrigger>
                       <SelectContent>{BLOOD_GROUPS.map((bg) => (<SelectItem key={bg} value={bg}>{bg}</SelectItem>))}</SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2"><Label>জন্মদিন</Label><Input type="date" value={addForm.birthday} onChange={(e) => setAddForm({ ...addForm, birthday: e.target.value })} className="bg-card" /></div>
+                  <div className="space-y-1.5"><Label className="text-xs">জন্মদিন</Label><Input type="date" value={addForm.birthday} onChange={(e) => setAddForm({ ...addForm, birthday: e.target.value })} className="bg-card h-9" /></div>
                 </div>
-                <div className="space-y-2"><Label>নোট</Label><Textarea value={addForm.note} onChange={(e) => setAddForm({ ...addForm, note: e.target.value })} className="bg-card" /></div>
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-primary" /> সিক্রেট কোড (ঐচ্ছিক)</Label>
-                  <Input value={addForm.secretCode} onChange={(e) => setAddForm({ ...addForm, secretCode: e.target.value })} placeholder="গোপন কোড" className="bg-card" />
+                <div className="space-y-1.5"><Label className="text-xs">নোট</Label><Textarea value={addForm.note} onChange={(e) => setAddForm({ ...addForm, note: e.target.value })} className="bg-card min-h-[60px]" /></div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs flex items-center gap-1.5"><Lock className="h-3 w-3 text-primary" /> সিক্রেট কোড (ঐচ্ছিক)</Label>
+                  <Input value={addForm.secretCode} onChange={(e) => setAddForm({ ...addForm, secretCode: e.target.value })} placeholder="গোপন কোড" className="bg-card h-9" />
                 </div>
               </div>
-              <Button onClick={() => handleAddContact()} variant="hero" className="w-full mt-6">
+              <Button onClick={() => handleAddContact()} variant="hero" className="w-full mt-4 h-9">
                 <Plus className="h-4 w-4 mr-1" /> কন্টাক্ট যোগ করুন
               </Button>
             </motion.div>
