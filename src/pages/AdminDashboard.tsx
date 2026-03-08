@@ -495,6 +495,11 @@ const AdminDashboard = () => {
         <TabsContent value="chat" className="mt-0">
           <EmbeddedAdminChat onUnreadChange={(count) => setTotalUnread(count)} />
         </TabsContent>
+
+        {/* ===== লগ ট্যাব ===== */}
+        <TabsContent value="logs" className="mt-0">
+          <AdminActivityLog />
+        </TabsContent>
       </Tabs>
 
       {/* ===== Modals ===== */}
