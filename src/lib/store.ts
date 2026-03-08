@@ -7,6 +7,7 @@ export interface ContactRow {
   whatsapp: string | null;
   imo: string | null;
   telegram: string | null;
+  facebook: string | null;
   email: string | null;
   category: string;
   custom_category: string | null;
