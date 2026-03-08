@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { uploadChatImage } from "@/lib/chatSession";
 import { toast } from "sonner";
 import { EmojiPicker } from "@/components/EmojiPicker";
+import { logAdminActivity } from "@/lib/adminLog";
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
 type Message = {
