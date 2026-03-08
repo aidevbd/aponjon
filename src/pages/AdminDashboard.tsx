@@ -19,9 +19,17 @@ const AdminDashboard = () => {
   const [contacts, setContacts] = useState<ContactRow[]>([]);
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [filterBloodGroup, setFilterBloodGroup] = useState("all");
   const [editingContact, setEditingContact] = useState<ContactRow | null>(null);
   const [editForm, setEditForm] = useState<Partial<ContactRow>>({});
   const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const birthdayNotified = useRef(false);
+  const [addForm, setAddForm] = useState({
+    name: "", phone: "", whatsapp: "", imo: "", email: "",
+    category: "অন্যান্য", customCategory: "", note: "", address: "",
+    bloodGroup: "", birthday: "", secretCode: "", photoUrl: "",
+  });
 
   useEffect(() => {
     const checkAuth = async () => {
