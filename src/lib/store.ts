@@ -6,6 +6,7 @@ export interface ContactRow {
   phone: string;
   whatsapp: string | null;
   imo: string | null;
+  telegram: string | null;
   email: string | null;
   category: string;
   custom_category: string | null;
@@ -51,6 +52,7 @@ export async function saveContact(contact: {
   phone: string;
   whatsapp?: string;
   imo?: string;
+  telegram?: string;
   email?: string;
   category: string;
   custom_category?: string;
@@ -61,12 +63,12 @@ export async function saveContact(contact: {
   secret_code?: string;
   photo_url?: string;
 }) {
-  // Use the hashed version via RPC
   const { data, error } = await supabase.rpc("save_contact_with_hash", {
     p_name: contact.name,
     p_phone: contact.phone,
     p_whatsapp: contact.whatsapp || null,
     p_imo: contact.imo || null,
+    p_telegram: contact.telegram || null,
     p_email: contact.email || null,
     p_category: contact.category || "অন্যান্য",
     p_custom_category: contact.custom_category || null,
@@ -76,7 +78,7 @@ export async function saveContact(contact: {
     p_birthday: contact.birthday || null,
     p_secret_code: contact.secret_code || null,
     p_photo_url: contact.photo_url || null,
-  });
+  } as any);
   if (error) throw error;
   return data;
 }
@@ -120,6 +122,7 @@ export async function updateVerifiedContact(
     name?: string;
     whatsapp?: string;
     imo?: string;
+    telegram?: string;
     email?: string;
     category?: string;
     custom_category?: string;
@@ -135,6 +138,7 @@ export async function updateVerifiedContact(
     p_name: updates.name || null,
     p_whatsapp: updates.whatsapp || null,
     p_imo: updates.imo || null,
+    p_telegram: updates.telegram || null,
     p_email: updates.email || null,
     p_category: updates.category || null,
     p_custom_category: updates.custom_category || null,
@@ -142,7 +146,7 @@ export async function updateVerifiedContact(
     p_address: updates.address || null,
     p_blood_group: updates.blood_group || null,
     p_birthday: updates.birthday || null,
-  });
+  } as any);
   if (error) throw error;
   return data;
 }

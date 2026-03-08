@@ -4,6 +4,7 @@ export interface Contact {
   phone: string;
   whatsapp?: string;
   imo?: string;
+  telegram?: string;
   email?: string;
   category: string;
   customCategory?: string;
