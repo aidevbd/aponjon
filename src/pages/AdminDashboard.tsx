@@ -41,6 +41,7 @@ const AdminDashboard = () => {
   const [totalUnread, setTotalUnread] = useState(0);
   const [activeTab, setActiveTab] = useState("contacts");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  const [selectedContact, setSelectedContact] = useState<ContactRow | null>(null);
   const birthdayNotified = useRef(false);
   const [addForm, setAddForm] = useState({
     name: "", facebook: "", email: "",
