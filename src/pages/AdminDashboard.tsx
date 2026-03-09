@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactCard } from "@/components/ContactCard";
 import { ContactListItem } from "@/components/ContactListItem";
+import { ContactDetailSheet } from "@/components/ContactDetailSheet";
 import { ContactFilters } from "@/components/ContactFilters";
 import { DashboardHome } from "@/components/DashboardHome";
 import { PhotoUpload } from "@/components/PhotoUpload";
