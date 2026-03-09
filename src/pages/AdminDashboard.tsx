@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContactCard } from "@/components/ContactCard";
 import { ContactListItem } from "@/components/ContactListItem";
+import { ContactDetailSheet } from "@/components/ContactDetailSheet";
 import { ContactFilters } from "@/components/ContactFilters";
 import { DashboardHome } from "@/components/DashboardHome";
 import { PhotoUpload } from "@/components/PhotoUpload";
@@ -40,6 +41,7 @@ const AdminDashboard = () => {
   const [totalUnread, setTotalUnread] = useState(0);
   const [activeTab, setActiveTab] = useState("contacts");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  const [selectedContact, setSelectedContact] = useState<ContactRow | null>(null);
   const birthdayNotified = useRef(false);
   const [addForm, setAddForm] = useState({
     name: "", facebook: "", email: "",
@@ -375,12 +377,21 @@ const AdminDashboard = () => {
               ))}
             </div>
           ) : (
-            <div className="space-y-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
               {filtered.map((contact, i) => (
-                <ContactListItem key={contact.id} contact={contact} index={i} onEdit={handleEdit} onDelete={handleDelete} />
+                <ContactListItem key={contact.id} contact={contact} index={i} onClick={setSelectedContact} />
               ))}
             </div>
           )}
+
+          {/* Contact Detail Sheet */}
+          <ContactDetailSheet
+            contact={selectedContact}
+            open={!!selectedContact}
+            onClose={() => setSelectedContact(null)}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
         </TabsContent>
 
         {/* ===== চ্যাট ট্যাব ===== */}
