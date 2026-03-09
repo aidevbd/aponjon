@@ -1,8 +1,9 @@
-import { Phone, MessageCircle, Mail, MapPin, Droplets, Calendar, Edit3, Trash2, StickyNote, Send, X } from "lucide-react";
+import { Phone, MessageCircle, Video, Send, Mail, MapPin, Droplets, Calendar, Edit3, Trash2, StickyNote, Copy, FileText, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { CATEGORIES } from "@/lib/types";
 import { type ContactRow } from "@/lib/store";
+import { toast } from "sonner";
 
 interface ContactDetailSheetProps {
   contact: ContactRow | null;
@@ -25,6 +26,15 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
     const url = fb.startsWith("http") ? fb : `https://facebook.com/${fb}`;
     window.open(url, "_blank");
   };
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("কপি হয়েছে!");
+  };
+
+  const hasWhatsApp = contact.whatsapp && contact.whatsapp.trim();
+  const hasIMO = contact.imo && contact.imo.trim();
+  const hasTelegram = contact.telegram && contact.telegram.trim();
+  const hasFacebook = contact.facebook && contact.facebook.trim();
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
@@ -54,64 +64,200 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
           </div>
         </div>
 
-        {/* Action buttons */}
-        <div className="flex flex-wrap justify-center gap-2 mb-6">
-          <button onClick={() => callPhone(contact.phone)} className="flex items-center gap-1.5 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20 transition-colors">
-            <Phone className="h-4 w-4" /> {contact.phone}
+        {/* Quick Action Grid - 2x2 like reference */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <button
+            onClick={() => callPhone(contact.phone)}
+            className="flex flex-col items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 hover:bg-primary/10 transition-colors"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/15">
+              <Phone className="h-6 w-6 text-primary" />
+            </div>
+            <span className="text-sm font-medium text-foreground">কল করুন</span>
           </button>
-          {contact.whatsapp?.split(",").map((num, i) => (
-            <button key={`wa-${i}`} onClick={() => openWhatsApp(num.trim())} className="flex items-center gap-1.5 rounded-full bg-green-100 px-4 py-2 text-sm font-medium text-green-700 hover:bg-green-200 transition-colors">
-              <MessageCircle className="h-4 w-4" /> WhatsApp
-            </button>
-          ))}
-          {contact.imo?.split(",").map((num, i) => (
-            <button key={`imo-${i}`} onClick={() => openIMO(num.trim())} className="flex items-center gap-1.5 rounded-full bg-blue-100 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-200 transition-colors">
-              <Phone className="h-4 w-4" /> IMO
-            </button>
-          ))}
-          {contact.telegram?.split(",").map((num, i) => (
-            <button key={`tg-${i}`} onClick={() => openTelegram(num.trim())} className="flex items-center gap-1.5 rounded-full bg-sky-100 px-4 py-2 text-sm font-medium text-sky-700 hover:bg-sky-200 transition-colors">
-              <Send className="h-4 w-4" /> Telegram
-            </button>
-          ))}
-          {contact.email && (
-            <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground hover:bg-accent/80 transition-colors">
-              <Mail className="h-4 w-4" /> ইমেইল
-            </a>
-          )}
-          {contact.facebook && (
-            <button onClick={() => openFacebook(contact.facebook!)} className="flex items-center gap-1.5 rounded-full bg-blue-100 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-200 transition-colors">
-              🌐 Facebook
-            </button>
-          )}
+
+          <button
+            onClick={() => hasWhatsApp ? openWhatsApp(contact.whatsapp!.split(",")[0].trim()) : null}
+            disabled={!hasWhatsApp}
+            className="flex flex-col items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 hover:bg-primary/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/15">
+              <MessageCircle className="h-6 w-6 text-green-600" />
+            </div>
+            <span className="text-sm font-medium text-foreground">WhatsApp</span>
+          </button>
+
+          <button
+            onClick={() => hasIMO ? openIMO(contact.imo!.split(",")[0].trim()) : null}
+            disabled={!hasIMO}
+            className="flex flex-col items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 hover:bg-primary/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-500/15">
+              <Video className="h-6 w-6 text-sky-600" />
+            </div>
+            <span className="text-sm font-medium text-foreground">IMO</span>
+          </button>
+
+          <button
+            onClick={() => hasFacebook ? openFacebook(contact.facebook!) : null}
+            disabled={!hasFacebook}
+            className="flex flex-col items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 hover:bg-primary/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/15">
+              <ExternalLink className="h-6 w-6 text-blue-600" />
+            </div>
+            <span className="text-sm font-medium text-foreground">Facebook</span>
+          </button>
         </div>
 
-        {/* Details */}
-        <div className="space-y-3 text-sm text-muted-foreground">
-          {contact.address && (
-            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-accent/30">
-              <MapPin className="h-4 w-4 text-primary/60 shrink-0" /> <span>{contact.address}</span>
+        {/* Telegram row if available */}
+        {hasTelegram && (
+          <div className="mb-6">
+            <button
+              onClick={() => openTelegram(contact.telegram!.split(",")[0].trim())}
+              className="w-full flex items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 p-3 hover:bg-primary/10 transition-colors"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/15">
+                <Send className="h-5 w-5 text-sky-500" />
+              </div>
+              <span className="text-sm font-medium text-foreground">Telegram</span>
+            </button>
+          </div>
+        )}
+
+        {/* পরিচিতি / Identity section */}
+        {contact.note && (
+          <div className="mb-4 rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+              <FileText className="h-4 w-4" />
+              <span className="text-sm font-medium">পরিচিতি</span>
             </div>
-          )}
-          {contact.birthday && (
-            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-accent/30">
-              <Calendar className="h-4 w-4 text-primary/60 shrink-0" /> <span>জন্মদিন: {new Date(contact.birthday).toLocaleDateString("bn-BD")}</span>
+            <p className="text-sm text-foreground leading-relaxed">{contact.note}</p>
+          </div>
+        )}
+
+        {/* যোগাযোগ তথ্য / Contact Info */}
+        <div className="rounded-xl border border-border bg-card p-4 mb-4">
+          <h3 className="text-sm font-medium text-muted-foreground mb-3">যোগাযোগ তথ্য</h3>
+          
+          <div className="space-y-3">
+            {/* Main phone */}
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Phone className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">মোবাইল নম্বর (মূল)</p>
+                <p className="text-base font-medium text-foreground">{contact.phone}</p>
+              </div>
+              <button onClick={() => copyToClipboard(contact.phone)} className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground">
+                <Copy className="h-4 w-4" />
+              </button>
             </div>
-          )}
-          {contact.note && (
-            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-accent/30">
-              <StickyNote className="h-4 w-4 text-primary/60 mt-0.5 shrink-0" />
-              <p className="text-sm">{contact.note}</p>
-            </div>
-          )}
+
+            {/* WhatsApp numbers */}
+            {hasWhatsApp && contact.whatsapp!.split(",").map((num, i) => (
+              <div key={`wa-${i}`} className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/10">
+                  <MessageCircle className="h-5 w-5 text-green-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">WhatsApp</p>
+                  <p className="text-base font-medium text-foreground">{num.trim()}</p>
+                </div>
+                <button onClick={() => copyToClipboard(num.trim())} className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground">
+                  <Copy className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+
+            {/* IMO numbers */}
+            {hasIMO && contact.imo!.split(",").map((num, i) => (
+              <div key={`imo-${i}`} className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/10">
+                  <Video className="h-5 w-5 text-sky-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">IMO</p>
+                  <p className="text-base font-medium text-foreground">{num.trim()}</p>
+                </div>
+                <button onClick={() => copyToClipboard(num.trim())} className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground">
+                  <Copy className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+
+            {/* Telegram */}
+            {hasTelegram && contact.telegram!.split(",").map((num, i) => (
+              <div key={`tg-${i}`} className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/10">
+                  <Send className="h-5 w-5 text-sky-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">Telegram</p>
+                  <p className="text-base font-medium text-foreground">{num.trim()}</p>
+                </div>
+                <button onClick={() => copyToClipboard(num.trim())} className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground">
+                  <Copy className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+
+            {/* Email */}
+            {contact.email && (
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent">
+                  <Mail className="h-5 w-5 text-accent-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">ইমেইল</p>
+                  <p className="text-base font-medium text-foreground">{contact.email}</p>
+                </div>
+                <button onClick={() => copyToClipboard(contact.email!)} className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground">
+                  <Copy className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Additional details */}
+        {(contact.address || contact.birthday) && (
+          <div className="rounded-xl border border-border bg-card p-4 mb-4">
+            <h3 className="text-sm font-medium text-muted-foreground mb-3">অতিরিক্ত তথ্য</h3>
+            <div className="space-y-3">
+              {contact.address && (
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                    <MapPin className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">ঠিকানা</p>
+                    <p className="text-sm text-foreground">{contact.address}</p>
+                  </div>
+                </div>
+              )}
+              {contact.birthday && (
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                    <Calendar className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">জন্মদিন</p>
+                    <p className="text-sm text-foreground">{new Date(contact.birthday).toLocaleDateString("bn-BD")}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Edit / Delete at bottom */}
-        <div className="flex gap-3 mt-8">
-          <Button variant="outline" className="flex-1 gap-2" onClick={() => { onClose(); onEdit(contact); }}>
+        <div className="flex gap-3 mt-6">
+          <Button variant="outline" className="flex-1 gap-2 h-12 rounded-xl" onClick={() => { onClose(); onEdit(contact); }}>
             <Edit3 className="h-4 w-4" /> এডিট
           </Button>
-          <Button variant="outline" className="flex-1 gap-2 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive" onClick={() => { onClose(); onDelete(contact.id); }}>
+          <Button variant="outline" className="flex-1 gap-2 h-12 rounded-xl text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive" onClick={() => { onClose(); onDelete(contact.id); }}>
             <Trash2 className="h-4 w-4" /> ডিলিট
           </Button>
         </div>
