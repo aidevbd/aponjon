@@ -377,12 +377,21 @@ const AdminDashboard = () => {
               ))}
             </div>
           ) : (
-            <div className="space-y-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
               {filtered.map((contact, i) => (
-                <ContactListItem key={contact.id} contact={contact} index={i} onEdit={handleEdit} onDelete={handleDelete} />
+                <ContactListItem key={contact.id} contact={contact} index={i} onClick={setSelectedContact} />
               ))}
             </div>
           )}
+
+          {/* Contact Detail Sheet */}
+          <ContactDetailSheet
+            contact={selectedContact}
+            open={!!selectedContact}
+            onClose={() => setSelectedContact(null)}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
         </TabsContent>
 
         {/* ===== চ্যাট ট্যাব ===== */}
