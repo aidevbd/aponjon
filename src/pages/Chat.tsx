@@ -388,28 +388,28 @@ const Chat = () => {
 
   // ============ CHAT INTERFACE ============
   return (
-    <div className="min-h-screen warm-gradient flex flex-col">
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md">
+    <div className="h-screen warm-gradient flex flex-col overflow-hidden">
+      <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md shrink-0">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             {selectedContact ? (
-              <button onClick={() => { setSelectedContact(null); setSearchOpen(false); setSearchQuery(""); }} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
-                <ArrowLeft className="h-5 w-5" />
-                <div className="flex items-center gap-2">
-                  <div className="relative">
+              <button onClick={() => { setSelectedContact(null); setSearchOpen(false); setSearchQuery(""); }} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors min-w-0">
+                <ArrowLeft className="h-5 w-5 shrink-0" />
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="relative shrink-0">
                     {selectedContact.photo_url ? (
                       <img src={selectedContact.photo_url} alt="" className="h-8 w-8 rounded-full object-cover border border-primary/20" />
                     ) : (
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedContact.name.charAt(0)}</div>
                     )}
                     {presenceMap[selectedContact.id]?.is_online && (
-                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
+                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-card" />
                     )}
                   </div>
-                  <div>
-                    <span className="font-semibold text-sm">{selectedContact.name}</span>
+                  <div className="min-w-0">
+                    <span className="font-semibold text-sm truncate block">{selectedContact.name}</span>
                     {presenceMap[selectedContact.id] && (
-                      <p className={`text-[10px] ${presenceMap[selectedContact.id].is_online ? "text-green-500" : "text-muted-foreground"}`}>
+                      <p className={`text-[10px] truncate ${presenceMap[selectedContact.id].is_online ? "text-emerald-500" : "text-muted-foreground"}`}>
                         {formatLastSeen(presenceMap[selectedContact.id])}
                       </p>
                     )}
@@ -428,18 +428,27 @@ const Chat = () => {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {selectedContact && (
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
                 <Search className="h-4 w-4" />
               </Button>
             )}
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-xs gap-1">
-              <Heart className="h-3.5 w-3.5" /> হোম
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-xs text-destructive hover:text-destructive">
-              লগআউট
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem onClick={() => navigate("/")} className="gap-2 text-sm">
+                  <Home className="h-4 w-4" /> হোম
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout} className="gap-2 text-sm text-destructive focus:text-destructive">
+                  <LogOut className="h-4 w-4" /> লগআউট
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
