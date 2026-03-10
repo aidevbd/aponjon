@@ -453,7 +453,7 @@ const Chat = () => {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col container mx-auto max-w-2xl min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {/* Search bar */}
         {searchOpen && (
           <div className="px-4 pt-2">
