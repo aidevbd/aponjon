@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Lock, Phone, X, Loader2, Trash2, Pencil, Reply, Search, Pin } from "lucide-react";
+import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Lock, Phone, X, Loader2, Trash2, Pencil, Reply, Search, Pin, MoreVertical, Home, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
