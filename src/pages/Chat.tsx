@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Lock, Phone, X, Loader2, Trash2, Pencil, Reply, Search, Pin } from "lucide-react";
+import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Lock, Phone, X, Loader2, Trash2, Pencil, Reply, Search, Pin, MoreVertical, Home, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -103,6 +104,10 @@ const Chat = () => {
         if (msg.receiver_id === session.contactId && msg.sender_id !== selectedContact?.id) {
           setUnreadMap((prev) => ({ ...prev, [msg.sender_id]: (prev[msg.sender_id] || 0) + 1 }));
         }
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages" }, (payload) => {
+        const updated = payload.new as Message;
+        setMessages((prev) => prev.map(m => m.id === updated.id ? { ...m, is_read: updated.is_read } : m));
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -383,28 +388,28 @@ const Chat = () => {
 
   // ============ CHAT INTERFACE ============
   return (
-    <div className="min-h-screen warm-gradient flex flex-col">
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md">
+    <div className="h-screen warm-gradient flex flex-col overflow-hidden">
+      <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md shrink-0">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             {selectedContact ? (
-              <button onClick={() => { setSelectedContact(null); setSearchOpen(false); setSearchQuery(""); }} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
-                <ArrowLeft className="h-5 w-5" />
-                <div className="flex items-center gap-2">
-                  <div className="relative">
+              <button onClick={() => { setSelectedContact(null); setSearchOpen(false); setSearchQuery(""); }} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors min-w-0">
+                <ArrowLeft className="h-5 w-5 shrink-0" />
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="relative shrink-0">
                     {selectedContact.photo_url ? (
                       <img src={selectedContact.photo_url} alt="" className="h-8 w-8 rounded-full object-cover border border-primary/20" />
                     ) : (
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedContact.name.charAt(0)}</div>
                     )}
                     {presenceMap[selectedContact.id]?.is_online && (
-                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
+                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-card" />
                     )}
                   </div>
-                  <div>
-                    <span className="font-semibold text-sm">{selectedContact.name}</span>
+                  <div className="min-w-0">
+                    <span className="font-semibold text-sm truncate block">{selectedContact.name}</span>
                     {presenceMap[selectedContact.id] && (
-                      <p className={`text-[10px] ${presenceMap[selectedContact.id].is_online ? "text-green-500" : "text-muted-foreground"}`}>
+                      <p className={`text-[10px] truncate ${presenceMap[selectedContact.id].is_online ? "text-emerald-500" : "text-muted-foreground"}`}>
                         {formatLastSeen(presenceMap[selectedContact.id])}
                       </p>
                     )}
@@ -423,23 +428,32 @@ const Chat = () => {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {selectedContact && (
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
                 <Search className="h-4 w-4" />
               </Button>
             )}
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-xs gap-1">
-              <Heart className="h-3.5 w-3.5" /> হোম
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-xs text-destructive hover:text-destructive">
-              লগআউট
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem onClick={() => navigate("/")} className="gap-2 text-sm">
+                  <Home className="h-4 w-4" /> হোম
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout} className="gap-2 text-sm text-destructive focus:text-destructive">
+                  <LogOut className="h-4 w-4" /> লগআউট
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col container mx-auto max-w-2xl">
+      <div className="flex-1 flex flex-col container mx-auto max-w-2xl min-h-0 overflow-hidden">
         {/* Search bar */}
         {searchOpen && (
           <div className="px-4 pt-2">
@@ -511,7 +525,7 @@ const Chat = () => {
               )}
             </motion.div>
           ) : (
-            <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
+            <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0 overflow-hidden">
               <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
                 {filteredMessages.length === 0 && (
                   <div className="text-center py-16 text-muted-foreground">
@@ -616,13 +630,13 @@ const Chat = () => {
                 </div>
               )}
 
-              <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-4 py-3">
-                <div className="flex items-center gap-2">
+              <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-3 py-2 shrink-0">
+                <div className="flex items-center gap-1.5">
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   <EmojiPicker onSelect={(emoji) => setMsgInput(prev => prev + emoji)} />
                   <Button
                     variant="ghost" size="icon"
-                    className="h-9 w-9 shrink-0"
+                    className="h-8 w-8 shrink-0"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
                   >
@@ -634,12 +648,12 @@ const Chat = () => {
                     value={msgInput}
                     onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
                     onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-                    className="bg-background/50 text-sm"
+                    className="bg-background/50 text-sm h-9"
                     disabled={sending}
                   />
                   <Button
                     variant="hero" size="icon"
-                    className="h-9 w-9 shrink-0"
+                    className="h-8 w-8 shrink-0"
                     onClick={handleSend}
                     disabled={sending || !msgInput.trim()}
                   >
