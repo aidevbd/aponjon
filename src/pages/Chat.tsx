@@ -630,8 +630,8 @@ const Chat = () => {
                 </div>
               )}
 
-              <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-3 py-2 shrink-0">
-                <div className="flex items-center gap-1.5">
+              <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-2 sm:px-3 py-2 shrink-0">
+                <div className="flex items-center gap-1">
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   <EmojiPicker onSelect={(emoji) => setMsgInput(prev => prev + emoji)} />
                   <Button
@@ -648,7 +648,7 @@ const Chat = () => {
                     value={msgInput}
                     onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
                     onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-                    className="bg-background/50 text-sm h-9"
+                    className="bg-background/50 text-sm h-9 flex-1 min-w-0"
                     disabled={sending}
                   />
                   <Button
