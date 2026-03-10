@@ -23,16 +23,16 @@ export function Header() {
         </Link>
 
         {!isAdmin && (
-          <nav className="flex items-center gap-2">
+          <nav className="flex items-center gap-1 sm:gap-2">
             <Link
               to="/add"
-              className="rounded-lg px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
+              className="rounded-lg px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-foreground hover:bg-accent transition-colors whitespace-nowrap"
             >
-              তথ্য যোগ করুন
+              তথ্য যোগ
             </Link>
             <Link
               to="/access"
-              className="rounded-lg px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
+              className="rounded-lg px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-foreground hover:bg-accent transition-colors whitespace-nowrap"
             >
               আমার তথ্য
             </Link>
