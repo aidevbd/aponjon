@@ -105,6 +105,10 @@ const Chat = () => {
           setUnreadMap((prev) => ({ ...prev, [msg.sender_id]: (prev[msg.sender_id] || 0) + 1 }));
         }
       })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages" }, (payload) => {
+        const updated = payload.new as Message;
+        setMessages((prev) => prev.map(m => m.id === updated.id ? { ...m, is_read: updated.is_read } : m));
+      })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [session, selectedContact]);
