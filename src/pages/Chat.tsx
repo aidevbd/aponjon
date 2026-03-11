@@ -232,7 +232,6 @@ const Chat = () => {
     } finally {
       setSending(false);
       setEditingMsg(null);
-      setTimeout(() => inputRef.current?.focus(), 50);
     }
       return;
     }
@@ -253,7 +252,6 @@ const Chat = () => {
       }
     } finally {
       setSending(false);
-      setTimeout(() => inputRef.current?.focus(), 50);
     }
   };
 
