@@ -219,7 +219,6 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       setSending(false);
       setEditingMsg(null);
       setMsgInput("");
-      setTimeout(() => inputRef.current?.focus(), 50);
     }
   };
 
