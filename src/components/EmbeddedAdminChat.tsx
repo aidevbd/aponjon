@@ -618,7 +618,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                   className="bg-card h-9 text-sm"
                   disabled={sending}
                 />
-                <Button variant="hero" size="icon" className="h-9 w-9 shrink-0" onClick={handleSend} disabled={sending || !msgInput.trim()}>
+                <Button variant="hero" size="icon" className="h-9 w-9 shrink-0" onMouseDown={(e) => e.preventDefault()} onTouchStart={(e) => e.preventDefault()} onClick={handleSend} disabled={sending || !msgInput.trim()}>
                   <Send className="h-4 w-4" />
                 </Button>
               </div>

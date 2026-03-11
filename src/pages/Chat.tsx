@@ -658,6 +658,8 @@ const Chat = () => {
                   <Button
                     variant="hero" size="icon"
                     className="h-9 w-9 shrink-0 rounded-full"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onTouchStart={(e) => e.preventDefault()}
                     onClick={handleSend}
                     disabled={sending || !msgInput.trim()}
                   >
