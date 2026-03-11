@@ -232,7 +232,6 @@ const Chat = () => {
     } finally {
       setSending(false);
       setEditingMsg(null);
-      setTimeout(() => inputRef.current?.focus(), 50);
     }
       return;
     }
@@ -253,7 +252,6 @@ const Chat = () => {
       }
     } finally {
       setSending(false);
-      setTimeout(() => inputRef.current?.focus(), 50);
     }
   };
 
@@ -660,6 +658,8 @@ const Chat = () => {
                   <Button
                     variant="hero" size="icon"
                     className="h-9 w-9 shrink-0 rounded-full"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onTouchStart={(e) => e.preventDefault()}
                     onClick={handleSend}
                     disabled={sending || !msgInput.trim()}
                   >

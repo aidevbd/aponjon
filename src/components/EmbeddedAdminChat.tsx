@@ -219,7 +219,6 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       setSending(false);
       setEditingMsg(null);
       setMsgInput("");
-      setTimeout(() => inputRef.current?.focus(), 50);
     }
   };
 
@@ -253,7 +252,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       if (error) throw error;
       setReplyingTo(null);
     } catch { toast.error("মেসেজ পাঠাতে সমস্যা"); setMsgInput(text); }
-    finally { setSending(false); setTimeout(() => inputRef.current?.focus(), 50); }
+    finally { setSending(false); }
   };
 
   const handleStartEdit = (msg: Message) => {
@@ -619,7 +618,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                   className="bg-card h-9 text-sm"
                   disabled={sending}
                 />
-                <Button variant="hero" size="icon" className="h-9 w-9 shrink-0" onClick={handleSend} disabled={sending || !msgInput.trim()}>
+                <Button variant="hero" size="icon" className="h-9 w-9 shrink-0" onMouseDown={(e) => e.preventDefault()} onTouchStart={(e) => e.preventDefault()} onClick={handleSend} disabled={sending || !msgInput.trim()}>
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
