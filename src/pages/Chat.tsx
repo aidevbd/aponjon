@@ -229,10 +229,11 @@ const Chat = () => {
       } catch {
         toast.error("এডিট করতে সমস্যা");
         setMsgInput(text);
-      } finally {
-        setSending(false);
-        setEditingMsg(null);
-      }
+    } finally {
+      setSending(false);
+      setEditingMsg(null);
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
       return;
     }
 
@@ -252,6 +253,7 @@ const Chat = () => {
       }
     } finally {
       setSending(false);
+      setTimeout(() => inputRef.current?.focus(), 50);
     }
   };
 
