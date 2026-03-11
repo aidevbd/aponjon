@@ -252,7 +252,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       if (error) throw error;
       setReplyingTo(null);
     } catch { toast.error("মেসেজ পাঠাতে সমস্যা"); setMsgInput(text); }
-    finally { setSending(false); }
+    finally { setSending(false); setTimeout(() => inputRef.current?.focus(), 50); }
   };
 
   const handleStartEdit = (msg: Message) => {
