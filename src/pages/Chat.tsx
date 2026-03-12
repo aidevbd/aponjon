@@ -659,12 +659,13 @@ const Chat = () => {
                     readOnly={sending}
                   />
                   <Button
+                    type="button"
+                    tabIndex={-1}
                     variant="hero" size="icon"
                     className="h-9 w-9 shrink-0 rounded-full"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onTouchStart={(e) => e.preventDefault()}
-                    onClick={handleSend}
-                    disabled={sending || !msgInput.trim()}
+                    onPointerDown={(e) => { e.preventDefault(); if (!sending) void handleSend(); }}
+                    onClick={(e) => e.preventDefault()}
+                    disabled={!msgInput.trim()}
                   >
                     <Send className="h-4 w-4" />
                   </Button>
