@@ -653,7 +653,7 @@ const Chat = () => {
                     onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
                     onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                     className="bg-background/50 text-sm h-9 flex-1 min-w-0 mr-1"
-                    disabled={sending}
+                    readOnly={sending}
                   />
                   <Button
                     variant="hero" size="icon"
