@@ -123,9 +123,12 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   };
 
   useEffect(() => {
-    if (messages.length > 0) {
-      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 150);
-    }
+    if (messages.length === 0 || !messageListRef.current) return;
+    const keepKeyboardStable = document.activeElement === inputRef.current;
+    messageListRef.current.scrollTo({
+      top: messageListRef.current.scrollHeight,
+      behavior: keepKeyboardStable ? "auto" : "smooth",
+    });
   }, [messages]);
 
   useEffect(() => {
