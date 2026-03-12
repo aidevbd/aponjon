@@ -616,7 +616,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                   onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                   className="bg-card h-9 text-sm"
-                  disabled={sending}
+                  readOnly={sending}
                 />
                 <Button variant="hero" size="icon" className="h-9 w-9 shrink-0" onMouseDown={(e) => e.preventDefault()} onTouchStart={(e) => e.preventDefault()} onClick={handleSend} disabled={sending || !msgInput.trim()}>
                   <Send className="h-4 w-4" />
