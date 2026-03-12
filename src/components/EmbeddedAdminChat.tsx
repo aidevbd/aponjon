@@ -235,6 +235,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   };
 
   const handleSend = async () => {
+    if (sending) return;
     if (editingMsg) {
       handleEditMessage();
       return;

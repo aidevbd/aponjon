@@ -217,7 +217,7 @@ const Chat = () => {
   };
 
   const handleSend = async () => {
-    if (!session || !selectedContact || (!msgInput.trim() && !uploading)) return;
+    if (sending || !session || !selectedContact || (!msgInput.trim() && !uploading)) return;
     const text = msgInput.trim();
     if (!text) return;
 
