@@ -138,9 +138,12 @@ const Chat = () => {
   };
 
   useEffect(() => {
-    if (messages.length > 0) {
-      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-    }
+    if (messages.length === 0 || !messageListRef.current) return;
+    const keepKeyboardStable = document.activeElement === inputRef.current;
+    messageListRef.current.scrollTo({
+      top: messageListRef.current.scrollHeight,
+      behavior: keepKeyboardStable ? "auto" : "smooth",
+    });
   }, [messages]);
 
   const loadContacts = async () => {
