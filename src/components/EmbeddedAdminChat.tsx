@@ -49,7 +49,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const [tappedMsgId, setTappedMsgId] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageListRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -123,9 +123,12 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   };
 
   useEffect(() => {
-    if (messages.length > 0) {
-      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 150);
-    }
+    if (messages.length === 0 || !messageListRef.current) return;
+    const keepKeyboardStable = document.activeElement === inputRef.current;
+    messageListRef.current.scrollTo({
+      top: messageListRef.current.scrollHeight,
+      behavior: keepKeyboardStable ? "auto" : "smooth",
+    });
   }, [messages]);
 
   useEffect(() => {
@@ -235,6 +238,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   };
 
   const handleSend = async () => {
+    if (sending) return;
     if (editingMsg) {
       handleEditMessage();
       return;
@@ -471,7 +475,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
             )}
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto py-3 space-y-1">
+            <div ref={messageListRef} className="flex-1 overflow-y-auto py-3 space-y-1">
               {filteredMessages.length === 0 && (
                 <div className="text-center py-12 text-muted-foreground">
                   <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-30" />
@@ -569,7 +573,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                   </div>
                 );
               })}
-              <div ref={messagesEndRef} />
+              <div className="h-0" />
             </div>
 
             {isOtherTyping && (
@@ -618,7 +622,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                   className="bg-card h-9 text-sm"
                   readOnly={sending}
                 />
-                <Button variant="hero" size="icon" className="h-9 w-9 shrink-0" onMouseDown={(e) => e.preventDefault()} onTouchStart={(e) => e.preventDefault()} onClick={handleSend} disabled={sending || !msgInput.trim()}>
+                <Button type="button" tabIndex={-1} variant="hero" size="icon" className="h-9 w-9 shrink-0" onPointerDown={(e) => { e.preventDefault(); if (!sending) void handleSend(); }} onClick={(e) => e.preventDefault()} disabled={!msgInput.trim()}>
                   <Send className="h-4 w-4" />
                 </Button>
               </div>

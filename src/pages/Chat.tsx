@@ -50,7 +50,7 @@ const Chat = () => {
   const [tappedMsgId, setTappedMsgId] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageListRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -138,9 +138,12 @@ const Chat = () => {
   };
 
   useEffect(() => {
-    if (messages.length > 0) {
-      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-    }
+    if (messages.length === 0 || !messageListRef.current) return;
+    const keepKeyboardStable = document.activeElement === inputRef.current;
+    messageListRef.current.scrollTo({
+      top: messageListRef.current.scrollHeight,
+      behavior: keepKeyboardStable ? "auto" : "smooth",
+    });
   }, [messages]);
 
   const loadContacts = async () => {
@@ -214,7 +217,7 @@ const Chat = () => {
   };
 
   const handleSend = async () => {
-    if (!session || !selectedContact || (!msgInput.trim() && !uploading)) return;
+    if (sending || !session || !selectedContact || (!msgInput.trim() && !uploading)) return;
     const text = msgInput.trim();
     if (!text) return;
 
@@ -528,7 +531,7 @@ const Chat = () => {
             </motion.div>
           ) : (
             <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+              <div ref={messageListRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
                 {filteredMessages.length === 0 && (
                   <div className="text-center py-16 text-muted-foreground">
                     <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
@@ -600,7 +603,7 @@ const Chat = () => {
                     </div>
                   );
                 })}
-                <div ref={messagesEndRef} />
+                <div className="h-0" />
               </div>
 
               {isOtherTyping && (
@@ -656,12 +659,13 @@ const Chat = () => {
                     readOnly={sending}
                   />
                   <Button
+                    type="button"
+                    tabIndex={-1}
                     variant="hero" size="icon"
                     className="h-9 w-9 shrink-0 rounded-full"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onTouchStart={(e) => e.preventDefault()}
-                    onClick={handleSend}
-                    disabled={sending || !msgInput.trim()}
+                    onPointerDown={(e) => { e.preventDefault(); if (!sending) void handleSend(); }}
+                    onClick={(e) => e.preventDefault()}
+                    disabled={!msgInput.trim()}
                   >
                     <Send className="h-4 w-4" />
                   </Button>
