@@ -603,7 +603,7 @@ const Chat = () => {
                     </div>
                   );
                 })}
-                <div ref={messagesEndRef} />
+                <div className="h-0" />
               </div>
 
               {isOtherTyping && (
