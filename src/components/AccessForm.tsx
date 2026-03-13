@@ -236,6 +236,7 @@ export function AccessForm() {
     setEditPhones([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]);
     setOtpCode("");
     setOtpPhone("");
+    setOtpSessionToken("");
     setNoSecretCode(false);
   };
 

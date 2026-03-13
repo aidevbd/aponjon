@@ -666,9 +666,13 @@ const Chat = () => {
                     placeholder={editingMsg ? "এডিট করুন..." : "মেসেজ লিখুন..."}
                     value={msgInput}
                     onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
-                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        void handleSend();
+                      }
+                    }}
                     className="bg-background/50 text-sm h-9 flex-1 min-w-0 mr-1"
-                    readOnly={sending}
                   />
                   <Button
                     type="button"
