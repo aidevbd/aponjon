@@ -54,6 +54,12 @@ const Chat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const restoreInputFocus = useCallback(() => {
+    requestAnimationFrame(() => {
+      inputRef.current?.focus({ preventScroll: true });
+    });
+  }, []);
+
   useEffect(() => {
     const existing = getChatSession();
     if (existing) setSession(existing);
@@ -217,9 +223,13 @@ const Chat = () => {
   };
 
   const handleSend = async () => {
-    if (sending || !session || !selectedContact || (!msgInput.trim() && !uploading)) return;
+    if (sending || !session || !selectedContact) return;
+
     const text = msgInput.trim();
-    if (!text) return;
+    if (!text) {
+      restoreInputFocus();
+      return;
+    }
 
     // If editing
     if (editingMsg) {
@@ -232,10 +242,11 @@ const Chat = () => {
       } catch {
         toast.error("এডিট করতে সমস্যা");
         setMsgInput(text);
-    } finally {
-      setSending(false);
-      setEditingMsg(null);
-    }
+      } finally {
+        setSending(false);
+        setEditingMsg(null);
+        restoreInputFocus();
+      }
       return;
     }
 
@@ -255,6 +266,7 @@ const Chat = () => {
       }
     } finally {
       setSending(false);
+      restoreInputFocus();
     }
   };
 
@@ -654,9 +666,13 @@ const Chat = () => {
                     placeholder={editingMsg ? "এডিট করুন..." : "মেসেজ লিখুন..."}
                     value={msgInput}
                     onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
-                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        void handleSend();
+                      }
+                    }}
                     className="bg-background/50 text-sm h-9 flex-1 min-w-0 mr-1"
-                    readOnly={sending}
                   />
                   <Button
                     type="button"

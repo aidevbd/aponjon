@@ -262,6 +262,33 @@ export type Database = {
         }
         Relationships: []
       }
+      otp_edit_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          phone: string
+          session_token: string
+          used: boolean
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          phone: string
+          session_token: string
+          used?: boolean
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          phone?: string
+          session_token?: string
+          used?: boolean
+        }
+        Relationships: []
+      }
       rate_limit_attempts: {
         Row: {
           action_type: string
@@ -584,8 +611,31 @@ export type Database = {
         Args: { p_name: string; p_phone?: string }
         Returns: string
       }
+      start_otp_edit_session: {
+        Args: { p_code: string; p_phone: string }
+        Returns: Json
+      }
       toggle_pin_message: { Args: { p_message_id: string }; Returns: boolean }
       update_admin_presence: { Args: never; Returns: undefined }
+      update_contact_via_otp_session: {
+        Args: {
+          p_address?: string
+          p_birthday?: string
+          p_blood_group?: string
+          p_category?: string
+          p_custom_category?: string
+          p_email?: string
+          p_facebook?: string
+          p_imo?: string
+          p_name?: string
+          p_note?: string
+          p_photo_url?: string
+          p_session_token: string
+          p_telegram?: string
+          p_whatsapp?: string
+        }
+        Returns: boolean
+      }
       update_presence: { Args: { p_contact_id: string }; Returns: undefined }
       update_verified_contact:
         | {

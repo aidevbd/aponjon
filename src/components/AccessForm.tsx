@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
-import { verifyContactByPhone, verifySecretCode, verifyAndGetContact, updateVerifiedContact, generateOtp, verifyOtp } from "@/lib/store";
+import { verifyContactByPhone, verifySecretCode, verifyAndGetContact, updateVerifiedContact, generateOtp, startOtpEditSession, updateContactViaOtpSession } from "@/lib/store";
 import { toast } from "sonner";
 
 type AccessStep = "choose" | "phone-input" | "secret-input" | "verify-phone" | "otp-input" | "edit";
@@ -28,6 +28,7 @@ export function AccessForm() {
   const [loading, setLoading] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [otpPhone, setOtpPhone] = useState("");
+  const [otpSessionToken, setOtpSessionToken] = useState("");
   const [noSecretCode, setNoSecretCode] = useState(false);
 
   const initEditFromContact = (contact: any) => {
@@ -53,7 +54,7 @@ export function AccessForm() {
         setNoSecretCode(true);
         setOtpPhone(phoneInput);
         toast.info("সিক্রেট কোড সেট করা হয়নি। OTP ভেরিফিকেশন প্রয়োজন।");
-        
+
         const otpResult = await generateOtp(phoneInput);
         if (otpResult === "RATE_LIMITED") {
           toast.error("অনেকবার চেষ্টা করেছেন। পরে আবার চেষ্টা করুন। 🔒");
@@ -63,8 +64,16 @@ export function AccessForm() {
           toast.error("আজকের জন্য OTP সীমা শেষ। আগামীকাল আবার চেষ্টা করুন।");
           return;
         }
-        toast.info(`🔑 আপনার OTP: ${otpResult} (টেস্টিং মোড — প্রোডাকশনে SMS এ যাবে)`);
-        setStep("otp-input");
+        if (otpResult === "NOT_FOUND") {
+          toast.error("এই নম্বরে কোনো তথ্য পাওয়া যায়নি");
+          return;
+        }
+        if (otpResult === "SENT") {
+          toast.success("OTP পাঠানো হয়েছে। ফোনে পাওয়া কোডটি দিন।");
+          setStep("otp-input");
+          return;
+        }
+        toast.error("OTP পাঠাতে সমস্যা হয়েছে");
         return;
       }
       toast.info("আপনার সিক্রেট কোড দিন");
@@ -79,22 +88,20 @@ export function AccessForm() {
   const handleOtpSubmit = async () => {
     setLoading(true);
     try {
-      const result = await verifyOtp(otpPhone, otpCode);
-      if (result) {
-        toast.success("OTP ভেরিফিকেশন সফল! 🎉");
-        const { data } = await (await import("@/integrations/supabase/client")).supabase
-          .from("contacts_public")
-          .select("*")
-          .eq("phone", otpPhone)
-          .single();
-        if (data) {
-          initEditFromContact(data);
-        } else {
+      const result = await startOtpEditSession(otpPhone, otpCode);
+
+      if (!result.success || !result.contact || !result.session_token) {
+        if (result.error === "NOT_FOUND") {
           toast.error("তথ্য পাওয়া যায়নি");
+        } else {
+          toast.error("OTP কোড ভুল হয়েছে");
         }
-      } else {
-        toast.error("OTP কোড ভুল হয়েছে");
+        return;
       }
+
+      setOtpSessionToken(result.session_token);
+      initEditFromContact(result.contact);
+      toast.success("OTP ভেরিফিকেশন সফল! 🎉");
     } catch {
       toast.error("একটি সমস্যা হয়েছে");
     } finally {
@@ -165,8 +172,11 @@ export function AccessForm() {
     try {
       const messengers = deriveMessengers(editPhones);
       if (noSecretCode) {
-        const { supabase } = await import("@/integrations/supabase/client");
-        const { error } = await supabase.from("contacts").update({
+        if (!otpSessionToken) {
+          throw new Error("OTP_SESSION_INVALID");
+        }
+
+        const success = await updateContactViaOtpSession(otpSessionToken, {
           name: editForm.name,
           whatsapp: messengers.whatsapp,
           imo: messengers.imo,
@@ -180,8 +190,11 @@ export function AccessForm() {
           blood_group: editForm.blood_group,
           birthday: editForm.birthday,
           photo_url: editForm.photo_url,
-        }).eq("id", currentContact.id);
-        if (error) throw error;
+        });
+
+        if (!success) {
+          throw new Error("OTP_SESSION_INVALID");
+        }
       } else {
         const phone = currentContact.phone;
         await updateVerifiedContact(phone, secretInput, {
@@ -201,8 +214,12 @@ export function AccessForm() {
       }
       toast.success("তথ্য সফলভাবে আপডেট হয়েছে! 💕");
       resetAll();
-    } catch {
-      toast.error("আপডেট করতে সমস্যা হয়েছে");
+    } catch (error: any) {
+      if (error?.message === "OTP_SESSION_INVALID") {
+        toast.error("OTP সেশন শেষ হয়েছে। আবার OTP দিয়ে ভেরিফাই করুন।");
+      } else {
+        toast.error("আপডেট করতে সমস্যা হয়েছে");
+      }
     } finally {
       setLoading(false);
     }
@@ -219,6 +236,7 @@ export function AccessForm() {
     setEditPhones([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]);
     setOtpCode("");
     setOtpPhone("");
+    setOtpSessionToken("");
     setNoSecretCode(false);
   };
 
