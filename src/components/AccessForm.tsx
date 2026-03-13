@@ -172,8 +172,11 @@ export function AccessForm() {
     try {
       const messengers = deriveMessengers(editPhones);
       if (noSecretCode) {
-        const { supabase } = await import("@/integrations/supabase/client");
-        const { error } = await supabase.from("contacts").update({
+        if (!otpSessionToken) {
+          throw new Error("OTP_SESSION_INVALID");
+        }
+
+        const success = await updateContactViaOtpSession(otpSessionToken, {
           name: editForm.name,
           whatsapp: messengers.whatsapp,
           imo: messengers.imo,
@@ -187,8 +190,11 @@ export function AccessForm() {
           blood_group: editForm.blood_group,
           birthday: editForm.birthday,
           photo_url: editForm.photo_url,
-        }).eq("id", currentContact.id);
-        if (error) throw error;
+        });
+
+        if (!success) {
+          throw new Error("OTP_SESSION_INVALID");
+        }
       } else {
         const phone = currentContact.phone;
         await updateVerifiedContact(phone, secretInput, {
@@ -208,8 +214,12 @@ export function AccessForm() {
       }
       toast.success("তথ্য সফলভাবে আপডেট হয়েছে! 💕");
       resetAll();
-    } catch {
-      toast.error("আপডেট করতে সমস্যা হয়েছে");
+    } catch (error: any) {
+      if (error?.message === "OTP_SESSION_INVALID") {
+        toast.error("OTP সেশন শেষ হয়েছে। আবার OTP দিয়ে ভেরিফাই করুন।");
+      } else {
+        toast.error("আপডেট করতে সমস্যা হয়েছে");
+      }
     } finally {
       setLoading(false);
     }
