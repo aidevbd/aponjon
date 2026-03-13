@@ -54,6 +54,12 @@ const Chat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const restoreInputFocus = useCallback(() => {
+    requestAnimationFrame(() => {
+      inputRef.current?.focus({ preventScroll: true });
+    });
+  }, []);
+
   useEffect(() => {
     const existing = getChatSession();
     if (existing) setSession(existing);

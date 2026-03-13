@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
-import { verifyContactByPhone, verifySecretCode, verifyAndGetContact, updateVerifiedContact, generateOtp, verifyOtp } from "@/lib/store";
+import { verifyContactByPhone, verifySecretCode, verifyAndGetContact, updateVerifiedContact, generateOtp, startOtpEditSession, updateContactViaOtpSession } from "@/lib/store";
 import { toast } from "sonner";
 
 type AccessStep = "choose" | "phone-input" | "secret-input" | "verify-phone" | "otp-input" | "edit";
@@ -28,6 +28,7 @@ export function AccessForm() {
   const [loading, setLoading] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [otpPhone, setOtpPhone] = useState("");
+  const [otpSessionToken, setOtpSessionToken] = useState("");
   const [noSecretCode, setNoSecretCode] = useState(false);
 
   const initEditFromContact = (contact: any) => {
