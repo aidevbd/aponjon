@@ -228,6 +228,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       setSending(false);
       setEditingMsg(null);
       setMsgInput("");
+      restoreInputFocus();
     }
   };
 
@@ -246,11 +247,17 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const handleSend = async () => {
     if (sending) return;
     if (editingMsg) {
-      handleEditMessage();
+      void handleEditMessage();
       return;
     }
-    if (!selectedUser || !msgInput.trim()) return;
+    if (!selectedUser) return;
+
     const text = msgInput.trim();
+    if (!text) {
+      restoreInputFocus();
+      return;
+    }
+
     setSending(true);
     setMsgInput("");
     try {
@@ -261,8 +268,13 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       } as any);
       if (error) throw error;
       setReplyingTo(null);
-    } catch { toast.error("মেসেজ পাঠাতে সমস্যা"); setMsgInput(text); }
-    finally { setSending(false); }
+    } catch {
+      toast.error("মেসেজ পাঠাতে সমস্যা");
+      setMsgInput(text);
+    } finally {
+      setSending(false);
+      restoreInputFocus();
+    }
   };
 
   const handleStartEdit = (msg: Message) => {

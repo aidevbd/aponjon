@@ -54,7 +54,7 @@ export function AccessForm() {
         setNoSecretCode(true);
         setOtpPhone(phoneInput);
         toast.info("সিক্রেট কোড সেট করা হয়নি। OTP ভেরিফিকেশন প্রয়োজন।");
-        
+
         const otpResult = await generateOtp(phoneInput);
         if (otpResult === "RATE_LIMITED") {
           toast.error("অনেকবার চেষ্টা করেছেন। পরে আবার চেষ্টা করুন। 🔒");
@@ -64,8 +64,16 @@ export function AccessForm() {
           toast.error("আজকের জন্য OTP সীমা শেষ। আগামীকাল আবার চেষ্টা করুন।");
           return;
         }
-        toast.info(`🔑 আপনার OTP: ${otpResult} (টেস্টিং মোড — প্রোডাকশনে SMS এ যাবে)`);
-        setStep("otp-input");
+        if (otpResult === "NOT_FOUND") {
+          toast.error("এই নম্বরে কোনো তথ্য পাওয়া যায়নি");
+          return;
+        }
+        if (otpResult === "SENT") {
+          toast.success("OTP পাঠানো হয়েছে। ফোনে পাওয়া কোডটি দিন।");
+          setStep("otp-input");
+          return;
+        }
+        toast.error("OTP পাঠাতে সমস্যা হয়েছে");
         return;
       }
       toast.info("আপনার সিক্রেট কোড দিন");
@@ -80,22 +88,20 @@ export function AccessForm() {
   const handleOtpSubmit = async () => {
     setLoading(true);
     try {
-      const result = await verifyOtp(otpPhone, otpCode);
-      if (result) {
-        toast.success("OTP ভেরিফিকেশন সফল! 🎉");
-        const { data } = await (await import("@/integrations/supabase/client")).supabase
-          .from("contacts_public")
-          .select("*")
-          .eq("phone", otpPhone)
-          .single();
-        if (data) {
-          initEditFromContact(data);
-        } else {
+      const result = await startOtpEditSession(otpPhone, otpCode);
+
+      if (!result.success || !result.contact || !result.session_token) {
+        if (result.error === "NOT_FOUND") {
           toast.error("তথ্য পাওয়া যায়নি");
+        } else {
+          toast.error("OTP কোড ভুল হয়েছে");
         }
-      } else {
-        toast.error("OTP কোড ভুল হয়েছে");
+        return;
       }
+
+      setOtpSessionToken(result.session_token);
+      initEditFromContact(result.contact);
+      toast.success("OTP ভেরিফিকেশন সফল! 🎉");
     } catch {
       toast.error("একটি সমস্যা হয়েছে");
     } finally {

@@ -223,9 +223,13 @@ const Chat = () => {
   };
 
   const handleSend = async () => {
-    if (sending || !session || !selectedContact || (!msgInput.trim() && !uploading)) return;
+    if (sending || !session || !selectedContact) return;
+
     const text = msgInput.trim();
-    if (!text) return;
+    if (!text) {
+      restoreInputFocus();
+      return;
+    }
 
     // If editing
     if (editingMsg) {
@@ -238,10 +242,11 @@ const Chat = () => {
       } catch {
         toast.error("এডিট করতে সমস্যা");
         setMsgInput(text);
-    } finally {
-      setSending(false);
-      setEditingMsg(null);
-    }
+      } finally {
+        setSending(false);
+        setEditingMsg(null);
+        restoreInputFocus();
+      }
       return;
     }
 
@@ -261,6 +266,7 @@ const Chat = () => {
       }
     } finally {
       setSending(false);
+      restoreInputFocus();
     }
   };
 
