@@ -22,6 +22,15 @@ export interface ContactRow {
   updated_at: string;
 }
 
+export type GenerateOtpStatus = "SENT" | "RATE_LIMITED" | "NOT_FOUND" | "DAILY_LIMIT";
+
+export interface OtpEditSessionResult {
+  success: boolean;
+  error?: "INVALID_OTP" | "NOT_FOUND";
+  session_token?: string;
+  contact?: ContactRow;
+}
+
 // ---------- Admin Auth ----------
 export async function adminLogin(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -157,10 +166,57 @@ export async function updateVerifiedContact(
 }
 
 // ---------- OTP ----------
-export async function generateOtp(phone: string) {
+export async function generateOtp(phone: string): Promise<GenerateOtpStatus> {
   const { data, error } = await supabase.rpc("generate_otp", { p_phone: phone });
   if (error) throw error;
-  return data; // Returns OTP code, 'RATE_LIMITED', 'NOT_FOUND', or 'DAILY_LIMIT'
+  return data as GenerateOtpStatus;
+}
+
+export async function startOtpEditSession(phone: string, code: string): Promise<OtpEditSessionResult> {
+  const { data, error } = await supabase.rpc("start_otp_edit_session" as any, {
+    p_phone: phone,
+    p_code: code,
+  });
+  if (error) throw error;
+  return (data || { success: false, error: "INVALID_OTP" }) as OtpEditSessionResult;
+}
+
+export async function updateContactViaOtpSession(
+  sessionToken: string,
+  updates: {
+    name?: string;
+    whatsapp?: string;
+    imo?: string;
+    telegram?: string;
+    facebook?: string;
+    email?: string;
+    category?: string;
+    custom_category?: string;
+    note?: string;
+    address?: string;
+    blood_group?: string;
+    birthday?: string;
+    photo_url?: string;
+  },
+): Promise<boolean> {
+  const { data, error } = await supabase.rpc("update_contact_via_otp_session" as any, {
+    p_session_token: sessionToken,
+    p_name: updates.name || null,
+    p_whatsapp: updates.whatsapp || null,
+    p_imo: updates.imo || null,
+    p_telegram: updates.telegram || null,
+    p_facebook: updates.facebook || null,
+    p_email: updates.email || null,
+    p_category: updates.category || null,
+    p_custom_category: updates.custom_category || null,
+    p_note: updates.note || null,
+    p_address: updates.address || null,
+    p_blood_group: updates.blood_group || null,
+    p_birthday: updates.birthday || null,
+    p_photo_url: updates.photo_url || null,
+  } as any);
+  if (error) throw error;
+  return !!data;
 }
 
 export async function verifyOtp(phone: string, code: string) {
