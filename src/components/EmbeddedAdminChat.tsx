@@ -100,8 +100,8 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
           (msg.sender_id === adminContactId && msg.receiver_id === selectedUser.id)
         );
 
-        if (isCurrentThread && selectedUser) {
-          void loadMessages(selectedUser);
+        if (isCurrentThread) {
+          setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
           return;
         }
 
@@ -115,7 +115,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [adminContactId, selectedUser, loadMessages]);
+  }, [adminContactId, selectedUser]);
 
   useEffect(() => {
     if (!adminContactId || !selectedUser) { setIsOtherTyping(false); return; }
