@@ -162,7 +162,11 @@ const Chat = () => {
       top: messageListRef.current.scrollHeight,
       behavior: keepKeyboardStable ? "auto" : "smooth",
     });
-  }, [messages]);
+
+    if (Date.now() - recentSendAtRef.current < 1500) {
+      restoreInputFocus(true);
+    }
+  }, [messages, restoreInputFocus]);
 
   const loadContacts = async () => {
     if (!session) return;
