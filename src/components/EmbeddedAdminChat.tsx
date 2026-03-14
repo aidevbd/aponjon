@@ -94,20 +94,28 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       .channel("admin-chat-embedded")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
         const msg = payload.new as Message;
-        if (selectedUser && (
+
+        const isCurrentThread = !!selectedUser && (
           (msg.sender_id === selectedUser.id && msg.receiver_id === adminContactId) ||
           (msg.sender_id === adminContactId && msg.receiver_id === selectedUser.id)
-        )) {
-          setMessages(prev => [...prev, msg]);
+        );
+
+        if (isCurrentThread && selectedUser) {
+          void loadMessages(selectedUser);
+          return;
         }
+
         if (msg.receiver_id === adminContactId && msg.sender_id !== selectedUser?.id) {
           setUnreadMap(prev => ({ ...prev, [msg.sender_id]: (prev[msg.sender_id] || 0) + 1 }));
-          loadChatUsers();
+        }
+
+        if (msg.sender_id === adminContactId || msg.receiver_id === adminContactId) {
+          void loadChatUsers();
         }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [adminContactId, selectedUser]);
+  }, [adminContactId, selectedUser, loadMessages]);
 
   useEffect(() => {
     if (!adminContactId || !selectedUser) { setIsOtherTyping(false); return; }
