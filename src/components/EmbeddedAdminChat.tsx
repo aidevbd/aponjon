@@ -288,6 +288,20 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     }
   };
 
+  const handleStartEdit = (msg: Message) => {
+    setEditingMsg(msg);
+    setMsgInput(msg.content || "");
+    setReplyingTo(null);
+    inputRef.current?.focus();
+  };
+
+  const handleStartReply = (msg: Message) => {
+    setReplyingTo(msg);
+    setEditingMsg(null);
+    setMsgInput("");
+    inputRef.current?.focus();
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedUser) return;
