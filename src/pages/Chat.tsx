@@ -246,7 +246,42 @@ const Chat = () => {
       restoreInputFocus(true);
       return;
     }
-...
+
+    // If editing
+    if (editingMsg) {
+      recentSendAtRef.current = Date.now();
+      setSending(true);
+      setMsgInput("");
+      try {
+        await editMessage(session.token, editingMsg.id, text);
+        setMessages(prev => prev.map(m => m.id === editingMsg.id ? { ...m, content: text, edited_at: new Date().toISOString(), original_content: m.original_content || m.content } : m));
+        toast.success("মেসেজ এডিট হয়েছে");
+      } catch {
+        toast.error("এডিট করতে সমস্যা");
+        setMsgInput(text);
+      } finally {
+        setSending(false);
+        setEditingMsg(null);
+        restoreInputFocus(true);
+      }
+      return;
+    }
+
+    recentSendAtRef.current = Date.now();
+    setSending(true);
+    setMsgInput("");
+    try {
+      await sendMessage(session.token, selectedContact.id, text, undefined, replyingTo?.id);
+      setReplyingTo(null);
+    } catch (err: any) {
+      if (err?.message?.includes("Invalid session")) {
+        clearChatSession();
+        setSession(null);
+        toast.error("সেশন শেষ হয়ে গেছে। আবার লগইন করুন।");
+      } else {
+        toast.error("মেসেজ পাঠাতে সমস্যা");
+        setMsgInput(text);
+      }
     } finally {
       setSending(false);
       restoreInputFocus(true);
