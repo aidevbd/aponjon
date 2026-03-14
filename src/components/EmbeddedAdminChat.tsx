@@ -215,6 +215,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const handleEditMessage = async () => {
     if (!editingMsg || !msgInput.trim()) return;
     const text = msgInput.trim();
+    recentSendAtRef.current = Date.now();
     setSending(true);
     try {
       const { error } = await supabase.rpc("edit_admin_message" as any, { p_message_id: editingMsg.id, p_new_content: text });
@@ -222,13 +223,16 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       setMessages(prev => prev.map(m => m.id === editingMsg.id ? { ...m, content: text, edited_at: new Date().toISOString(), original_content: m.original_content || m.content } : m));
       toast.success("মেসেজ এডিট হয়েছে");
       logAdminActivity("message_edit", `মেসেজ এডিট করা হয়েছে`, editingMsg.id, "message");
+      if (selectedUser) {
+        await loadMessages(selectedUser);
+      }
     } catch {
       toast.error("এডিট করতে সমস্যা");
     } finally {
       setSending(false);
       setEditingMsg(null);
       setMsgInput("");
-      restoreInputFocus();
+      restoreInputFocus(true);
     }
   };
 
