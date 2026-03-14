@@ -258,10 +258,11 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
     const text = msgInput.trim();
     if (!text) {
-      restoreInputFocus();
+      restoreInputFocus(true);
       return;
     }
 
+    recentSendAtRef.current = Date.now();
     setSending(true);
     setMsgInput("");
     try {
@@ -272,29 +273,16 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       } as any);
       if (error) throw error;
       setReplyingTo(null);
+      await loadMessages(selectedUser);
     } catch {
       toast.error("মেসেজ পাঠাতে সমস্যা");
       setMsgInput(text);
     } finally {
       setSending(false);
-      restoreInputFocus();
+      restoreInputFocus(true);
     }
   };
-
-  const handleStartEdit = (msg: Message) => {
-    setEditingMsg(msg);
-    setMsgInput(msg.content || "");
-    setReplyingTo(null);
-    inputRef.current?.focus();
-  };
-
-  const handleStartReply = (msg: Message) => {
-    setReplyingTo(msg);
-    setEditingMsg(null);
-    setMsgInput("");
-    inputRef.current?.focus();
-  };
-
+...
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedUser) return;
@@ -309,6 +297,9 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       } as any);
       if (error) throw error;
       setReplyingTo(null);
+      recentSendAtRef.current = Date.now();
+      await loadMessages(selectedUser);
+      restoreInputFocus(true);
     } catch { toast.error("ছবি পাঠাতে সমস্যা"); }
     finally { setUploading(false); if (fileInputRef.current) fileInputRef.current.value = ""; }
   };
