@@ -49,13 +49,18 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const [tappedMsgId, setTappedMsgId] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
+  const recentSendAtRef = useRef(0);
   const messageListRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const restoreInputFocus = useCallback(() => {
+  const restoreInputFocus = useCallback((force = false) => {
     requestAnimationFrame(() => {
-      inputRef.current?.focus({ preventScroll: true });
+      const input = inputRef.current;
+      if (!input) return;
+      if (force || document.activeElement !== input) {
+        input.focus({ preventScroll: true });
+      }
     });
   }, []);
 
