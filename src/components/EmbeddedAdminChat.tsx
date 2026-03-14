@@ -49,13 +49,18 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const [tappedMsgId, setTappedMsgId] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
+  const recentSendAtRef = useRef(0);
   const messageListRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const restoreInputFocus = useCallback(() => {
+  const restoreInputFocus = useCallback((force = false) => {
     requestAnimationFrame(() => {
-      inputRef.current?.focus({ preventScroll: true });
+      const input = inputRef.current;
+      if (!input) return;
+      if (force || document.activeElement !== input) {
+        input.focus({ preventScroll: true });
+      }
     });
   }, []);
 
@@ -89,15 +94,23 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       .channel("admin-chat-embedded")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
         const msg = payload.new as Message;
-        if (selectedUser && (
+
+        const isCurrentThread = !!selectedUser && (
           (msg.sender_id === selectedUser.id && msg.receiver_id === adminContactId) ||
           (msg.sender_id === adminContactId && msg.receiver_id === selectedUser.id)
-        )) {
-          setMessages(prev => [...prev, msg]);
+        );
+
+        if (isCurrentThread) {
+          setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+          return;
         }
+
         if (msg.receiver_id === adminContactId && msg.sender_id !== selectedUser?.id) {
           setUnreadMap(prev => ({ ...prev, [msg.sender_id]: (prev[msg.sender_id] || 0) + 1 }));
-          loadChatUsers();
+        }
+
+        if (msg.sender_id === adminContactId || msg.receiver_id === adminContactId) {
+          void loadChatUsers();
         }
       })
       .subscribe();
@@ -215,6 +228,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const handleEditMessage = async () => {
     if (!editingMsg || !msgInput.trim()) return;
     const text = msgInput.trim();
+    recentSendAtRef.current = Date.now();
     setSending(true);
     try {
       const { error } = await supabase.rpc("edit_admin_message" as any, { p_message_id: editingMsg.id, p_new_content: text });
@@ -222,13 +236,16 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       setMessages(prev => prev.map(m => m.id === editingMsg.id ? { ...m, content: text, edited_at: new Date().toISOString(), original_content: m.original_content || m.content } : m));
       toast.success("মেসেজ এডিট হয়েছে");
       logAdminActivity("message_edit", `মেসেজ এডিট করা হয়েছে`, editingMsg.id, "message");
+      if (selectedUser) {
+        await loadMessages(selectedUser);
+      }
     } catch {
       toast.error("এডিট করতে সমস্যা");
     } finally {
       setSending(false);
       setEditingMsg(null);
       setMsgInput("");
-      restoreInputFocus();
+      restoreInputFocus(true);
     }
   };
 
@@ -254,10 +271,11 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
     const text = msgInput.trim();
     if (!text) {
-      restoreInputFocus();
+      restoreInputFocus(true);
       return;
     }
 
+    recentSendAtRef.current = Date.now();
     setSending(true);
     setMsgInput("");
     try {
@@ -268,12 +286,13 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       } as any);
       if (error) throw error;
       setReplyingTo(null);
+      await loadMessages(selectedUser);
     } catch {
       toast.error("মেসেজ পাঠাতে সমস্যা");
       setMsgInput(text);
     } finally {
       setSending(false);
-      restoreInputFocus();
+      restoreInputFocus(true);
     }
   };
 
@@ -305,6 +324,9 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       } as any);
       if (error) throw error;
       setReplyingTo(null);
+      recentSendAtRef.current = Date.now();
+      await loadMessages(selectedUser);
+      restoreInputFocus(true);
     } catch { toast.error("ছবি পাঠাতে সমস্যা"); }
     finally { setUploading(false); if (fileInputRef.current) fileInputRef.current.value = ""; }
   };
@@ -644,7 +666,18 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                   }}
                   className="bg-card h-9 text-sm"
                 />
-                <Button type="button" tabIndex={-1} variant="hero" size="icon" className="h-9 w-9 shrink-0" onPointerDown={(e) => { e.preventDefault(); if (!sending) void handleSend(); }} onClick={(e) => e.preventDefault()} disabled={!msgInput.trim()}>
+                <Button
+                  type="button"
+                  tabIndex={-1}
+                  variant="hero"
+                  size="icon"
+                  className="h-9 w-9 shrink-0"
+                  onMouseDown={(e) => { e.preventDefault(); restoreInputFocus(true); }}
+                  onTouchStart={(e) => { e.preventDefault(); restoreInputFocus(true); }}
+                  onPointerDown={(e) => { e.preventDefault(); restoreInputFocus(true); if (!sending) void handleSend(); }}
+                  onClick={(e) => e.preventDefault()}
+                  disabled={!msgInput.trim()}
+                >
                   <Send className="h-4 w-4" />
                 </Button>
               </div>

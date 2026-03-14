@@ -50,13 +50,25 @@ const Chat = () => {
   const [tappedMsgId, setTappedMsgId] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
+  const recentSendAtRef = useRef(0);
   const messageListRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const restoreInputFocus = useCallback(() => {
+  const restoreInputFocus = useCallback((force = false) => {
+    const focusInput = () => {
+      const input = inputRef.current;
+      if (!input) return;
+      if (force || document.activeElement !== input) {
+        input.focus({ preventScroll: true });
+        const caret = input.value.length;
+        try { input.setSelectionRange(caret, caret); } catch {}
+      }
+    };
+
     requestAnimationFrame(() => {
-      inputRef.current?.focus({ preventScroll: true });
+      focusInput();
+      window.setTimeout(focusInput, 40);
     });
   }, []);
 
@@ -150,7 +162,11 @@ const Chat = () => {
       top: messageListRef.current.scrollHeight,
       behavior: keepKeyboardStable ? "auto" : "smooth",
     });
-  }, [messages]);
+
+    if (Date.now() - recentSendAtRef.current < 1500) {
+      restoreInputFocus(true);
+    }
+  }, [messages, restoreInputFocus]);
 
   const loadContacts = async () => {
     if (!session) return;
@@ -227,12 +243,13 @@ const Chat = () => {
 
     const text = msgInput.trim();
     if (!text) {
-      restoreInputFocus();
+      restoreInputFocus(true);
       return;
     }
 
     // If editing
     if (editingMsg) {
+      recentSendAtRef.current = Date.now();
       setSending(true);
       setMsgInput("");
       try {
@@ -245,11 +262,12 @@ const Chat = () => {
       } finally {
         setSending(false);
         setEditingMsg(null);
-        restoreInputFocus();
+        restoreInputFocus(true);
       }
       return;
     }
 
+    recentSendAtRef.current = Date.now();
     setSending(true);
     setMsgInput("");
     try {
@@ -266,7 +284,7 @@ const Chat = () => {
       }
     } finally {
       setSending(false);
-      restoreInputFocus();
+      restoreInputFocus(true);
     }
   };
 
@@ -679,7 +697,9 @@ const Chat = () => {
                     tabIndex={-1}
                     variant="hero" size="icon"
                     className="h-9 w-9 shrink-0 rounded-full"
-                    onPointerDown={(e) => { e.preventDefault(); if (!sending) void handleSend(); }}
+                    onMouseDown={(e) => { e.preventDefault(); restoreInputFocus(true); }}
+                    onTouchStart={(e) => { e.preventDefault(); restoreInputFocus(true); }}
+                    onPointerDown={(e) => { e.preventDefault(); restoreInputFocus(true); if (!sending) void handleSend(); }}
                     onClick={(e) => e.preventDefault()}
                     disabled={!msgInput.trim()}
                   >
