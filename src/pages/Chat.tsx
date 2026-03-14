@@ -249,6 +249,7 @@ const Chat = () => {
 
     // If editing
     if (editingMsg) {
+      recentSendAtRef.current = Date.now();
       setSending(true);
       setMsgInput("");
       try {
@@ -261,11 +262,12 @@ const Chat = () => {
       } finally {
         setSending(false);
         setEditingMsg(null);
-        restoreInputFocus();
+        restoreInputFocus(true);
       }
       return;
     }
 
+    recentSendAtRef.current = Date.now();
     setSending(true);
     setMsgInput("");
     try {
