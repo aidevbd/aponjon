@@ -26,6 +26,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { EmbeddedAdminChat } from "@/components/EmbeddedAdminChat";
 import { AdminActivityLog } from "@/components/AdminActivityLog";
 import { logAdminActivity } from "@/lib/adminLog";
+import { ChangePasswordForm } from "@/components/ChangePasswordForm";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -261,19 +262,19 @@ const AdminDashboard = () => {
 
       {/* Tab-Based Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="container mx-auto px-4 py-3">
-        <TabsList className="w-full grid grid-cols-4 h-10 mb-4">
-          <TabsTrigger value="dashboard" className="gap-1 text-[11px] sm:text-sm">
+        <TabsList className="w-full grid grid-cols-5 h-10 mb-4">
+          <TabsTrigger value="dashboard" className="gap-1 text-[10px] sm:text-sm px-1">
             <LayoutDashboard className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">ড্যাশবোর্ড</span>
             <span className="sm:hidden">হোম</span>
           </TabsTrigger>
-          <TabsTrigger value="contacts" className="gap-1 text-[11px] sm:text-sm">
+          <TabsTrigger value="contacts" className="gap-1 text-[10px] sm:text-sm px-1">
             <Users className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">কন্টাক্ট</span>
             <span className="sm:hidden">কন্টাক্ট</span>
             <span className="ml-0.5 text-[9px] bg-primary/10 text-primary rounded-full px-1">{stats.total}</span>
           </TabsTrigger>
-          <TabsTrigger value="chat" className="gap-1 text-[11px] sm:text-sm relative">
+          <TabsTrigger value="chat" className="gap-1 text-[10px] sm:text-sm relative px-1">
             <MessageCircle className="h-3.5 w-3.5" />
             চ্যাট
             {totalUnread > 0 && (
@@ -282,10 +283,15 @@ const AdminDashboard = () => {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="logs" className="gap-1 text-[11px] sm:text-sm">
+          <TabsTrigger value="logs" className="gap-1 text-[10px] sm:text-sm px-1">
             <Activity className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">লগ</span>
             <span className="sm:hidden">লগ</span>
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="gap-1 text-[10px] sm:text-sm px-1">
+            <Settings className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">সেটিংস</span>
+            <span className="sm:hidden">সেটিংস</span>
           </TabsTrigger>
         </TabsList>
 
@@ -402,6 +408,11 @@ const AdminDashboard = () => {
         {/* ===== লগ ট্যাব ===== */}
         <TabsContent value="logs" className="mt-0">
           <AdminActivityLog />
+        </TabsContent>
+
+        {/* ===== সেটিংস ট্যাব ===== */}
+        <TabsContent value="settings" className="mt-0">
+          <ChangePasswordForm />
         </TabsContent>
       </Tabs>
 
