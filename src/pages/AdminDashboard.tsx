@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, LogOut, Users, Heart, Download, Edit3, X, Cake, Gift, Plus,
   Droplets, Phone, MessageCircle, Mail, MapPin, Calendar, Lock, StickyNote,
-  Globe, LayoutDashboard, UserPlus, Facebook, LayoutGrid, List, Send, Activity
+  Globe, LayoutDashboard, UserPlus, Facebook, LayoutGrid, List, Send, Activity, Settings
 } from "lucide-react";
 import { PhoneWithMessengers, PhoneEntry, deriveMessengers, parseMessengersToPhones } from "@/components/PhoneWithMessengers";
 import { Button } from "@/components/ui/button";
