@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lock, Heart, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -85,6 +85,14 @@ const AdminLogin = () => {
               <Button onClick={handleLogin} variant="hero" className="w-full" disabled={loading}>
                 <Heart className="h-4 w-4 mr-1" /> {loading ? "লগইন হচ্ছে..." : "লগইন করুন"}
               </Button>
+              <div className="text-center">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-primary hover:underline"
+                >
+                  পাসওয়ার্ড ভুলে গেছেন?
+                </Link>
+              </div>
             </div>
           </div>
         </motion.div>
