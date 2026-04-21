@@ -22,35 +22,54 @@ const ResetPassword = () => {
 
     const init = async () => {
       try {
-        // 1) Handle modern PKCE flow: ?code=...
         const url = new URL(window.location.href);
         const code = url.searchParams.get("code");
+        const hash = window.location.hash;
+
+        // 0) Check if there's already a valid session BEFORE touching the code
+        // (prevents "code already used" on refresh)
+        const { data: existing } = await supabase.auth.getSession();
+        if (existing.session) {
+          if (mounted) setReady(true);
+          if (code || hash.includes("access_token")) {
+            window.history.replaceState({}, "", window.location.pathname);
+          }
+          return;
+        }
+
+        // 1) Handle modern PKCE flow: ?code=...
         if (code) {
-          const { error: exErr } = await supabase.auth.exchangeCodeForSession(code);
-          if (exErr) throw exErr;
-          // clean URL
+          const { data: ex, error: exErr } =
+            await supabase.auth.exchangeCodeForSession(code);
           window.history.replaceState({}, "", window.location.pathname);
+          if (exErr) throw exErr;
+          if (ex.session && mounted) {
+            setReady(true);
+            return;
+          }
         }
 
         // 2) Handle legacy implicit flow: #access_token=...&type=recovery
-        const hash = window.location.hash;
         if (hash && hash.includes("access_token")) {
           const params = new URLSearchParams(hash.substring(1));
           const access_token = params.get("access_token");
           const refresh_token = params.get("refresh_token");
           if (access_token && refresh_token) {
-            const { error: setErr } = await supabase.auth.setSession({
-              access_token,
-              refresh_token,
-            });
-            if (setErr) throw setErr;
+            const { data: setData, error: setErr } =
+              await supabase.auth.setSession({ access_token, refresh_token });
             window.history.replaceState({}, "", window.location.pathname);
+            if (setErr) throw setErr;
+            if (setData.session && mounted) {
+              setReady(true);
+              return;
+            }
           }
         }
 
-        // 3) Check existing session
-        const { data: { session } } = await supabase.auth.getSession();
-        if (mounted) {
+        // 3) Nothing worked — wait briefly for onAuthStateChange (PASSWORD_RECOVERY)
+        setTimeout(async () => {
+          if (!mounted) return;
+          const { data: { session } } = await supabase.auth.getSession();
           if (session) {
             setReady(true);
           } else {
@@ -58,7 +77,7 @@ const ResetPassword = () => {
               "রিসেট লিংক অবৈধ অথবা মেয়াদ শেষ হয়ে গেছে। নতুন লিংক রিকুয়েস্ট করুন।"
             );
           }
-        }
+        }, 1500);
       } catch (err: any) {
         if (mounted) {
           setError(err?.message || "লিংক যাচাই ব্যর্থ হয়েছে");
