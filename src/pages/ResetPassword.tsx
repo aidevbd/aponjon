@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, KeyRound } from "lucide-react";
+import { Lock, KeyRound, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,22 +14,74 @@ const ResetPassword = () => {
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Supabase recovery link triggers a PASSWORD_RECOVERY auth event
-    const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
-        setReady(true);
+    let mounted = true;
+
+    const init = async () => {
+      try {
+        // 1) Handle modern PKCE flow: ?code=...
+        const url = new URL(window.location.href);
+        const code = url.searchParams.get("code");
+        if (code) {
+          const { error: exErr } = await supabase.auth.exchangeCodeForSession(code);
+          if (exErr) throw exErr;
+          // clean URL
+          window.history.replaceState({}, "", window.location.pathname);
+        }
+
+        // 2) Handle legacy implicit flow: #access_token=...&type=recovery
+        const hash = window.location.hash;
+        if (hash && hash.includes("access_token")) {
+          const params = new URLSearchParams(hash.substring(1));
+          const access_token = params.get("access_token");
+          const refresh_token = params.get("refresh_token");
+          if (access_token && refresh_token) {
+            const { error: setErr } = await supabase.auth.setSession({
+              access_token,
+              refresh_token,
+            });
+            if (setErr) throw setErr;
+            window.history.replaceState({}, "", window.location.pathname);
+          }
+        }
+
+        // 3) Check existing session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (mounted) {
+          if (session) {
+            setReady(true);
+          } else {
+            setError(
+              "রিসেট লিংক অবৈধ অথবা মেয়াদ শেষ হয়ে গেছে। নতুন লিংক রিকুয়েস্ট করুন।"
+            );
+          }
+        }
+      } catch (err: any) {
+        if (mounted) {
+          setError(err?.message || "লিংক যাচাই ব্যর্থ হয়েছে");
+        }
+      }
+    };
+
+    // Listen for PASSWORD_RECOVERY event as well
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") && session) {
+        if (mounted) {
+          setReady(true);
+          setError(null);
+        }
       }
     });
 
-    // Also check existing session (link may already be processed)
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setReady(true);
-    });
+    init();
 
-    return () => data.subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      data.subscription.unsubscribe();
+    };
   }, []);
 
   const handleReset = async () => {
@@ -73,11 +125,38 @@ const ResetPassword = () => {
                 নতুন পাসওয়ার্ড সেট করুন
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                {ready ? "নতুন পাসওয়ার্ড দিন" : "লিংক যাচাই হচ্ছে..."}
+                {error
+                  ? "ত্রুটি ঘটেছে"
+                  : ready
+                  ? "নতুন পাসওয়ার্ড দিন"
+                  : "লিংক যাচাই হচ্ছে..."}
               </p>
             </div>
 
-            {ready && (
+            {error && (
+              <div className="space-y-4 text-center">
+                <div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-destructive/10 text-destructive">
+                  <AlertCircle className="h-6 w-6" />
+                  <p className="text-sm">{error}</p>
+                </div>
+                <Button
+                  onClick={() => navigate("/forgot-password")}
+                  variant="hero"
+                  className="w-full"
+                >
+                  নতুন রিসেট লিংক চান
+                </Button>
+                <Button
+                  onClick={() => navigate("/admin")}
+                  variant="ghost"
+                  className="w-full"
+                >
+                  লগইনে ফিরুন
+                </Button>
+              </div>
+            )}
+
+            {ready && !error && (
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="password" className="flex items-center gap-2">
