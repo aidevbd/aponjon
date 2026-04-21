@@ -636,7 +636,10 @@ export type Database = {
         }
         Returns: boolean
       }
-      update_presence: { Args: { p_contact_id: string }; Returns: undefined }
+      update_presence: {
+        Args: { p_contact_id: string; p_token: string }
+        Returns: undefined
+      }
       update_verified_contact:
         | {
             Args: {

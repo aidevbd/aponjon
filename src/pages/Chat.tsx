@@ -82,7 +82,7 @@ const Chat = () => {
     loadContacts();
     loadUnread();
     const sendHeartbeat = async () => {
-      try { await supabase.rpc("update_presence", { p_contact_id: session.contactId }); } catch {}
+      try { await supabase.rpc("update_presence", { p_token: session.token, p_contact_id: session.contactId } as any); } catch {}
     };
     sendHeartbeat();
     const heartbeat = setInterval(sendHeartbeat, 30000);
