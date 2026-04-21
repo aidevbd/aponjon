@@ -117,7 +117,13 @@ const Chat = () => {
           (msg.sender_id === selectedContact.id && msg.receiver_id === session.contactId) ||
           (msg.sender_id === session.contactId && msg.receiver_id === selectedContact.id)
         )) {
-          setMessages((prev) => [...prev, msg]);
+          // If the message is a reply, the realtime row lacks joined reply_content/reply_sender_id.
+          // Reload from RPC so the reply preview shows for the user as well.
+          if (msg.reply_to_id) {
+            void loadMessages(selectedContact);
+          } else {
+            setMessages((prev) => (prev.some(m => m.id === msg.id) ? prev : [...prev, msg]));
+          }
         }
         if (msg.receiver_id === session.contactId && msg.sender_id !== selectedContact?.id) {
           setUnreadMap((prev) => ({ ...prev, [msg.sender_id]: (prev[msg.sender_id] || 0) + 1 }));
@@ -669,7 +675,7 @@ const Chat = () => {
                 <div className="flex items-center gap-2">
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   <div className="flex items-center shrink-0">
-                    <EmojiPicker onSelect={(emoji) => setMsgInput(prev => prev + emoji)} />
+                    <EmojiPicker inputRef={inputRef} onSelect={(emoji) => setMsgInput(prev => prev + emoji)} />
                     <Button
                       variant="ghost" size="icon"
                       className="h-8 w-8"
