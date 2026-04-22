@@ -117,14 +117,28 @@ export async function editMessage(token: string, messageId: string, newContent: 
   return data as unknown as boolean;
 }
 
-export async function uploadChatImage(file: File): Promise<string> {
+export async function uploadChatImage(file: File, sessionToken?: string): Promise<string> {
   const compressed = await compressChatImage(file);
   const fileName = `chat/${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
-  
-  const { error } = await supabase.storage
-    .from("chat-images")
-    .upload(fileName, compressed, { contentType: "image/webp" });
-  if (error) throw error;
+
+  // Use fetch directly so we can attach the chat-session header that storage RLS validates
+  const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL as string;
+  const anonKey = (import.meta as any).env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+  const headers: Record<string, string> = {
+    "Content-Type": "image/webp",
+    apikey: anonKey,
+    Authorization: `Bearer ${anonKey}`,
+  };
+  if (sessionToken) headers["x-chat-session"] = sessionToken;
+
+  const res = await fetch(
+    `${supabaseUrl}/storage/v1/object/chat-images/${encodeURIComponent(fileName)}`,
+    { method: "POST", headers, body: compressed }
+  );
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Upload failed: ${res.status} ${text}`);
+  }
 
   const { data } = supabase.storage.from("chat-images").getPublicUrl(fileName);
   return data.publicUrl;
