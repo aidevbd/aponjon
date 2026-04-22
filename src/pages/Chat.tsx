@@ -109,29 +109,27 @@ const Chat = () => {
 
   useEffect(() => {
     if (!session) return;
+    // Regular users no longer have direct SELECT on the messages table for privacy.
+    // Subscribe to a per-conversation broadcast topic emitted by send_message / send_admin_message
+    // and refetch the conversation via the secure RPC when a new message arrives.
+    if (!selectedContact) return;
+    const sortedIds = [session.contactId, selectedContact.id].sort();
+    const topic = `msg:${sortedIds[0]}:${sortedIds[1]}`;
     const channel = supabase
-      .channel("chat-messages")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
-        const msg = payload.new as Message;
+      .channel(topic, { config: { private: false } })
+      .on("broadcast", { event: "new_message" }, (payload) => {
+        const data = payload.payload as { id: string; sender_id: string; receiver_id: string };
+        if (!data) return;
+        // Refetch messages so the user sees the new content (including any reply context)
         if (selectedContact && (
-          (msg.sender_id === selectedContact.id && msg.receiver_id === session.contactId) ||
-          (msg.sender_id === session.contactId && msg.receiver_id === selectedContact.id)
+          (data.sender_id === selectedContact.id && data.receiver_id === session.contactId) ||
+          (data.sender_id === session.contactId && data.receiver_id === selectedContact.id)
         )) {
-          // If the message is a reply, the realtime row lacks joined reply_content/reply_sender_id.
-          // Reload from RPC so the reply preview shows for the user as well.
-          if (msg.reply_to_id) {
-            void loadMessages(selectedContact);
-          } else {
-            setMessages((prev) => (prev.some(m => m.id === msg.id) ? prev : [...prev, msg]));
-          }
+          void loadMessages(selectedContact);
         }
-        if (msg.receiver_id === session.contactId && msg.sender_id !== selectedContact?.id) {
-          setUnreadMap((prev) => ({ ...prev, [msg.sender_id]: (prev[msg.sender_id] || 0) + 1 }));
+        if (data.receiver_id === session.contactId && data.sender_id !== selectedContact?.id) {
+          setUnreadMap((prev) => ({ ...prev, [data.sender_id]: (prev[data.sender_id] || 0) + 1 }));
         }
-      })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages" }, (payload) => {
-        const updated = payload.new as Message;
-        setMessages((prev) => prev.map(m => m.id === updated.id ? { ...m, is_read: updated.is_read } : m));
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -327,7 +325,7 @@ const Chat = () => {
     if (!file.type.startsWith("image/")) { toast.error("শুধুমাত্র ছবি পাঠানো যাবে"); return; }
     setUploading(true);
     try {
-      const url = await uploadChatImage(file);
+      const url = await uploadChatImage(file, session.token);
       await sendMessage(session.token, selectedContact.id, undefined, url, replyingTo?.id);
       setReplyingTo(null);
     } catch {
