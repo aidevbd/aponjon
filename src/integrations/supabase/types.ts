@@ -412,6 +412,7 @@ export type Database = {
         Args: { p_phone: string; p_secret_code: string }
         Returns: Json
       }
+      current_chat_session_contact: { Args: never; Returns: string }
       delete_admin_message: { Args: { p_message_id: string }; Returns: boolean }
       delete_message: {
         Args: { p_message_id: string; p_token: string }
