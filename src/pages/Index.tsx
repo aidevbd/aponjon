@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Heart, UserPlus, Shield, Search, MessageCircle } from "lucide-react";
+import { Heart, UserPlus, Shield, Search, MessageCircle, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
@@ -63,6 +63,20 @@ const Index = () => {
         </div>
       </section>
 
+      <section className="container mx-auto px-4 pb-10">
+        <div className="mx-auto max-w-4xl rounded-2xl border border-border/60 bg-card/70 px-5 py-4 shadow-soft backdrop-blur-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground">অ্যাপের মতো ব্যবহার করতে চান?</p>
+              <p className="text-xs text-muted-foreground">মোবাইল ব্রাউজারের menu থেকে “Add to Home Screen” দিলে এটি installable app হিসেবে কাজ করবে।</p>
+            </div>
+            <Button variant="outline" className="gap-2 self-start sm:self-auto" onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })}>
+              <Download className="h-4 w-4 text-primary" /> ইনস্টল হিন্ট দেখুন
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="container mx-auto px-4 pb-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -103,6 +117,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t border-border/50 py-6 text-center text-sm text-muted-foreground">
         <p>তৈরি হয়েছে ভালোবাসা দিয়ে 💕 আপনজন ডাইরেক্টরি</p>
+        <p className="mt-1 text-xs">iPhone: Share → Add to Home Screen, Android: browser menu → Install app</p>
       </footer>
     </div>
   );

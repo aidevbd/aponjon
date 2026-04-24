@@ -242,6 +242,16 @@ export function AccessForm() {
 
   return (
     <div className="mx-auto max-w-lg">
+      <div className="mb-5 rounded-xl border border-border/60 bg-muted/40 p-4">
+        <div className="flex items-start gap-3">
+          <Shield className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <div>
+            <p className="text-sm font-medium text-foreground">সহজ ৩ ধাপের এক্সেস</p>
+            <p className="text-xs text-muted-foreground mt-1">ফোন নম্বর বা সিক্রেট কোড দিয়ে শুরু করুন, ভেরিফাই করুন, তারপর নিজের তথ্য আপডেট করুন।</p>
+          </div>
+        </div>
+      </div>
+
       <AnimatePresence mode="wait">
         {step === "choose" && (
           <motion.div key="choose" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
@@ -278,6 +288,7 @@ export function AccessForm() {
               <Label className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-primary" /> আপনার ফোন নম্বর</Label>
               <Input placeholder="01XXXXXXXXX" value={phoneInput} onChange={(e) => setPhoneInput(e.target.value)} className="bg-card" />
             </div>
+            <p className="text-xs text-muted-foreground">এই নম্বরেই আপনার তথ্য খোঁজা হবে। সিক্রেট কোড না থাকলে OTP ভেরিফিকেশন লাগবে।</p>
             <Button onClick={handlePhoneSubmit} variant="hero" className="w-full" disabled={loading}>{loading ? "যাচাই হচ্ছে..." : "পরবর্তী →"}</Button>
           </motion.div>
         )}
@@ -291,6 +302,7 @@ export function AccessForm() {
               <Label className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-primary" /> সিক্রেট কোড</Label>
               <Input type="password" placeholder="আপনার সিক্রেট কোড" value={secretInput} onChange={(e) => setSecretInput(e.target.value)} className="bg-card" />
             </div>
+            <p className="text-xs text-muted-foreground">ফোন নম্বর মনে না থাকলেও সিক্রেট কোড দিয়ে তথ্য খুঁজে নিতে পারবেন।</p>
             <Button onClick={handleSecretSubmit} variant="hero" className="w-full" disabled={loading}>{loading ? "যাচাই হচ্ছে..." : "ভেরিফাই করুন"}</Button>
           </motion.div>
         )}
@@ -336,6 +348,7 @@ export function AccessForm() {
               <Label>সম্পূর্ণ ফোন নম্বর লিখুন</Label>
               <Input placeholder="01XXXXXXXXX" value={fullPhoneInput} onChange={(e) => setFullPhoneInput(e.target.value)} className="bg-card" />
             </div>
+            <p className="text-xs text-muted-foreground">নিরাপত্তার জন্য শুধু আপনার সম্পূর্ণ নম্বর মিললে তথ্য দেখানো হবে।</p>
             <Button onClick={handleVerifyPhone} variant="hero" className="w-full" disabled={loading}>{loading ? "যাচাই হচ্ছে..." : "ভেরিফাই করুন"}</Button>
           </motion.div>
         )}
@@ -348,6 +361,9 @@ export function AccessForm() {
             <div className="text-center mb-4">
               <Edit3 className="h-8 w-8 text-primary mx-auto mb-2" />
               <h3 className="text-lg font-display font-semibold">তথ্য আপডেট করুন</h3>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-card/60 p-3 text-xs text-muted-foreground">
+              ফোন নম্বরটি স্থির রাখা হয়েছে যাতে আপনার একাউন্ট সঠিক থাকে। বাকি তথ্য চাইলে আপডেট করতে পারেন।
             </div>
             <div className="space-y-4">
               <PhotoUpload
