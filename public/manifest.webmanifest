@@ -1,0 +1,29 @@
+{
+  "name": "আপনজন ডাইরেক্টরি",
+  "short_name": "আপনজন",
+  "description": "প্রিয়জনদের যোগাযোগ সংরক্ষণ ও প্রাইভেট মেসেজের জন্য installable app",
+  "lang": "bn",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fff6f7",
+  "theme_color": "#d45472",
+  "icons": [
+    {
+      "src": "/pwa-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
