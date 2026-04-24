@@ -100,32 +100,6 @@ const Chat = () => {
 
   useEffect(() => {
     if (!session) return;
-
-    const deliverQueued = async () => {
-      const result = await flushOfflineQueue((item: QueuedChatMessage) => {
-        if (selectedContact?.id === item.receiverId) {
-          void loadMessages(selectedContact);
-        }
-      });
-
-      if (result.sent > 0) {
-        toast.success(`${result.sent}টি pending মেসেজ পাঠানো হয়েছে`);
-      }
-      if (selectedContact) {
-        setQueuedCount(getOfflineQueueCountForContact(selectedContact.id));
-      }
-    };
-
-    if (navigator.onLine) {
-      void deliverQueued();
-    }
-
-    window.addEventListener("online", deliverQueued);
-    return () => window.removeEventListener("online", deliverQueued);
-  }, [session, selectedContact, loadMessages]);
-
-  useEffect(() => {
-    if (!session) return;
     loadContacts();
     loadUnread();
     const sendHeartbeat = async () => {
@@ -258,6 +232,32 @@ const Chat = () => {
       toast.error("মেসেজ লোড করতে সমস্যা");
     }
   }, [session]);
+
+  useEffect(() => {
+    if (!session) return;
+
+    const deliverQueued = async () => {
+      const result = await flushOfflineQueue((item: QueuedChatMessage) => {
+        if (selectedContact?.id === item.receiverId) {
+          void loadMessages(selectedContact);
+        }
+      });
+
+      if (result.sent > 0) {
+        toast.success(`${result.sent}টি pending মেসেজ পাঠানো হয়েছে`);
+      }
+      if (selectedContact) {
+        setQueuedCount(getOfflineQueueCountForContact(selectedContact.id));
+      }
+    };
+
+    if (navigator.onLine) {
+      void deliverQueued();
+    }
+
+    window.addEventListener("online", deliverQueued);
+    return () => window.removeEventListener("online", deliverQueued);
+  }, [session, selectedContact, loadMessages]);
 
   const handleSelectContact = (contact: ChatContact) => {
     setSelectedContact(contact);
