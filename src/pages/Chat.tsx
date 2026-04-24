@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { EmojiPicker } from "@/components/EmojiPicker";
+import { enqueueOfflineMessage, flushOfflineQueue, getOfflineQueueCountForContact, type QueuedChatMessage } from "@/lib/offlineChatQueue";
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
 type Message = {
@@ -48,6 +49,8 @@ const Chat = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [tappedMsgId, setTappedMsgId] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(typeof navigator !== "undefined" ? !navigator.onLine : false);
+  const [queuedCount, setQueuedCount] = useState(0);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
   const recentSendAtRef = useRef(0);
@@ -76,6 +79,50 @@ const Chat = () => {
     const existing = getChatSession();
     if (existing) setSession(existing);
   }, []);
+
+  useEffect(() => {
+    const syncConnectivity = () => setIsOffline(!navigator.onLine);
+    const syncQueueCount = () => setQueuedCount(selectedContact ? getOfflineQueueCountForContact(selectedContact.id) : 0);
+
+    syncConnectivity();
+    syncQueueCount();
+
+    window.addEventListener("online", syncConnectivity);
+    window.addEventListener("offline", syncConnectivity);
+    window.addEventListener("offline-chat-queue-changed", syncQueueCount as EventListener);
+
+    return () => {
+      window.removeEventListener("online", syncConnectivity);
+      window.removeEventListener("offline", syncConnectivity);
+      window.removeEventListener("offline-chat-queue-changed", syncQueueCount as EventListener);
+    };
+  }, [selectedContact]);
+
+  useEffect(() => {
+    if (!session) return;
+
+    const deliverQueued = async () => {
+      const result = await flushOfflineQueue((item: QueuedChatMessage) => {
+        if (selectedContact?.id === item.receiverId) {
+          void loadMessages(selectedContact);
+        }
+      });
+
+      if (result.sent > 0) {
+        toast.success(`${result.sent}টি pending মেসেজ পাঠানো হয়েছে`);
+      }
+      if (selectedContact) {
+        setQueuedCount(getOfflineQueueCountForContact(selectedContact.id));
+      }
+    };
+
+    if (navigator.onLine) {
+      void deliverQueued();
+    }
+
+    window.addEventListener("online", deliverQueued);
+    return () => window.removeEventListener("online", deliverQueued);
+  }, [session, selectedContact, loadMessages]);
 
   useEffect(() => {
     if (!session) return;
@@ -214,6 +261,7 @@ const Chat = () => {
 
   const handleSelectContact = (contact: ChatContact) => {
     setSelectedContact(contact);
+    setQueuedCount(getOfflineQueueCountForContact(contact.id));
     loadMessages(contact);
   };
 
@@ -274,6 +322,23 @@ const Chat = () => {
     recentSendAtRef.current = Date.now();
     setSending(true);
     setMsgInput("");
+
+    if (!navigator.onLine) {
+      enqueueOfflineMessage({
+        token: session.token,
+        receiverId: selectedContact.id,
+        content: text,
+        imageUrl: null,
+        replyToId: replyingTo?.id || null,
+      });
+      setQueuedCount(getOfflineQueueCountForContact(selectedContact.id));
+      setReplyingTo(null);
+      setSending(false);
+      restoreInputFocus(true);
+      toast.success("ইন্টারনেট এলে মেসেজ অটো পাঠানো হবে");
+      return;
+    }
+
     try {
       await sendMessage(session.token, selectedContact.id, text, undefined, replyingTo?.id);
       setReplyingTo(null);
@@ -665,6 +730,21 @@ const Chat = () => {
                     <button onClick={() => { setEditingMsg(null); setReplyingTo(null); setMsgInput(""); }} className="shrink-0">
                       <X className="h-3.5 w-3.5 text-muted-foreground" />
                     </button>
+                  </div>
+                </div>
+              )}
+
+              {(isOffline || queuedCount > 0) && (
+                <div className="px-4 pt-2">
+                  <div className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-muted/60 px-3 py-2 text-[11px] text-muted-foreground">
+                    <span>
+                      {isOffline ? "আপনি এখন অফলাইনে আছেন" : "কানেকশন ফিরে এসেছে"}
+                    </span>
+                    {queuedCount > 0 && (
+                      <span className="rounded-full bg-card px-2 py-0.5 text-foreground">
+                        {queuedCount}টি pending
+                      </span>
+                    )}
                   </div>
                 </div>
               )}
