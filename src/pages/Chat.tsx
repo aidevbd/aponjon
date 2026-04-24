@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Lock, Phone, X, Loader2, Trash2, Pencil, Reply, Search, Pin, MoreVertical, Home, LogOut } from "lucide-react";
+import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Lock, Phone, X, Loader2, Trash2, Pencil, Reply, Search, Pin, MoreVertical, Home, LogOut, WifiOff, Clock3, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import {
   getChatSession, createChatSession, getChatContacts,
   sendMessage, getMessages, getUnreadCounts, uploadChatImage,
@@ -25,6 +26,11 @@ type Message = {
   edited_at?: string | null; original_content?: string | null;
   reply_to_id?: string | null; reply_content?: string | null; reply_sender_id?: string | null;
   is_pinned?: boolean;
+};
+
+type ContactPreview = {
+  preview: string;
+  time: string | null;
 };
 
 const Chat = () => {
@@ -51,12 +57,15 @@ const Chat = () => {
   const [tappedMsgId, setTappedMsgId] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(typeof navigator !== "undefined" ? !navigator.onLine : false);
   const [queuedCount, setQueuedCount] = useState(0);
+  const [contactPreviews, setContactPreviews] = useState<Record<string, ContactPreview>>({});
+  const [actionMessage, setActionMessage] = useState<Message | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
   const recentSendAtRef = useRef(0);
   const messageListRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const longPressTimeoutRef = useRef<number | null>(null);
 
   const restoreInputFocus = useCallback((force = false) => {
     const focusInput = () => {
@@ -207,6 +216,24 @@ const Chat = () => {
         }
       }
       setContacts(data);
+      const previewEntries = await Promise.all(
+        data.map(async (contact) => {
+          try {
+            const contactMessages = await getMessages(session.token, contact.id);
+            const lastMessage = contactMessages[contactMessages.length - 1];
+            return [
+              contact.id,
+              {
+                preview: lastMessage?.content || (lastMessage?.image_url ? "ছবি পাঠানো হয়েছে" : "ট্যাপ করে মেসেজ করুন"),
+                time: lastMessage?.created_at || null,
+              },
+            ] as const;
+          } catch {
+            return [contact.id, { preview: "ট্যাপ করে মেসেজ করুন", time: null }] as const;
+          }
+        }),
+      );
+      setContactPreviews(Object.fromEntries(previewEntries));
     } catch {
       toast.error("কন্টাক্ট লোড করতে সমস্যা");
     }
@@ -227,6 +254,14 @@ const Chat = () => {
     try {
       const data = await getMessages(session.token, contact.id);
       setMessages(data);
+      const lastMessage = data[data.length - 1];
+      setContactPreviews((prev) => ({
+        ...prev,
+        [contact.id]: {
+          preview: lastMessage?.content || (lastMessage?.image_url ? "ছবি পাঠানো হয়েছে" : "এখনো কোনো মেসেজ নেই"),
+          time: lastMessage?.created_at || null,
+        },
+      }));
       setUnreadMap((prev) => { const n = { ...prev }; delete n[contact.id]; return n; });
     } catch {
       toast.error("মেসেজ লোড করতে সমস্যা");
@@ -384,6 +419,18 @@ const Chat = () => {
     inputRef.current?.focus();
   };
 
+  const startLongPress = (msg: Message) => {
+    if (longPressTimeoutRef.current) window.clearTimeout(longPressTimeoutRef.current);
+    longPressTimeoutRef.current = window.setTimeout(() => setActionMessage(msg), 450);
+  };
+
+  const cancelLongPress = () => {
+    if (longPressTimeoutRef.current) {
+      window.clearTimeout(longPressTimeoutRef.current);
+      longPressTimeoutRef.current = null;
+    }
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !session || !selectedContact) return;
@@ -451,6 +498,14 @@ const Chat = () => {
   const filteredMessages = searchQuery
     ? messages.filter(m => m.content?.toLowerCase().includes(searchQuery.toLowerCase()))
     : messages;
+  const statusTone = sending ? "text-primary" : isOffline ? "text-destructive" : queuedCount > 0 ? "text-foreground" : "text-muted-foreground";
+  const statusLabel = sending
+    ? "মেসেজ পাঠানো হচ্ছে..."
+    : isOffline
+      ? "অফলাইন — মেসেজ queue হবে"
+      : queuedCount > 0
+        ? `${queuedCount}টি pending মেসেজ আছে`
+        : "অনলাইন — এখনই মেসেজ যাবে";
 
   // ============ LOGIN SCREEN ============
   if (!session) {
