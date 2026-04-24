@@ -101,6 +101,16 @@ export function ContactForm() {
 
   return (
     <div className="mx-auto max-w-lg">
+      <div className="mb-5 rounded-xl border border-border/60 bg-muted/40 p-4">
+        <div className="flex items-start gap-3">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <div>
+            <p className="text-sm font-medium text-foreground">৩ ধাপে তথ্য যোগ করুন</p>
+            <p className="text-xs text-muted-foreground mt-1">প্রথমে প্রয়োজনীয় তথ্য, তারপর অতিরিক্ত তথ্য, শেষে সিক্রেট কোড। চাইলে মাঝপথে আগের ধাপে ফিরে যেতে পারবেন।</p>
+          </div>
+        </div>
+      </div>
+
       <div className="mb-8 flex items-center justify-center gap-2">
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex items-center gap-2">
@@ -118,6 +128,9 @@ export function ContactForm() {
             <div className="text-center mb-6">
               <h3 className="text-lg font-display font-semibold text-foreground">মূল তথ্য</h3>
               <p className="text-sm text-muted-foreground">আপনার নাম ও যোগাযোগের তথ্য দিন</p>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-card/60 p-3 text-xs text-muted-foreground">
+              * চিহ্নিত তথ্যগুলো আবশ্যক। ফোন নম্বরটি ভবিষ্যতে আপনার তথ্য খুঁজে পেতে ব্যবহার হবে।
             </div>
             <div className="flex justify-center">
               <PhotoUpload value={form.photoUrl || undefined} onChange={(url) => updateForm("photoUrl", url || "")} />
@@ -146,6 +159,9 @@ export function ContactForm() {
             <div className="text-center mb-6">
               <h3 className="text-lg font-display font-semibold text-foreground">অতিরিক্ত তথ্য</h3>
               <p className="text-sm text-muted-foreground">ক্যাটাগরি ও অন্যান্য বিবরণ</p>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-card/60 p-3 text-xs text-muted-foreground">
+              এই ধাপের সব তথ্য ঐচ্ছিক। যতটুকু দরকার ততটুকুই দিন।
             </div>
             <div className="space-y-2">
               <Label className="flex items-center gap-2">সম্পর্ক/ক্যাটাগরি</Label>
@@ -193,6 +209,9 @@ export function ContactForm() {
             <div className="text-center mb-6">
               <h3 className="text-lg font-display font-semibold text-foreground">সিক্রেট কোড (ঐচ্ছিক)</h3>
               <p className="text-sm text-muted-foreground">ভবিষ্যতে নিজের তথ্য এক্সেস করতে</p>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-card/60 p-3 text-xs text-muted-foreground">
+              ছোট কিন্তু মনে রাখার মতো কোড দিন—যেমন ডাকনাম, বিশেষ শব্দ, বা সংখ্যা+অক্ষরের মিশ্রণ।
             </div>
             <div className="space-y-2">
               <Label htmlFor="secretCode" className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-primary" /> সিক্রেট কোড</Label>
