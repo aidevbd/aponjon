@@ -52,18 +52,12 @@ const Index = () => {
           transition={{ delay: 0.3, duration: 0.6 }}
           className="mx-auto max-w-2xl glass-card p-6 md:p-8"
         >
-          <div className="space-y-4 text-[15px] md:text-base leading-relaxed text-foreground/90 font-display">
+          <div className="space-y-3 text-[15px] md:text-base leading-relaxed text-foreground/90 font-display">
             <p>
-              এই ছোট্ট ডাইরেক্টরিটা আমি বানিয়েছি শুধু একটাই কারণে — যেন আমার প্রিয় মানুষগুলোর নম্বর কখনো হারিয়ে না যায়।
+              মোবাইল হারালে যেন আপনাকে হারিয়ে না ফেলি — তাই এই ছোট্ট ডাইরেক্টরি।
             </p>
             <p>
-              মোবাইল হারিয়ে গেলে, নষ্ট হয়ে গেলে, কিংবা নতুন ফোন নিলে — অনেক সময় কাছের মানুষের নম্বরটাই খুঁজে পাই না। সেই কষ্ট থেকেই এই ছোট প্রয়াস।
-            </p>
-            <p>
-              আপনি যদি আমার আপনজন হন, একটু কষ্ট করে আপনার নাম আর যোগাযোগের তথ্যটা এখানে যোগ করে দেবেন? তাহলে যখনই দরকার হবে, আপনাকে খুঁজে পাব ইনশাআল্লাহ।
-            </p>
-            <p className="text-muted-foreground text-sm md:text-[15px]">
-              আপনার তথ্য শুধু আমার কাছেই থাকবে — সম্পূর্ণ ব্যক্তিগত, নিরাপদ। 🤍
+              একটু কষ্ট করে আপনার নাম আর নম্বরটা যোগ করে দেবেন? 🤍
             </p>
           </div>
 
