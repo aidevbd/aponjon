@@ -328,8 +328,8 @@ const AdminChat = () => {
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-4 py-3">
-                <div className="flex items-center gap-2">
+              <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-3 sm:px-4 py-3">
+                <div className="flex items-center gap-1.5 sm:gap-2 w-full">
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                     {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4 text-primary" />}
@@ -339,10 +339,10 @@ const AdminChat = () => {
                     value={msgInput}
                     onChange={(e) => setMsgInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-                    className="bg-background/50 text-sm"
+                    className="bg-background/50 text-sm h-9 flex-1 min-w-0"
                     disabled={sending}
                   />
-                  <Button variant="hero" size="icon" className="h-9 w-9 shrink-0" onClick={handleSend} disabled={sending || !msgInput.trim()}>
+                  <Button variant="hero" size="icon" className="h-9 w-9 shrink-0 rounded-full" onClick={handleSend} disabled={sending || !msgInput.trim()}>
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
