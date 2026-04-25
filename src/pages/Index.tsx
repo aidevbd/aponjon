@@ -9,7 +9,7 @@ const Index = () => {
     <div className="min-h-screen warm-gradient">
       <Header />
 
-      {/* Hero — personal letter style */}
+      {/* Hero — personal letter, no box */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 opacity-30 pointer-events-none">
           <div className="absolute top-20 left-10 h-32 w-32 rounded-full bg-primary/20 blur-3xl" />
@@ -17,12 +17,12 @@ const Index = () => {
           <div className="absolute top-40 right-1/3 h-24 w-24 rounded-full bg-peach/40 blur-2xl" />
         </div>
 
-        <div className="container relative mx-auto px-4 py-16 md:py-24">
+        <div className="container relative mx-auto px-4 py-14 md:py-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
-            className="text-center max-w-2xl mx-auto"
+            className="text-center max-w-xl mx-auto"
           >
             <motion.div
               initial={{ scale: 0 }}
@@ -33,55 +33,45 @@ const Index = () => {
               <Heart className="h-8 w-8 md:h-10 md:w-10 text-primary-foreground fill-current" />
             </motion.div>
 
-            <h1 className="mb-4 text-3xl md:text-4xl font-display font-bold text-foreground leading-tight">
-              আমার আপনজনদের জন্য
+            <p className="text-sm md:text-base text-muted-foreground mb-2">
+              আসসালামু আলাইকুম 💕
+            </p>
+
+            <h1 className="mb-6 text-3xl md:text-4xl font-display font-bold text-foreground leading-tight">
+              আপনি আমার আপনজন
             </h1>
 
-            <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-              আসসালামু আলাইকুম 💕
+            <div className="space-y-3 text-base md:text-lg leading-relaxed text-foreground/90 font-display">
+              <p>
+                মোবাইল হারালে যেন আপনাকে হারিয়ে না ফেলি — তাই এই ছোট্ট ডাইরেক্টরি।
+              </p>
+              <p>
+                একটু কষ্ট করে আপনার নাম আর নম্বরটা যোগ করে দেবেন? 🤍
+              </p>
+            </div>
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+              <Link to="/add" className="w-full sm:w-auto">
+                <Button variant="hero" size="lg" className="w-full sm:w-auto gap-2 text-base px-8">
+                  <UserPlus className="h-5 w-5" /> আমার তথ্য যোগ করি
+                </Button>
+              </Link>
+              <Link to="/access" className="w-full sm:w-auto">
+                <Button variant="ghost" size="lg" className="w-full sm:w-auto gap-2 text-base px-8">
+                  <Shield className="h-5 w-5" /> আগে যোগ করেছি, দেখি
+                </Button>
+              </Link>
+            </div>
+
+            <p className="mt-8 text-xs text-muted-foreground">
+              — কৃতজ্ঞতায়, আপনারই একজন আপনজন
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Personal letter card */}
-      <section className="container mx-auto px-4 -mt-8 md:-mt-10 pb-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-          className="mx-auto max-w-2xl glass-card p-6 md:p-8"
-        >
-          <div className="space-y-3 text-[15px] md:text-base leading-relaxed text-foreground/90 font-display">
-            <p>
-              মোবাইল হারালে যেন আপনাকে হারিয়ে না ফেলি — তাই এই ছোট্ট ডাইরেক্টরি।
-            </p>
-            <p>
-              একটু কষ্ট করে আপনার নাম আর নম্বরটা যোগ করে দেবেন? 🤍
-            </p>
-          </div>
-
-          <div className="mt-7 flex flex-col sm:flex-row gap-3">
-            <Link to="/add" className="flex-1">
-              <Button variant="hero" size="lg" className="w-full gap-2 text-base">
-                <UserPlus className="h-5 w-5" /> আমার তথ্য যোগ করি
-              </Button>
-            </Link>
-            <Link to="/access" className="flex-1">
-              <Button variant="outline" size="lg" className="w-full gap-2 text-base">
-                <Shield className="h-5 w-5" /> আগে যোগ করেছি, দেখি
-              </Button>
-            </Link>
-          </div>
-
-          <p className="mt-5 text-center text-xs text-muted-foreground">
-            — কৃতজ্ঞতায়, আপনারই একজন আপনজন
-          </p>
-        </motion.div>
-      </section>
-
       {/* Footer */}
-      <footer className="border-t border-border/50 py-6 text-center text-xs text-muted-foreground">
+      <footer className="py-6 text-center text-xs text-muted-foreground">
         <p>ভালোবাসা দিয়ে তৈরি 💕</p>
       </footer>
     </div>
