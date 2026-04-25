@@ -820,14 +820,14 @@ const Chat = () => {
                 </div>
               )}
 
-              <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-2 sm:px-3 py-2 shrink-0">
-                <div className="flex items-center gap-2">
+              <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-3 py-2 shrink-0">
+                <div className="flex items-center gap-1.5 sm:gap-2 w-full">
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   <div className="flex items-center shrink-0">
                     <EmojiPicker inputRef={inputRef} onSelect={(emoji) => setMsgInput(prev => prev + emoji)} />
                     <Button
                       variant="ghost" size="icon"
-                      className="h-8 w-8"
+                      className="h-9 w-9"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploading}
                     >
@@ -845,7 +845,7 @@ const Chat = () => {
                         void handleSend();
                       }
                     }}
-                    className="bg-background/50 text-sm h-9 flex-1 min-w-0 mr-1"
+                    className="bg-background/50 text-sm h-9 flex-1 min-w-0"
                   />
                   <Button
                     type="button"

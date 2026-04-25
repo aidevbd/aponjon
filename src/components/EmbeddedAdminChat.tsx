@@ -646,8 +646,8 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
             )}
 
             {/* Input */}
-            <div className="border-t border-border/50 pt-3">
-              <div className="flex items-center gap-2">
+            <div className="border-t border-border/50 pt-3 px-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 w-full">
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 <EmojiPicker inputRef={inputRef} onSelect={(emoji) => setMsgInput(prev => prev + emoji)} />
                 <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
@@ -664,14 +664,14 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                       void handleSend();
                     }
                   }}
-                  className="bg-card h-9 text-sm"
+                  className="bg-card h-9 text-sm flex-1 min-w-0"
                 />
                 <Button
                   type="button"
                   tabIndex={-1}
                   variant="hero"
                   size="icon"
-                  className="h-9 w-9 shrink-0"
+                  className="h-9 w-9 shrink-0 rounded-full"
                   onMouseDown={(e) => { e.preventDefault(); restoreInputFocus(true); }}
                   onTouchStart={(e) => { e.preventDefault(); restoreInputFocus(true); }}
                   onPointerDown={(e) => { e.preventDefault(); restoreInputFocus(true); if (!sending) void handleSend(); }}
