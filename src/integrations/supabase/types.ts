@@ -518,6 +518,7 @@ export type Database = {
           last_seen_at: string
         }[]
       }
+      is_current_user_admin: { Args: never; Returns: boolean }
       log_admin_activity: {
         Args: {
           p_action_type: string
