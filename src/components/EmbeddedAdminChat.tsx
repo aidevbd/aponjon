@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Loader2, Settings, Trash2, Pencil, Reply, Search, Pin, X, Eye } from "lucide-react";
+import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Loader2, Settings, Pencil, Reply, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,10 @@ import { uploadChatImage } from "@/lib/chatSession";
 import { toast } from "sonner";
 import { EmojiPicker } from "@/components/EmojiPicker";
 import { logAdminActivity } from "@/lib/adminLog";
+import { MessageBubble } from "@/components/chat/MessageBubble";
+import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
+import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
+import { TypingIndicator } from "@/components/chat/TypingIndicator";
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
 type Message = {
