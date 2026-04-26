@@ -403,16 +403,63 @@ const Chat = () => {
     }
   };
 
-  const handleDeleteMessage = async () => {
-    if (!session || !deleteTargetId) return;
+  const handleUnsendMessage = async () => {
+    if (!session || !unsendTargetId) return;
     try {
-      await deleteMessage(session.token, deleteTargetId);
-      setMessages(prev => prev.filter(m => m.id !== deleteTargetId));
-      toast.success("মেসেজ ডিলিট হয়েছে");
+      await unsendMessage(session.token, unsendTargetId);
+      setMessages(prev => prev.map(m => m.id === unsendTargetId ? { ...m, content: null, image_url: null, unsent_at: new Date().toISOString() } : m));
+      toast.success("মেসেজ আনসেন্ড করা হয়েছে");
     } catch {
-      toast.error("ডিলিট করতে সমস্যা");
+      toast.error("আনসেন্ড করতে সমস্যা");
     } finally {
-      setDeleteTargetId(null);
+      setUnsendTargetId(null);
+    }
+  };
+
+  const handleRemoveForMe = async (msg: Message) => {
+    if (!session) return;
+    try {
+      await removeMessageForMe(session.token, msg.id);
+      setMessages(prev => prev.filter(m => m.id !== msg.id));
+      toast.success("আপনার চ্যাট থেকে সরানো হয়েছে");
+    } catch {
+      toast.error("সরাতে সমস্যা");
+    }
+  };
+
+  const handleReact = async (msg: Message, emoji: string) => {
+    if (!session) return;
+    // optimistic toggle
+    setMessages(prev => prev.map(m => {
+      if (m.id !== msg.id) return m;
+      const reactions = m.reactions || [];
+      const mine = reactions.find(r => r.reactor_id === session.contactId);
+      let next = reactions.filter(r => r.reactor_id !== session.contactId);
+      if (!mine || mine.emoji !== emoji) {
+        next = [...next, { emoji, reactor_id: session.contactId }];
+      }
+      return { ...m, reactions: next };
+    }));
+    try {
+      await reactToMessage(session.token, msg.id, emoji);
+    } catch {
+      toast.error("রিয়্যাকশনে সমস্যা");
+      if (selectedContact) void loadMessages(selectedContact);
+    }
+  };
+
+  const handleShowEditHistory = async (msg: Message) => {
+    if (!session) return;
+    setEditHistoryFor(msg);
+    setEditHistoryLoading(true);
+    setEditHistory([]);
+    try {
+      const data = await getMessageEditHistory(session.token, msg.id);
+      setEditHistory(data);
+    } catch {
+      toast.error("ইতিহাস লোড করতে সমস্যা");
+    } finally {
+      setEditHistoryLoading(false);
     }
   };
 
@@ -428,18 +475,6 @@ const Chat = () => {
     setEditingMsg(null);
     setMsgInput("");
     inputRef.current?.focus();
-  };
-
-  const startLongPress = (msg: Message) => {
-    if (longPressTimeoutRef.current) window.clearTimeout(longPressTimeoutRef.current);
-    longPressTimeoutRef.current = window.setTimeout(() => setActionMessage(msg), 450);
-  };
-
-  const cancelLongPress = () => {
-    if (longPressTimeoutRef.current) {
-      window.clearTimeout(longPressTimeoutRef.current);
-      longPressTimeoutRef.current = null;
-    }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
