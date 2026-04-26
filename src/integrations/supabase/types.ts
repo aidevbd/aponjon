@@ -457,16 +457,19 @@ export type Database = {
           created_at: string
           deleted_by_sender: boolean
           edited_at: string
+          has_edit_history: boolean
           id: string
           image_url: string
           is_pinned: boolean
           is_read: boolean
           original_content: string
+          reactions: Json
           receiver_id: string
           reply_content: string
           reply_sender_id: string
           reply_to_id: string
           sender_id: string
+          unsent_at: string
         }[]
       }
       get_admin_unread_counts: {
@@ -491,16 +494,19 @@ export type Database = {
           content: string
           created_at: string
           edited_at: string
+          has_edit_history: boolean
           id: string
           image_url: string
           is_pinned: boolean
           is_read: boolean
           original_content: string
+          reactions: Json
           receiver_id: string
           reply_content: string
           reply_sender_id: string
           reply_to_id: string
           sender_id: string
+          unsent_at: string
         }[]
       }
       get_unread_counts: {
