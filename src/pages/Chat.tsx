@@ -744,80 +744,56 @@ const Chat = () => {
                     {!searchQuery && <p className="text-xs mt-1">নিচের বক্সে লিখে প্রথম মেসেজ শুরু করুন</p>}
                   </div>
                 )}
-                {filteredMessages.map((msg, idx) => {
-                  const isMine = msg.sender_id === session.contactId;
-                  const showDateHeader = !searchQuery && shouldShowDateHeader(filteredMessages, idx);
-                  return (
-                    <div key={msg.id}>
-                      {showDateHeader && (
-                        <div className="flex justify-center my-3">
-                          <span className="text-[10px] text-muted-foreground bg-muted/60 px-3 py-0.5 rounded-full">{getDateLabel(msg.created_at)}</span>
-                        </div>
-                      )}
-                      <div
-                        className={`group flex flex-col ${isMine ? "items-end" : "items-start"}`}
-                        onClick={() => setTappedMsgId(tappedMsgId === msg.id ? null : msg.id)}
-                        onTouchStart={() => startLongPress(msg)}
-                        onTouchEnd={cancelLongPress}
-                        onTouchCancel={cancelLongPress}
-                      >
-                        <div className={`flex ${isMine ? "justify-end" : "justify-start"} w-full`}>
-                          {isMine && (
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-1.5 flex items-center gap-0.5">
-                              <button onClick={(e) => { e.stopPropagation(); handleStartEdit(msg); }} className="p-1 rounded-full hover:bg-muted" title="এডিট">
-                                <Pencil className="h-3 w-3 text-muted-foreground" />
-                              </button>
-                              <button onClick={(e) => { e.stopPropagation(); setDeleteTargetId(msg.id); }} className="p-1 rounded-full hover:bg-destructive/10" title="ডিলিট">
-                                <Trash2 className="h-3 w-3 text-destructive" />
-                              </button>
-                            </div>
-                          )}
-                          <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 ${msg.is_pinned ? "ring-1 ring-primary/30" : ""} ${isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
-                            {msg.is_pinned && <p className="text-[9px] mb-0.5 opacity-70">📌 পিন করা</p>}
-                            {msg.reply_content && (
-                              <div className={`text-[10px] mb-1.5 px-2 py-1 rounded-lg border-l-2 ${isMine ? "bg-primary-foreground/10 border-primary-foreground/30" : "bg-muted border-primary/30"}`}>
-                                <span className="font-medium">{msg.reply_sender_id === session.contactId ? "আপনি" : selectedContact?.name}</span>
-                                <p className="truncate opacity-80">{msg.reply_content}</p>
-                              </div>
-                            )}
-                            {msg.image_url && (
-                              <img src={msg.image_url} alt="" className="rounded-lg max-w-full mb-1.5 cursor-pointer" onClick={(e) => { e.stopPropagation(); window.open(msg.image_url!, "_blank"); }} />
-                            )}
-                            {msg.content && <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>}
-                            {msg.edited_at && (
-                              <span className={`text-[9px] ${isMine ? "text-primary-foreground/50" : "text-muted-foreground"}`}>এডিটেড</span>
-                            )}
+                {(() => {
+                  // Find last own message id for receipt rendering
+                  let lastMineId: string | null = null;
+                  for (let i = filteredMessages.length - 1; i >= 0; i--) {
+                    if (filteredMessages[i].sender_id === session.contactId) { lastMineId = filteredMessages[i].id; break; }
+                  }
+                  return filteredMessages.map((msg, idx) => {
+                    const isMine = msg.sender_id === session.contactId;
+                    const showDateHeader = !searchQuery && shouldShowDateHeader(filteredMessages, idx);
+                    const prev = idx > 0 ? filteredMessages[idx - 1] : null;
+                    const next = idx < filteredMessages.length - 1 ? filteredMessages[idx + 1] : null;
+                    const sameAsNext = next && next.sender_id === msg.sender_id && (new Date(next.created_at).getTime() - new Date(msg.created_at).getTime() < 5 * 60 * 1000);
+                    const sameAsPrev = prev && prev.sender_id === msg.sender_id && (new Date(msg.created_at).getTime() - new Date(prev.created_at).getTime() < 5 * 60 * 1000);
+                    const showTail = !sameAsNext;
+                    const showAvatar = !isMine && !sameAsNext;
+                    return (
+                      <div key={msg.id}>
+                        {showDateHeader && (
+                          <div className="flex justify-center my-3">
+                            <span className="text-[10px] text-muted-foreground bg-muted/60 px-3 py-0.5 rounded-full">{getDateLabel(msg.created_at)}</span>
                           </div>
-                          {!isMine && (
-                            <button onClick={(e) => { e.stopPropagation(); handleStartReply(msg); }} className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-1.5 p-1 rounded-full hover:bg-muted" title="রিপ্লাই">
-                              <Reply className="h-3 w-3 text-muted-foreground" />
-                            </button>
-                          )}
-                          {isMine && (
-                            <button onClick={(e) => { e.stopPropagation(); handleStartReply(msg); }} className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-0.5 p-1 rounded-full hover:bg-muted" title="রিপ্লাই">
-                              <Reply className="h-3 w-3 text-muted-foreground" />
-                            </button>
-                          )}
-                        </div>
-                        {/* Time shown outside bubble on hover/tap */}
-                        <div className={`flex items-center gap-1 mt-0.5 px-2 transition-all duration-200 ${tappedMsgId === msg.id ? "max-h-5 opacity-100" : "max-h-0 opacity-0 group-hover:max-h-5 group-hover:opacity-100"} overflow-hidden`}>
-                          <p className="text-[10px] text-muted-foreground">{formatTime(msg.created_at)}</p>
-                          {isMine && (
-                            <span className={`text-[10px] ${msg.is_read ? "text-primary" : "text-muted-foreground/50"}`}>
-                              {msg.is_read ? "✓✓" : "✓"}
-                            </span>
-                          )}
-                        </div>
+                        )}
+                        {!sameAsPrev && !isMine && (
+                          <div className="text-[10px] text-muted-foreground ml-10 mb-0.5">{selectedContact?.name}</div>
+                        )}
+                        <MessageBubble
+                          msg={msg}
+                          isMine={isMine}
+                          myId={session.contactId}
+                          otherName={selectedContact?.name || ""}
+                          showTail={showTail}
+                          showAvatar={showAvatar}
+                          avatarUrl={selectedContact?.photo_url || null}
+                          onOpenActions={(m) => setActionMessage(m)}
+                          onQuickReact={(m, e) => handleReact(m, e)}
+                          onStartReply={(m) => handleStartReply(m)}
+                          onShowEditHistory={(m) => handleShowEditHistory(m)}
+                          isDelivered={!!msg.is_read || true}
+                          showReceipt={isMine && msg.id === lastMineId}
+                        />
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
                 <div className="h-0" />
               </div>
 
               {isOtherTyping && (
                 <div className="px-4 pb-1">
-                  <span className="text-xs text-muted-foreground italic animate-pulse">লিখছে...</span>
+                  <TypingIndicator name={selectedContact?.name} />
                 </div>
               )}
 
