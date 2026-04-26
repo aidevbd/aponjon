@@ -1,23 +1,28 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Lock, Phone, X, Loader2, Trash2, Pencil, Reply, Search, Pin, MoreVertical, Home, LogOut, WifiOff, Clock3, CheckCircle2 } from "lucide-react";
+import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Lock, Phone, X, Loader2, Pencil, Reply, Search, Pin, MoreVertical, Home, LogOut, WifiOff, Clock3, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import {
   getChatSession, createChatSession, getChatContacts,
   sendMessage, getMessages, getUnreadCounts, uploadChatImage,
-  clearChatSession, deleteMessage, editMessage, type ChatSession,
+  clearChatSession, editMessage,
+  reactToMessage, unsendMessage, removeMessageForMe, getMessageEditHistory,
+  type ChatSession,
 } from "@/lib/chatSession";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { EmojiPicker } from "@/components/EmojiPicker";
 import { enqueueOfflineMessage, flushOfflineQueue, getOfflineQueueCountForContact, type QueuedChatMessage } from "@/lib/offlineChatQueue";
+import { MessageBubble } from "@/components/chat/MessageBubble";
+import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
+import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
+import { TypingIndicator } from "@/components/chat/TypingIndicator";
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
 type Message = {
