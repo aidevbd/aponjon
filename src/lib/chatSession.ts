@@ -76,27 +76,62 @@ export async function sendMessage(token: string, receiverId: string, content?: s
   return data as string;
 }
 
+export type ChatReaction = { emoji: string; reactor_id: string };
+export type ChatMessageRow = {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  content: string | null;
+  image_url: string | null;
+  is_read: boolean;
+  created_at: string;
+  edited_at: string | null;
+  original_content: string | null;
+  reply_to_id: string | null;
+  reply_content: string | null;
+  reply_sender_id: string | null;
+  is_pinned: boolean;
+  unsent_at: string | null;
+  has_edit_history: boolean;
+  reactions: ChatReaction[];
+};
+
 export async function getMessages(token: string, otherId: string) {
   const { data, error } = await supabase.rpc("get_messages", {
     p_token: token,
     p_other_id: otherId,
   });
   if (error) throw error;
-  return (data || []) as {
-    id: string;
-    sender_id: string;
-    receiver_id: string;
-    content: string | null;
-    image_url: string | null;
-    is_read: boolean;
-    created_at: string;
-    edited_at: string | null;
-    original_content: string | null;
-    reply_to_id: string | null;
-    reply_content: string | null;
-    reply_sender_id: string | null;
-    is_pinned: boolean;
-  }[];
+  return (data || []) as ChatMessageRow[];
+}
+
+export async function reactToMessage(token: string, messageId: string, emoji: string) {
+  const { error } = await supabase.rpc("react_to_message" as any, {
+    p_token: token, p_message_id: messageId, p_emoji: emoji,
+  });
+  if (error) throw error;
+}
+
+export async function unsendMessage(token: string, messageId: string) {
+  const { error } = await supabase.rpc("unsend_message" as any, {
+    p_token: token, p_message_id: messageId,
+  });
+  if (error) throw error;
+}
+
+export async function removeMessageForMe(token: string, messageId: string) {
+  const { error } = await supabase.rpc("remove_message_for_me" as any, {
+    p_token: token, p_message_id: messageId,
+  });
+  if (error) throw error;
+}
+
+export async function getMessageEditHistory(token: string, messageId: string) {
+  const { data, error } = await supabase.rpc("get_message_edit_history" as any, {
+    p_token: token, p_message_id: messageId,
+  });
+  if (error) throw error;
+  return (data || []) as { previous_content: string; edited_at: string }[];
 }
 
 export async function getUnreadCounts(token: string) {

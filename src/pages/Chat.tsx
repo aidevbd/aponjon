@@ -26,6 +26,9 @@ type Message = {
   edited_at?: string | null; original_content?: string | null;
   reply_to_id?: string | null; reply_content?: string | null; reply_sender_id?: string | null;
   is_pinned?: boolean;
+  unsent_at?: string | null;
+  has_edit_history?: boolean;
+  reactions?: { emoji: string; reactor_id: string }[];
 };
 
 type ContactPreview = {
