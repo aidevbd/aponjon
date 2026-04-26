@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Loader2, Settings, Trash2, Pencil, Reply, Search, Pin, X, Eye } from "lucide-react";
+import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Loader2, Settings, Pencil, Reply, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,10 @@ import { uploadChatImage } from "@/lib/chatSession";
 import { toast } from "sonner";
 import { EmojiPicker } from "@/components/EmojiPicker";
 import { logAdminActivity } from "@/lib/adminLog";
+import { MessageBubble } from "@/components/chat/MessageBubble";
+import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
+import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
+import { TypingIndicator } from "@/components/chat/TypingIndicator";
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
 type Message = {
@@ -43,13 +47,15 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [editingMsg, setEditingMsg] = useState<Message | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewOriginal, setViewOriginal] = useState<string | null>(null);
-  const [tappedMsgId, setTappedMsgId] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<Message | null>(null);
+  const [unsendTargetId, setUnsendTargetId] = useState<string | null>(null);
+  const [editHistoryFor, setEditHistoryFor] = useState<Message | null>(null);
+  const [editHistory, setEditHistory] = useState<{ previous_content: string; edited_at: string }[]>([]);
+  const [editHistoryLoading, setEditHistoryLoading] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
   const recentSendAtRef = useRef(0);
@@ -213,18 +219,63 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     finally { setSetupLoading(false); }
   };
 
-  const handleDeleteMessage = async () => {
-    if (!deleteTargetId) return;
+  const handleUnsendMessage = async () => {
+    if (!unsendTargetId) return;
     try {
-      const { error } = await supabase.rpc("delete_admin_message", { p_message_id: deleteTargetId });
+      const { error } = await supabase.rpc("unsend_message_admin" as any, { p_message_id: unsendTargetId });
       if (error) throw error;
-      setMessages(prev => prev.filter(m => m.id !== deleteTargetId));
-      toast.success("মেসেজ ডিলিট হয়েছে");
-      logAdminActivity("message_delete", `মেসেজ ডিলিট করা হয়েছে`, deleteTargetId, "message");
+      setMessages(prev => prev.map(m => m.id === unsendTargetId ? { ...m, content: null, image_url: null, unsent_at: new Date().toISOString() } : m));
+      toast.success("মেসেজ আনসেন্ড করা হয়েছে");
+      logAdminActivity("message_unsend", `মেসেজ আনসেন্ড করা হয়েছে`, unsendTargetId, "message");
     } catch {
-      toast.error("ডিলিট করতে সমস্যা");
+      toast.error("আনসেন্ড করতে সমস্যা");
     } finally {
-      setDeleteTargetId(null);
+      setUnsendTargetId(null);
+    }
+  };
+
+  const handleRemoveForMe = async (msg: Message) => {
+    try {
+      const { error } = await supabase.rpc("remove_message_for_me_admin" as any, { p_message_id: msg.id });
+      if (error) throw error;
+      setMessages(prev => prev.filter(m => m.id !== msg.id));
+      toast.success("আপনার চ্যাট থেকে সরানো হয়েছে");
+    } catch { toast.error("সরাতে সমস্যা"); }
+  };
+
+  const handleReact = async (msg: Message, emoji: string) => {
+    if (!adminContactId) return;
+    setMessages(prev => prev.map(m => {
+      if (m.id !== msg.id) return m;
+      const reactions = m.reactions || [];
+      const mine = reactions.find(r => r.reactor_id === adminContactId);
+      let next = reactions.filter(r => r.reactor_id !== adminContactId);
+      if (!mine || mine.emoji !== emoji) {
+        next = [...next, { emoji, reactor_id: adminContactId }];
+      }
+      return { ...m, reactions: next };
+    }));
+    try {
+      const { error } = await supabase.rpc("react_to_message_admin" as any, { p_message_id: msg.id, p_emoji: emoji });
+      if (error) throw error;
+    } catch {
+      toast.error("রিয়্যাকশনে সমস্যা");
+      if (selectedUser) void loadMessages(selectedUser);
+    }
+  };
+
+  const handleShowEditHistory = async (msg: Message) => {
+    setEditHistoryFor(msg);
+    setEditHistoryLoading(true);
+    setEditHistory([]);
+    try {
+      const { data, error } = await supabase.rpc("get_message_edit_history_admin" as any, { p_message_id: msg.id });
+      if (error) throw error;
+      setEditHistory((data || []) as any);
+    } catch {
+      toast.error("ইতিহাস লোড করতে সমস্যা");
+    } finally {
+      setEditHistoryLoading(false);
     }
   };
 

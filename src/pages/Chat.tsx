@@ -1,23 +1,28 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Lock, Phone, X, Loader2, Trash2, Pencil, Reply, Search, Pin, MoreVertical, Home, LogOut, WifiOff, Clock3, CheckCircle2 } from "lucide-react";
+import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Lock, Phone, X, Loader2, Pencil, Reply, Search, Pin, MoreVertical, Home, LogOut, WifiOff, Clock3, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import {
   getChatSession, createChatSession, getChatContacts,
   sendMessage, getMessages, getUnreadCounts, uploadChatImage,
-  clearChatSession, deleteMessage, editMessage, type ChatSession,
+  clearChatSession, editMessage,
+  reactToMessage, unsendMessage, removeMessageForMe, getMessageEditHistory,
+  type ChatSession,
 } from "@/lib/chatSession";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { EmojiPicker } from "@/components/EmojiPicker";
 import { enqueueOfflineMessage, flushOfflineQueue, getOfflineQueueCountForContact, type QueuedChatMessage } from "@/lib/offlineChatQueue";
+import { MessageBubble } from "@/components/chat/MessageBubble";
+import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
+import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
+import { TypingIndicator } from "@/components/chat/TypingIndicator";
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
 type Message = {
@@ -51,17 +56,20 @@ const Chat = () => {
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [presenceMap, setPresenceMap] = useState<Record<string, { is_online: boolean; last_seen_at: string }>>({});
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  
   const [isOtherTyping, setIsOtherTyping] = useState(false);
   const [editingMsg, setEditingMsg] = useState<Message | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [tappedMsgId, setTappedMsgId] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(typeof navigator !== "undefined" ? !navigator.onLine : false);
   const [queuedCount, setQueuedCount] = useState(0);
   const [contactPreviews, setContactPreviews] = useState<Record<string, ContactPreview>>({});
   const [actionMessage, setActionMessage] = useState<Message | null>(null);
+  const [unsendTargetId, setUnsendTargetId] = useState<string | null>(null);
+  const [editHistoryFor, setEditHistoryFor] = useState<Message | null>(null);
+  const [editHistory, setEditHistory] = useState<{ previous_content: string; edited_at: string }[]>([]);
+  const [editHistoryLoading, setEditHistoryLoading] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
   const recentSendAtRef = useRef(0);
@@ -163,6 +171,14 @@ const Chat = () => {
         if (data.receiver_id === session.contactId && data.sender_id !== selectedContact?.id) {
           setUnreadMap((prev) => ({ ...prev, [data.sender_id]: (prev[data.sender_id] || 0) + 1 }));
         }
+      })
+      .on("broadcast", { event: "msg_update" }, (payload) => {
+        const data = payload.payload as { id: string; sender_id: string; receiver_id: string; event: string };
+        if (!data || !selectedContact) return;
+        const inThread =
+          (data.sender_id === selectedContact.id && data.receiver_id === session.contactId) ||
+          (data.sender_id === session.contactId && data.receiver_id === selectedContact.id);
+        if (inThread) void loadMessages(selectedContact);
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -395,16 +411,63 @@ const Chat = () => {
     }
   };
 
-  const handleDeleteMessage = async () => {
-    if (!session || !deleteTargetId) return;
+  const handleUnsendMessage = async () => {
+    if (!session || !unsendTargetId) return;
     try {
-      await deleteMessage(session.token, deleteTargetId);
-      setMessages(prev => prev.filter(m => m.id !== deleteTargetId));
-      toast.success("মেসেজ ডিলিট হয়েছে");
+      await unsendMessage(session.token, unsendTargetId);
+      setMessages(prev => prev.map(m => m.id === unsendTargetId ? { ...m, content: null, image_url: null, unsent_at: new Date().toISOString() } : m));
+      toast.success("মেসেজ আনসেন্ড করা হয়েছে");
     } catch {
-      toast.error("ডিলিট করতে সমস্যা");
+      toast.error("আনসেন্ড করতে সমস্যা");
     } finally {
-      setDeleteTargetId(null);
+      setUnsendTargetId(null);
+    }
+  };
+
+  const handleRemoveForMe = async (msg: Message) => {
+    if (!session) return;
+    try {
+      await removeMessageForMe(session.token, msg.id);
+      setMessages(prev => prev.filter(m => m.id !== msg.id));
+      toast.success("আপনার চ্যাট থেকে সরানো হয়েছে");
+    } catch {
+      toast.error("সরাতে সমস্যা");
+    }
+  };
+
+  const handleReact = async (msg: Message, emoji: string) => {
+    if (!session) return;
+    // optimistic toggle
+    setMessages(prev => prev.map(m => {
+      if (m.id !== msg.id) return m;
+      const reactions = m.reactions || [];
+      const mine = reactions.find(r => r.reactor_id === session.contactId);
+      let next = reactions.filter(r => r.reactor_id !== session.contactId);
+      if (!mine || mine.emoji !== emoji) {
+        next = [...next, { emoji, reactor_id: session.contactId }];
+      }
+      return { ...m, reactions: next };
+    }));
+    try {
+      await reactToMessage(session.token, msg.id, emoji);
+    } catch {
+      toast.error("রিয়্যাকশনে সমস্যা");
+      if (selectedContact) void loadMessages(selectedContact);
+    }
+  };
+
+  const handleShowEditHistory = async (msg: Message) => {
+    if (!session) return;
+    setEditHistoryFor(msg);
+    setEditHistoryLoading(true);
+    setEditHistory([]);
+    try {
+      const data = await getMessageEditHistory(session.token, msg.id);
+      setEditHistory(data);
+    } catch {
+      toast.error("ইতিহাস লোড করতে সমস্যা");
+    } finally {
+      setEditHistoryLoading(false);
     }
   };
 
@@ -420,18 +483,6 @@ const Chat = () => {
     setEditingMsg(null);
     setMsgInput("");
     inputRef.current?.focus();
-  };
-
-  const startLongPress = (msg: Message) => {
-    if (longPressTimeoutRef.current) window.clearTimeout(longPressTimeoutRef.current);
-    longPressTimeoutRef.current = window.setTimeout(() => setActionMessage(msg), 450);
-  };
-
-  const cancelLongPress = () => {
-    if (longPressTimeoutRef.current) {
-      window.clearTimeout(longPressTimeoutRef.current);
-      longPressTimeoutRef.current = null;
-    }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -701,80 +752,56 @@ const Chat = () => {
                     {!searchQuery && <p className="text-xs mt-1">নিচের বক্সে লিখে প্রথম মেসেজ শুরু করুন</p>}
                   </div>
                 )}
-                {filteredMessages.map((msg, idx) => {
-                  const isMine = msg.sender_id === session.contactId;
-                  const showDateHeader = !searchQuery && shouldShowDateHeader(filteredMessages, idx);
-                  return (
-                    <div key={msg.id}>
-                      {showDateHeader && (
-                        <div className="flex justify-center my-3">
-                          <span className="text-[10px] text-muted-foreground bg-muted/60 px-3 py-0.5 rounded-full">{getDateLabel(msg.created_at)}</span>
-                        </div>
-                      )}
-                      <div
-                        className={`group flex flex-col ${isMine ? "items-end" : "items-start"}`}
-                        onClick={() => setTappedMsgId(tappedMsgId === msg.id ? null : msg.id)}
-                        onTouchStart={() => startLongPress(msg)}
-                        onTouchEnd={cancelLongPress}
-                        onTouchCancel={cancelLongPress}
-                      >
-                        <div className={`flex ${isMine ? "justify-end" : "justify-start"} w-full`}>
-                          {isMine && (
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-1.5 flex items-center gap-0.5">
-                              <button onClick={(e) => { e.stopPropagation(); handleStartEdit(msg); }} className="p-1 rounded-full hover:bg-muted" title="এডিট">
-                                <Pencil className="h-3 w-3 text-muted-foreground" />
-                              </button>
-                              <button onClick={(e) => { e.stopPropagation(); setDeleteTargetId(msg.id); }} className="p-1 rounded-full hover:bg-destructive/10" title="ডিলিট">
-                                <Trash2 className="h-3 w-3 text-destructive" />
-                              </button>
-                            </div>
-                          )}
-                          <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 ${msg.is_pinned ? "ring-1 ring-primary/30" : ""} ${isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
-                            {msg.is_pinned && <p className="text-[9px] mb-0.5 opacity-70">📌 পিন করা</p>}
-                            {msg.reply_content && (
-                              <div className={`text-[10px] mb-1.5 px-2 py-1 rounded-lg border-l-2 ${isMine ? "bg-primary-foreground/10 border-primary-foreground/30" : "bg-muted border-primary/30"}`}>
-                                <span className="font-medium">{msg.reply_sender_id === session.contactId ? "আপনি" : selectedContact?.name}</span>
-                                <p className="truncate opacity-80">{msg.reply_content}</p>
-                              </div>
-                            )}
-                            {msg.image_url && (
-                              <img src={msg.image_url} alt="" className="rounded-lg max-w-full mb-1.5 cursor-pointer" onClick={(e) => { e.stopPropagation(); window.open(msg.image_url!, "_blank"); }} />
-                            )}
-                            {msg.content && <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>}
-                            {msg.edited_at && (
-                              <span className={`text-[9px] ${isMine ? "text-primary-foreground/50" : "text-muted-foreground"}`}>এডিটেড</span>
-                            )}
+                {(() => {
+                  // Find last own message id for receipt rendering
+                  let lastMineId: string | null = null;
+                  for (let i = filteredMessages.length - 1; i >= 0; i--) {
+                    if (filteredMessages[i].sender_id === session.contactId) { lastMineId = filteredMessages[i].id; break; }
+                  }
+                  return filteredMessages.map((msg, idx) => {
+                    const isMine = msg.sender_id === session.contactId;
+                    const showDateHeader = !searchQuery && shouldShowDateHeader(filteredMessages, idx);
+                    const prev = idx > 0 ? filteredMessages[idx - 1] : null;
+                    const next = idx < filteredMessages.length - 1 ? filteredMessages[idx + 1] : null;
+                    const sameAsNext = next && next.sender_id === msg.sender_id && (new Date(next.created_at).getTime() - new Date(msg.created_at).getTime() < 5 * 60 * 1000);
+                    const sameAsPrev = prev && prev.sender_id === msg.sender_id && (new Date(msg.created_at).getTime() - new Date(prev.created_at).getTime() < 5 * 60 * 1000);
+                    const showTail = !sameAsNext;
+                    const showAvatar = !isMine && !sameAsNext;
+                    return (
+                      <div key={msg.id}>
+                        {showDateHeader && (
+                          <div className="flex justify-center my-3">
+                            <span className="text-[10px] text-muted-foreground bg-muted/60 px-3 py-0.5 rounded-full">{getDateLabel(msg.created_at)}</span>
                           </div>
-                          {!isMine && (
-                            <button onClick={(e) => { e.stopPropagation(); handleStartReply(msg); }} className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-1.5 p-1 rounded-full hover:bg-muted" title="রিপ্লাই">
-                              <Reply className="h-3 w-3 text-muted-foreground" />
-                            </button>
-                          )}
-                          {isMine && (
-                            <button onClick={(e) => { e.stopPropagation(); handleStartReply(msg); }} className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-0.5 p-1 rounded-full hover:bg-muted" title="রিপ্লাই">
-                              <Reply className="h-3 w-3 text-muted-foreground" />
-                            </button>
-                          )}
-                        </div>
-                        {/* Time shown outside bubble on hover/tap */}
-                        <div className={`flex items-center gap-1 mt-0.5 px-2 transition-all duration-200 ${tappedMsgId === msg.id ? "max-h-5 opacity-100" : "max-h-0 opacity-0 group-hover:max-h-5 group-hover:opacity-100"} overflow-hidden`}>
-                          <p className="text-[10px] text-muted-foreground">{formatTime(msg.created_at)}</p>
-                          {isMine && (
-                            <span className={`text-[10px] ${msg.is_read ? "text-primary" : "text-muted-foreground/50"}`}>
-                              {msg.is_read ? "✓✓" : "✓"}
-                            </span>
-                          )}
-                        </div>
+                        )}
+                        {!sameAsPrev && !isMine && (
+                          <div className="text-[10px] text-muted-foreground ml-10 mb-0.5">{selectedContact?.name}</div>
+                        )}
+                        <MessageBubble
+                          msg={msg}
+                          isMine={isMine}
+                          myId={session.contactId}
+                          otherName={selectedContact?.name || ""}
+                          showTail={showTail}
+                          showAvatar={showAvatar}
+                          avatarUrl={selectedContact?.photo_url || null}
+                          onOpenActions={(m) => setActionMessage(m)}
+                          onQuickReact={(m, e) => handleReact(m, e)}
+                          onStartReply={(m) => handleStartReply(m)}
+                          onShowEditHistory={(m) => handleShowEditHistory(m)}
+                          isDelivered={!!msg.is_read || true}
+                          showReceipt={isMine && msg.id === lastMineId}
+                        />
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
                 <div className="h-0" />
               </div>
 
               {isOtherTyping && (
                 <div className="px-4 pb-1">
-                  <span className="text-xs text-muted-foreground italic animate-pulse">লিখছে...</span>
+                  <TypingIndicator name={selectedContact?.name} />
                 </div>
               )}
 
@@ -870,42 +897,39 @@ const Chat = () => {
         </AnimatePresence>
       </div>
 
-      <AlertDialog open={!!deleteTargetId} onOpenChange={(open) => !open && setDeleteTargetId(null)}>
+      <AlertDialog open={!!unsendTargetId} onOpenChange={(open) => !open && setUnsendTargetId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>মেসেজ ডিলিট করবেন?</AlertDialogTitle>
-            <AlertDialogDescription>এই মেসেজটি আপনার চ্যাট থেকে মুছে যাবে। এটি পূর্বাবস্থায় ফেরানো যাবে না।</AlertDialogDescription>
+            <AlertDialogTitle>সবার জন্য আনসেন্ড?</AlertDialogTitle>
+            <AlertDialogDescription>এই মেসেজটি দুজনের চ্যাট থেকেই মুছে যাবে। এটি পূর্বাবস্থায় ফেরানো যাবে না।</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>বাতিল</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteMessage} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">ডিলিট করুন</AlertDialogAction>
+            <AlertDialogAction onClick={handleUnsendMessage} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">আনসেন্ড করুন</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <Drawer open={!!actionMessage} onOpenChange={(open) => !open && setActionMessage(null)}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>মেসেজ অপশন</DrawerTitle>
-            <DrawerDescription>মোবাইলে long-press করেও এই অপশনগুলো পাবেন</DrawerDescription>
-          </DrawerHeader>
-          <div className="px-4 pb-6 space-y-2">
-            <Button variant="outline" className="w-full justify-start gap-2" onClick={() => { if (actionMessage) handleStartReply(actionMessage); setActionMessage(null); }}>
-              <Reply className="h-4 w-4 text-primary" /> রিপ্লাই
-            </Button>
-            {actionMessage?.sender_id === session.contactId && (
-              <>
-                <Button variant="outline" className="w-full justify-start gap-2" onClick={() => { if (actionMessage) handleStartEdit(actionMessage); setActionMessage(null); }}>
-                  <Pencil className="h-4 w-4 text-primary" /> এডিট
-                </Button>
-                <Button variant="outline" className="w-full justify-start gap-2 text-destructive" onClick={() => { if (actionMessage) setDeleteTargetId(actionMessage.id); setActionMessage(null); }}>
-                  <Trash2 className="h-4 w-4" /> ডিলিট
-                </Button>
-              </>
-            )}
-          </div>
-        </DrawerContent>
-      </Drawer>
+      <MessageActionSheet
+        open={!!actionMessage}
+        message={actionMessage}
+        isMine={actionMessage?.sender_id === session.contactId}
+        onOpenChange={(open) => !open && setActionMessage(null)}
+        onReact={(emoji) => actionMessage && handleReact(actionMessage, emoji)}
+        onReply={() => actionMessage && handleStartReply(actionMessage)}
+        onEdit={() => actionMessage && handleStartEdit(actionMessage)}
+        onUnsend={() => actionMessage && setUnsendTargetId(actionMessage.id)}
+        onRemoveForMe={() => actionMessage && handleRemoveForMe(actionMessage)}
+        onShowEditHistory={() => actionMessage && handleShowEditHistory(actionMessage)}
+      />
+
+      <EditHistoryDialog
+        open={!!editHistoryFor}
+        onOpenChange={(open) => !open && setEditHistoryFor(null)}
+        history={editHistory}
+        currentContent={editHistoryFor?.content || null}
+        loading={editHistoryLoading}
+      />
     </div>
   );
 };
