@@ -219,18 +219,63 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     finally { setSetupLoading(false); }
   };
 
-  const handleDeleteMessage = async () => {
-    if (!deleteTargetId) return;
+  const handleUnsendMessage = async () => {
+    if (!unsendTargetId) return;
     try {
-      const { error } = await supabase.rpc("delete_admin_message", { p_message_id: deleteTargetId });
+      const { error } = await supabase.rpc("unsend_message_admin" as any, { p_message_id: unsendTargetId });
       if (error) throw error;
-      setMessages(prev => prev.filter(m => m.id !== deleteTargetId));
-      toast.success("মেসেজ ডিলিট হয়েছে");
-      logAdminActivity("message_delete", `মেসেজ ডিলিট করা হয়েছে`, deleteTargetId, "message");
+      setMessages(prev => prev.map(m => m.id === unsendTargetId ? { ...m, content: null, image_url: null, unsent_at: new Date().toISOString() } : m));
+      toast.success("মেসেজ আনসেন্ড করা হয়েছে");
+      logAdminActivity("message_unsend", `মেসেজ আনসেন্ড করা হয়েছে`, unsendTargetId, "message");
     } catch {
-      toast.error("ডিলিট করতে সমস্যা");
+      toast.error("আনসেন্ড করতে সমস্যা");
     } finally {
-      setDeleteTargetId(null);
+      setUnsendTargetId(null);
+    }
+  };
+
+  const handleRemoveForMe = async (msg: Message) => {
+    try {
+      const { error } = await supabase.rpc("remove_message_for_me_admin" as any, { p_message_id: msg.id });
+      if (error) throw error;
+      setMessages(prev => prev.filter(m => m.id !== msg.id));
+      toast.success("আপনার চ্যাট থেকে সরানো হয়েছে");
+    } catch { toast.error("সরাতে সমস্যা"); }
+  };
+
+  const handleReact = async (msg: Message, emoji: string) => {
+    if (!adminContactId) return;
+    setMessages(prev => prev.map(m => {
+      if (m.id !== msg.id) return m;
+      const reactions = m.reactions || [];
+      const mine = reactions.find(r => r.reactor_id === adminContactId);
+      let next = reactions.filter(r => r.reactor_id !== adminContactId);
+      if (!mine || mine.emoji !== emoji) {
+        next = [...next, { emoji, reactor_id: adminContactId }];
+      }
+      return { ...m, reactions: next };
+    }));
+    try {
+      const { error } = await supabase.rpc("react_to_message_admin" as any, { p_message_id: msg.id, p_emoji: emoji });
+      if (error) throw error;
+    } catch {
+      toast.error("রিয়্যাকশনে সমস্যা");
+      if (selectedUser) void loadMessages(selectedUser);
+    }
+  };
+
+  const handleShowEditHistory = async (msg: Message) => {
+    setEditHistoryFor(msg);
+    setEditHistoryLoading(true);
+    setEditHistory([]);
+    try {
+      const { data, error } = await supabase.rpc("get_message_edit_history_admin" as any, { p_message_id: msg.id });
+      if (error) throw error;
+      setEditHistory((data || []) as any);
+    } catch {
+      toast.error("ইতিহাস লোড করতে সমস্যা");
+    } finally {
+      setEditHistoryLoading(false);
     }
   };
 
