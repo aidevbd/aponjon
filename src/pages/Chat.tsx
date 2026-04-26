@@ -62,11 +62,14 @@ const Chat = () => {
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [tappedMsgId, setTappedMsgId] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(typeof navigator !== "undefined" ? !navigator.onLine : false);
   const [queuedCount, setQueuedCount] = useState(0);
   const [contactPreviews, setContactPreviews] = useState<Record<string, ContactPreview>>({});
   const [actionMessage, setActionMessage] = useState<Message | null>(null);
+  const [unsendTargetId, setUnsendTargetId] = useState<string | null>(null);
+  const [editHistoryFor, setEditHistoryFor] = useState<Message | null>(null);
+  const [editHistory, setEditHistory] = useState<{ previous_content: string; edited_at: string }[]>([]);
+  const [editHistoryLoading, setEditHistoryLoading] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef(0);
   const recentSendAtRef = useRef(0);
