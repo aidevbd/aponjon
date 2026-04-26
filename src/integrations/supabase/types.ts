@@ -161,6 +161,51 @@ export type Database = {
         }
         Relationships: []
       }
+      message_edit_history: {
+        Row: {
+          edited_at: string
+          id: string
+          message_id: string
+          previous_content: string
+        }
+        Insert: {
+          edited_at?: string
+          id?: string
+          message_id: string
+          previous_content: string
+        }
+        Update: {
+          edited_at?: string
+          id?: string
+          message_id?: string
+          previous_content?: string
+        }
+        Relationships: []
+      }
+      message_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          message_id: string
+          reactor_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          message_id: string
+          reactor_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          message_id?: string
+          reactor_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string | null
@@ -404,6 +449,15 @@ export type Database = {
       }
     }
     Functions: {
+      _broadcast_msg_update: {
+        Args: {
+          p_event: string
+          p_msg_id: string
+          p_receiver: string
+          p_sender: string
+        }
+        Returns: undefined
+      }
       check_rate_limit: {
         Args: { p_action_type: string; p_key: string }
         Returns: boolean
@@ -488,6 +542,20 @@ export type Database = {
           photo_url: string
         }[]
       }
+      get_message_edit_history: {
+        Args: { p_message_id: string; p_token: string }
+        Returns: {
+          edited_at: string
+          previous_content: string
+        }[]
+      }
+      get_message_edit_history_admin: {
+        Args: { p_message_id: string }
+        Returns: {
+          edited_at: string
+          previous_content: string
+        }[]
+      }
       get_messages: {
         Args: { p_other_id: string; p_token: string }
         Returns: {
@@ -534,6 +602,22 @@ export type Database = {
           p_target_type?: string
         }
         Returns: string
+      }
+      react_to_message: {
+        Args: { p_emoji: string; p_message_id: string; p_token: string }
+        Returns: boolean
+      }
+      react_to_message_admin: {
+        Args: { p_emoji: string; p_message_id: string }
+        Returns: boolean
+      }
+      remove_message_for_me: {
+        Args: { p_message_id: string; p_token: string }
+        Returns: boolean
+      }
+      remove_message_for_me_admin: {
+        Args: { p_message_id: string }
+        Returns: boolean
       }
       reset_rate_limit: {
         Args: { p_action_type: string; p_key: string }
@@ -624,6 +708,11 @@ export type Database = {
         Returns: Json
       }
       toggle_pin_message: { Args: { p_message_id: string }; Returns: boolean }
+      unsend_message: {
+        Args: { p_message_id: string; p_token: string }
+        Returns: boolean
+      }
+      unsend_message_admin: { Args: { p_message_id: string }; Returns: boolean }
       update_admin_presence: { Args: never; Returns: undefined }
       update_contact_via_otp_session: {
         Args: {
