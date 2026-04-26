@@ -889,42 +889,39 @@ const Chat = () => {
         </AnimatePresence>
       </div>
 
-      <AlertDialog open={!!deleteTargetId} onOpenChange={(open) => !open && setDeleteTargetId(null)}>
+      <AlertDialog open={!!unsendTargetId} onOpenChange={(open) => !open && setUnsendTargetId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>মেসেজ ডিলিট করবেন?</AlertDialogTitle>
-            <AlertDialogDescription>এই মেসেজটি আপনার চ্যাট থেকে মুছে যাবে। এটি পূর্বাবস্থায় ফেরানো যাবে না।</AlertDialogDescription>
+            <AlertDialogTitle>সবার জন্য আনসেন্ড?</AlertDialogTitle>
+            <AlertDialogDescription>এই মেসেজটি দুজনের চ্যাট থেকেই মুছে যাবে। এটি পূর্বাবস্থায় ফেরানো যাবে না।</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>বাতিল</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteMessage} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">ডিলিট করুন</AlertDialogAction>
+            <AlertDialogAction onClick={handleUnsendMessage} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">আনসেন্ড করুন</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <Drawer open={!!actionMessage} onOpenChange={(open) => !open && setActionMessage(null)}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>মেসেজ অপশন</DrawerTitle>
-            <DrawerDescription>মোবাইলে long-press করেও এই অপশনগুলো পাবেন</DrawerDescription>
-          </DrawerHeader>
-          <div className="px-4 pb-6 space-y-2">
-            <Button variant="outline" className="w-full justify-start gap-2" onClick={() => { if (actionMessage) handleStartReply(actionMessage); setActionMessage(null); }}>
-              <Reply className="h-4 w-4 text-primary" /> রিপ্লাই
-            </Button>
-            {actionMessage?.sender_id === session.contactId && (
-              <>
-                <Button variant="outline" className="w-full justify-start gap-2" onClick={() => { if (actionMessage) handleStartEdit(actionMessage); setActionMessage(null); }}>
-                  <Pencil className="h-4 w-4 text-primary" /> এডিট
-                </Button>
-                <Button variant="outline" className="w-full justify-start gap-2 text-destructive" onClick={() => { if (actionMessage) setDeleteTargetId(actionMessage.id); setActionMessage(null); }}>
-                  <Trash2 className="h-4 w-4" /> ডিলিট
-                </Button>
-              </>
-            )}
-          </div>
-        </DrawerContent>
-      </Drawer>
+      <MessageActionSheet
+        open={!!actionMessage}
+        message={actionMessage}
+        isMine={actionMessage?.sender_id === session.contactId}
+        onOpenChange={(open) => !open && setActionMessage(null)}
+        onReact={(emoji) => actionMessage && handleReact(actionMessage, emoji)}
+        onReply={() => actionMessage && handleStartReply(actionMessage)}
+        onEdit={() => actionMessage && handleStartEdit(actionMessage)}
+        onUnsend={() => actionMessage && setUnsendTargetId(actionMessage.id)}
+        onRemoveForMe={() => actionMessage && handleRemoveForMe(actionMessage)}
+        onShowEditHistory={() => actionMessage && handleShowEditHistory(actionMessage)}
+      />
+
+      <EditHistoryDialog
+        open={!!editHistoryFor}
+        onOpenChange={(open) => !open && setEditHistoryFor(null)}
+        history={editHistory}
+        currentContent={editHistoryFor?.content || null}
+        loading={editHistoryLoading}
+      />
     </div>
   );
 };
