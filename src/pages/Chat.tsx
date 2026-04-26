@@ -172,6 +172,14 @@ const Chat = () => {
           setUnreadMap((prev) => ({ ...prev, [data.sender_id]: (prev[data.sender_id] || 0) + 1 }));
         }
       })
+      .on("broadcast", { event: "msg_update" }, (payload) => {
+        const data = payload.payload as { id: string; sender_id: string; receiver_id: string; event: string };
+        if (!data || !selectedContact) return;
+        const inThread =
+          (data.sender_id === selectedContact.id && data.receiver_id === session.contactId) ||
+          (data.sender_id === session.contactId && data.receiver_id === selectedContact.id);
+        if (inThread) void loadMessages(selectedContact);
+      })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [session, selectedContact]);
