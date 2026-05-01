@@ -122,9 +122,17 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
           void loadChatUsers();
         }
       })
+      .on("broadcast", { event: "msg_update" }, (payload) => {
+        const data = payload.payload as { id: string; sender_id: string; receiver_id: string; event: string };
+        if (!data || !selectedUser) return;
+        const inThread =
+          (data.sender_id === selectedUser.id && data.receiver_id === adminContactId) ||
+          (data.sender_id === adminContactId && data.receiver_id === selectedUser.id);
+        if (inThread) void loadMessages(selectedUser);
+      })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [adminContactId, selectedUser]);
+  }, [adminContactId, selectedUser, loadMessages]);
 
   useEffect(() => {
     if (!adminContactId || !selectedUser) { setIsOtherTyping(false); return; }
