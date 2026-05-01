@@ -122,8 +122,17 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
           void loadChatUsers();
         }
       })
+      .on("broadcast", { event: "msg_update" }, (payload) => {
+        const data = payload.payload as { id: string; sender_id: string; receiver_id: string; event: string };
+        if (!data || !selectedUser) return;
+        const inThread =
+          (data.sender_id === selectedUser.id && data.receiver_id === adminContactId) ||
+          (data.sender_id === adminContactId && data.receiver_id === selectedUser.id);
+        if (inThread) void loadMessages(selectedUser);
+      })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminContactId, selectedUser]);
 
   useEffect(() => {
@@ -624,7 +633,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
             {isOtherTyping && (
               <div className="pb-1">
-                <span className="text-xs text-muted-foreground italic animate-pulse">লিখছে...</span>
+                <TypingIndicator name={selectedUser?.name} />
               </div>
             )}
 
