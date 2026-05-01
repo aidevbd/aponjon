@@ -692,18 +692,41 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
         )}
       </AnimatePresence>
 
-      <AlertDialog open={!!deleteTargetId} onOpenChange={(open) => !open && setDeleteTargetId(null)}>
+      <AlertDialog open={!!unsendTargetId} onOpenChange={(open) => !open && setUnsendTargetId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>মেসেজ ডিলিট করবেন?</AlertDialogTitle>
-            <AlertDialogDescription>এই মেসেজটি স্থায়ীভাবে মুছে যাবে।</AlertDialogDescription>
+            <AlertDialogTitle>সবার জন্য আনসেন্ড?</AlertDialogTitle>
+            <AlertDialogDescription>এই মেসেজটি দুজনের চ্যাট থেকেই মুছে যাবে। এটি পূর্বাবস্থায় ফেরানো যাবে না।</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>বাতিল</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteMessage} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">ডিলিট করুন</AlertDialogAction>
+            <AlertDialogAction onClick={handleUnsendMessage} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">আনসেন্ড করুন</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <MessageActionSheet
+        open={!!actionMessage}
+        message={actionMessage as any}
+        isMine={actionMessage?.sender_id === adminContactId}
+        canPin
+        onOpenChange={(open) => !open && setActionMessage(null)}
+        onReact={(emoji) => actionMessage && handleReact(actionMessage, emoji)}
+        onReply={() => actionMessage && handleStartReply(actionMessage)}
+        onEdit={() => actionMessage && handleStartEdit(actionMessage)}
+        onUnsend={() => actionMessage && setUnsendTargetId(actionMessage.id)}
+        onRemoveForMe={() => actionMessage && handleRemoveForMe(actionMessage)}
+        onTogglePin={() => actionMessage && handleTogglePin(actionMessage.id)}
+        onShowEditHistory={() => actionMessage && handleShowEditHistory(actionMessage)}
+      />
+
+      <EditHistoryDialog
+        open={!!editHistoryFor}
+        onOpenChange={(open) => !open && setEditHistoryFor(null)}
+        history={editHistory}
+        currentContent={editHistoryFor?.content || null}
+        loading={editHistoryLoading}
+      />
     </div>
   );
 }
