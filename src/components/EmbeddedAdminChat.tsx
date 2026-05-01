@@ -132,7 +132,8 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [adminContactId, selectedUser, loadMessages]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adminContactId, selectedUser]);
 
   useEffect(() => {
     if (!adminContactId || !selectedUser) { setIsOtherTyping(false); return; }
