@@ -633,7 +633,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
             {isOtherTyping && (
               <div className="pb-1">
-                <span className="text-xs text-muted-foreground italic animate-pulse">লিখছে...</span>
+                <TypingIndicator name={selectedUser?.name} />
               </div>
             )}
 
