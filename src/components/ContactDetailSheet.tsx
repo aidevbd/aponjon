@@ -1,6 +1,6 @@
 import { Phone, MessageCircle, Video, Send, Mail, MapPin, Droplets, Calendar, Edit3, Trash2, StickyNote, Copy, FileText, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { CATEGORIES } from "@/lib/types";
 import { type ContactRow } from "@/lib/store";
 import { toast } from "sonner";
@@ -41,6 +41,7 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
       <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto pb-8">
         <SheetHeader className="pb-2">
           <SheetTitle className="sr-only">{contact.name}</SheetTitle>
+          <SheetDescription className="sr-only">যোগাযোগের বিস্তারিত তথ্য</SheetDescription>
         </SheetHeader>
 
         {/* Profile header */}
