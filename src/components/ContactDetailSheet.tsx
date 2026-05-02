@@ -38,10 +38,7 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent
-        side="bottom"
-        className="rounded-t-2xl max-h-[85vh] overflow-y-auto pb-8 bg-background isolate transform-gpu [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [will-change:transform]"
-      >
+      <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto pb-8 bg-background">
         <SheetHeader className="pb-2">
           <SheetTitle className="sr-only">{contact.name}</SheetTitle>
           <SheetDescription className="sr-only">যোগাযোগের বিস্তারিত তথ্য</SheetDescription>
