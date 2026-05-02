@@ -1,0 +1,1 @@
+ALTER TABLE public.messages ADD COLUMN IF NOT EXISTS unsent_at timestamp with time zone;

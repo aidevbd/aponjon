@@ -220,6 +220,7 @@ export type Database = {
           receiver_id: string
           reply_to_id: string | null
           sender_id: string
+          unsent_at: string | null
         }
         Insert: {
           content?: string | null
@@ -234,6 +235,7 @@ export type Database = {
           receiver_id: string
           reply_to_id?: string | null
           sender_id: string
+          unsent_at?: string | null
         }
         Update: {
           content?: string | null
@@ -248,6 +250,7 @@ export type Database = {
           receiver_id?: string
           reply_to_id?: string | null
           sender_id?: string
+          unsent_at?: string | null
         }
         Relationships: [
           {
