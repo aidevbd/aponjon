@@ -245,7 +245,7 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen warm-gradient relative">
       {/* Compact Header */}
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-border/50 bg-card">
         <div className="container mx-auto flex h-12 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-full hero-gradient shadow-rose">
