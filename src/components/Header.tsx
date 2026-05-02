@@ -10,7 +10,7 @@ export function Header() {
     <motion.header
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md"
+      className="sticky top-0 z-50 border-b border-border/50 bg-card"
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2 group">
