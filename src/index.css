@@ -103,13 +103,12 @@
   .contact-surface {
     @apply bg-card border border-border/50 rounded-xl;
     box-shadow: var(--shadow-soft);
-    backface-visibility: hidden;
-    transform: translateZ(0);
+    background-clip: padding-box;
     contain: paint;
   }
 
   .contact-detail-panel {
-    backface-visibility: hidden;
+    background-clip: padding-box;
     transform: none;
     contain: paint;
   }
