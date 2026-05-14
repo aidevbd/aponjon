@@ -273,7 +273,7 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
             <Trash2 className="h-4 w-4" /> ডিলিট
           </Button>
         </div>
-      </SheetContent>
-    </Sheet>
+      </div>
+    </div>
   );
 }
