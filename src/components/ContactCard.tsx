@@ -10,7 +10,7 @@ interface ContactCardProps {
   index?: number;
 }
 
-export function ContactCard({ contact, onEdit, onDelete, index = 0 }: ContactCardProps) {
+export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
   const category = CATEGORIES.find((c) => c.value === contact.category);
 
   const openWhatsApp = (number: string) => {
