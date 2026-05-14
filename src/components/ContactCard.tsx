@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Phone, MessageCircle, Mail, MapPin, Droplets, Calendar, Edit3, Trash2, StickyNote, Send } from "lucide-react";
 import { CATEGORIES } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ interface ContactCardProps {
   index?: number;
 }
 
-export function ContactCard({ contact, onEdit, onDelete, index = 0 }: ContactCardProps) {
+export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
   const category = CATEGORIES.find((c) => c.value === contact.category);
 
   const openWhatsApp = (number: string) => {
@@ -36,12 +35,7 @@ export function ContactCard({ contact, onEdit, onDelete, index = 0 }: ContactCar
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className="glass-card p-5 hover:shadow-rose transition-shadow duration-300"
-    >
+    <div className="contact-surface p-5 hover:shadow-rose transition-shadow duration-300">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           {contact.photo_url ? (
@@ -130,6 +124,6 @@ export function ContactCard({ contact, onEdit, onDelete, index = 0 }: ContactCar
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
