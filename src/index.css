@@ -104,13 +104,11 @@
     @apply bg-card border border-border/50 rounded-xl;
     box-shadow: var(--shadow-soft);
     background-clip: padding-box;
-    contain: paint;
   }
 
   .contact-detail-panel {
     background-clip: padding-box;
     transform: none;
-    contain: paint;
   }
 
   .love-badge {
