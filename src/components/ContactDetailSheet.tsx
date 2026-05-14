@@ -1,6 +1,5 @@
-import { Phone, MessageCircle, Video, Send, Mail, MapPin, Droplets, Calendar, Edit3, Trash2, StickyNote, Copy, FileText, ExternalLink } from "lucide-react";
+import { Phone, MessageCircle, Video, Send, Mail, MapPin, Droplets, Calendar, Edit3, Trash2, StickyNote, Copy, FileText, ExternalLink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { CATEGORIES } from "@/lib/types";
 import { type ContactRow } from "@/lib/store";
 import { toast } from "sonner";
@@ -36,13 +35,25 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
   const hasTelegram = contact.telegram && contact.telegram.trim();
   const hasFacebook = contact.facebook && contact.facebook.trim();
 
+  if (!open) return null;
+
   return (
-    <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto pb-8 bg-background">
-        <SheetHeader className="pb-2">
-          <SheetTitle className="sr-only">{contact.name}</SheetTitle>
-          <SheetDescription className="sr-only">যোগাযোগের বিস্তারিত তথ্য</SheetDescription>
-        </SheetHeader>
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-foreground/60" onClick={onClose} />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="contact-detail-title"
+        className="contact-detail-panel fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-2xl border-t border-border bg-background px-6 pb-8 pt-6 shadow-lg"
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 rounded-sm p-1 text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          aria-label="বন্ধ করুন"
+        >
+          <X className="h-4 w-4" />
+        </button>
 
         {/* Profile header */}
         <div className="flex flex-col items-center gap-3 mb-6">
