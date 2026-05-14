@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Phone } from "lucide-react";
 import { CATEGORIES } from "@/lib/types";
 import { type ContactRow } from "@/lib/store";
@@ -18,12 +17,9 @@ export function ContactListItem({ contact, index, onClick }: ContactListItemProp
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.015 }}
+    <div
       onClick={() => onClick(contact)}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-card/60 hover:bg-card cursor-pointer transition-colors border border-transparent hover:border-border/50"
+      className="contact-surface flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-card cursor-pointer transition-colors border border-transparent hover:border-border/50"
     >
       {/* Avatar */}
       {contact.photo_url ? (
@@ -50,6 +46,6 @@ export function ContactListItem({ contact, index, onClick }: ContactListItemProp
       >
         <Phone className="h-4 w-4" />
       </button>
-    </motion.div>
+    </div>
   );
 }
