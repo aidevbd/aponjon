@@ -8,7 +8,7 @@ interface ContactListItemProps {
   onClick: (contact: ContactRow) => void;
 }
 
-export function ContactListItem({ contact, index, onClick }: ContactListItemProps) {
+export function ContactListItem({ contact, onClick }: ContactListItemProps) {
   const category = CATEGORIES.find((c) => c.value === contact.category);
 
   const callPhone = (e: React.MouseEvent) => {
