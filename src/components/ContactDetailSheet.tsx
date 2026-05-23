@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Phone, MessageCircle, Video, Send, Mail, MapPin, Droplets, Calendar, Edit3, Trash2, StickyNote, Copy, FileText, ExternalLink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/types";
@@ -13,6 +14,15 @@ interface ContactDetailSheetProps {
 }
 
 export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }: ContactDetailSheetProps) {
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
   if (!contact) return null;
 
   const category = CATEGORIES.find((c) => c.value === contact.category);
@@ -44,16 +54,19 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
         role="dialog"
         aria-modal="true"
         aria-labelledby="contact-detail-title"
-        className="contact-detail-panel fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-2xl border-t border-border bg-background px-6 pb-8 pt-6 shadow-lg"
+        className="contact-detail-panel fixed inset-x-0 bottom-0 top-[15dvh] z-50 overflow-hidden rounded-t-2xl border-t border-border bg-background shadow-lg"
       >
+        <div className="absolute inset-0 bg-background" aria-hidden="true" />
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-sm p-1 text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="absolute right-4 top-4 z-10 rounded-sm p-1 text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           aria-label="বন্ধ করুন"
         >
           <X className="h-4 w-4" />
         </button>
+
+        <div className="contact-detail-scroll relative h-full overflow-y-auto bg-background px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6">
 
         {/* Profile header */}
         <div className="flex flex-col items-center gap-3 mb-6">
@@ -272,6 +285,7 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
           <Button variant="outline" className="flex-1 gap-2 h-12 rounded-xl text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive" onClick={() => { onClose(); onDelete(contact.id); }}>
             <Trash2 className="h-4 w-4" /> ডিলিট
           </Button>
+        </div>
         </div>
       </div>
     </div>

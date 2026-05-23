@@ -69,6 +69,13 @@
     @apply bg-background text-foreground font-bengali antialiased;
   }
 
+  html,
+  body,
+  #root {
+    min-height: 100%;
+    background: hsl(var(--background));
+  }
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
   }
@@ -109,12 +116,17 @@
   .contact-detail-panel {
     background-clip: padding-box;
     transform: none;
+    isolation: isolate;
+    overscroll-behavior: contain;
+  }
+
+  .contact-detail-scroll {
     scrollbar-width: none;
     -ms-overflow-style: none;
     overscroll-behavior: contain;
   }
 
-  .contact-detail-panel::-webkit-scrollbar {
+  .contact-detail-scroll::-webkit-scrollbar {
     display: none;
     width: 0;
     height: 0;
