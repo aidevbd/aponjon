@@ -56,6 +56,7 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
         aria-labelledby="contact-detail-title"
         className="contact-detail-panel fixed inset-x-0 bottom-0 top-[15dvh] z-50 overflow-hidden rounded-t-2xl border-t border-border bg-background shadow-lg"
       >
+        <div className="absolute inset-0 bg-background" aria-hidden="true" />
         <button
           type="button"
           onClick={onClose}
@@ -65,7 +66,7 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
           <X className="h-4 w-4" />
         </button>
 
-        <div className="contact-detail-scroll h-full overflow-y-auto bg-background px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6">
+        <div className="contact-detail-scroll relative h-full overflow-y-auto bg-background px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6">
 
         {/* Profile header */}
         <div className="flex flex-col items-center gap-3 mb-6">
