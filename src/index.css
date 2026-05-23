@@ -109,12 +109,16 @@
   .contact-detail-panel {
     background-clip: padding-box;
     transform: none;
+    overscroll-behavior: contain;
+  }
+
+  .contact-detail-scroll {
     scrollbar-width: none;
     -ms-overflow-style: none;
     overscroll-behavior: contain;
   }
 
-  .contact-detail-panel::-webkit-scrollbar {
+  .contact-detail-scroll::-webkit-scrollbar {
     display: none;
     width: 0;
     height: 0;
