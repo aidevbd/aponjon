@@ -55,7 +55,7 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
         role="dialog"
         aria-modal="true"
         aria-labelledby="contact-detail-title"
-        className="contact-detail-panel fixed inset-x-0 bottom-0 z-[101] flex h-[85dvh] max-h-[85dvh] flex-col overflow-hidden rounded-t-2xl border-t border-border bg-background shadow-lg"
+        className="contact-detail-panel fixed inset-x-0 bottom-0 z-[101] flex h-[85svh] max-h-[85svh] flex-col overflow-hidden rounded-t-2xl border-t border-border bg-background shadow-lg"
       >
         <button
           type="button"
