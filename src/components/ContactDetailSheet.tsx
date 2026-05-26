@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Phone, MessageCircle, Video, Send, Mail, MapPin, Droplets, Calendar, Edit3, Trash2, StickyNote, Copy, FileText, ExternalLink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/types";
@@ -47,26 +48,26 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
 
   if (!open) return null;
 
-  return (
-    <div className="fixed inset-0 z-50">
+  return createPortal(
+    <div className="contact-detail-root fixed inset-0 z-[100]">
       <div className="absolute inset-0 bg-foreground/60" onClick={onClose} />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="contact-detail-title"
-        className="contact-detail-panel fixed inset-x-0 bottom-0 top-[15dvh] z-50 overflow-hidden rounded-t-2xl border-t border-border bg-background shadow-lg"
+        className="contact-detail-panel fixed inset-x-0 bottom-0 z-[101] flex h-[85svh] max-h-[85svh] flex-col overflow-hidden rounded-t-2xl border-t border-border bg-background shadow-lg"
       >
-        <div className="absolute inset-0 bg-background" aria-hidden="true" />
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 z-10 rounded-sm p-1 text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="absolute right-4 top-4 z-20 rounded-sm p-1 text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           aria-label="বন্ধ করুন"
         >
           <X className="h-4 w-4" />
         </button>
 
-        <div className="contact-detail-scroll relative h-full overflow-y-auto bg-background px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6">
+        <div className="contact-detail-scroll min-h-0 flex-1 overflow-y-auto bg-background px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6">
+          <div className="contact-detail-content min-h-full bg-background">
 
         {/* Profile header */}
         <div className="flex flex-col items-center gap-3 mb-6">
@@ -286,8 +287,10 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
             <Trash2 className="h-4 w-4" /> ডিলিট
           </Button>
         </div>
+          </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
