@@ -18,9 +18,12 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
   useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previousOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
     };
   }, [open]);
 
@@ -49,22 +52,23 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
   if (!open) return null;
 
   return createPortal(
-    <div className="contact-detail-root fixed inset-0 z-[100]">
-      <div className="absolute inset-0 bg-foreground/60" onClick={onClose} />
+    <div className="contact-detail-root fixed inset-0 z-[100] bg-background">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="contact-detail-title"
-        className="contact-detail-panel fixed inset-x-0 bottom-0 z-[101] flex h-[85svh] max-h-[85svh] flex-col overflow-hidden rounded-t-2xl border-t border-border bg-background shadow-lg"
+        className="contact-detail-panel fixed inset-0 z-[101] flex flex-col overflow-hidden bg-background"
       >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-4 top-4 z-20 rounded-sm p-1 text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-          aria-label="বন্ধ করুন"
-        >
-          <X className="h-4 w-4" />
-        </button>
+        <div className="flex h-12 shrink-0 items-center justify-end border-b border-border bg-background px-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-sm p-1 text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            aria-label="বন্ধ করুন"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
 
         <div className="contact-detail-scroll min-h-0 flex-1 overflow-y-auto bg-background px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6">
           <div className="contact-detail-content min-h-full bg-background">
