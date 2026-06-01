@@ -117,8 +117,6 @@
     background: hsl(var(--background));
     isolation: isolate;
     overscroll-behavior: contain;
-    contain: layout paint style;
-    transform: translateZ(0);
   }
 
   .contact-detail-scroll {
@@ -126,14 +124,11 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
     overscroll-behavior: contain;
-    -webkit-overflow-scrolling: auto;
-    transform: translateZ(0);
-    backface-visibility: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   .contact-detail-content {
     background: hsl(var(--background));
-    transform: translateZ(0);
   }
 
   .contact-detail-scroll::-webkit-scrollbar {
