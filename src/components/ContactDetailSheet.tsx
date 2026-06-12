@@ -97,44 +97,48 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
         {/* Quick Action Grid - 2x2 like reference */}
         <div className="grid grid-cols-2 gap-3 mb-6">
           <button
+            type="button"
             onClick={() => callPhone(contact.phone)}
-            className="flex flex-col items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 hover:bg-primary/10 transition-colors"
+            className="contact-action-card flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 transition-colors hover:bg-secondary"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/15">
+            <div className="contact-action-icon flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
               <Phone className="h-6 w-6 text-primary" />
             </div>
             <span className="text-sm font-medium text-foreground">কল করুন</span>
           </button>
 
           <button
+            type="button"
             onClick={() => hasWhatsApp ? openWhatsApp(contact.whatsapp!.split(",")[0].trim()) : null}
             disabled={!hasWhatsApp}
-            className="flex flex-col items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 hover:bg-primary/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="contact-action-card flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:bg-muted"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/15">
-              <MessageCircle className="h-6 w-6 text-green-600" />
+            <div className="contact-action-icon flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+              <MessageCircle className="h-6 w-6 text-primary" />
             </div>
             <span className="text-sm font-medium text-foreground">WhatsApp</span>
           </button>
 
           <button
+            type="button"
             onClick={() => hasIMO ? openIMO(contact.imo!.split(",")[0].trim()) : null}
             disabled={!hasIMO}
-            className="flex flex-col items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 hover:bg-primary/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="contact-action-card flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:bg-muted"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-500/15">
-              <Video className="h-6 w-6 text-sky-600" />
+            <div className="contact-action-icon flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+              <Video className="h-6 w-6 text-primary" />
             </div>
             <span className="text-sm font-medium text-foreground">IMO</span>
           </button>
 
           <button
+            type="button"
             onClick={() => hasFacebook ? openFacebook(contact.facebook!) : null}
             disabled={!hasFacebook}
-            className="flex flex-col items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 hover:bg-primary/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="contact-action-card flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:bg-muted"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/15">
-              <ExternalLink className="h-6 w-6 text-blue-600" />
+            <div className="contact-action-icon flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+              <ExternalLink className="h-6 w-6 text-primary" />
             </div>
             <span className="text-sm font-medium text-foreground">Facebook</span>
           </button>
@@ -144,11 +148,12 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
         {hasTelegram && (
           <div className="mb-6">
             <button
+              type="button"
               onClick={() => openTelegram(contact.telegram!.split(",")[0].trim())}
-              className="w-full flex items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 p-3 hover:bg-primary/10 transition-colors"
+              className="contact-action-card w-full flex items-center justify-center gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:bg-secondary"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/15">
-                <Send className="h-5 w-5 text-sky-500" />
+              <div className="contact-action-icon flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                <Send className="h-5 w-5 text-primary" />
               </div>
               <span className="text-sm font-medium text-foreground">Telegram</span>
             </button>
