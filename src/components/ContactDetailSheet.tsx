@@ -52,12 +52,12 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
   if (!open) return null;
 
   return createPortal(
-    <div className="contact-detail-root fixed inset-0 z-[100] bg-background">
+    <div className="contact-detail-root fixed inset-0 z-[100] overflow-y-auto bg-background">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="contact-detail-title"
-        className="contact-detail-panel fixed inset-0 z-[101] flex flex-col overflow-hidden bg-background"
+        className="contact-detail-panel min-h-[100dvh] bg-background"
       >
         <div className="flex h-12 shrink-0 items-center justify-end border-b border-border bg-background px-4">
           <button
@@ -70,7 +70,7 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
           </button>
         </div>
 
-        <div className="contact-detail-scroll min-h-0 flex-1 overflow-y-auto bg-background px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6">
+        <div className="contact-detail-scroll bg-background px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6">
           <div className="contact-detail-content min-h-full bg-background">
 
         {/* Profile header */}
@@ -97,44 +97,48 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
         {/* Quick Action Grid - 2x2 like reference */}
         <div className="grid grid-cols-2 gap-3 mb-6">
           <button
+            type="button"
             onClick={() => callPhone(contact.phone)}
-            className="flex flex-col items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 hover:bg-primary/10 transition-colors"
+            className="contact-action-card flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 transition-colors hover:bg-secondary"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/15">
+            <div className="contact-action-icon flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
               <Phone className="h-6 w-6 text-primary" />
             </div>
             <span className="text-sm font-medium text-foreground">কল করুন</span>
           </button>
 
           <button
+            type="button"
             onClick={() => hasWhatsApp ? openWhatsApp(contact.whatsapp!.split(",")[0].trim()) : null}
             disabled={!hasWhatsApp}
-            className="flex flex-col items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 hover:bg-primary/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="contact-action-card flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:bg-muted"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/15">
-              <MessageCircle className="h-6 w-6 text-green-600" />
+            <div className="contact-action-icon flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+              <MessageCircle className="h-6 w-6 text-primary" />
             </div>
             <span className="text-sm font-medium text-foreground">WhatsApp</span>
           </button>
 
           <button
+            type="button"
             onClick={() => hasIMO ? openIMO(contact.imo!.split(",")[0].trim()) : null}
             disabled={!hasIMO}
-            className="flex flex-col items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 hover:bg-primary/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="contact-action-card flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:bg-muted"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-500/15">
-              <Video className="h-6 w-6 text-sky-600" />
+            <div className="contact-action-icon flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+              <Video className="h-6 w-6 text-primary" />
             </div>
             <span className="text-sm font-medium text-foreground">IMO</span>
           </button>
 
           <button
+            type="button"
             onClick={() => hasFacebook ? openFacebook(contact.facebook!) : null}
             disabled={!hasFacebook}
-            className="flex flex-col items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 hover:bg-primary/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="contact-action-card flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:bg-muted"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/15">
-              <ExternalLink className="h-6 w-6 text-blue-600" />
+            <div className="contact-action-icon flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+              <ExternalLink className="h-6 w-6 text-primary" />
             </div>
             <span className="text-sm font-medium text-foreground">Facebook</span>
           </button>
@@ -144,11 +148,12 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
         {hasTelegram && (
           <div className="mb-6">
             <button
+              type="button"
               onClick={() => openTelegram(contact.telegram!.split(",")[0].trim())}
-              className="w-full flex items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 p-3 hover:bg-primary/10 transition-colors"
+              className="contact-action-card w-full flex items-center justify-center gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:bg-secondary"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/15">
-                <Send className="h-5 w-5 text-sky-500" />
+              <div className="contact-action-icon flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                <Send className="h-5 w-5 text-primary" />
               </div>
               <span className="text-sm font-medium text-foreground">Telegram</span>
             </button>
@@ -188,8 +193,8 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
             {/* WhatsApp numbers */}
             {hasWhatsApp && contact.whatsapp!.split(",").map((num, i) => (
               <div key={`wa-${i}`} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/10">
-                  <MessageCircle className="h-5 w-5 text-green-600" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                  <MessageCircle className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-muted-foreground">WhatsApp</p>
@@ -204,8 +209,8 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
             {/* IMO numbers */}
             {hasIMO && contact.imo!.split(",").map((num, i) => (
               <div key={`imo-${i}`} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/10">
-                  <Video className="h-5 w-5 text-sky-600" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                  <Video className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-muted-foreground">IMO</p>
@@ -220,8 +225,8 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
             {/* Telegram */}
             {hasTelegram && contact.telegram!.split(",").map((num, i) => (
               <div key={`tg-${i}`} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/10">
-                  <Send className="h-5 w-5 text-sky-500" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                  <Send className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-muted-foreground">Telegram</p>

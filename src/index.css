@@ -131,6 +131,21 @@
     background: hsl(var(--background));
   }
 
+  .contact-action-card {
+    background-color: hsl(var(--card));
+    background-image: none;
+    box-shadow: none;
+    background-clip: border-box;
+    opacity: 1;
+    contain: paint;
+  }
+
+  .contact-action-icon {
+    background-color: hsl(var(--secondary));
+    background-image: none;
+    box-shadow: none;
+  }
+
   .contact-detail-scroll::-webkit-scrollbar {
     display: none;
     width: 0;
