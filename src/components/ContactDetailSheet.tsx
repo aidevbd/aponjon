@@ -193,8 +193,8 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
             {/* WhatsApp numbers */}
             {hasWhatsApp && contact.whatsapp!.split(",").map((num, i) => (
               <div key={`wa-${i}`} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/10">
-                  <MessageCircle className="h-5 w-5 text-green-600" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                  <MessageCircle className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-muted-foreground">WhatsApp</p>
@@ -209,8 +209,8 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
             {/* IMO numbers */}
             {hasIMO && contact.imo!.split(",").map((num, i) => (
               <div key={`imo-${i}`} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/10">
-                  <Video className="h-5 w-5 text-sky-600" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                  <Video className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-muted-foreground">IMO</p>
@@ -225,8 +225,8 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
             {/* Telegram */}
             {hasTelegram && contact.telegram!.split(",").map((num, i) => (
               <div key={`tg-${i}`} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/10">
-                  <Send className="h-5 w-5 text-sky-500" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                  <Send className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-muted-foreground">Telegram</p>
