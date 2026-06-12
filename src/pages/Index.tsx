@@ -10,14 +10,8 @@ const Index = () => {
       <Header />
 
       {/* Hero — personal letter, no box */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 opacity-30 pointer-events-none">
-          <div className="absolute top-20 left-10 h-32 w-32 rounded-full bg-primary/20 blur-3xl" />
-          <div className="absolute bottom-20 right-10 h-40 w-40 rounded-full bg-coral/20 blur-3xl" />
-          <div className="absolute top-40 right-1/3 h-24 w-24 rounded-full bg-peach/40 blur-2xl" />
-        </div>
-
-        <div className="container relative mx-auto px-4 py-14 md:py-20">
+      <section className="relative overflow-hidden bg-background">
+        <div className="container mx-auto px-4 py-14 md:py-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
