@@ -52,12 +52,12 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
   if (!open) return null;
 
   return createPortal(
-    <div className="contact-detail-root fixed inset-0 z-[100] bg-background">
+    <div className="contact-detail-root fixed inset-0 z-[100] overflow-y-auto bg-background">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="contact-detail-title"
-        className="contact-detail-panel fixed inset-0 z-[101] flex flex-col overflow-hidden bg-background"
+        className="contact-detail-panel min-h-[100dvh] bg-background"
       >
         <div className="flex h-12 shrink-0 items-center justify-end border-b border-border bg-background px-4">
           <button
@@ -70,7 +70,7 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
           </button>
         </div>
 
-        <div className="contact-detail-scroll min-h-0 flex-1 overflow-y-auto bg-background px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6">
+        <div className="contact-detail-scroll bg-background px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6">
           <div className="contact-detail-content min-h-full bg-background">
 
         {/* Profile header */}
