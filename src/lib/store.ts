@@ -173,7 +173,7 @@ export async function generateOtp(phone: string): Promise<GenerateOtpStatus> {
 }
 
 export async function startOtpEditSession(phone: string, code: string): Promise<OtpEditSessionResult> {
-  const { data, error } = await supabase.rpc("start_otp_edit_session" as any, {
+  const { data, error } = await supabase.rpc("start_otp_edit_session", {
     p_phone: phone,
     p_code: code,
   });
