@@ -158,14 +158,24 @@ const AdminDashboard = () => {
       return;
     }
     try {
-      const { error } = await supabase.from("contacts").insert({
-        name: addForm.name, phone: primaryPhone, whatsapp: messengers.whatsapp, imo: messengers.imo,
-        telegram: messengers.telegram, facebook: addForm.facebook || null, email: addForm.email || null,
-        category: addForm.category || "অন্যান্য", custom_category: addForm.customCategory || null,
-        note: addForm.note || null, address: addForm.address || null, blood_group: addForm.bloodGroup || null,
-        birthday: addForm.birthday || null, photo_url: addForm.photoUrl || null, added_by: "admin",
+      // Use save_contact_with_hash RPC so secret_code is hashed & persisted (not silently discarded)
+      await saveContact({
+        name: addForm.name,
+        phone: primaryPhone,
+        whatsapp: messengers.whatsapp || undefined,
+        imo: messengers.imo || undefined,
+        telegram: messengers.telegram || undefined,
+        facebook: addForm.facebook || undefined,
+        email: addForm.email || undefined,
+        category: addForm.category || "অন্যান্য",
+        custom_category: addForm.customCategory || undefined,
+        note: addForm.note || undefined,
+        address: addForm.address || undefined,
+        blood_group: addForm.bloodGroup || undefined,
+        birthday: addForm.birthday || undefined,
+        secret_code: addForm.secretCode || undefined,
+        photo_url: addForm.photoUrl || undefined,
       });
-      if (error) throw error;
       toast.success("নতুন কন্টাক্ট যোগ হয়েছে! 💕");
       logAdminActivity("contact_add", `নতুন কন্টাক্ট যোগ: ${addForm.name} (${primaryPhone})`, undefined, "contact", { name: addForm.name, phone: primaryPhone });
       resetAddForm(); await loadContacts();

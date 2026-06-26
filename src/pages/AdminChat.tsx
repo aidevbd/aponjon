@@ -24,12 +24,17 @@ const AdminChat = () => {
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
   const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
+  const selectedUserRef = useRef<ChatUser | null>(null);
+  const adminContactIdRef = useRef<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { selectedUserRef.current = selectedUser; }, [selectedUser]);
+  useEffect(() => { adminContactIdRef.current = adminContactId; }, [adminContactId]);
 
   // Check auth & admin setup
   useEffect(() => {
@@ -56,28 +61,30 @@ const AdminChat = () => {
     loadUnread();
   }, [adminContactId]);
 
-  // Realtime
+  // Realtime — subscribe once per admin contact; read latest selectedUser via refs to avoid stale closure
   useEffect(() => {
     if (!adminContactId) return;
     const channel = supabase
       .channel("admin-chat")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
         const msg = payload.new as Message;
-        if (selectedUser && (
-          (msg.sender_id === selectedUser.id && msg.receiver_id === adminContactId) ||
-          (msg.sender_id === adminContactId && msg.receiver_id === selectedUser.id)
+        const sel = selectedUserRef.current;
+        const adminId = adminContactIdRef.current;
+        if (!adminId) return;
+        if (sel && (
+          (msg.sender_id === sel.id && msg.receiver_id === adminId) ||
+          (msg.sender_id === adminId && msg.receiver_id === sel.id)
         )) {
-          setMessages(prev => [...prev, msg]);
+          setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
         }
-        if (msg.receiver_id === adminContactId && msg.sender_id !== selectedUser?.id) {
+        if (msg.receiver_id === adminId && msg.sender_id !== sel?.id) {
           setUnreadMap(prev => ({ ...prev, [msg.sender_id]: (prev[msg.sender_id] || 0) + 1 }));
-          // Refresh user list for new conversations
           loadChatUsers();
         }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [adminContactId, selectedUser]);
+  }, [adminContactId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
