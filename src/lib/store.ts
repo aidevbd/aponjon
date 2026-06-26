@@ -148,19 +148,19 @@ export async function updateVerifiedContact(
   const { data, error } = await supabase.rpc("update_verified_contact", {
     p_phone: phone,
     p_secret_code: secretCode,
-    p_name: updates.name || null,
-    p_whatsapp: updates.whatsapp || null,
-    p_imo: updates.imo || null,
-    p_telegram: updates.telegram || null,
-    p_facebook: updates.facebook || null,
-    p_email: updates.email || null,
-    p_category: updates.category || null,
-    p_custom_category: updates.custom_category || null,
-    p_note: updates.note || null,
-    p_address: updates.address || null,
-    p_blood_group: updates.blood_group || null,
-    p_birthday: updates.birthday || null,
-  } as any);
+    p_name: updates.name ?? undefined,
+    p_whatsapp: updates.whatsapp ?? undefined,
+    p_imo: updates.imo ?? undefined,
+    p_telegram: updates.telegram ?? undefined,
+    p_facebook: updates.facebook ?? undefined,
+    p_email: updates.email ?? undefined,
+    p_category: updates.category ?? undefined,
+    p_custom_category: updates.custom_category ?? undefined,
+    p_note: updates.note ?? undefined,
+    p_address: updates.address ?? undefined,
+    p_blood_group: updates.blood_group ?? undefined,
+    p_birthday: updates.birthday ?? undefined,
+  });
   if (error) throw error;
   return data;
 }
