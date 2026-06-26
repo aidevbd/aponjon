@@ -77,20 +77,20 @@ export async function saveContact(contact: {
   const { data, error } = await supabase.rpc("save_contact_with_hash", {
     p_name: contact.name,
     p_phone: contact.phone,
-    p_whatsapp: contact.whatsapp || null,
-    p_imo: contact.imo || null,
-    p_telegram: contact.telegram || null,
-    p_facebook: contact.facebook || null,
-    p_email: contact.email || null,
+    p_whatsapp: contact.whatsapp ?? undefined,
+    p_imo: contact.imo ?? undefined,
+    p_telegram: contact.telegram ?? undefined,
+    p_facebook: contact.facebook ?? undefined,
+    p_email: contact.email ?? undefined,
     p_category: contact.category || "অন্যান্য",
-    p_custom_category: contact.custom_category || null,
-    p_note: contact.note || null,
-    p_address: contact.address || null,
-    p_blood_group: contact.blood_group || null,
-    p_birthday: contact.birthday || null,
-    p_secret_code: contact.secret_code || null,
-    p_photo_url: contact.photo_url || null,
-  } as any);
+    p_custom_category: contact.custom_category ?? undefined,
+    p_note: contact.note ?? undefined,
+    p_address: contact.address ?? undefined,
+    p_blood_group: contact.blood_group ?? undefined,
+    p_birthday: contact.birthday ?? undefined,
+    p_secret_code: contact.secret_code ?? undefined,
+    p_photo_url: contact.photo_url ?? undefined,
+  });
   if (error) throw error;
   return data;
 }
