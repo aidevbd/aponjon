@@ -39,6 +39,7 @@ const AdminDashboard = () => {
   const [editPhones, setEditPhones] = useState<PhoneEntry[]>([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isAddingContact, setIsAddingContact] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
   const [activeTab, setActiveTab] = useState("contacts");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
@@ -137,6 +138,7 @@ const AdminDashboard = () => {
   }, [upcomingBirthdays]);
 
   const handleAddContact = async (forceUpdate = false) => {
+    if (isAddingContact) return;
     const primaryPhone = addPhones[0]?.number.trim();
     if (!addForm.name.trim() || !primaryPhone) { toast.error("নাম এবং ফোন নম্বর আবশ্যক"); return; }
     const messengers = deriveMessengers(addPhones);
@@ -144,6 +146,7 @@ const AdminDashboard = () => {
     if (existing && !forceUpdate) {
       const confirmed = confirm(`⚠️ এই নম্বর (${primaryPhone}) দিয়ে "${existing.name}" ইতিমধ্যে আছে।\n\nআপডেট করতে চান?`);
       if (!confirmed) return;
+      setIsAddingContact(true);
       try {
         await updateContact(existing.id, {
           name: addForm.name, phone: primaryPhone, whatsapp: messengers.whatsapp, imo: messengers.imo,
@@ -155,8 +158,10 @@ const AdminDashboard = () => {
         toast.success("কন্টাক্ট আপডেট হয়েছে! ✅");
         resetAddForm(); await loadContacts();
       } catch { toast.error("আপডেট করতে সমস্যা হয়েছে"); }
+      finally { setIsAddingContact(false); }
       return;
     }
+    setIsAddingContact(true);
     try {
       // Use save_contact_with_hash RPC so secret_code is hashed & persisted (not silently discarded)
       await saveContact({
@@ -180,6 +185,7 @@ const AdminDashboard = () => {
       logAdminActivity("contact_add", `নতুন কন্টাক্ট যোগ: ${addForm.name} (${primaryPhone})`, undefined, "contact", { name: addForm.name, phone: primaryPhone });
       resetAddForm(); await loadContacts();
     } catch { toast.error("সেভ করতে সমস্যা হয়েছে"); }
+    finally { setIsAddingContact(false); }
   };
 
   const resetAddForm = () => {
@@ -536,8 +542,8 @@ const AdminDashboard = () => {
                   <Input value={addForm.secretCode} onChange={(e) => setAddForm({ ...addForm, secretCode: e.target.value })} placeholder="গোপন কোড" className="bg-card h-9" />
                 </div>
               </div>
-              <Button onClick={() => handleAddContact()} variant="hero" className="w-full mt-4 h-9">
-                <Plus className="h-4 w-4 mr-1" /> কন্টাক্ট যোগ করুন
+              <Button onClick={() => handleAddContact()} disabled={isAddingContact} variant="hero" className="w-full mt-4 h-9">
+                <Plus className="h-4 w-4 mr-1" /> {isAddingContact ? "যোগ হচ্ছে..." : "কন্টাক্ট যোগ করুন"}
               </Button>
             </motion.div>
           </motion.div>
