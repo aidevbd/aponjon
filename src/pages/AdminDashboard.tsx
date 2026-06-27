@@ -13,6 +13,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ContactCard } from "@/components/ContactCard";
 import { ContactListItem } from "@/components/ContactListItem";
 import { ContactDetailSheet } from "@/components/ContactDetailSheet";
@@ -44,6 +48,8 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("contacts");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [selectedContact, setSelectedContact] = useState<ContactRow | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [pendingDuplicate, setPendingDuplicate] = useState<{ existingName: string; phone: string } | null>(null);
   const birthdayNotified = useRef(false);
   const [addForm, setAddForm] = useState({
     name: "", facebook: "", email: "",
@@ -144,8 +150,10 @@ const AdminDashboard = () => {
     const messengers = deriveMessengers(addPhones);
     const existing = contacts.find((c) => c.phone === primaryPhone);
     if (existing && !forceUpdate) {
-      const confirmed = confirm(`⚠️ এই নম্বর (${primaryPhone}) দিয়ে "${existing.name}" ইতিমধ্যে আছে।\n\nআপডেট করতে চান?`);
-      if (!confirmed) return;
+      setPendingDuplicate({ existingName: existing.name, phone: primaryPhone });
+      return;
+    }
+    if (existing && forceUpdate) {
       setIsAddingContact(true);
       try {
         await updateContact(existing.id, {
@@ -194,14 +202,23 @@ const AdminDashboard = () => {
     setAddPhones([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
+    setPendingDeleteId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    const id = pendingDeleteId;
+    setPendingDeleteId(null);
     const contact = contacts.find(c => c.id === id);
-    if (confirm("আপনি কি নিশ্চিত এই কন্টাক্ট ডিলিট করতে চান?")) {
-      try {
-        await deleteContact(id); await loadContacts(); toast.success("কন্টাক্ট ডিলিট হয়েছে");
-        logAdminActivity("contact_delete", `কন্টাক্ট ডিলিট: ${contact?.name || "অজানা"} (${contact?.phone || ""})`, id, "contact", { name: contact?.name, phone: contact?.phone });
-      }
-      catch { toast.error("ডিলিট করতে সমস্যা হয়েছে"); }
+    try {
+      await deleteContact(id);
+      await loadContacts();
+      toast.success("কন্টাক্ট ডিলিট হয়েছে");
+      logAdminActivity("contact_delete", `কন্টাক্ট ডিলিট: ${contact?.name || "অজানা"} (${contact?.phone || ""})`, id, "contact", { name: contact?.name, phone: contact?.phone });
+    } catch (err) {
+      console.error("[delete contact]", err);
+      toast.error("ডিলিট করতে সমস্যা হয়েছে");
     }
   };
 
