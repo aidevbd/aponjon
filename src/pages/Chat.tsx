@@ -261,7 +261,8 @@ const Chat = () => {
         }),
       );
       setContactPreviews(Object.fromEntries(previewEntries));
-    } catch {
+    } catch (err) {
+      console.error("[catch]", err);
       toast.error("কন্টাক্ট লোড করতে সমস্যা");
     }
   };
@@ -290,7 +291,8 @@ const Chat = () => {
         },
       }));
       setUnreadMap((prev) => { const n = { ...prev }; delete n[contact.id]; return n; });
-    } catch {
+    } catch (err) {
+      console.error("[catch]", err);
       toast.error("মেসেজ লোড করতে সমস্যা");
     }
   }, [session]);
@@ -370,7 +372,8 @@ const Chat = () => {
         await editMessage(session.token, editingMsg.id, text);
         setMessages(prev => prev.map(m => m.id === editingMsg.id ? { ...m, content: text, edited_at: new Date().toISOString(), original_content: m.original_content || m.content } : m));
         toast.success("মেসেজ এডিট হয়েছে");
-      } catch {
+      } catch (err) {
+        console.error("[catch]", err);
         toast.error("এডিট করতে সমস্যা");
         setMsgInput(text);
       } finally {
@@ -425,7 +428,8 @@ const Chat = () => {
       await unsendMessage(session.token, unsendTargetId);
       setMessages(prev => prev.map(m => m.id === unsendTargetId ? { ...m, content: null, image_url: null, unsent_at: new Date().toISOString() } : m));
       toast.success("মেসেজ আনসেন্ড করা হয়েছে");
-    } catch {
+    } catch (err) {
+      console.error("[catch]", err);
       toast.error("আনসেন্ড করতে সমস্যা");
     } finally {
       setUnsendTargetId(null);
@@ -438,7 +442,8 @@ const Chat = () => {
       await removeMessageForMe(session.token, msg.id);
       setMessages(prev => prev.filter(m => m.id !== msg.id));
       toast.success("আপনার চ্যাট থেকে সরানো হয়েছে");
-    } catch {
+    } catch (err) {
+      console.error("[catch]", err);
       toast.error("সরাতে সমস্যা");
     }
   };
@@ -458,7 +463,8 @@ const Chat = () => {
     }));
     try {
       await reactToMessage(session.token, msg.id, emoji);
-    } catch {
+    } catch (err) {
+      console.error("[catch]", err);
       toast.error("রিয়্যাকশনে সমস্যা");
       if (selectedContact) void loadMessages(selectedContact);
     }
@@ -472,7 +478,8 @@ const Chat = () => {
     try {
       const data = await getMessageEditHistory(session.token, msg.id);
       setEditHistory(data);
-    } catch {
+    } catch (err) {
+      console.error("[catch]", err);
       toast.error("ইতিহাস লোড করতে সমস্যা");
     } finally {
       setEditHistoryLoading(false);
@@ -502,7 +509,8 @@ const Chat = () => {
       const url = await uploadChatImage(file, session.token);
       await sendMessage(session.token, selectedContact.id, undefined, url, replyingTo?.id);
       setReplyingTo(null);
-    } catch {
+    } catch (err) {
+      console.error("[catch]", err);
       toast.error("ছবি পাঠাতে সমস্যা");
     } finally {
       setUploading(false);
