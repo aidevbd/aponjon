@@ -77,6 +77,7 @@ const Chat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const longPressTimeoutRef = useRef<number | null>(null);
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const restoreInputFocus = useCallback((force = false) => {
     const focusInput = () => {
@@ -185,7 +186,7 @@ const Chat = () => {
   }, [session, selectedContact]);
 
   useEffect(() => {
-    if (!session || !selectedContact) { setIsOtherTyping(false); return; }
+    if (!session || !selectedContact) { setIsOtherTyping(false); typingChannelRef.current = null; return; }
     const channelName = `typing:${[session.contactId, selectedContact.id].sort().join(":")}`;
     const channel = supabase.channel(channelName)
       .on("broadcast", { event: "typing" }, (payload) => {
@@ -196,7 +197,12 @@ const Chat = () => {
         }
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); setIsOtherTyping(false); };
+    typingChannelRef.current = channel;
+    return () => {
+      typingChannelRef.current = null;
+      supabase.removeChannel(channel);
+      setIsOtherTyping(false);
+    };
   }, [session, selectedContact]);
 
   const emitTyping = () => {
@@ -204,8 +210,10 @@ const Chat = () => {
     const now = Date.now();
     if (now - lastTypingRef.current < 2000) return;
     lastTypingRef.current = now;
-    const channelName = `typing:${[session.contactId, selectedContact.id].sort().join(":")}`;
-    supabase.channel(channelName).send({ type: "broadcast", event: "typing", payload: { sender_id: session.contactId } });
+    // Re-use the already-subscribed typing channel instead of creating a new one each keystroke.
+    const channel = typingChannelRef.current;
+    if (!channel) return;
+    void channel.send({ type: "broadcast", event: "typing", payload: { sender_id: session.contactId } });
   };
 
   useEffect(() => {
