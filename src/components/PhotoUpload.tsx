@@ -82,8 +82,8 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
 
       onChange(urlData.publicUrl);
       toast.success("ছবি আপলোড হয়েছে! 📸");
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // Don't leak raw upload error / storage URLs into the console
       toast.error("ছবি আপলোড করতে সমস্যা হয়েছে");
     } finally {
       setUploading(false);

@@ -3,6 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 const SESSION_KEY = "aponjon_chat_session";
 const SESSION_EXPIRY_HOURS = 24;
 
+// Use sessionStorage so the chat session is scoped to the tab —
+// closing the tab/browser invalidates the session (defence-in-depth for shared devices).
+const sessionStore: Storage | null =
+  typeof window !== "undefined" && typeof window.sessionStorage !== "undefined"
+    ? window.sessionStorage
+    : null;
+
 export interface ChatSession {
   token: string;
   contactId: string;
@@ -12,28 +19,34 @@ export interface ChatSession {
 }
 
 export function getChatSession(): ChatSession | null {
+  if (!sessionStore) return null;
   try {
-    const raw = localStorage.getItem(SESSION_KEY);
+    // Migration: if an older localStorage session exists, drop it (no longer trusted).
+    try { localStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
+    const raw = sessionStore.getItem(SESSION_KEY);
     if (!raw) return null;
     const session: ChatSession = JSON.parse(raw);
     const elapsed = Date.now() - session.createdAt;
     if (elapsed > SESSION_EXPIRY_HOURS * 60 * 60 * 1000) {
-      localStorage.removeItem(SESSION_KEY);
+      sessionStore.removeItem(SESSION_KEY);
       return null;
     }
     return session;
   } catch {
-    localStorage.removeItem(SESSION_KEY);
+    sessionStore.removeItem(SESSION_KEY);
     return null;
   }
 }
 
 export function saveChatSession(session: ChatSession) {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  if (!sessionStore) return;
+  sessionStore.setItem(SESSION_KEY, JSON.stringify(session));
 }
 
 export function clearChatSession() {
-  localStorage.removeItem(SESSION_KEY);
+  if (!sessionStore) return;
+  sessionStore.removeItem(SESSION_KEY);
+  try { localStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
 }
 
 export async function createChatSession(phone: string, secretCode: string): Promise<ChatSession | null> {
