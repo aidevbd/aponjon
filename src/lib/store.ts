@@ -15,7 +15,7 @@ export interface ContactRow {
   address: string | null;
   blood_group: string | null;
   birthday: string | null;
-  secret_code: string | null;
+  secret_code?: string | null;
   secret_code_hash?: string | null;
   photo_url: string | null;
   created_at: string;
@@ -96,7 +96,8 @@ export async function saveContact(contact: {
 }
 
 export async function updateContact(id: string, updates: Partial<ContactRow>) {
-  const { error } = await supabase.from("contacts").update(updates).eq("id", id);
+  const { secret_code: _omit, ...safe } = updates;
+  const { error } = await supabase.from("contacts").update(safe).eq("id", id);
   if (error) throw error;
 }
 

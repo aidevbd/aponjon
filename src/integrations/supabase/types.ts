@@ -105,7 +105,6 @@ export type Database = {
           note: string | null
           phone: string
           photo_url: string | null
-          secret_code: string | null
           secret_code_hash: string | null
           telegram: string | null
           updated_at: string
@@ -129,7 +128,6 @@ export type Database = {
           note?: string | null
           phone: string
           photo_url?: string | null
-          secret_code?: string | null
           secret_code_hash?: string | null
           telegram?: string | null
           updated_at?: string
@@ -153,7 +151,6 @@ export type Database = {
           note?: string | null
           phone?: string
           photo_url?: string | null
-          secret_code?: string | null
           secret_code_hash?: string | null
           telegram?: string | null
           updated_at?: string
