@@ -566,6 +566,44 @@ const AdminDashboard = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!pendingDeleteId} onOpenChange={(o) => { if (!o) setPendingDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>কন্টাক্ট ডিলিট করবেন?</AlertDialogTitle>
+            <AlertDialogDescription>
+              এই কন্টাক্ট স্থায়ীভাবে মুছে যাবে। এই কাজ ফেরানো যাবে না।
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>বাতিল</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              হ্যাঁ, ডিলিট করুন
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Duplicate phone — confirm update */}
+      <AlertDialog open={!!pendingDuplicate} onOpenChange={(o) => { if (!o) setPendingDuplicate(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>এই নম্বর ইতিমধ্যে আছে</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingDuplicate && (
+                <>এই নম্বর ({pendingDuplicate.phone}) দিয়ে "{pendingDuplicate.existingName}" ইতিমধ্যে সংরক্ষিত আছে। বিদ্যমান কন্টাক্ট আপডেট করতে চান?</>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>না</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setPendingDuplicate(null); void handleAddContact(true); }}>
+              হ্যাঁ, আপডেট করুন
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
