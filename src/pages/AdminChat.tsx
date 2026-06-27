@@ -95,7 +95,7 @@ const AdminChat = () => {
       const { data, error } = await supabase.rpc("get_admin_chat_users");
       if (error) throw error;
       setChatUsers((data || []) as ChatUser[]);
-    } catch { toast.error("চ্যাট ইউজার লোড করতে সমস্যা"); }
+    } catch (err) { console.error("[catch]", err); toast.error("চ্যাট ইউজার লোড করতে সমস্যা"); }
   };
 
   const loadUnread = async () => {
@@ -114,7 +114,7 @@ const AdminChat = () => {
       if (error) throw error;
       setMessages((data || []) as Message[]);
       setUnreadMap(prev => { const n = { ...prev }; delete n[user.id]; return n; });
-    } catch { toast.error("মেসেজ লোড করতে সমস্যা"); }
+    } catch (err) { console.error("[catch]", err); toast.error("মেসেজ লোড করতে সমস্যা"); }
   }, []);
 
   const handleSelectUser = (user: ChatUser) => {
@@ -131,7 +131,8 @@ const AdminChat = () => {
       setAdminContactId(data);
       setNeedsSetup(false);
       toast.success("অ্যাডমিন চ্যাট সেটআপ হয়েছে! 💬");
-    } catch {
+    } catch (err) {
+      console.error("[catch]", err);
       toast.error("সেটআপ সমস্যা হয়েছে");
     } finally {
       setSetupLoading(false);
@@ -149,7 +150,8 @@ const AdminChat = () => {
         p_content: text,
       });
       if (error) throw error;
-    } catch {
+    } catch (err) {
+      console.error("[catch]", err);
       toast.error("মেসেজ পাঠাতে সমস্যা");
       setMsgInput(text);
     } finally {
@@ -169,7 +171,8 @@ const AdminChat = () => {
         p_image_url: url,
       });
       if (error) throw error;
-    } catch {
+    } catch (err) {
+      console.error("[catch]", err);
       toast.error("ছবি পাঠাতে সমস্যা");
     } finally {
       setUploading(false);
