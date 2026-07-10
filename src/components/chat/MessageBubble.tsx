@@ -226,7 +226,7 @@ export function MessageBubble({
               {msg.image_url && (
                 <img
                   src={msg.image_url}
-                  alt=""
+                  alt="পাঠানো ছবি"
                   className="rounded-lg max-w-[240px] mb-1.5 cursor-pointer"
                   onClick={(e) => { e.stopPropagation(); window.open(msg.image_url!, "_blank"); }}
                 />
