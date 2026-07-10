@@ -177,7 +177,7 @@ export function MessageBubble({
         <div className="w-7 mr-1.5 shrink-0 self-end">
           {showAvatar && (
             avatarUrl ? (
-              <img src={avatarUrl} alt="" className="h-7 w-7 rounded-full object-cover" />
+              <img src={avatarUrl} alt={otherName} className="h-7 w-7 rounded-full object-cover" />
             ) : (
               <div className="h-7 w-7 rounded-full bg-primary/15 text-primary text-xs font-bold flex items-center justify-center">
                 {otherName.charAt(0)}
