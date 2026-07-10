@@ -729,7 +729,7 @@ const Chat = () => {
                     >
                       <div className="relative shrink-0">
                         {c.photo_url ? (
-                          <img src={c.photo_url} alt="" className="h-11 w-11 rounded-full object-cover border border-primary/20" />
+                          <img src={c.photo_url} alt={c.name} className="h-11 w-11 rounded-full object-cover border border-primary/20" />
                         ) : (
                           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">{c.name.charAt(0)}</div>
                         )}
