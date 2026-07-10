@@ -545,7 +545,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                   </div>
                 </div>
               </button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="মেসেজ খুঁজুন" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
                 <Search className="h-4 w-4" />
               </Button>
             </div>
