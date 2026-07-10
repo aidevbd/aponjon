@@ -687,6 +687,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                   variant="hero"
                   size="icon"
                   className="h-9 w-9 shrink-0 rounded-full"
+                  aria-label="মেসেজ পাঠান"
                   onMouseDown={(e) => { e.preventDefault(); restoreInputFocus(true); }}
                   onTouchStart={(e) => { e.preventDefault(); restoreInputFocus(true); }}
                   onPointerDown={(e) => { e.preventDefault(); restoreInputFocus(true); if (!sending) void handleSend(); }}
