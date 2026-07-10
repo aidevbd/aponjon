@@ -555,7 +555,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
               <div className="pt-2 px-1">
                 <div className="flex items-center gap-2">
                   <Input placeholder="মেসেজ খুঁজুন..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-card h-8 text-sm" autoFocus />
-                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="সার্চ বন্ধ করুন" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
