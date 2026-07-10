@@ -238,7 +238,7 @@ const AdminChat = () => {
                 <ArrowLeft className="h-5 w-5" />
                 <div className="flex items-center gap-2">
                   {selectedUser.photo_url ? (
-                    <img src={selectedUser.photo_url} alt="" className="h-8 w-8 rounded-full object-cover border border-primary/20" />
+                    <img src={selectedUser.photo_url} alt={selectedUser.name} className="h-8 w-8 rounded-full object-cover border border-primary/20" />
                   ) : (
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</div>
                   )}
