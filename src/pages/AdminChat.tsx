@@ -352,7 +352,7 @@ const AdminChat = () => {
                     className="bg-background/50 text-sm h-9 flex-1 min-w-0"
                     disabled={sending}
                   />
-                  <Button variant="hero" size="icon" className="h-9 w-9 shrink-0 rounded-full" onClick={handleSend} disabled={sending || !msgInput.trim()}>
+                  <Button variant="hero" size="icon" className="h-9 w-9 shrink-0 rounded-full" aria-label="মেসেজ পাঠান" onClick={handleSend} disabled={sending || !msgInput.trim()}>
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
