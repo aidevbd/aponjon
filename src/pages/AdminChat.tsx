@@ -285,7 +285,7 @@ const AdminChat = () => {
                       className="w-full flex items-center gap-3 rounded-xl p-3 hover:bg-card/80 transition-colors text-left border border-transparent hover:border-border/50"
                     >
                       {u.photo_url ? (
-                        <img src={u.photo_url} alt="" className="h-11 w-11 rounded-full object-cover border border-primary/20 shrink-0" />
+                        <img src={u.photo_url} alt={u.name} className="h-11 w-11 rounded-full object-cover border border-primary/20 shrink-0" />
                       ) : (
                         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">{u.name.charAt(0)}</div>
                       )}
