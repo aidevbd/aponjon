@@ -43,6 +43,15 @@
     --warm-cream: 30 40% 96%;
     --gold: 40 70% 55%;
 
+    --messenger-whatsapp-bg: 142 70% 92%;
+    --messenger-whatsapp-text: 142 70% 28%;
+    --messenger-imo-bg: 217 70% 92%;
+    --messenger-imo-text: 217 70% 35%;
+    --messenger-telegram-bg: 199 80% 92%;
+    --messenger-telegram-text: 199 80% 35%;
+    --messenger-facebook-bg: 217 70% 92%;
+    --messenger-facebook-text: 217 70% 45%;
+
     --gradient-hero: linear-gradient(135deg, hsl(346 60% 56%), hsl(15 80% 60%));
     --gradient-soft: linear-gradient(135deg, hsl(346 40% 95%), hsl(25 80% 90%));
     --gradient-warm: hsl(20 33% 98%);
@@ -156,5 +165,37 @@
     @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium;
     background: hsl(var(--rose-soft));
     color: hsl(var(--primary));
+  }
+
+  .messenger-whatsapp {
+    background-color: hsl(var(--messenger-whatsapp-bg));
+    color: hsl(var(--messenger-whatsapp-text));
+  }
+  .messenger-whatsapp:hover {
+    background-color: hsl(var(--messenger-whatsapp-bg) / 0.85);
+  }
+
+  .messenger-imo {
+    background-color: hsl(var(--messenger-imo-bg));
+    color: hsl(var(--messenger-imo-text));
+  }
+  .messenger-imo:hover {
+    background-color: hsl(var(--messenger-imo-bg) / 0.85);
+  }
+
+  .messenger-telegram {
+    background-color: hsl(var(--messenger-telegram-bg));
+    color: hsl(var(--messenger-telegram-text));
+  }
+  .messenger-telegram:hover {
+    background-color: hsl(var(--messenger-telegram-bg) / 0.85);
+  }
+
+  .messenger-facebook {
+    background-color: hsl(var(--messenger-facebook-bg));
+    color: hsl(var(--messenger-facebook-text));
+  }
+  .messenger-facebook:hover {
+    background-color: hsl(var(--messenger-facebook-bg) / 0.85);
   }
 }

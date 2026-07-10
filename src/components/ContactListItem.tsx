@@ -43,6 +43,7 @@ export function ContactListItem({ contact, onClick }: ContactListItemProps) {
         onClick={callPhone}
         className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0"
         title="কল করুন"
+        aria-label="কল করুন"
       >
         <Phone className="h-4 w-4" />
       </button>

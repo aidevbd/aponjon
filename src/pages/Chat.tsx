@@ -627,7 +627,7 @@ const Chat = () => {
                 <div className="flex items-center gap-2 min-w-0">
                   <div className="relative shrink-0">
                     {selectedContact.photo_url ? (
-                      <img src={selectedContact.photo_url} alt="" className="h-8 w-8 rounded-full object-cover border border-primary/20" />
+                      <img src={selectedContact.photo_url} alt={selectedContact.name} className="h-8 w-8 rounded-full object-cover border border-primary/20" />
                     ) : (
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedContact.name.charAt(0)}</div>
                     )}
@@ -659,13 +659,13 @@ const Chat = () => {
           </div>
           <div className="flex items-center gap-1 shrink-0">
             {selectedContact && (
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="মেসেজ খুঁজুন" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
                 <Search className="h-4 w-4" />
               </Button>
             )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="আরও অপশন">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -688,7 +688,7 @@ const Chat = () => {
           <div className="px-4 pt-2">
             <div className="flex items-center gap-2">
               <Input placeholder="মেসেজ খুঁজুন..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-card h-8 text-sm" autoFocus />
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="সার্চ বন্ধ করুন" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -729,7 +729,7 @@ const Chat = () => {
                     >
                       <div className="relative shrink-0">
                         {c.photo_url ? (
-                          <img src={c.photo_url} alt="" className="h-11 w-11 rounded-full object-cover border border-primary/20" />
+                          <img src={c.photo_url} alt={c.name} className="h-11 w-11 rounded-full object-cover border border-primary/20" />
                         ) : (
                           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">{c.name.charAt(0)}</div>
                         )}
@@ -874,6 +874,7 @@ const Chat = () => {
                     <Button
                       variant="ghost" size="icon"
                       className="h-9 w-9"
+                      aria-label="ছবি পাঠান"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploading}
                     >
@@ -898,6 +899,7 @@ const Chat = () => {
                     tabIndex={-1}
                     variant="hero" size="icon"
                     className="h-9 w-9 shrink-0 rounded-full"
+                    aria-label="মেসেজ পাঠান"
                     onMouseDown={(e) => { e.preventDefault(); restoreInputFocus(true); }}
                     onTouchStart={(e) => { e.preventDefault(); restoreInputFocus(true); }}
                     onPointerDown={(e) => { e.preventDefault(); restoreInputFocus(true); if (!sending) void handleSend(); }}

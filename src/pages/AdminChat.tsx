@@ -238,7 +238,7 @@ const AdminChat = () => {
                 <ArrowLeft className="h-5 w-5" />
                 <div className="flex items-center gap-2">
                   {selectedUser.photo_url ? (
-                    <img src={selectedUser.photo_url} alt="" className="h-8 w-8 rounded-full object-cover border border-primary/20" />
+                    <img src={selectedUser.photo_url} alt={selectedUser.name} className="h-8 w-8 rounded-full object-cover border border-primary/20" />
                   ) : (
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</div>
                   )}
@@ -285,7 +285,7 @@ const AdminChat = () => {
                       className="w-full flex items-center gap-3 rounded-xl p-3 hover:bg-card/80 transition-colors text-left border border-transparent hover:border-border/50"
                     >
                       {u.photo_url ? (
-                        <img src={u.photo_url} alt="" className="h-11 w-11 rounded-full object-cover border border-primary/20 shrink-0" />
+                        <img src={u.photo_url} alt={u.name} className="h-11 w-11 rounded-full object-cover border border-primary/20 shrink-0" />
                       ) : (
                         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">{u.name.charAt(0)}</div>
                       )}
@@ -318,7 +318,7 @@ const AdminChat = () => {
                     <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 ${isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
                         {msg.image_url && (
-                          <img src={msg.image_url} alt="" className="rounded-lg max-w-full mb-1.5 cursor-pointer" onClick={() => window.open(msg.image_url!, "_blank")} />
+                          <img src={msg.image_url} alt="পাঠানো ছবি" className="rounded-lg max-w-full mb-1.5 cursor-pointer" onClick={() => window.open(msg.image_url!, "_blank")} />
                         )}
                         {msg.content && <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>}
                         <div className={`flex items-center gap-1 mt-1 ${isMine ? "justify-end" : ""}`}>
@@ -341,7 +341,7 @@ const AdminChat = () => {
               <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-3 sm:px-4 py-3">
                 <div className="flex items-center gap-1.5 sm:gap-2 w-full">
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                  <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                  <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" aria-label="ছবি পাঠান" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                     {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4 text-primary" />}
                   </Button>
                   <Input
@@ -352,7 +352,7 @@ const AdminChat = () => {
                     className="bg-background/50 text-sm h-9 flex-1 min-w-0"
                     disabled={sending}
                   />
-                  <Button variant="hero" size="icon" className="h-9 w-9 shrink-0 rounded-full" onClick={handleSend} disabled={sending || !msgInput.trim()}>
+                  <Button variant="hero" size="icon" className="h-9 w-9 shrink-0 rounded-full" aria-label="মেসেজ পাঠান" onClick={handleSend} disabled={sending || !msgInput.trim()}>
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>

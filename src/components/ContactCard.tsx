@@ -60,12 +60,12 @@ export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
         {(onEdit || onDelete) && (
           <div className="flex gap-1">
             {onEdit && (
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(contact)}>
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="সম্পাদনা করুন" onClick={() => onEdit(contact)}>
                 <Edit3 className="h-4 w-4" />
               </Button>
             )}
             {onDelete && (
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => onDelete(contact.id)}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" aria-label="মুছে ফেলুন" onClick={() => onDelete(contact.id)}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
@@ -81,17 +81,17 @@ export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
           <Phone className="h-3.5 w-3.5" /> {contact.phone}
         </button>
         {contact.whatsapp && contact.whatsapp.split(",").map((num, i) => (
-          <button key={`wa-${i}`} onClick={() => openWhatsApp(num.trim())} className="flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-200 transition-colors">
+          <button key={`wa-${i}`} onClick={() => openWhatsApp(num.trim())} className="messenger-whatsapp flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors">
             <MessageCircle className="h-3.5 w-3.5" /> WhatsApp {contact.whatsapp!.includes(",") ? num.trim().slice(-4) : ""}
           </button>
         ))}
         {contact.imo && contact.imo.split(",").map((num, i) => (
-          <button key={`imo-${i}`} onClick={() => openIMO(num.trim())} className="flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors">
+          <button key={`imo-${i}`} onClick={() => openIMO(num.trim())} className="messenger-imo flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors">
             <Phone className="h-3.5 w-3.5" /> IMO {contact.imo!.includes(",") ? num.trim().slice(-4) : ""}
           </button>
         ))}
         {contact.telegram && contact.telegram.split(",").map((num, i) => (
-          <button key={`tg-${i}`} onClick={() => openTelegram(num.trim())} className="flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-200 transition-colors">
+          <button key={`tg-${i}`} onClick={() => openTelegram(num.trim())} className="messenger-telegram flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors">
             <Send className="h-3.5 w-3.5" /> Telegram {contact.telegram!.includes(",") ? num.trim().slice(-4) : ""}
           </button>
         ))}
@@ -101,7 +101,7 @@ export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
           </a>
         )}
         {contact.facebook && (
-          <button onClick={() => openFacebook(contact.facebook!)} className="flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-200 transition-colors">
+          <button onClick={() => openFacebook(contact.facebook!)} className="messenger-facebook flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors">
             🌐 Facebook
           </button>
         )}

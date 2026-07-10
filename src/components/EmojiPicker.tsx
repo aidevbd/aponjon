@@ -58,6 +58,7 @@ export function EmojiPicker({ onSelect, inputRef }: EmojiPickerProps) {
         variant="ghost"
         size="icon"
         className="h-9 w-9 shrink-0"
+        aria-label="ইমোজি খুলুন"
         onMouseDown={preventFocusSteal}
         onPointerDown={preventFocusSteal}
         onClick={(e) => { e.preventDefault(); setOpen(!open); }}

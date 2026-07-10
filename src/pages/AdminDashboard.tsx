@@ -472,7 +472,7 @@ const AdminDashboard = () => {
                 <h3 className="text-base font-display font-semibold flex items-center gap-2">
                   <Edit3 className="h-4 w-4 text-primary" /> তথ্য সম্পাদনা
                 </h3>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditingContact(null)}><X className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="সম্পাদনা বন্ধ করুন" onClick={() => setEditingContact(null)}><X className="h-4 w-4" /></Button>
               </div>
               <div className="space-y-3">
                 <div className="flex justify-center">
@@ -519,7 +519,7 @@ const AdminDashboard = () => {
                 <h3 className="text-base font-display font-semibold flex items-center gap-2">
                   <Plus className="h-4 w-4 text-primary" /> নতুন কন্টাক্ট
                 </h3>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowAddModal(false)}><X className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="যোগ বন্ধ করুন" onClick={() => setShowAddModal(false)}><X className="h-4 w-4" /></Button>
               </div>
               <div className="space-y-3">
                 <div className="flex justify-center">

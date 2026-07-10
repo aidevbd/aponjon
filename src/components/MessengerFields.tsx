@@ -25,7 +25,7 @@ export function MessengerFields({ phone, whatsapp, imo, telegram, onChange }: Me
         <div className="flex gap-2">
           <Input value={whatsapp} onChange={(e) => onChange("whatsapp", e.target.value)} placeholder="WhatsApp নম্বর" className="bg-card" />
           {phone && (
-            <Button type="button" variant="outline" size="icon" className="shrink-0 h-10 w-10" onClick={() => copyPhone("whatsapp")} title="ফোন নম্বর কপি করুন">
+            <Button type="button" variant="outline" size="icon" className="shrink-0 h-10 w-10" onClick={() => copyPhone("whatsapp")} title="ফোন নম্বর কপি করুন" aria-label="WhatsApp-এ ফোন নম্বর কপি করুন">
               <Copy className="h-3.5 w-3.5" />
             </Button>
           )}
@@ -38,7 +38,7 @@ export function MessengerFields({ phone, whatsapp, imo, telegram, onChange }: Me
         <div className="flex gap-2">
           <Input value={imo} onChange={(e) => onChange("imo", e.target.value)} placeholder="IMO নম্বর" className="bg-card" />
           {phone && (
-            <Button type="button" variant="outline" size="icon" className="shrink-0 h-10 w-10" onClick={() => copyPhone("imo")} title="ফোন নম্বর কপি করুন">
+            <Button type="button" variant="outline" size="icon" className="shrink-0 h-10 w-10" onClick={() => copyPhone("imo")} title="ফোন নম্বর কপি করুন" aria-label="IMO-তে ফোন নম্বর কপি করুন">
               <Copy className="h-3.5 w-3.5" />
             </Button>
           )}
@@ -51,7 +51,7 @@ export function MessengerFields({ phone, whatsapp, imo, telegram, onChange }: Me
         <div className="flex gap-2">
           <Input value={telegram} onChange={(e) => onChange("telegram", e.target.value)} placeholder="Telegram নম্বর" className="bg-card" />
           {phone && (
-            <Button type="button" variant="outline" size="icon" className="shrink-0 h-10 w-10" onClick={() => copyPhone("telegram")} title="ফোন নম্বর কপি করুন">
+            <Button type="button" variant="outline" size="icon" className="shrink-0 h-10 w-10" onClick={() => copyPhone("telegram")} title="ফোন নম্বর কপি করুন" aria-label="Telegram-এ ফোন নম্বর কপি করুন">
               <Copy className="h-3.5 w-3.5" />
             </Button>
           )}
