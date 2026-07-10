@@ -525,7 +525,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                 <ArrowLeft className="h-4 w-4 shrink-0" />
                 <div className="relative shrink-0">
                   {selectedUser.photo_url ? (
-                    <img src={selectedUser.photo_url} alt="" className="h-8 w-8 rounded-full object-cover border border-primary/20" />
+                    <img src={selectedUser.photo_url} alt={selectedUser.name} className="h-8 w-8 rounded-full object-cover border border-primary/20" />
                   ) : (
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</div>
                   )}
