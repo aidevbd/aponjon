@@ -96,7 +96,7 @@ export function PhoneWithMessengers({ phones, onChange, maxPhones = 3, firstPhon
               readOnly={index === 0 && firstPhoneReadOnly}
             />
             {index > 0 && (
-              <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive hover:text-destructive shrink-0" onClick={() => removePhone(index)}>
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive hover:text-destructive shrink-0" aria-label="নম্বর সরান" onClick={() => removePhone(index)}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
