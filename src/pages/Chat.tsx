@@ -627,7 +627,7 @@ const Chat = () => {
                 <div className="flex items-center gap-2 min-w-0">
                   <div className="relative shrink-0">
                     {selectedContact.photo_url ? (
-                      <img src={selectedContact.photo_url} alt="" className="h-8 w-8 rounded-full object-cover border border-primary/20" />
+                      <img src={selectedContact.photo_url} alt={selectedContact.name} className="h-8 w-8 rounded-full object-cover border border-primary/20" />
                     ) : (
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedContact.name.charAt(0)}</div>
                     )}
@@ -659,13 +659,13 @@ const Chat = () => {
           </div>
           <div className="flex items-center gap-1 shrink-0">
             {selectedContact && (
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="মেসেজ খুঁজুন" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
                 <Search className="h-4 w-4" />
               </Button>
             )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="আরও অপশন">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
