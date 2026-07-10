@@ -874,6 +874,7 @@ const Chat = () => {
                     <Button
                       variant="ghost" size="icon"
                       className="h-9 w-9"
+                      aria-label="ছবি পাঠান"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploading}
                     >
@@ -898,6 +899,7 @@ const Chat = () => {
                     tabIndex={-1}
                     variant="hero" size="icon"
                     className="h-9 w-9 shrink-0 rounded-full"
+                    aria-label="মেসেজ পাঠান"
                     onMouseDown={(e) => { e.preventDefault(); restoreInputFocus(true); }}
                     onTouchStart={(e) => { e.preventDefault(); restoreInputFocus(true); }}
                     onPointerDown={(e) => { e.preventDefault(); restoreInputFocus(true); if (!sending) void handleSend(); }}
