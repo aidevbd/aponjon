@@ -490,7 +490,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                     >
                       <div className="relative shrink-0">
                         {u.photo_url ? (
-                          <img src={u.photo_url} alt="" className="h-10 w-10 rounded-full object-cover border border-primary/20" />
+                          <img src={u.photo_url} alt={u.name} className="h-10 w-10 rounded-full object-cover border border-primary/20" />
                         ) : (
                           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{u.name.charAt(0)}</div>
                         )}
