@@ -455,7 +455,9 @@ const AdminDashboard = () => {
         <TabsContent value="settings" className="mt-0">
           <ChangePasswordForm />
         </TabsContent>
-      </Tabs>
+     </Tabs>
+      </main>
+
 
       {/* ===== Floating Add Button (FAB) ===== */}
       {activeTab === "contacts" && (
