@@ -109,10 +109,12 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
               <button
                 type="button"
                 onClick={handleRemove}
+                aria-label="ছবি সরান"
                 className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 transition-colors"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
+
             )}
           </div>
         ) : (

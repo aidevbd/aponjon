@@ -294,7 +294,10 @@ const AdminDashboard = () => {
       </header>
 
       {/* Tab-Based Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="container mx-auto px-4 py-3">
+      <main className="container mx-auto px-4 py-3">
+        <h1 className="sr-only">অ্যাডমিন ড্যাশবোর্ড</h1>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+
         <TabsList className="w-full grid grid-cols-5 h-10 mb-4">
           <TabsTrigger value="dashboard" className="gap-1 text-[10px] sm:text-sm px-1">
             <LayoutDashboard className="h-3.5 w-3.5" />
@@ -352,16 +355,21 @@ const AdminDashboard = () => {
             <div className="ml-auto flex border border-border rounded-lg overflow-hidden">
               <button
                 onClick={() => setViewMode("list")}
+                aria-label="লিস্ট ভিউ"
+                aria-pressed={viewMode === "list"}
                 className={`p-1.5 transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}
               >
                 <List className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setViewMode("grid")}
+                aria-label="গ্রিড ভিউ"
+                aria-pressed={viewMode === "grid"}
                 className={`p-1.5 transition-colors ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}
               >
                 <LayoutGrid className="h-4 w-4" />
               </button>
+
             </div>
           </div>
 
