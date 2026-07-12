@@ -227,10 +227,15 @@ export function MessageBubble({
                 <img
                   src={msg.image_url}
                   alt="পাঠানো ছবি"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="ছবি বড় করে দেখুন"
                   className="rounded-lg max-w-[240px] mb-1.5 cursor-pointer"
                   onClick={(e) => { e.stopPropagation(); window.open(msg.image_url!, "_blank"); }}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); window.open(msg.image_url!, "_blank"); } }}
                 />
               )}
+
               {msg.content && <span>{msg.content}</span>}
             </>
           )}

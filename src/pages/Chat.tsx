@@ -617,7 +617,7 @@ const Chat = () => {
 
   // ============ CHAT INTERFACE ============
   return (
-    <div className="h-screen warm-gradient flex flex-col overflow-hidden">
+    <div className="h-dvh warm-gradient flex flex-col overflow-hidden">
       <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md shrink-0">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-2 min-w-0 flex-1">
