@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Heart, UserPlus, Shield, ArrowRight, Sparkles } from "lucide-react";
+import { Heart, UserPlus, Shield, ArrowRight, Sparkles, PlusCircle, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 
@@ -63,30 +63,51 @@ const Index = () => {
               মোবাইল হারালে যেন আপনাকে হারিয়ে না ফেলি — একটু কষ্ট করে আপনার নাম আর নম্বরটা যোগ করে দেবেন? 🤍
             </p>
 
-            {/* CTAs */}
-            <div className="mt-6 flex w-full flex-col gap-2.5 sm:mt-7">
-              <Link
-                to="/add"
-                className="group inline-flex min-h-12 w-full items-center justify-between gap-2 rounded-2xl hero-gradient px-5 py-3.5 text-sm font-semibold text-primary-foreground shadow-rose transition-all hover:shadow-lg active:scale-[0.98] sm:text-base"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <UserPlus className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden />
-                  আমার তথ্য যোগ করি
-                </span>
-                <ArrowRight
-                  className="h-4 w-4 transition-transform group-hover:translate-x-1"
-                  aria-hidden
-                />
-              </Link>
+            {/* CTA section */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="mt-6 w-full sm:mt-7"
+            >
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                আজই শুরু করুন
+              </p>
 
-              <Link
-                to="/access"
-                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-border bg-background px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-[hsl(var(--rose-soft))] active:scale-[0.98] sm:text-base"
-              >
-                <Shield className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden />
-                আগে যোগ করেছি, দেখি
-              </Link>
-            </div>
+              <div className="flex w-full flex-col gap-3">
+                {/* Primary CTA */}
+                <Link
+                  to="/add"
+                  className="cta-primary group w-full px-5 py-3.5 text-sm sm:text-base"
+                >
+                  <span className="relative z-10 inline-flex items-center gap-2">
+                    <PlusCircle className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden />
+                    <span className="font-semibold">আমার তথ্য যোগ করি</span>
+                  </span>
+                  <ArrowRight
+                    className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 sm:h-5 sm:w-5"
+                    aria-hidden
+                  />
+                </Link>
+                <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
+                  মাত্র ১ মিনিটে নাম, নম্বর ও সোশ্যাল মিডিয়া যোগ করুন
+                </p>
+
+                {/* Secondary CTA */}
+                <Link
+                  to="/access"
+                  className="cta-secondary group w-full px-5 py-3 text-sm sm:text-base"
+                >
+                  <span className="relative z-10 inline-flex items-center gap-2">
+                    <Search className="h-4 w-4 transition-transform duration-300 group-hover:scale-110 sm:h-5 sm:w-5" aria-hidden />
+                    <span>আগে যোগ করেছি — দেখতে চাই</span>
+                  </span>
+                </Link>
+                <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
+                  আপনার OTP দিয়ে সংরক্ষিত তথ্য দেখুন ও পরিবর্তন করুন
+                </p>
+              </div>
+            </motion.div>
 
             {/* Divider */}
             <div className="mt-6 flex w-full items-center gap-3 sm:mt-7">
