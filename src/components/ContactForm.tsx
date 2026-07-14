@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Mail, MapPin, Droplets, Calendar, Lock, Info, CheckCircle2, Facebook } from "lucide-react";
+import { Heart, Mail, MapPin, Droplets, Calendar, Lock, Info, CheckCircle2, Facebook, MessageCircle, Pencil, UserPlus, ArrowRight, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,13 +11,18 @@ import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
 import { saveContact } from "@/lib/store";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhoneWithMessengers, PhoneEntry, deriveMessengers } from "@/components/PhoneWithMessengers";
+import { createChatSession } from "@/lib/chatSession";
 import { toast } from "sonner";
 
 export function ContactForm() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [showSecretWarning, setShowSecretWarning] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [chatReady, setChatReady] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [savedProfile, setSavedProfile] = useState<{ name: string; phone: string; photoUrl: string; category: string } | null>(null);
   const [phones, setPhones] = useState<PhoneEntry[]>([
     { number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false },
   ]);
@@ -71,6 +77,29 @@ export function ContactForm() {
         secret_code: form.secretCode,
         photo_url: form.photoUrl,
       });
+
+      const displayCategory =
+        form.category === "অন্যান্য" && form.customCategory
+          ? form.customCategory
+          : form.category || "অন্যান্য";
+      setSavedProfile({
+        name: form.name.trim(),
+        phone: primaryPhone,
+        photoUrl: form.photoUrl,
+        category: displayCategory,
+      });
+
+      // Auto-create a chat session if the user set a secret code so messaging
+      // works with a single tap on the success screen.
+      if (form.secretCode && form.secretCode.trim()) {
+        try {
+          const session = await createChatSession(primaryPhone, form.secretCode.trim());
+          if (session) setChatReady(true);
+        } catch {
+          // Non-fatal: user can still sign in via /access
+        }
+      }
+
       setSubmitted(true);
       toast.success("আপনার তথ্য সফলভাবে সেভ হয়েছে! 💕");
     } catch (err: any) {
@@ -84,17 +113,137 @@ export function ContactForm() {
     }
   };
 
-  if (submitted) {
+  const handleGoToChat = async () => {
+    if (chatReady) {
+      navigate("/chat");
+      return;
+    }
+    if (!savedProfile || !form.secretCode.trim()) {
+      navigate("/access");
+      return;
+    }
+    setChatLoading(true);
+    try {
+      const session = await createChatSession(savedProfile.phone, form.secretCode.trim());
+      if (session) {
+        setChatReady(true);
+        navigate("/chat");
+      } else {
+        toast.error("চ্যাট সেশন তৈরি করা যায়নি। 'আমার তথ্য' থেকে চেষ্টা করুন।");
+        navigate("/access");
+      }
+    } catch {
+      toast.error("চ্যাট সেশন তৈরি করা যায়নি। আবার চেষ্টা করুন।");
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  const resetForm = () => {
+    setSubmitted(false);
+    setChatReady(false);
+    setSavedProfile(null);
+    setStep(1);
+    setForm({ name: "", email: "", facebook: "", category: "", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" });
+    setPhones([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]);
+  };
+
+  if (submitted && savedProfile) {
+    const hasSecret = !!form.secretCode.trim();
+    const maskedPhone = savedProfile.phone.length > 5
+      ? savedProfile.phone.slice(0, 3) + "****" + savedProfile.phone.slice(-2)
+      : savedProfile.phone;
     return (
-      <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center justify-center py-16 text-center">
-        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring" }} className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-          <CheckCircle2 className="h-10 w-10 text-primary" />
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="flex flex-col items-center text-center"
+      >
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.15, type: "spring", stiffness: 260, damping: 18 }}
+          className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 ring-4 ring-primary/10"
+        >
+          <CheckCircle2 className="h-8 w-8 text-primary" />
         </motion.div>
-        <h2 className="mb-2 text-2xl font-display font-semibold text-foreground">ধন্যবাদ! 💕</h2>
-        <p className="mb-6 text-muted-foreground max-w-md">আপনার তথ্য সফলভাবে আপনজন ডাইরেক্টরিতে যুক্ত হয়েছে। আপনি আমাদের কাছে গুরুত্বপূর্ণ!</p>
-        <Button variant="outline" onClick={() => { setSubmitted(false); setStep(1); setForm({ name: "", email: "", facebook: "", category: "", customCategory: "", note: "", address: "", bloodGroup: "", birthday: "", secretCode: "", photoUrl: "" }); setPhones([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]); }}>
+
+        <h2 className="mb-1 text-xl md:text-2xl font-display font-semibold text-foreground">
+          স্বাগতম, {savedProfile.name.split(" ")[0]}! 💕
+        </h2>
+        <p className="mb-6 text-sm text-muted-foreground max-w-sm">
+          আপনার তথ্য সফলভাবে সংরক্ষিত হয়েছে। এখান থেকেই আপনি এডমিনকে মেসেজ করতে বা নিজের তথ্য এডিট করতে পারবেন।
+        </p>
+
+        {/* Profile preview card */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+          className="w-full rounded-2xl border border-primary/15 bg-card/70 p-4 mb-5 shadow-soft"
+        >
+          <div className="flex items-center gap-4 text-left">
+            {savedProfile.photoUrl ? (
+              <img
+                src={savedProfile.photoUrl}
+                alt={savedProfile.name}
+                className="h-14 w-14 rounded-full object-cover border-2 border-primary/20"
+              />
+            ) : (
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary font-display text-xl">
+                {savedProfile.name.charAt(0)}
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="font-display font-semibold text-foreground truncate">{savedProfile.name}</p>
+              <p className="text-xs text-muted-foreground truncate">{maskedPhone} · {savedProfile.category}</p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Primary actions */}
+        <div className="w-full space-y-3">
+          <Button
+            onClick={handleGoToChat}
+            variant="hero"
+            size="lg"
+            className="w-full gap-2 h-12"
+            disabled={chatLoading || (!hasSecret && !chatReady)}
+          >
+            <MessageCircle className="h-4 w-4" />
+            {chatLoading ? "চ্যাট খুলছে..." : "এডমিনকে মেসেজ করুন"}
+            {!chatLoading && <ArrowRight className="h-4 w-4 ml-auto" />}
+          </Button>
+
+          <Button
+            onClick={() => navigate("/access")}
+            variant="outline"
+            size="lg"
+            className="w-full gap-2 h-12 border-primary/30 hover:bg-primary/5"
+          >
+            <Pencil className="h-4 w-4 text-primary" />
+            আমার তথ্য দেখুন ও এডিট করুন
+            <ArrowRight className="h-4 w-4 ml-auto text-primary" />
+          </Button>
+        </div>
+
+        {!hasSecret && (
+          <div className="mt-4 flex items-start gap-2 rounded-xl border border-gold/30 bg-accent/50 p-3 text-left">
+            <Shield className="h-4 w-4 shrink-0 mt-0.5 text-gold" />
+            <p className="text-xs text-accent-foreground">
+              আপনি সিক্রেট কোড দেননি, তাই সরাসরি মেসেজ পাঠানো যাচ্ছে না। ভবিষ্যতে চ্যাট ও এডিটের জন্য 'আমার তথ্য' থেকে OTP দিয়ে সিক্রেট কোড যোগ করে নিন।
+            </p>
+          </div>
+        )}
+
+        <button
+          onClick={resetForm}
+          className="mt-6 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+        >
+          <UserPlus className="h-3.5 w-3.5" />
           আরেকজনের তথ্য যোগ করুন
-        </Button>
+        </button>
       </motion.div>
     );
   }
