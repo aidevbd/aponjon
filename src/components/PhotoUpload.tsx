@@ -55,12 +55,36 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const MAX_SIZE_MB = 5;
+  const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+  const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast.error("শুধুমাত্র ছবি আপলোড করুন");
+      toast.error("শুধুমাত্র ছবি আপলোড করুন (JPG, PNG, WebP)");
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      toast.error("এই ফরম্যাট সাপোর্ট করে না। JPG, PNG বা WebP ব্যবহার করুন");
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+
+    if (file.size > MAX_SIZE_BYTES) {
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      toast.error(`ছবির সাইজ ${sizeMb}MB — সর্বোচ্চ ${MAX_SIZE_MB}MB পর্যন্ত আপলোড করা যাবে`);
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+
+    if (file.size === 0) {
+      toast.error("ফাইলটি খালি — অন্য একটি ছবি বেছে নিন");
+      if (inputRef.current) inputRef.current.value = "";
       return;
     }
 
