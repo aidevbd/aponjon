@@ -15,10 +15,14 @@ import { createChatSession } from "@/lib/chatSession";
 import { toast } from "sonner";
 
 export function ContactForm() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [showSecretWarning, setShowSecretWarning] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [chatReady, setChatReady] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [savedProfile, setSavedProfile] = useState<{ name: string; phone: string; photoUrl: string; category: string } | null>(null);
   const [phones, setPhones] = useState<PhoneEntry[]>([
     { number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false },
   ]);
