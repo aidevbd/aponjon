@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.current_chat_session_contact() TO anon, authenticated;
