@@ -162,10 +162,15 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
         onChange={handleFile}
         className="hidden"
       />
+      {!value && !disabled && (
+        <p className="text-[10px] text-muted-foreground text-center leading-tight">
+          JPG, PNG, WebP · সর্বোচ্চ {MAX_SIZE_MB}MB
+        </p>
+      )}
       {value && !disabled && (
         <button
           type="button"
