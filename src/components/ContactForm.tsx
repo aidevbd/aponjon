@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Mail, MapPin, Droplets, Calendar, Lock, Info, CheckCircle2, Facebook } from "lucide-react";
+import { Heart, Mail, MapPin, Droplets, Calendar, Lock, Info, CheckCircle2, Facebook, MessageCircle, Pencil, UserPlus, ArrowRight, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +11,7 @@ import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
 import { saveContact } from "@/lib/store";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhoneWithMessengers, PhoneEntry, deriveMessengers } from "@/components/PhoneWithMessengers";
+import { createChatSession } from "@/lib/chatSession";
 import { toast } from "sonner";
 
 export function ContactForm() {
