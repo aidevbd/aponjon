@@ -127,18 +127,17 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
             <img
               src={value}
               alt="প্রোফাইল ফটো"
-              className="h-24 w-24 rounded-full object-cover border-2 border-primary/30 shadow-md"
+              className="h-24 w-24 rounded-full object-cover border-2 border-[hsl(var(--heirloom-gold))]/50 shadow-[0_4px_12px_hsl(var(--heirloom-gold-deep)/0.15)]"
             />
             {!disabled && (
               <button
                 type="button"
                 onClick={handleRemove}
                 aria-label="ছবি সরান"
-                className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 transition-colors"
+                className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(var(--heirloom-ink))] text-[hsl(var(--heirloom-bg))] shadow-sm hover:opacity-90 transition-opacity"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
-
             )}
           </div>
         ) : (
@@ -146,7 +145,7 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={uploading || disabled}
-            className="flex h-24 w-24 flex-col items-center justify-center rounded-full border-2 border-dashed border-primary/30 bg-primary/5 text-primary/60 hover:bg-primary/10 hover:border-primary/50 transition-colors disabled:opacity-50"
+            className="flex h-24 w-24 flex-col items-center justify-center rounded-full border-2 border-dashed border-[hsl(var(--heirloom-gold))]/50 bg-[hsl(var(--heirloom-bg))] text-[hsl(var(--heirloom-gold-deep))] hover:bg-[hsl(var(--heirloom-gold))]/10 hover:border-[hsl(var(--heirloom-gold-deep))]/70 transition-colors disabled:opacity-50"
           >
             {uploading ? (
               <Loader2 className="h-6 w-6 animate-spin" />
@@ -167,7 +166,7 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
         className="hidden"
       />
       {!value && !disabled && (
-        <p className="text-[10px] text-muted-foreground text-center leading-tight">
+        <p className="text-[10px] text-[hsl(var(--heirloom-ink-mute))] text-center leading-tight">
           JPG, PNG, WebP · সর্বোচ্চ {MAX_SIZE_MB}MB
         </p>
       )}
@@ -176,7 +175,7 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="text-xs text-primary hover:underline disabled:opacity-50"
+          className="text-xs text-[hsl(var(--heirloom-gold-deep))] hover:underline disabled:opacity-50"
         >
           {uploading ? "আপলোড হচ্ছে..." : "পরিবর্তন করুন"}
         </button>

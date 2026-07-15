@@ -296,7 +296,7 @@ export function ContactForm() {
               <PhotoUpload value={form.photoUrl || undefined} onChange={(url) => updateForm("photoUrl", url || "")} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="name" className="flex items-center gap-2"><Heart className="h-3.5 w-3.5 text-primary" /> আপনার নাম *</Label>
+              <Label htmlFor="name" className="flex items-center gap-2"><Heart className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> আপনার নাম *</Label>
               <Input id="name" placeholder="আপনার পূর্ণ নাম" value={form.name} onChange={(e) => updateForm("name", e.target.value)} className="bg-card" />
             </div>
 
@@ -307,7 +307,7 @@ export function ContactForm() {
               <Input id="facebook" placeholder="ফেসবুক প্রোফাইল লিংক বা ইউজারনেম" value={form.facebook} onChange={(e) => updateForm("facebook", e.target.value)} className="bg-card" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-primary" /> ইমেইল</Label>
+              <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> ইমেইল</Label>
               <Input id="email" type="email" placeholder="email@example.com" value={form.email} onChange={(e) => updateForm("email", e.target.value)} className="bg-card" />
             </div>
             <Button onClick={() => { if (!form.name.trim() || !phones[0]?.number.trim()) { toast.error("নাম এবং ফোন নম্বর আবশ্যক"); return; } setStep(2); }} className="w-full" variant="heirloom" size="lg">পরবর্তী ধাপ →</Button>
@@ -337,7 +337,7 @@ export function ContactForm() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="address" className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-primary" /> ঠিকানা</Label>
+              <Label htmlFor="address" className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> ঠিকানা</Label>
               <Input id="address" placeholder="আপনার ঠিকানা" value={form.address} onChange={(e) => updateForm("address", e.target.value)} className="bg-card" />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -349,7 +349,7 @@ export function ContactForm() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="flex items-center gap-2"><Calendar className="h-3.5 w-3.5 text-primary" /> জন্মদিন</Label>
+                <Label className="flex items-center gap-2"><Calendar className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> জন্মদিন</Label>
                 <Input type="date" value={form.birthday} onChange={(e) => updateForm("birthday", e.target.value)} className="bg-card" />
               </div>
             </div>
@@ -374,7 +374,7 @@ export function ContactForm() {
               ছোট কিন্তু মনে রাখার মতো কোড দিন—যেমন ডাকনাম, বিশেষ শব্দ, বা সংখ্যা+অক্ষরের মিশ্রণ।
             </div>
             <div className="space-y-2">
-              <Label htmlFor="secretCode" className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-primary" /> সিক্রেট কোড</Label>
+              <Label htmlFor="secretCode" className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> সিক্রেট কোড</Label>
               <Input id="secretCode" placeholder="আপনার গোপন কোড (যেমন: জন্মতারিখ, নিকনেম)" value={form.secretCode} onChange={(e) => updateForm("secretCode", e.target.value)} className="bg-card" />
             </div>
             <AnimatePresence>
