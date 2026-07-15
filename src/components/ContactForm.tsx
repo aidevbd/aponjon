@@ -183,23 +183,23 @@ export function ContactForm() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
-          className="w-full rounded-2xl border border-primary/15 bg-card/70 p-4 mb-5 shadow-soft"
+          className="heirloom-chip w-full rounded-sm border p-4 mb-5"
         >
           <div className="flex items-center gap-4 text-left">
             {savedProfile.photoUrl ? (
               <img
                 src={savedProfile.photoUrl}
                 alt={savedProfile.name}
-                className="h-14 w-14 rounded-full object-cover border-2 border-primary/20"
+                className="h-14 w-14 rounded-full object-cover border-2 border-[hsl(var(--heirloom-gold))]/50"
               />
             ) : (
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary font-display text-xl">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold))]/40 bg-[hsl(var(--heirloom-bg))] font-display text-xl text-[hsl(var(--heirloom-ink))]">
                 {savedProfile.name.charAt(0)}
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="font-display font-semibold text-foreground truncate">{savedProfile.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{maskedPhone} · {savedProfile.category}</p>
+              <p className="font-display font-semibold text-[hsl(var(--heirloom-ink))] truncate">{savedProfile.name}</p>
+              <p className="text-xs text-[hsl(var(--heirloom-ink-mute))] truncate">{maskedPhone} · {savedProfile.category}</p>
             </div>
           </div>
         </motion.div>
