@@ -1,13 +1,7 @@
 import { motion } from "framer-motion";
-import { ArrowRight, PlusCircle, Search, ShieldCheck, Clock3, Lock } from "lucide-react";
+import { ArrowRight, PlusCircle, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
-
-const trustPoints = [
-  { icon: Clock3, text: "মাত্র ১ মিনিটেই শেষ" },
-  { icon: ShieldCheck, text: "শুধু আপনার OTP দিয়েই অ্যাক্সেস" },
-  { icon: Lock, text: "আপনার তথ্য, আপনারই নিয়ন্ত্রণে" },
-];
 
 const Index = () => {
   return (
