@@ -164,9 +164,11 @@ export function ContactForm() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.15, type: "spring", stiffness: 260, damping: 18 }}
-          className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 ring-4 ring-primary/10"
+          className="heirloom-seal-outer mb-5 flex h-16 w-16 items-center justify-center rounded-full p-1"
         >
-          <CheckCircle2 className="h-8 w-8 text-primary" />
+          <div className="heirloom-seal-inner flex h-full w-full items-center justify-center rounded-full">
+            <CheckCircle2 className="h-7 w-7 text-[hsl(var(--heirloom-gold-deep))]" />
+          </div>
         </motion.div>
 
         <h2 className="mb-1 text-xl md:text-2xl font-display font-semibold text-foreground">
@@ -181,23 +183,23 @@ export function ContactForm() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
-          className="w-full rounded-2xl border border-primary/15 bg-card/70 p-4 mb-5 shadow-soft"
+          className="heirloom-chip w-full rounded-sm border p-4 mb-5"
         >
           <div className="flex items-center gap-4 text-left">
             {savedProfile.photoUrl ? (
               <img
                 src={savedProfile.photoUrl}
                 alt={savedProfile.name}
-                className="h-14 w-14 rounded-full object-cover border-2 border-primary/20"
+                className="h-14 w-14 rounded-full object-cover border-2 border-[hsl(var(--heirloom-gold))]/50"
               />
             ) : (
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary font-display text-xl">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold))]/40 bg-[hsl(var(--heirloom-bg))] font-display text-xl text-[hsl(var(--heirloom-ink))]">
                 {savedProfile.name.charAt(0)}
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="font-display font-semibold text-foreground truncate">{savedProfile.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{maskedPhone} · {savedProfile.category}</p>
+              <p className="font-display font-semibold text-[hsl(var(--heirloom-ink))] truncate">{savedProfile.name}</p>
+              <p className="text-xs text-[hsl(var(--heirloom-ink-mute))] truncate">{maskedPhone} · {savedProfile.category}</p>
             </div>
           </div>
         </motion.div>
@@ -206,9 +208,9 @@ export function ContactForm() {
         <div className="w-full space-y-3">
           <Button
             onClick={handleGoToChat}
-            variant="hero"
+            variant="heirloom"
             size="lg"
-            className="w-full gap-2 h-12"
+            className="w-full gap-2 h-12 rounded-sm"
             disabled={chatLoading || (!hasSecret && !chatReady)}
           >
             <MessageCircle className="h-4 w-4" />
@@ -218,13 +220,13 @@ export function ContactForm() {
 
           <Button
             onClick={() => navigate("/access")}
-            variant="outline"
+            variant="heirloomGhost"
             size="lg"
-            className="w-full gap-2 h-12 border-primary/30 hover:bg-primary/5"
+            className="w-full gap-2 h-12 rounded-sm"
           >
-            <Pencil className="h-4 w-4 text-primary" />
+            <Pencil className="h-4 w-4 text-[hsl(var(--heirloom-gold-deep))]" />
             আমার তথ্য দেখুন ও এডিট করুন
-            <ArrowRight className="h-4 w-4 ml-auto text-primary" />
+            <ArrowRight className="h-4 w-4 ml-auto text-[hsl(var(--heirloom-gold-deep))]" />
           </Button>
         </div>
 
@@ -250,12 +252,12 @@ export function ContactForm() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <div className="mb-5 rounded-xl border border-border/60 bg-muted/40 p-4">
+      <div className="heirloom-chip mb-5 rounded-sm border p-4">
         <div className="flex items-start gap-3">
-          <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--heirloom-gold-deep))]" />
           <div>
-            <p className="text-sm font-medium text-foreground">৩ ধাপে তথ্য যোগ করুন</p>
-            <p className="text-xs text-muted-foreground mt-1">প্রথমে প্রয়োজনীয় তথ্য, তারপর অতিরিক্ত তথ্য, শেষে সিক্রেট কোড। চাইলে মাঝপথে আগের ধাপে ফিরে যেতে পারবেন।</p>
+            <p className="text-sm font-medium text-[hsl(var(--heirloom-ink))]">৩ ধাপে তথ্য যোগ করুন</p>
+            <p className="text-xs text-[hsl(var(--heirloom-ink-mute))] mt-1">প্রথমে প্রয়োজনীয় তথ্য, তারপর অতিরিক্ত তথ্য, শেষে সিক্রেট কোড। চাইলে মাঝপথে আগের ধাপে ফিরে যেতে পারবেন।</p>
           </div>
         </div>
       </div>
@@ -263,10 +265,19 @@ export function ContactForm() {
       <div className="mb-8 flex items-center justify-center gap-2">
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex items-center gap-2">
-            <button onClick={() => setStep(s)} className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all ${s === step ? "hero-gradient text-primary-foreground shadow-rose" : s < step ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}`}>
+            <button
+              onClick={() => setStep(s)}
+              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all ${
+                s === step
+                  ? "bg-[hsl(var(--heirloom-gold-deep))] text-[hsl(var(--heirloom-bg))] shadow-[0_2px_8px_hsl(var(--heirloom-gold-deep)/0.35)]"
+                  : s < step
+                  ? "bg-[hsl(var(--heirloom-gold))]/25 text-[hsl(var(--heirloom-gold-deep))]"
+                  : "bg-[hsl(var(--heirloom-line))]/40 text-[hsl(var(--heirloom-ink-mute))]"
+              }`}
+            >
               {s}
             </button>
-            {s < 3 && <div className={`h-0.5 w-8 rounded ${s < step ? "bg-primary/40" : "bg-border"}`} />}
+            {s < 3 && <div className={`h-0.5 w-8 rounded ${s < step ? "bg-[hsl(var(--heirloom-gold))]/60" : "bg-[hsl(var(--heirloom-line))]"}`} />}
           </div>
         ))}
       </div>
@@ -278,7 +289,7 @@ export function ContactForm() {
               <h3 className="text-lg font-display font-semibold text-foreground">মূল তথ্য</h3>
               <p className="text-sm text-muted-foreground">আপনার নাম ও যোগাযোগের তথ্য দিন</p>
             </div>
-            <div className="rounded-xl border border-border/60 bg-card/60 p-3 text-xs text-muted-foreground">
+            <div className="heirloom-chip rounded-sm border p-3 text-xs">
               * চিহ্নিত তথ্যগুলো আবশ্যক। ফোন নম্বরটি ভবিষ্যতে আপনার তথ্য খুঁজে পেতে ব্যবহার হবে।
             </div>
             <div className="flex justify-center">
@@ -299,7 +310,7 @@ export function ContactForm() {
               <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-primary" /> ইমেইল</Label>
               <Input id="email" type="email" placeholder="email@example.com" value={form.email} onChange={(e) => updateForm("email", e.target.value)} className="bg-card" />
             </div>
-            <Button onClick={() => { if (!form.name.trim() || !phones[0]?.number.trim()) { toast.error("নাম এবং ফোন নম্বর আবশ্যক"); return; } setStep(2); }} className="w-full" variant="hero" size="lg">পরবর্তী ধাপ →</Button>
+            <Button onClick={() => { if (!form.name.trim() || !phones[0]?.number.trim()) { toast.error("নাম এবং ফোন নম্বর আবশ্যক"); return; } setStep(2); }} className="w-full" variant="heirloom" size="lg">পরবর্তী ধাপ →</Button>
           </motion.div>
         )}
 
@@ -309,7 +320,7 @@ export function ContactForm() {
               <h3 className="text-lg font-display font-semibold text-foreground">অতিরিক্ত তথ্য</h3>
               <p className="text-sm text-muted-foreground">ক্যাটাগরি ও অন্যান্য বিবরণ</p>
             </div>
-            <div className="rounded-xl border border-border/60 bg-card/60 p-3 text-xs text-muted-foreground">
+            <div className="heirloom-chip rounded-sm border p-3 text-xs">
               এই ধাপের সব তথ্য ঐচ্ছিক। যতটুকু দরকার ততটুকুই দিন।
             </div>
             <div className="space-y-2">
@@ -347,8 +358,8 @@ export function ContactForm() {
               <Textarea placeholder="যেকোনো গুরুত্বপূর্ণ তথ্য লিখুন..." value={form.note} onChange={(e) => updateForm("note", e.target.value)} className="bg-card min-h-[80px]" />
             </div>
             <div className="flex gap-3">
-              <Button onClick={() => setStep(1)} variant="outline" className="flex-1">← আগের ধাপ</Button>
-              <Button onClick={() => setStep(3)} variant="hero" className="flex-1">পরবর্তী ধাপ →</Button>
+              <Button onClick={() => setStep(1)} variant="heirloomGhost" className="flex-1 rounded-sm">← আগের ধাপ</Button>
+              <Button onClick={() => setStep(3)} variant="heirloom" className="flex-1">পরবর্তী ধাপ →</Button>
             </div>
           </motion.div>
         )}
@@ -359,7 +370,7 @@ export function ContactForm() {
               <h3 className="text-lg font-display font-semibold text-foreground">সিক্রেট কোড (ঐচ্ছিক)</h3>
               <p className="text-sm text-muted-foreground">ভবিষ্যতে নিজের তথ্য এক্সেস করতে</p>
             </div>
-            <div className="rounded-xl border border-border/60 bg-card/60 p-3 text-xs text-muted-foreground">
+            <div className="heirloom-chip rounded-sm border p-3 text-xs">
               ছোট কিন্তু মনে রাখার মতো কোড দিন—যেমন ডাকনাম, বিশেষ শব্দ, বা সংখ্যা+অক্ষরের মিশ্রণ।
             </div>
             <div className="space-y-2">
@@ -369,7 +380,7 @@ export function ContactForm() {
             <AnimatePresence>
               {(showSecretWarning || !form.secretCode) && (
                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                  <div className="flex gap-3 rounded-xl bg-accent/60 p-4 border border-accent">
+                  <div className="flex gap-3 heirloom-chip rounded-sm border p-4">
                     <Info className="h-5 w-5 text-gold shrink-0 mt-0.5" />
                     <p className="text-sm text-accent-foreground">
                       আপনি সিক্রেট কোড না দিলে পরবর্তীতে নিজে তথ্য আপডেট করতে পারবেন না। তখন তথ্য আপডেট করতে অ্যাডমিনকে জানাতে হবে। 🙏
@@ -379,8 +390,8 @@ export function ContactForm() {
               )}
             </AnimatePresence>
             <div className="flex gap-3">
-              <Button onClick={() => setStep(2)} variant="outline" className="flex-1">← আগের ধাপ</Button>
-              <Button onClick={handleSubmit} variant="hero" className="flex-1" disabled={loading}>
+              <Button onClick={() => setStep(2)} variant="heirloomGhost" className="flex-1 rounded-sm">← আগের ধাপ</Button>
+              <Button onClick={handleSubmit} variant="heirloom" className="flex-1" disabled={loading}>
                 <Heart className="h-4 w-4 mr-1" /> {loading ? "সেভ হচ্ছে..." : "সেভ করুন"}
               </Button>
             </div>
