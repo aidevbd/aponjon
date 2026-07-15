@@ -242,15 +242,6 @@ export function AccessForm() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <div className="heirloom-chip mb-5 rounded-sm border p-4">
-        <div className="flex items-start gap-3">
-          <Shield className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--heirloom-gold-deep))]" />
-          <div>
-            <p className="text-sm font-medium text-[hsl(var(--heirloom-ink))]">সহজ ৩ ধাপের এক্সেস</p>
-            <p className="text-xs text-[hsl(var(--heirloom-ink-mute))] mt-1">ফোন নম্বর বা সিক্রেট কোড দিয়ে শুরু করুন, ভেরিফাই করুন, তারপর নিজের তথ্য আপডেট করুন।</p>
-          </div>
-        </div>
-      </div>
 
       <AnimatePresence mode="wait">
         {step === "choose" && (
