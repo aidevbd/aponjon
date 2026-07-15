@@ -17,6 +17,8 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         hero: "hero-gradient text-primary-foreground shadow-rose hover:opacity-90 transition-opacity",
         warm: "bg-accent text-accent-foreground hover:bg-accent/80",
+        heirloom: "heirloom-btn-primary",
+        heirloomGhost: "heirloom-btn-ghost border",
       },
       size: {
         default: "h-10 px-4 py-2",
