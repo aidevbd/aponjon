@@ -323,9 +323,9 @@ const AdminChat = () => {
                   const isMine = msg.sender_id === adminContactId;
                   return (
                     <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-                      <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 ${isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
+                      <div className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-3.5 py-2 ${isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
                         {msg.image_url && (
-                          <img src={msg.image_url} alt="পাঠানো ছবি" className="rounded-lg max-w-full mb-1.5 cursor-pointer" onClick={() => window.open(msg.image_url!, "_blank")} />
+                          <img src={msg.image_url} alt="পাঠানো ছবি" className="rounded-lg max-w-[240px] w-full mb-1.5 cursor-pointer" onClick={() => window.open(msg.image_url!, "_blank")} />
                         )}
                         {msg.content && <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>}
                         <div className={`flex items-center gap-1 mt-1 ${isMine ? "justify-end" : ""}`}>
