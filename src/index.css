@@ -66,6 +66,17 @@
     --sidebar-accent-foreground: 340 20% 25%;
     --sidebar-border: 340 15% 90%;
     --sidebar-ring: 346 60% 56%;
+
+    /* Heirloom diary palette (home page) */
+    --heirloom-bg: 42 55% 96%;
+    --heirloom-paper: 42 60% 98%;
+    --heirloom-ink: 26 32% 22%;
+    --heirloom-ink-soft: 28 18% 40%;
+    --heirloom-ink-mute: 30 12% 58%;
+    --heirloom-line: 36 30% 86%;
+    --heirloom-gold: 42 55% 55%;
+    --heirloom-gold-deep: 34 45% 42%;
+    --heirloom-seal: 26 38% 34%;
   }
 }
 
