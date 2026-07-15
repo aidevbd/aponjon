@@ -35,7 +35,7 @@ const AccessData = () => {
                 </p>
               </div>
 
-              <div className="mt-8 sm:mt-10">
+              <div className="mt-10 sm:mt-12">
                 <AccessForm />
               </div>
             </div>
