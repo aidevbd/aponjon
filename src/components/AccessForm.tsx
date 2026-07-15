@@ -244,7 +244,7 @@ export function AccessForm() {
     <div className="mx-auto max-w-lg">
       <div className="mb-5 rounded-xl border border-border/60 bg-muted/40 p-4">
         <div className="flex items-start gap-3">
-          <Shield className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <Shield className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--heirloom-gold-deep))]" />
           <div>
             <p className="text-sm font-medium text-foreground">সহজ ৩ ধাপের এক্সেস</p>
             <p className="text-xs text-muted-foreground mt-1">ফোন নম্বর বা সিক্রেট কোড দিয়ে শুরু করুন, ভেরিফাই করুন, তারপর নিজের তথ্য আপডেট করুন।</p>
@@ -256,21 +256,21 @@ export function AccessForm() {
         {step === "choose" && (
           <motion.div key="choose" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
             <div className="text-center mb-8">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                <Shield className="h-8 w-8 text-primary" />
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[hsl(var(--heirloom-gold))]/15">
+                <Shield className="h-8 w-8 text-[hsl(var(--heirloom-gold-deep))]" />
               </div>
               <h2 className="text-xl font-display font-semibold text-foreground">আপনার তথ্য এক্সেস করুন</h2>
               <p className="text-sm text-muted-foreground mt-1">ফোন নম্বর অথবা সিক্রেট কোড দিয়ে শুরু করুন</p>
             </div>
             <Button onClick={() => setStep("phone-input")} variant="outline" size="lg" className="w-full justify-start gap-3 h-14">
-              <Phone className="h-5 w-5 text-primary" />
+              <Phone className="h-5 w-5 text-[hsl(var(--heirloom-gold-deep))]" />
               <div className="text-left">
                 <div className="font-medium">ফোন নম্বর দিয়ে</div>
                 <div className="text-xs text-muted-foreground">আপনার রেজিস্টার্ড নম্বর দিন</div>
               </div>
             </Button>
             <Button onClick={() => { setPhoneInput(""); setStep("secret-input"); }} variant="outline" size="lg" className="w-full justify-start gap-3 h-14">
-              <Lock className="h-5 w-5 text-primary" />
+              <Lock className="h-5 w-5 text-[hsl(var(--heirloom-gold-deep))]" />
               <div className="text-left">
                 <div className="font-medium">সিক্রেট কোড দিয়ে</div>
                 <div className="text-xs text-muted-foreground">আপনার গোপন কোড দিন</div>
@@ -314,7 +314,7 @@ export function AccessForm() {
             </button>
             <div className="heirloom-chip rounded-sm border p-4">
               <div className="flex gap-2 items-start">
-                <KeyRound className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <KeyRound className="h-5 w-5 text-[hsl(var(--heirloom-gold-deep))] shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-accent-foreground">OTP পাঠানো হয়েছে</p>
                   <p className="text-xs text-muted-foreground mt-1">আপনার ফোনে পাঠানো ৬ সংখ্যার কোডটি দিন</p>
@@ -359,7 +359,7 @@ export function AccessForm() {
               <ArrowLeft className="h-4 w-4" /> পেছনে যান
             </button>
             <div className="text-center mb-4">
-              <Edit3 className="h-8 w-8 text-primary mx-auto mb-2" />
+              <Edit3 className="h-8 w-8 text-[hsl(var(--heirloom-gold-deep))] mx-auto mb-2" />
               <h3 className="text-lg font-display font-semibold">তথ্য আপডেট করুন</h3>
             </div>
             <div className="heirloom-chip rounded-sm border p-3 text-xs">
@@ -405,7 +405,7 @@ export function AccessForm() {
               <Heart className="h-4 w-4 mr-1" /> {loading ? "আপডেট হচ্ছে..." : "আপডেট সেভ করুন"}
             </Button>
             <Button onClick={() => navigate("/chat")} variant="outline" className="w-full gap-2">
-              <MessageCircle className="h-4 w-4 text-primary" /> প্রাইভেট মেসেজ করুন
+              <MessageCircle className="h-4 w-4 text-[hsl(var(--heirloom-gold-deep))]" /> প্রাইভেট মেসেজ করুন
             </Button>
           </motion.div>
         )}
