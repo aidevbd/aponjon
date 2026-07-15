@@ -96,7 +96,7 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
         </div>
 
         {/* Quick Action Grid - 2x2 like reference */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           <button
             type="button"
             onClick={() => callPhone(contact.phone)}
