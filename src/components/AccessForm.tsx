@@ -242,28 +242,10 @@ export function AccessForm() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <div className="heirloom-chip mb-5 rounded-sm border p-4">
-        <div className="flex items-start gap-3">
-          <Shield className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--heirloom-gold-deep))]" />
-          <div>
-            <p className="text-sm font-medium text-[hsl(var(--heirloom-ink))]">সহজ ৩ ধাপের এক্সেস</p>
-            <p className="text-xs text-[hsl(var(--heirloom-ink-mute))] mt-1">ফোন নম্বর বা সিক্রেট কোড দিয়ে শুরু করুন, ভেরিফাই করুন, তারপর নিজের তথ্য আপডেট করুন।</p>
-          </div>
-        </div>
-      </div>
 
       <AnimatePresence mode="wait">
         {step === "choose" && (
           <motion.div key="choose" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
-            <div className="text-center mb-8">
-              <div className="heirloom-seal-outer mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full p-1">
-                <div className="heirloom-seal-inner flex h-full w-full items-center justify-center rounded-full">
-                  <Shield className="h-6 w-6 text-[hsl(var(--heirloom-gold-deep))]" />
-                </div>
-              </div>
-              <h2 className="text-xl font-display font-semibold text-[hsl(var(--heirloom-ink))]">আপনার তথ্য এক্সেস করুন</h2>
-              <p className="text-sm text-[hsl(var(--heirloom-ink-mute))] mt-1">ফোন নম্বর অথবা সিক্রেট কোড দিয়ে শুরু করুন</p>
-            </div>
             <Button onClick={() => setStep("phone-input")} variant="heirloomGhost" size="lg" className="w-full justify-start gap-3 h-14 rounded-sm">
               <Phone className="h-5 w-5 text-[hsl(var(--heirloom-gold-deep))]" />
               <div className="text-left">

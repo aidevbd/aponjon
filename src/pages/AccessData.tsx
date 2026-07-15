@@ -31,7 +31,7 @@ const AccessData = () => {
                 <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
 
                 <p className="mt-5 max-w-md text-[15px] leading-[1.7] text-[hsl(var(--heirloom-ink-soft))] sm:text-base md:max-w-lg md:text-[17px] lg:text-[18px]">
-                  ফোন নম্বর বা সিক্রেট কোড দিয়ে আপনার তথ্য দেখুন ও আপডেট করুন।
+                  আপনার রেজিস্টার্ড ফোন নম্বর বা সিক্রেট কোড দিয়ে তথ্য ভেরিফাই করুন।
                 </p>
               </div>
 
