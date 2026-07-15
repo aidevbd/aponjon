@@ -35,17 +35,14 @@ Deno.serve(async (req) => {
       const jwt = authHeader.slice(7);
       // Reject the anon key masquerading as a user JWT
       if (jwt !== ANON) {
-        const anonClient = createClient(SUPABASE_URL, ANON, {
-          global: { headers: { Authorization: authHeader } },
-        });
+        const anonClient = createClient(SUPABASE_URL, ANON);
         const { data: claims } = await anonClient.auth.getClaims(jwt);
-        if (claims?.claims?.sub) {
-          const { data: isAdmin } = await admin.rpc("is_current_user_admin" as any).setHeader?.("Authorization", authHeader) ?? { data: null };
-          // Fallback: check contacts table directly
+        const sub = claims?.claims?.sub;
+        if (sub) {
           const { data: contact } = await admin
             .from("contacts")
             .select("id")
-            .eq("auth_user_id", claims.claims.sub)
+            .eq("auth_user_id", sub)
             .eq("is_admin", true)
             .maybeSingle();
           if (contact) authorized = true;
