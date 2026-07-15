@@ -16,7 +16,23 @@ const Index = () => {
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="heirloom-page relative overflow-hidden rounded-sm border p-6 sm:p-10 md:p-14 lg:p-16"
           >
-...
+            {/* Paper texture */}
+            <div aria-hidden className="heirloom-texture pointer-events-none absolute inset-0" />
+
+            {/* Corner ornaments */}
+            <div aria-hidden className="heirloom-corner absolute left-0 top-0 h-10 w-10 sm:h-14 sm:w-14 border-l-2 border-t-2 rounded-tl-sm" />
+            <div aria-hidden className="heirloom-corner absolute right-0 top-0 h-10 w-10 sm:h-14 sm:w-14 border-r-2 border-t-2 rounded-tr-sm" />
+            <div aria-hidden className="heirloom-corner absolute bottom-0 left-0 h-10 w-10 sm:h-14 sm:w-14 border-b-2 border-l-2 rounded-bl-sm" />
+            <div aria-hidden className="heirloom-corner absolute bottom-0 right-0 h-10 w-10 sm:h-14 sm:w-14 border-b-2 border-r-2 rounded-br-sm" />
+
+            <div className="relative flex flex-col items-center text-center">
+              {/* Heading */}
+              <h1 className="mt-10 font-display text-4xl leading-[1.1] tracking-tight text-[hsl(var(--heirloom-ink))] sm:mt-12 sm:text-5xl md:text-6xl">
+                আপনজন
+              </h1>
+
+              <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
+
               <p className="mt-5 max-w-md text-[15px] leading-[1.7] text-[hsl(var(--heirloom-ink-soft))] sm:text-base md:max-w-lg md:text-[17px] lg:text-[18px]">
                 বন্ধু, বেস্ট ফ্রেন্ড কিংবা ভালোবাসার মানুষ — আপনারা আমার জীবনের সবচেয়ে দামী অংশ। মোবাইল হারালে যেন আপনাদের হারিয়ে না ফেলি, তাই একটু কষ্ট করে নাম-নম্বরটা এখানে রেখে দেবেন? 🤍
               </p>
