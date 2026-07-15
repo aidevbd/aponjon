@@ -1,13 +1,7 @@
 import { motion } from "framer-motion";
-import { ArrowRight, PlusCircle, Search, ShieldCheck, Clock3, Lock } from "lucide-react";
+import { ArrowRight, PlusCircle, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
-
-const trustPoints = [
-  { icon: Clock3, text: "মাত্র ১ মিনিটেই শেষ" },
-  { icon: ShieldCheck, text: "শুধু আপনার OTP দিয়েই অ্যাক্সেস" },
-  { icon: Lock, text: "আপনার তথ্য, আপনারই নিয়ন্ত্রণে" },
-];
 
 const Index = () => {
   return (
@@ -55,28 +49,6 @@ const Index = () => {
                 বন্ধু, বেস্ট ফ্রেন্ড কিংবা ভালোবাসার মানুষ — আপনারা আমার জীবনের সবচেয়ে দামী অংশ। মোবাইল হারালে যেন আপনাদের হারিয়ে না ফেলি, তাই একটু কষ্ট করে নাম-নম্বরটা এখানে রেখে দেবেন? 🤍
               </p>
 
-              {/* Trust strip */}
-              <div className="mt-8 flex w-full items-center gap-3">
-                <div className="h-px flex-1 bg-[hsl(var(--heirloom-line))]" />
-                <span className="text-[10px] font-semibold uppercase tracking-[0.32em] text-[hsl(var(--heirloom-ink-mute))]">
-                  নিরাপদ সংগ্রহশালা
-                </span>
-                <div className="h-px flex-1 bg-[hsl(var(--heirloom-line))]" />
-              </div>
-
-              <ul className="mt-6 grid w-full max-w-md gap-2.5 sm:grid-cols-3 sm:gap-3">
-                {trustPoints.map(({ icon: Icon, text }) => (
-                  <li
-                    key={text}
-                    className="heirloom-chip flex items-center gap-2 rounded-sm border px-3 py-2.5 text-[12px] leading-snug sm:flex-col sm:items-center sm:justify-center sm:gap-1.5 sm:py-3 sm:text-center sm:text-[11.5px]"
-                  >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold))]/40 text-[hsl(var(--heirloom-gold-deep))]">
-                      <Icon className="h-3 w-3" aria-hidden />
-                    </span>
-                    <span className="text-[hsl(var(--heirloom-ink-soft))]">{text}</span>
-                  </li>
-                ))}
-              </ul>
 
               {/* CTAs — hidden on mobile (sticky bar takes over) */}
               <div className="mt-9 hidden w-full max-w-sm flex-col gap-3 sm:flex">
