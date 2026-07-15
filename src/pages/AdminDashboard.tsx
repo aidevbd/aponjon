@@ -31,6 +31,7 @@ import { EmbeddedAdminChat } from "@/components/EmbeddedAdminChat";
 import { AdminActivityLog } from "@/components/AdminActivityLog";
 import { logAdminActivity } from "@/lib/adminLog";
 import { ChangePasswordForm } from "@/components/ChangePasswordForm";
+import { AdminDashboardSkeleton } from "@/components/skeletons/LoadingSkeletons";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();

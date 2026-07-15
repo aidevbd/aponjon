@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, X, Loader2, Settings } from "lucide-react";
+import { ChatUserListSkeleton } from "@/components/skeletons/LoadingSkeletons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

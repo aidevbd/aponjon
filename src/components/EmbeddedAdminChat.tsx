@@ -14,6 +14,7 @@ import { MessageBubble } from "@/components/chat/MessageBubble";
 import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
 import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
+import { ChatUserListSkeleton } from "@/components/skeletons/LoadingSkeletons";
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
 type Message = {
