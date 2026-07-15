@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { uploadChatImage } from "@/lib/chatSession";
+import { uploadChatImage, signMessagesImages } from "@/lib/chatSession";
 import { toast } from "sonner";
 import { EmojiPicker } from "@/components/EmojiPicker";
 import { logAdminActivity } from "@/lib/adminLog";
