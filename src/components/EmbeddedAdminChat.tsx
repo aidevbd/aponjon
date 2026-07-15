@@ -474,7 +474,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: "calc(100vh - 140px)", minHeight: "400px" }}>
+    <div className="flex flex-col" style={{ height: "calc(100dvh - 160px)", minHeight: "400px" }}>
       <AnimatePresence mode="wait">
         {!selectedUser ? (
           <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 overflow-y-auto">
