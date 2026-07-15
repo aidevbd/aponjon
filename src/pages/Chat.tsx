@@ -281,7 +281,8 @@ const Chat = () => {
   const loadMessages = useCallback(async (contact: ChatContact) => {
     if (!session) return;
     try {
-      const data = await getMessages(session.token, contact.id);
+      const raw = await getMessages(session.token, contact.id);
+      const data = await signMessagesImages(raw, session.token);
       setMessages(data);
       const lastMessage = data[data.length - 1];
       setContactPreviews((prev) => ({
