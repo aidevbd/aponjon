@@ -208,9 +208,9 @@ export function ContactForm() {
         <div className="w-full space-y-3">
           <Button
             onClick={handleGoToChat}
-            variant="hero"
+            variant="heirloom"
             size="lg"
-            className="w-full gap-2 h-12"
+            className="w-full gap-2 h-12 rounded-sm"
             disabled={chatLoading || (!hasSecret && !chatReady)}
           >
             <MessageCircle className="h-4 w-4" />
@@ -220,13 +220,13 @@ export function ContactForm() {
 
           <Button
             onClick={() => navigate("/access")}
-            variant="outline"
+            variant="heirloomGhost"
             size="lg"
-            className="w-full gap-2 h-12 border-primary/30 hover:bg-primary/5"
+            className="w-full gap-2 h-12 rounded-sm"
           >
-            <Pencil className="h-4 w-4 text-primary" />
+            <Pencil className="h-4 w-4 text-[hsl(var(--heirloom-gold-deep))]" />
             আমার তথ্য দেখুন ও এডিট করুন
-            <ArrowRight className="h-4 w-4 ml-auto text-primary" />
+            <ArrowRight className="h-4 w-4 ml-auto text-[hsl(var(--heirloom-gold-deep))]" />
           </Button>
         </div>
 
