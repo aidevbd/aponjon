@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { uploadChatImage } from "@/lib/chatSession";
+import { uploadChatImage, signMessagesImages } from "@/lib/chatSession";
 import { getSession } from "@/lib/store";
 import { toast } from "sonner";
 
