@@ -447,8 +447,8 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <Heart className="h-6 w-6 text-primary animate-pulse" />
+      <div className="px-2 py-3">
+        <ChatUserListSkeleton rows={5} />
       </div>
     );
   }

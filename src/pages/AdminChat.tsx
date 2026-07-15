@@ -199,8 +199,10 @@ const AdminChat = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen warm-gradient flex items-center justify-center">
-        <Heart className="h-8 w-8 text-primary animate-pulse" />
+      <div className="min-h-dvh warm-gradient">
+        <div className="container mx-auto max-w-3xl px-4 py-4">
+          <ChatUserListSkeleton rows={6} />
+        </div>
       </div>
     );
   }
