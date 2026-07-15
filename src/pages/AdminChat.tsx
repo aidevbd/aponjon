@@ -235,7 +235,7 @@ const AdminChat = () => {
   }
 
   return (
-    <div className="min-h-screen warm-gradient flex flex-col">
+    <div className="min-h-dvh warm-gradient flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
