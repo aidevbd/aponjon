@@ -14,6 +14,7 @@ import { MessageBubble } from "@/components/chat/MessageBubble";
 import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
 import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
+import { ChatUserListSkeleton } from "@/components/skeletons/LoadingSkeletons";
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
 type Message = {
@@ -447,8 +448,8 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <Heart className="h-6 w-6 text-primary animate-pulse" />
+      <div className="px-2 py-3">
+        <ChatUserListSkeleton rows={5} />
       </div>
     );
   }

@@ -31,6 +31,7 @@ import { EmbeddedAdminChat } from "@/components/EmbeddedAdminChat";
 import { AdminActivityLog } from "@/components/AdminActivityLog";
 import { logAdminActivity } from "@/lib/adminLog";
 import { ChangePasswordForm } from "@/components/ChangePasswordForm";
+import { AdminDashboardSkeleton } from "@/components/skeletons/LoadingSkeletons";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -265,14 +266,7 @@ const AdminDashboard = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen warm-gradient flex items-center justify-center">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
-          <Heart className="h-8 w-8 text-primary animate-pulse mx-auto mb-2" />
-          <p className="text-muted-foreground">লোড হচ্ছে...</p>
-        </motion.div>
-      </div>
-    );
+    return <AdminDashboardSkeleton />;
   }
 
   return (
