@@ -164,9 +164,11 @@ export function ContactForm() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.15, type: "spring", stiffness: 260, damping: 18 }}
-          className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 ring-4 ring-primary/10"
+          className="heirloom-seal-outer mb-5 flex h-16 w-16 items-center justify-center rounded-full p-1"
         >
-          <CheckCircle2 className="h-8 w-8 text-primary" />
+          <div className="heirloom-seal-inner flex h-full w-full items-center justify-center rounded-full">
+            <CheckCircle2 className="h-7 w-7 text-[hsl(var(--heirloom-gold-deep))]" />
+          </div>
         </motion.div>
 
         <h2 className="mb-1 text-xl md:text-2xl font-display font-semibold text-foreground">
