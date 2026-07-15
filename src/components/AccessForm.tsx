@@ -265,7 +265,7 @@ export function AccessForm() {
 
         {step === "phone-input" && (
           <motion.div key="phone" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5">
-            <button onClick={resetAll} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={resetAll} className="absolute left-4 top-4 z-10 flex items-center gap-1 rounded-full border border-[hsl(var(--heirloom-gold)/0.3)] bg-[hsl(var(--heirloom-cream)/0.6)] px-3 py-1.5 text-xs text-[hsl(var(--heirloom-ink-soft))] shadow-sm backdrop-blur-sm transition-all hover:border-[hsl(var(--heirloom-gold)/0.6)] hover:text-[hsl(var(--heirloom-ink))] sm:left-6 sm:top-6">
               <ArrowLeft className="h-4 w-4" /> পেছনে যান
             </button>
             <div className="space-y-2">
@@ -279,7 +279,7 @@ export function AccessForm() {
 
         {step === "secret-input" && (
           <motion.div key="secret" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5">
-            <button onClick={resetAll} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={resetAll} className="absolute left-4 top-4 z-10 flex items-center gap-1 rounded-full border border-[hsl(var(--heirloom-gold)/0.3)] bg-[hsl(var(--heirloom-cream)/0.6)] px-3 py-1.5 text-xs text-[hsl(var(--heirloom-ink-soft))] shadow-sm backdrop-blur-sm transition-all hover:border-[hsl(var(--heirloom-gold)/0.6)] hover:text-[hsl(var(--heirloom-ink))] sm:left-6 sm:top-6">
               <ArrowLeft className="h-4 w-4" /> পেছনে যান
             </button>
             <div className="space-y-2">
@@ -293,7 +293,7 @@ export function AccessForm() {
 
         {step === "otp-input" && (
           <motion.div key="otp" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5">
-            <button onClick={resetAll} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={resetAll} className="absolute left-4 top-4 z-10 flex items-center gap-1 rounded-full border border-[hsl(var(--heirloom-gold)/0.3)] bg-[hsl(var(--heirloom-cream)/0.6)] px-3 py-1.5 text-xs text-[hsl(var(--heirloom-ink-soft))] shadow-sm backdrop-blur-sm transition-all hover:border-[hsl(var(--heirloom-gold)/0.6)] hover:text-[hsl(var(--heirloom-ink))] sm:left-6 sm:top-6">
               <ArrowLeft className="h-4 w-4" /> পেছনে যান
             </button>
             <div className="heirloom-chip rounded-sm border p-4">
@@ -319,7 +319,7 @@ export function AccessForm() {
 
         {step === "verify-phone" && (
           <motion.div key="verify" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5">
-            <button onClick={resetAll} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={resetAll} className="absolute left-4 top-4 z-10 flex items-center gap-1 rounded-full border border-[hsl(var(--heirloom-gold)/0.3)] bg-[hsl(var(--heirloom-cream)/0.6)] px-3 py-1.5 text-xs text-[hsl(var(--heirloom-ink-soft))] shadow-sm backdrop-blur-sm transition-all hover:border-[hsl(var(--heirloom-gold)/0.6)] hover:text-[hsl(var(--heirloom-ink))] sm:left-6 sm:top-6">
               <ArrowLeft className="h-4 w-4" /> পেছনে যান
             </button>
             <div className="heirloom-chip rounded-sm border p-4">
@@ -339,7 +339,7 @@ export function AccessForm() {
 
         {step === "edit" && currentContact && (
           <motion.div key="edit" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5">
-            <button onClick={resetAll} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={resetAll} className="absolute left-4 top-4 z-10 flex items-center gap-1 rounded-full border border-[hsl(var(--heirloom-gold)/0.3)] bg-[hsl(var(--heirloom-cream)/0.6)] px-3 py-1.5 text-xs text-[hsl(var(--heirloom-ink-soft))] shadow-sm backdrop-blur-sm transition-all hover:border-[hsl(var(--heirloom-gold)/0.6)] hover:text-[hsl(var(--heirloom-ink))] sm:left-6 sm:top-6">
               <ArrowLeft className="h-4 w-4" /> পেছনে যান
             </button>
             <div className="text-center mb-4">

@@ -24,7 +24,14 @@ const AccessData = () => {
 
             <div className="relative">
               <div className="flex flex-col items-center text-center">
-                <h1 className="mt-10 font-display text-3xl leading-[1.15] tracking-tight text-[hsl(var(--heirloom-ink))] sm:mt-12 sm:text-4xl md:text-5xl">
+                <div aria-hidden className="mt-8 flex h-12 w-12 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.5)] bg-[hsl(var(--heirloom-gold)/0.08)] shadow-[0_1px_2px_hsl(var(--heirloom-gold)/0.15)] sm:mt-10 sm:h-14 sm:w-14">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-[hsl(var(--heirloom-gold-deep))] sm:h-6 sm:w-6">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    <path d="M9 12l2 2 4-4" />
+                  </svg>
+                </div>
+
+                <h1 className="mt-5 font-display text-3xl leading-[1.15] tracking-tight text-[hsl(var(--heirloom-ink))] sm:mt-6 sm:text-4xl md:text-5xl">
                   আমার তথ্য
                 </h1>
 
