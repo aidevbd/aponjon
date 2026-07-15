@@ -166,7 +166,7 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
         className="hidden"
       />
       {!value && !disabled && (
-        <p className="text-[10px] text-muted-foreground text-center leading-tight">
+        <p className="text-[10px] text-[hsl(var(--heirloom-ink-mute))] text-center leading-tight">
           JPG, PNG, WebP · সর্বোচ্চ {MAX_SIZE_MB}MB
         </p>
       )}
@@ -175,7 +175,7 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="text-xs text-primary hover:underline disabled:opacity-50"
+          className="text-xs text-[hsl(var(--heirloom-gold-deep))] hover:underline disabled:opacity-50"
         >
           {uploading ? "আপলোড হচ্ছে..." : "পরিবর্তন করুন"}
         </button>
