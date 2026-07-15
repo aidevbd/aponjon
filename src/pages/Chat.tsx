@@ -12,6 +12,7 @@ import {
   sendMessage, getMessages, getUnreadCounts, uploadChatImage,
   clearChatSession, editMessage,
   reactToMessage, unsendMessage, removeMessageForMe, getMessageEditHistory,
+  signMessagesImages, getSignedChatImageUrl,
   type ChatSession,
 } from "@/lib/chatSession";
 import { supabase } from "@/integrations/supabase/client";
