@@ -621,7 +621,7 @@ const Chat = () => {
   return (
     <div className="h-dvh warm-gradient flex flex-col overflow-hidden">
       <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md shrink-0">
-        <div className="container mx-auto flex h-14 items-center justify-between px-4">
+        <div className="container mx-auto max-w-3xl lg:max-w-4xl flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {selectedContact ? (
               <button onClick={() => { setSelectedContact(null); setSearchOpen(false); setSearchQuery(""); }} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors min-w-0">
@@ -684,7 +684,7 @@ const Chat = () => {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden container mx-auto max-w-3xl lg:max-w-4xl w-full px-0">
         {/* Search bar */}
         {searchOpen && (
           <div className="px-4 pt-2">

@@ -235,7 +235,7 @@ const AdminChat = () => {
   }
 
   return (
-    <div className="min-h-screen warm-gradient flex flex-col">
+    <div className="min-h-dvh warm-gradient flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
@@ -273,7 +273,7 @@ const AdminChat = () => {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col container mx-auto max-w-2xl">
+      <div className="flex-1 flex flex-col container mx-auto max-w-2xl lg:max-w-4xl w-full">
         <AnimatePresence mode="wait">
           {!selectedUser ? (
             <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 px-4 py-4">
@@ -323,9 +323,9 @@ const AdminChat = () => {
                   const isMine = msg.sender_id === adminContactId;
                   return (
                     <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-                      <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 ${isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
+                      <div className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-3.5 py-2 ${isMine ? "bg-primary text-primary-foreground rounded-br-md" : "bg-card border border-border/50 text-foreground rounded-bl-md"}`}>
                         {msg.image_url && (
-                          <img src={msg.image_url} alt="পাঠানো ছবি" className="rounded-lg max-w-full mb-1.5 cursor-pointer" onClick={() => window.open(msg.image_url!, "_blank")} />
+                          <img src={msg.image_url} alt="পাঠানো ছবি" className="rounded-lg max-w-[240px] w-full mb-1.5 cursor-pointer" onClick={() => window.open(msg.image_url!, "_blank")} />
                         )}
                         {msg.content && <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>}
                         <div className={`flex items-center gap-1 mt-1 ${isMine ? "justify-end" : ""}`}>

@@ -52,14 +52,15 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
   if (!open) return null;
 
   return createPortal(
-    <div className="contact-detail-root fixed inset-0 z-[100] overflow-y-auto bg-background">
+    <div className="contact-detail-root fixed inset-0 z-[100] overflow-y-auto bg-background/70 md:backdrop-blur-sm md:flex md:items-center md:justify-center md:p-4">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="contact-detail-title"
-        className="contact-detail-panel min-h-[100dvh] bg-background"
+        className="contact-detail-panel min-h-[100dvh] md:min-h-0 md:max-h-[90dvh] md:w-full md:max-w-2xl lg:max-w-3xl md:rounded-2xl md:border md:border-border md:shadow-xl md:overflow-hidden bg-background"
       >
-        <div className="flex h-12 shrink-0 items-center justify-end border-b border-border bg-background px-4">
+        <div className="flex h-12 shrink-0 items-center justify-between md:justify-end border-b border-border bg-background px-4 sticky top-0 z-10">
+          <h2 id="contact-detail-title" className="md:hidden text-sm font-medium text-muted-foreground">বিস্তারিত</h2>
           <button
             type="button"
             onClick={onClose}
@@ -70,8 +71,8 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
           </button>
         </div>
 
-        <div className="contact-detail-scroll bg-background px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6">
-          <div className="contact-detail-content min-h-full bg-background">
+        <div className="contact-detail-scroll bg-background px-4 sm:px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6 md:max-h-[calc(90dvh-3rem)] md:overflow-y-auto">
+          <div className="contact-detail-content min-h-full bg-background mx-auto max-w-xl">
 
         {/* Profile header */}
         <div className="flex flex-col items-center gap-3 mb-6">
@@ -95,7 +96,7 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
         </div>
 
         {/* Quick Action Grid - 2x2 like reference */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           <button
             type="button"
             onClick={() => callPhone(contact.phone)}

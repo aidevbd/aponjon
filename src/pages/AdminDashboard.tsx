@@ -294,40 +294,39 @@ const AdminDashboard = () => {
       </header>
 
       {/* Tab-Based Content */}
-      <main className="container mx-auto px-4 py-3">
+      <main className="container mx-auto px-3 sm:px-4 py-3 max-w-7xl">
         <h1 className="sr-only">অ্যাডমিন ড্যাশবোর্ড</h1>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
 
-        <TabsList className="w-full grid grid-cols-5 h-10 mb-4">
-          <TabsTrigger value="dashboard" className="gap-1 text-[10px] sm:text-sm px-1">
+        <TabsList className="w-full grid grid-cols-5 h-auto sm:h-10 mb-4 p-1 gap-0.5">
+          <TabsTrigger value="dashboard" className="flex-col sm:flex-row gap-0.5 sm:gap-1 text-[10px] sm:text-sm px-1 py-1.5 sm:py-1">
             <LayoutDashboard className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">ড্যাশবোর্ড</span>
             <span className="sm:hidden">হোম</span>
           </TabsTrigger>
-          <TabsTrigger value="contacts" className="gap-1 text-[10px] sm:text-sm px-1">
+          <TabsTrigger value="contacts" className="flex-col sm:flex-row gap-0.5 sm:gap-1 text-[10px] sm:text-sm px-1 py-1.5 sm:py-1">
             <Users className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">কন্টাক্ট</span>
-            <span className="sm:hidden">কন্টাক্ট</span>
-            <span className="ml-0.5 text-[9px] bg-primary/10 text-primary rounded-full px-1">{stats.total}</span>
+            <span className="inline-flex items-center gap-1">
+              <span>কন্টাক্ট</span>
+              <span className="text-[9px] bg-primary/10 text-primary rounded-full px-1">{stats.total}</span>
+            </span>
           </TabsTrigger>
-          <TabsTrigger value="chat" className="gap-1 text-[10px] sm:text-sm relative px-1">
+          <TabsTrigger value="chat" className="flex-col sm:flex-row gap-0.5 sm:gap-1 text-[10px] sm:text-sm relative px-1 py-1.5 sm:py-1">
             <MessageCircle className="h-3.5 w-3.5" />
-            চ্যাট
+            <span>চ্যাট</span>
             {totalUnread > 0 && (
-              <span className="ml-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[9px] font-bold px-1">
+              <span className="absolute top-0.5 right-1 sm:static sm:ml-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[9px] font-bold px-1">
                 {totalUnread}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="logs" className="gap-1 text-[10px] sm:text-sm px-1">
+          <TabsTrigger value="logs" className="flex-col sm:flex-row gap-0.5 sm:gap-1 text-[10px] sm:text-sm px-1 py-1.5 sm:py-1">
             <Activity className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">লগ</span>
-            <span className="sm:hidden">লগ</span>
+            <span>লগ</span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="gap-1 text-[10px] sm:text-sm px-1">
+          <TabsTrigger value="settings" className="flex-col sm:flex-row gap-0.5 sm:gap-1 text-[10px] sm:text-sm px-1 py-1.5 sm:py-1">
             <Settings className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">সেটিংস</span>
-            <span className="sm:hidden">সেটিংস</span>
+            <span>সেটিংস</span>
           </TabsTrigger>
         </TabsList>
 
@@ -418,13 +417,13 @@ const AdminDashboard = () => {
               </button>
             </div>
           ) : viewMode === "grid" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
               {filtered.map((contact, i) => (
                 <ContactCard key={contact.id} contact={contact} index={i} onEdit={handleEdit} onDelete={handleDelete} />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-1">
               {filtered.map((contact, i) => (
                 <ContactListItem key={contact.id} contact={contact} index={i} onClick={setSelectedContact} />
               ))}
@@ -477,7 +476,7 @@ const AdminDashboard = () => {
       <AnimatePresence>
         {editingContact && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 backdrop-blur-sm p-4" onClick={() => setEditingContact(null)}>
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="glass-card p-5 w-full max-w-md max-h-[85vh] overflow-y-auto">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="glass-card p-5 w-full max-w-md md:max-w-xl lg:max-w-2xl max-h-[85dvh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-display font-semibold flex items-center gap-2">
                   <Edit3 className="h-4 w-4 text-primary" /> তথ্য সম্পাদনা
@@ -524,7 +523,7 @@ const AdminDashboard = () => {
 
         {showAddModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 backdrop-blur-sm p-4" onClick={() => setShowAddModal(false)}>
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="glass-card p-5 w-full max-w-md max-h-[85vh] overflow-y-auto">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="glass-card p-5 w-full max-w-md md:max-w-xl lg:max-w-2xl max-h-[85dvh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-display font-semibold flex items-center gap-2">
                   <Plus className="h-4 w-4 text-primary" /> নতুন কন্টাক্ট
