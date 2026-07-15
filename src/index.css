@@ -66,6 +66,17 @@
     --sidebar-accent-foreground: 340 20% 25%;
     --sidebar-border: 340 15% 90%;
     --sidebar-ring: 346 60% 56%;
+
+    /* Heirloom diary palette (home page) */
+    --heirloom-bg: 42 55% 96%;
+    --heirloom-paper: 42 60% 98%;
+    --heirloom-ink: 26 32% 22%;
+    --heirloom-ink-soft: 28 18% 40%;
+    --heirloom-ink-mute: 30 12% 58%;
+    --heirloom-line: 36 30% 86%;
+    --heirloom-gold: 42 55% 55%;
+    --heirloom-gold-deep: 34 45% 42%;
+    --heirloom-seal: 26 38% 34%;
   }
 }
 
@@ -243,5 +254,61 @@
   }
   .messenger-facebook:hover {
     background-color: hsl(var(--messenger-facebook-bg) / 0.85);
+  }
+
+  /* ===== Heirloom diary home ===== */
+  .heirloom-page {
+    background-color: hsl(var(--heirloom-paper));
+    border-color: hsl(var(--heirloom-line));
+    box-shadow: 20px 20px 60px -15px hsl(26 40% 30% / 0.12),
+                0 1px 0 hsl(42 60% 100% / 0.6) inset;
+  }
+  .heirloom-texture {
+    background-image:
+      radial-gradient(hsl(var(--heirloom-ink) / 0.045) 1px, transparent 1px),
+      radial-gradient(hsl(var(--heirloom-gold) / 0.05) 1px, transparent 1px);
+    background-size: 3px 3px, 7px 7px;
+    background-position: 0 0, 1px 2px;
+    mix-blend-mode: multiply;
+    opacity: 0.55;
+  }
+  .heirloom-corner {
+    border-color: hsl(var(--heirloom-gold) / 0.4);
+  }
+  .heirloom-seal-outer {
+    border: 2px solid hsl(var(--heirloom-seal));
+  }
+  .heirloom-seal-inner {
+    border: 1px solid hsl(var(--heirloom-gold));
+    color: hsl(var(--heirloom-seal));
+    background: hsl(var(--heirloom-paper));
+  }
+  .heirloom-chip {
+    background-color: hsl(0 0% 100% / 0.5);
+    border-color: hsl(var(--heirloom-line));
+  }
+  .heirloom-btn-primary {
+    background-color: hsl(var(--heirloom-seal));
+    color: hsl(var(--heirloom-bg));
+    box-shadow: 0 8px 24px -10px hsl(var(--heirloom-seal) / 0.6);
+    transition: background-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .heirloom-btn-primary:hover {
+    background-color: hsl(26 40% 26%);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px -10px hsl(var(--heirloom-seal) / 0.75);
+  }
+  .heirloom-btn-primary:active {
+    transform: translateY(0);
+  }
+  .heirloom-btn-ghost {
+    border-color: hsl(var(--heirloom-line));
+    color: hsl(var(--heirloom-ink));
+    background-color: hsl(0 0% 100% / 0.4);
+    transition: all 0.25s ease;
+  }
+  .heirloom-btn-ghost:hover {
+    border-color: hsl(var(--heirloom-gold));
+    background-color: hsl(42 55% 94%);
   }
 }
