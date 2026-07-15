@@ -78,8 +78,8 @@ const Index = () => {
                 ))}
               </ul>
 
-              {/* CTAs */}
-              <div className="mt-9 flex w-full max-w-sm flex-col gap-3">
+              {/* CTAs — hidden on mobile (sticky bar takes over) */}
+              <div className="mt-9 hidden w-full max-w-sm flex-col gap-3 sm:flex">
                 <Link
                   to="/add"
                   className="heirloom-btn-primary group relative flex w-full items-center justify-center gap-2 rounded-sm px-5 py-4 text-[15px] font-medium sm:text-base"
