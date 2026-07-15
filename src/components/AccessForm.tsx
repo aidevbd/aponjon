@@ -262,14 +262,14 @@ export function AccessForm() {
               <h2 className="text-xl font-display font-semibold text-foreground">আপনার তথ্য এক্সেস করুন</h2>
               <p className="text-sm text-muted-foreground mt-1">ফোন নম্বর অথবা সিক্রেট কোড দিয়ে শুরু করুন</p>
             </div>
-            <Button onClick={() => setStep("phone-input")} variant="outline" size="lg" className="w-full justify-start gap-3 h-14">
+            <Button onClick={() => setStep("phone-input")} variant="heirloomGhost" size="lg" className="w-full justify-start gap-3 h-14 rounded-sm">
               <Phone className="h-5 w-5 text-[hsl(var(--heirloom-gold-deep))]" />
               <div className="text-left">
                 <div className="font-medium">ফোন নম্বর দিয়ে</div>
                 <div className="text-xs text-muted-foreground">আপনার রেজিস্টার্ড নম্বর দিন</div>
               </div>
             </Button>
-            <Button onClick={() => { setPhoneInput(""); setStep("secret-input"); }} variant="outline" size="lg" className="w-full justify-start gap-3 h-14">
+            <Button onClick={() => { setPhoneInput(""); setStep("secret-input"); }} variant="heirloomGhost" size="lg" className="w-full justify-start gap-3 h-14 rounded-sm">
               <Lock className="h-5 w-5 text-[hsl(var(--heirloom-gold-deep))]" />
               <div className="text-left">
                 <div className="font-medium">সিক্রেট কোড দিয়ে</div>
@@ -404,7 +404,7 @@ export function AccessForm() {
             <Button onClick={handleSaveEdit} variant="heirloom" className="w-full" disabled={loading}>
               <Heart className="h-4 w-4 mr-1" /> {loading ? "আপডেট হচ্ছে..." : "আপডেট সেভ করুন"}
             </Button>
-            <Button onClick={() => navigate("/chat")} variant="outline" className="w-full gap-2">
+            <Button onClick={() => navigate("/chat")} variant="heirloomGhost" className="w-full gap-2 rounded-sm">
               <MessageCircle className="h-4 w-4 text-[hsl(var(--heirloom-gold-deep))]" /> প্রাইভেট মেসেজ করুন
             </Button>
           </motion.div>
