@@ -273,7 +273,7 @@ const AdminChat = () => {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col container mx-auto max-w-2xl">
+      <div className="flex-1 flex flex-col container mx-auto max-w-2xl lg:max-w-4xl w-full">
         <AnimatePresence mode="wait">
           {!selectedUser ? (
             <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 px-4 py-4">
