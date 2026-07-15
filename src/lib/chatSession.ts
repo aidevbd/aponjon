@@ -188,8 +188,76 @@ export async function uploadChatImage(file: File, sessionToken?: string): Promis
     throw new Error(`Upload failed: ${res.status} ${text}`);
   }
 
-  const { data } = supabase.storage.from("chat-images").getPublicUrl(fileName);
-  return data.publicUrl;
+  // Bucket is private — store the object path; callers sign it before displaying.
+  return fileName;
+}
+
+// Cache of signed URLs by path (valid ~1h; we refresh at 50min)
+const _signedUrlCache = new Map<string, { url: string; exp: number }>();
+
+export function extractChatImagePath(urlOrPath: string): string | null {
+  if (!urlOrPath) return null;
+  if (urlOrPath.startsWith("chat/")) return urlOrPath;
+  const m = urlOrPath.match(/\/chat-images\/(.+?)(?:\?.*)?$/);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+export async function getSignedChatImageUrl(urlOrPath: string, sessionToken?: string): Promise<string | null> {
+  const path = extractChatImagePath(urlOrPath);
+  if (!path) return null;
+  const cached = _signedUrlCache.get(path);
+  if (cached && cached.exp > Date.now()) return cached.url;
+
+  const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL as string;
+  const anonKey = (import.meta as any).env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    apikey: anonKey,
+  };
+  // Prefer authenticated admin session; fall back to chat session token
+  const { data: authData } = await supabase.auth.getSession();
+  if (authData.session?.access_token) {
+    headers["Authorization"] = `Bearer ${authData.session.access_token}`;
+  } else {
+    headers["Authorization"] = `Bearer ${anonKey}`;
+  }
+  if (sessionToken) headers["x-chat-session"] = sessionToken;
+
+  const res = await fetch(`${supabaseUrl}/functions/v1/sign-chat-image`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ path }),
+  });
+  if (!res.ok) return null;
+  const json = await res.json().catch(() => null);
+  if (!json?.signedUrl) return null;
+  _signedUrlCache.set(path, { url: json.signedUrl, exp: Date.now() + 50 * 60 * 1000 });
+  return json.signedUrl as string;
+}
+
+export async function signMessagesImages<T extends { image_url: string | null }>(
+  messages: T[],
+  sessionToken?: string,
+): Promise<T[]> {
+  const paths = new Set<string>();
+  for (const m of messages) {
+    const p = m.image_url ? extractChatImagePath(m.image_url) : null;
+    if (p) paths.add(p);
+  }
+  const map = new Map<string, string>();
+  await Promise.all(
+    Array.from(paths).map(async (p) => {
+      const url = await getSignedChatImageUrl(p, sessionToken);
+      if (url) map.set(p, url);
+    }),
+  );
+  return messages.map((m) => {
+    if (!m.image_url) return m;
+    const p = extractChatImagePath(m.image_url);
+    if (!p) return m;
+    const signed = map.get(p);
+    return signed ? { ...m, image_url: signed } : m;
+  });
 }
 
 function compressChatImage(file: File, maxWidth = 600, quality = 0.6): Promise<Blob> {

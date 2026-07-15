@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { uploadChatImage } from "@/lib/chatSession";
+import { uploadChatImage, signMessagesImages } from "@/lib/chatSession";
 import { getSession } from "@/lib/store";
 import { toast } from "sonner";
 
@@ -75,7 +75,13 @@ const AdminChat = () => {
           (msg.sender_id === sel.id && msg.receiver_id === adminId) ||
           (msg.sender_id === adminId && msg.receiver_id === sel.id)
         )) {
-          setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
+          if (msg.image_url) {
+            void signMessagesImages([msg]).then(([signed]) => {
+              setMessages(prev => prev.some(m => m.id === signed.id) ? prev : [...prev, signed]);
+            });
+          } else {
+            setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
+          }
         }
         if (msg.receiver_id === adminId && msg.sender_id !== sel?.id) {
           setUnreadMap(prev => ({ ...prev, [msg.sender_id]: (prev[msg.sender_id] || 0) + 1 }));
@@ -112,7 +118,8 @@ const AdminChat = () => {
     try {
       const { data, error } = await supabase.rpc("get_admin_messages", { p_other_id: user.id });
       if (error) throw error;
-      setMessages((data || []) as Message[]);
+      const signed = await signMessagesImages((data || []) as Message[]);
+      setMessages(signed);
       setUnreadMap(prev => { const n = { ...prev }; delete n[user.id]; return n; });
     } catch (err) { console.error("[catch]", err); toast.error("মেসেজ লোড করতে সমস্যা"); }
   }, []);

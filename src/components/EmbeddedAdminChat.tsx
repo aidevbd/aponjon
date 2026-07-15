@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { uploadChatImage } from "@/lib/chatSession";
+import { uploadChatImage, signMessagesImages } from "@/lib/chatSession";
 import { toast } from "sonner";
 import { EmojiPicker } from "@/components/EmojiPicker";
 import { logAdminActivity } from "@/lib/adminLog";
@@ -110,7 +110,13 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
         );
 
         if (isCurrentThread) {
-          setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+          if (msg.image_url) {
+            void signMessagesImages([msg]).then(([signed]) => {
+              setMessages((prev) => (prev.some((m) => m.id === signed.id) ? prev : [...prev, signed]));
+            });
+          } else {
+            setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+          }
           return;
         }
 
@@ -205,7 +211,8 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     try {
       const { data, error } = await supabase.rpc("get_admin_messages", { p_other_id: user.id });
       if (error) throw error;
-      setMessages((data || []) as Message[]);
+      const signed = await signMessagesImages((data || []) as Message[]);
+      setMessages(signed);
       setUnreadMap(prev => { const n = { ...prev }; delete n[user.id]; return n; });
     } catch { toast.error("মেসেজ লোড করতে সমস্যা"); }
   }, []);
