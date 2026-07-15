@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lock, Heart, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,12 +14,17 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+
+  const rawNext = params.get("next");
+  const nextPath = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : null;
+  const afterLogin = nextPath ?? "/admin/dashboard";
 
   useEffect(() => {
     getSession().then((session) => {
-      if (session) navigate("/admin/dashboard");
+      if (session) navigate(afterLogin, { replace: true });
     });
-  }, [navigate]);
+  }, [navigate, afterLogin]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -30,7 +35,7 @@ const AdminLogin = () => {
     try {
       await adminLogin(email, password);
       toast.success("স্বাগতম, অ্যাডমিন! 🎉");
-      navigate("/admin/dashboard");
+      navigate(afterLogin, { replace: true });
     } catch (err: any) {
       toast.error(err?.message || "লগইন ব্যর্থ হয়েছে");
     } finally {
