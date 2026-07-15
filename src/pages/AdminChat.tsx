@@ -75,7 +75,13 @@ const AdminChat = () => {
           (msg.sender_id === sel.id && msg.receiver_id === adminId) ||
           (msg.sender_id === adminId && msg.receiver_id === sel.id)
         )) {
-          setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
+          if (msg.image_url) {
+            void signMessagesImages([msg]).then(([signed]) => {
+              setMessages(prev => prev.some(m => m.id === signed.id) ? prev : [...prev, signed]);
+            });
+          } else {
+            setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
+          }
         }
         if (msg.receiver_id === adminId && msg.sender_id !== sel?.id) {
           setUnreadMap(prev => ({ ...prev, [msg.sender_id]: (prev[msg.sender_id] || 0) + 1 }));
