@@ -14,7 +14,7 @@ const Index = () => {
     <div className="flex min-h-dvh flex-col bg-[hsl(var(--heirloom-bg))]">
       <Header />
 
-      <main className="relative flex flex-1 items-center justify-center px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
+      <main className="relative flex flex-1 items-center justify-center px-4 py-8 pb-32 sm:px-6 sm:py-12 sm:pb-12 lg:py-16">
         <div className="mx-auto w-full max-w-2xl">
           <motion.article
             initial={{ opacity: 0, y: 20 }}
@@ -78,8 +78,8 @@ const Index = () => {
                 ))}
               </ul>
 
-              {/* CTAs */}
-              <div className="mt-9 flex w-full max-w-sm flex-col gap-3">
+              {/* CTAs — hidden on mobile (sticky bar takes over) */}
+              <div className="mt-9 hidden w-full max-w-sm flex-col gap-3 sm:flex">
                 <Link
                   to="/add"
                   className="heirloom-btn-primary group relative flex w-full items-center justify-center gap-2 rounded-sm px-5 py-4 text-[15px] font-medium sm:text-base"
@@ -109,6 +109,33 @@ const Index = () => {
           </motion.article>
         </div>
       </main>
+
+      {/* Mobile sticky CTA bar */}
+      <motion.div
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.35, duration: 0.4, ease: "easeOut" }}
+        className="heirloom-sticky-bar fixed inset-x-0 bottom-0 z-40 border-t px-3 pt-3 sm:hidden"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
+      >
+        <div className="mx-auto flex max-w-md items-stretch gap-2">
+          <Link
+            to="/add"
+            className="heirloom-btn-primary group flex flex-[1.35] items-center justify-center gap-1.5 rounded-sm px-3 py-3 text-[13.5px] font-medium"
+          >
+            <PlusCircle className="h-4 w-4" aria-hidden />
+            <span>যোগ করি</span>
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden />
+          </Link>
+          <Link
+            to="/access"
+            className="heirloom-btn-ghost flex flex-1 items-center justify-center gap-1.5 rounded-sm border px-3 py-3 text-[13.5px] font-medium"
+          >
+            <Search className="h-4 w-4" aria-hidden />
+            <span>দেখতে চাই</span>
+          </Link>
+        </div>
+      </motion.div>
     </div>
   );
 };
