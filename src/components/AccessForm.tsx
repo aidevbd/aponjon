@@ -285,11 +285,11 @@ export function AccessForm() {
               <ArrowLeft className="h-4 w-4" /> পেছনে যান
             </button>
             <div className="space-y-2">
-              <Label className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-primary" /> আপনার ফোন নম্বর</Label>
+              <Label className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> আপনার ফোন নম্বর</Label>
               <Input placeholder="01XXXXXXXXX" value={phoneInput} onChange={(e) => setPhoneInput(e.target.value)} className="bg-card" />
             </div>
             <p className="text-xs text-muted-foreground">এই নম্বরেই আপনার তথ্য খোঁজা হবে। সিক্রেট কোড না থাকলে OTP ভেরিফিকেশন লাগবে।</p>
-            <Button onClick={handlePhoneSubmit} variant="hero" className="w-full" disabled={loading}>{loading ? "যাচাই হচ্ছে..." : "পরবর্তী →"}</Button>
+            <Button onClick={handlePhoneSubmit} variant="heirloom" className="w-full" disabled={loading}>{loading ? "যাচাই হচ্ছে..." : "পরবর্তী →"}</Button>
           </motion.div>
         )}
 
@@ -299,11 +299,11 @@ export function AccessForm() {
               <ArrowLeft className="h-4 w-4" /> পেছনে যান
             </button>
             <div className="space-y-2">
-              <Label className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-primary" /> সিক্রেট কোড</Label>
+              <Label className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> সিক্রেট কোড</Label>
               <Input type="password" placeholder="আপনার সিক্রেট কোড" value={secretInput} onChange={(e) => setSecretInput(e.target.value)} className="bg-card" />
             </div>
             <p className="text-xs text-muted-foreground">ফোন নম্বর মনে না থাকলেও সিক্রেট কোড দিয়ে তথ্য খুঁজে নিতে পারবেন।</p>
-            <Button onClick={handleSecretSubmit} variant="hero" className="w-full" disabled={loading}>{loading ? "যাচাই হচ্ছে..." : "ভেরিফাই করুন"}</Button>
+            <Button onClick={handleSecretSubmit} variant="heirloom" className="w-full" disabled={loading}>{loading ? "যাচাই হচ্ছে..." : "ভেরিফাই করুন"}</Button>
           </motion.div>
         )}
 
@@ -312,7 +312,7 @@ export function AccessForm() {
             <button onClick={resetAll} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="h-4 w-4" /> পেছনে যান
             </button>
-            <div className="rounded-xl bg-accent/50 p-4 border border-accent">
+            <div className="heirloom-chip rounded-sm border p-4">
               <div className="flex gap-2 items-start">
                 <KeyRound className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
@@ -322,14 +322,14 @@ export function AccessForm() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="flex items-center gap-2"><KeyRound className="h-3.5 w-3.5 text-primary" /> OTP কোড</Label>
+              <Label className="flex items-center gap-2"><KeyRound className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> OTP কোড</Label>
               <Input placeholder="৬ সংখ্যার কোড" value={otpCode} onChange={(e) => setOtpCode(e.target.value)} className="bg-card text-center text-lg tracking-widest" maxLength={6} />
             </div>
             <div className="flex gap-2 rounded-xl bg-destructive/10 p-3 border border-destructive/20">
               <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
               <p className="text-xs text-destructive">প্রতিদিন সর্বোচ্চ ১টি OTP পাওয়া যাবে। ৫ মিনিটের মধ্যে ব্যবহার করুন।</p>
             </div>
-            <Button onClick={handleOtpSubmit} variant="hero" className="w-full" disabled={loading}>{loading ? "যাচাই হচ্ছে..." : "ভেরিফাই করুন"}</Button>
+            <Button onClick={handleOtpSubmit} variant="heirloom" className="w-full" disabled={loading}>{loading ? "যাচাই হচ্ছে..." : "ভেরিফাই করুন"}</Button>
           </motion.div>
         )}
 
@@ -338,7 +338,7 @@ export function AccessForm() {
             <button onClick={resetAll} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="h-4 w-4" /> পেছনে যান
             </button>
-            <div className="rounded-xl bg-accent/50 p-4 border border-accent">
+            <div className="heirloom-chip rounded-sm border p-4">
               <p className="text-sm font-medium text-accent-foreground mb-2">আপনার নম্বর পাওয়া গেছে:</p>
               {maskedContacts.map((mc) => (
                 <p key={mc.id} className="text-sm text-muted-foreground font-mono">{mc.masked_phone}</p>
@@ -349,7 +349,7 @@ export function AccessForm() {
               <Input placeholder="01XXXXXXXXX" value={fullPhoneInput} onChange={(e) => setFullPhoneInput(e.target.value)} className="bg-card" />
             </div>
             <p className="text-xs text-muted-foreground">নিরাপত্তার জন্য শুধু আপনার সম্পূর্ণ নম্বর মিললে তথ্য দেখানো হবে।</p>
-            <Button onClick={handleVerifyPhone} variant="hero" className="w-full" disabled={loading}>{loading ? "যাচাই হচ্ছে..." : "ভেরিফাই করুন"}</Button>
+            <Button onClick={handleVerifyPhone} variant="heirloom" className="w-full" disabled={loading}>{loading ? "যাচাই হচ্ছে..." : "ভেরিফাই করুন"}</Button>
           </motion.div>
         )}
 
@@ -362,7 +362,7 @@ export function AccessForm() {
               <Edit3 className="h-8 w-8 text-primary mx-auto mb-2" />
               <h3 className="text-lg font-display font-semibold">তথ্য আপডেট করুন</h3>
             </div>
-            <div className="rounded-xl border border-border/60 bg-card/60 p-3 text-xs text-muted-foreground">
+            <div className="heirloom-chip rounded-sm border p-3 text-xs">
               ফোন নম্বরটি স্থির রাখা হয়েছে যাতে আপনার একাউন্ট সঠিক থাকে। বাকি তথ্য চাইলে আপডেট করতে পারেন।
             </div>
             <div className="space-y-4">
@@ -401,7 +401,7 @@ export function AccessForm() {
               </div>
               <div className="space-y-2"><Label>নোট</Label><Textarea value={editForm.note || ""} onChange={(e) => setEditForm({ ...editForm, note: e.target.value })} className="bg-card" /></div>
             </div>
-            <Button onClick={handleSaveEdit} variant="hero" className="w-full" disabled={loading}>
+            <Button onClick={handleSaveEdit} variant="heirloom" className="w-full" disabled={loading}>
               <Heart className="h-4 w-4 mr-1" /> {loading ? "আপডেট হচ্ছে..." : "আপডেট সেভ করুন"}
             </Button>
             <Button onClick={() => navigate("/chat")} variant="outline" className="w-full gap-2">
