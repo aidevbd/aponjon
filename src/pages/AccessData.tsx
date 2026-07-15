@@ -24,24 +24,13 @@ const AccessData = () => {
 
             <div className="relative">
               <div className="flex flex-col items-center text-center">
-                <motion.div
-                  initial={{ scale: 0.7, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.15, type: "spring", stiffness: 180 }}
-                  className="heirloom-seal-outer flex h-14 w-14 items-center justify-center rounded-full p-1 sm:h-16 sm:w-16"
-                >
-                  <div className="heirloom-seal-inner flex h-full w-full items-center justify-center rounded-full">
-                    <span className="font-display text-xl italic sm:text-2xl">আ</span>
-                  </div>
-                </motion.div>
-
-                <h1 className="mt-5 font-display text-3xl leading-[1.15] tracking-tight text-[hsl(var(--heirloom-ink))] sm:text-4xl md:text-5xl">
+                <h1 className="mt-10 font-display text-3xl leading-[1.15] tracking-tight text-[hsl(var(--heirloom-ink))] sm:mt-12 sm:text-4xl md:text-5xl">
                   আমার তথ্য
                 </h1>
 
-                <div aria-hidden className="mt-4 h-px w-24 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
+                <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
 
-                <p className="mt-4 max-w-md text-[14.5px] leading-relaxed text-[hsl(var(--heirloom-ink-soft))] sm:text-base">
+                <p className="mt-5 max-w-md text-[15px] leading-[1.7] text-[hsl(var(--heirloom-ink-soft))] sm:text-base md:max-w-lg md:text-[17px] lg:text-[18px]">
                   ফোন নম্বর বা সিক্রেট কোড দিয়ে আপনার তথ্য দেখুন ও আপডেট করুন।
                 </p>
               </div>
