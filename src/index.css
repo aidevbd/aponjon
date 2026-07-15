@@ -311,4 +311,12 @@
     border-color: hsl(var(--heirloom-gold));
     background-color: hsl(42 55% 94%);
   }
+
+  .heirloom-sticky-bar {
+    background-color: hsl(var(--heirloom-bg) / 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top-color: hsl(var(--heirloom-gold) / 0.35);
+    box-shadow: 0 -8px 24px -12px hsl(26 32% 22% / 0.18);
+  }
 }
