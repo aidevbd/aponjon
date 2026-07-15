@@ -289,7 +289,7 @@ export function ContactForm() {
               <h3 className="text-lg font-display font-semibold text-foreground">মূল তথ্য</h3>
               <p className="text-sm text-muted-foreground">আপনার নাম ও যোগাযোগের তথ্য দিন</p>
             </div>
-            <div className="rounded-xl border border-border/60 bg-card/60 p-3 text-xs text-muted-foreground">
+            <div className="heirloom-chip rounded-sm border p-3 text-xs">
               * চিহ্নিত তথ্যগুলো আবশ্যক। ফোন নম্বরটি ভবিষ্যতে আপনার তথ্য খুঁজে পেতে ব্যবহার হবে।
             </div>
             <div className="flex justify-center">
@@ -310,7 +310,7 @@ export function ContactForm() {
               <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-primary" /> ইমেইল</Label>
               <Input id="email" type="email" placeholder="email@example.com" value={form.email} onChange={(e) => updateForm("email", e.target.value)} className="bg-card" />
             </div>
-            <Button onClick={() => { if (!form.name.trim() || !phones[0]?.number.trim()) { toast.error("নাম এবং ফোন নম্বর আবশ্যক"); return; } setStep(2); }} className="w-full" variant="hero" size="lg">পরবর্তী ধাপ →</Button>
+            <Button onClick={() => { if (!form.name.trim() || !phones[0]?.number.trim()) { toast.error("নাম এবং ফোন নম্বর আবশ্যক"); return; } setStep(2); }} className="w-full" variant="heirloom" size="lg">পরবর্তী ধাপ →</Button>
           </motion.div>
         )}
 
@@ -320,7 +320,7 @@ export function ContactForm() {
               <h3 className="text-lg font-display font-semibold text-foreground">অতিরিক্ত তথ্য</h3>
               <p className="text-sm text-muted-foreground">ক্যাটাগরি ও অন্যান্য বিবরণ</p>
             </div>
-            <div className="rounded-xl border border-border/60 bg-card/60 p-3 text-xs text-muted-foreground">
+            <div className="heirloom-chip rounded-sm border p-3 text-xs">
               এই ধাপের সব তথ্য ঐচ্ছিক। যতটুকু দরকার ততটুকুই দিন।
             </div>
             <div className="space-y-2">
@@ -358,8 +358,8 @@ export function ContactForm() {
               <Textarea placeholder="যেকোনো গুরুত্বপূর্ণ তথ্য লিখুন..." value={form.note} onChange={(e) => updateForm("note", e.target.value)} className="bg-card min-h-[80px]" />
             </div>
             <div className="flex gap-3">
-              <Button onClick={() => setStep(1)} variant="outline" className="flex-1">← আগের ধাপ</Button>
-              <Button onClick={() => setStep(3)} variant="hero" className="flex-1">পরবর্তী ধাপ →</Button>
+              <Button onClick={() => setStep(1)} variant="heirloomGhost" className="flex-1 rounded-sm">← আগের ধাপ</Button>
+              <Button onClick={() => setStep(3)} variant="heirloom" className="flex-1">পরবর্তী ধাপ →</Button>
             </div>
           </motion.div>
         )}
@@ -370,7 +370,7 @@ export function ContactForm() {
               <h3 className="text-lg font-display font-semibold text-foreground">সিক্রেট কোড (ঐচ্ছিক)</h3>
               <p className="text-sm text-muted-foreground">ভবিষ্যতে নিজের তথ্য এক্সেস করতে</p>
             </div>
-            <div className="rounded-xl border border-border/60 bg-card/60 p-3 text-xs text-muted-foreground">
+            <div className="heirloom-chip rounded-sm border p-3 text-xs">
               ছোট কিন্তু মনে রাখার মতো কোড দিন—যেমন ডাকনাম, বিশেষ শব্দ, বা সংখ্যা+অক্ষরের মিশ্রণ।
             </div>
             <div className="space-y-2">
@@ -380,7 +380,7 @@ export function ContactForm() {
             <AnimatePresence>
               {(showSecretWarning || !form.secretCode) && (
                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                  <div className="flex gap-3 rounded-xl bg-accent/60 p-4 border border-accent">
+                  <div className="flex gap-3 heirloom-chip rounded-sm border p-4">
                     <Info className="h-5 w-5 text-gold shrink-0 mt-0.5" />
                     <p className="text-sm text-accent-foreground">
                       আপনি সিক্রেট কোড না দিলে পরবর্তীতে নিজে তথ্য আপডেট করতে পারবেন না। তখন তথ্য আপডেট করতে অ্যাডমিনকে জানাতে হবে। 🙏
@@ -390,8 +390,8 @@ export function ContactForm() {
               )}
             </AnimatePresence>
             <div className="flex gap-3">
-              <Button onClick={() => setStep(2)} variant="outline" className="flex-1">← আগের ধাপ</Button>
-              <Button onClick={handleSubmit} variant="hero" className="flex-1" disabled={loading}>
+              <Button onClick={() => setStep(2)} variant="heirloomGhost" className="flex-1 rounded-sm">← আগের ধাপ</Button>
+              <Button onClick={handleSubmit} variant="heirloom" className="flex-1" disabled={loading}>
                 <Heart className="h-4 w-4 mr-1" /> {loading ? "সেভ হচ্ছে..." : "সেভ করুন"}
               </Button>
             </div>
