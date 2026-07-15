@@ -26,29 +26,16 @@ const Index = () => {
             <div aria-hidden className="heirloom-corner absolute bottom-0 right-0 h-10 w-10 sm:h-14 sm:w-14 border-b-2 border-r-2 rounded-br-sm" />
 
             <div className="relative flex flex-col items-center text-center">
-              {/* Seal */}
-              <motion.div
-                initial={{ scale: 0.7, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.15, type: "spring", stiffness: 180 }}
-                className="heirloom-seal-outer flex h-16 w-16 items-center justify-center rounded-full p-1 sm:h-20 sm:w-20"
-              >
-                <div className="heirloom-seal-inner flex h-full w-full items-center justify-center rounded-full">
-                  <span className="font-display text-2xl italic sm:text-3xl">আ</span>
-                </div>
-              </motion.div>
-
               {/* Heading */}
-              <h1 className="mt-6 font-display text-4xl leading-[1.1] tracking-tight text-[hsl(var(--heirloom-ink))] sm:text-5xl md:text-6xl">
+              <h1 className="mt-6 font-display text-4xl leading-[1.1] tracking-tight text-[hsl(var(--heirloom-ink))] sm:mt-10 sm:text-5xl md:mt-12 md:text-6xl">
                 আপনজন
               </h1>
 
               <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
 
-              <p className="mt-5 max-w-md text-[15px] leading-relaxed text-[hsl(var(--heirloom-ink-soft))] sm:text-base md:text-lg">
+              <p className="mt-5 max-w-md text-[15px] leading-[1.7] text-[hsl(var(--heirloom-ink-soft))] sm:text-base md:text-lg">
                 বন্ধু, বেস্ট ফ্রেন্ড কিংবা ভালোবাসার মানুষ — আপনারা আমার জীবনের সবচেয়ে দামী অংশ। মোবাইল হারালে যেন আপনাদের হারিয়ে না ফেলি, তাই একটু কষ্ট করে নাম-নম্বরটা এখানে রেখে দেবেন? 🤍
               </p>
-
 
               {/* CTAs — hidden on mobile (sticky bar takes over) */}
               <div className="mt-9 hidden w-full max-w-sm flex-col gap-3 sm:flex">
@@ -73,7 +60,7 @@ const Index = () => {
               {/* Signature */}
               <footer className="mt-10 flex flex-col items-center">
                 <div aria-hidden className="h-px w-16 bg-[hsl(var(--heirloom-line))]" />
-                <p className="mt-4 font-display text-base italic text-[hsl(var(--heirloom-ink-soft))] sm:text-lg">
+                <p className="mt-6 font-display text-base italic text-[hsl(var(--heirloom-ink-soft))] sm:text-lg">
                   ইতি, আপনারই একজন আপনজন
                 </p>
               </footer>
