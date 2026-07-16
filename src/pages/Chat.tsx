@@ -25,6 +25,7 @@ import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
 import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
+import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
 import { notifyNewMessage } from "@/lib/notificationPrefs";
 
 
