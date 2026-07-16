@@ -53,7 +53,10 @@ export function DashboardHome({
                 onClick={() => onCategoryClick(cat)}
                 className="group flex items-center gap-1.5 rounded-full border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.6)] px-3.5 py-1.5 transition-all duration-300 hover:border-[hsl(var(--heirloom-gold)/0.6)] hover:bg-[hsl(var(--heirloom-cream)/0.5)]"
               >
-                <span className="text-sm">{catInfo?.icon || "✨"}</span>
+                <CategoryIcon
+                  category={catInfo?.value}
+                  className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]"
+                />
                 <span className="text-[13px] text-[hsl(var(--heirloom-ink))]">{cat}</span>
                 <span className="text-[11px] text-[hsl(var(--heirloom-ink-soft))]">{count}</span>
               </button>
