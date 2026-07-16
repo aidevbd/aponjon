@@ -280,11 +280,17 @@ const AdminChat = () => {
               </div>
             )}
           </div>
-          <Button variant="ghost" size="sm" onClick={() => navigate("/admin/dashboard")} className="text-xs gap-1">
-            <Heart className="h-3.5 w-3.5" /> ড্যাশবোর্ড
-          </Button>
+          <div className="flex items-center gap-1 shrink-0">
+            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="নোটিফিকেশন সেটিংস" onClick={() => setNotifPrefsOpen(true)}>
+              <Bell className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/dashboard")} className="text-xs gap-1">
+              <Heart className="h-3.5 w-3.5" /> ড্যাশবোর্ড
+            </Button>
+          </div>
         </div>
       </header>
+
 
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden container mx-auto max-w-2xl lg:max-w-4xl w-full">
         <AnimatePresence mode="wait">
