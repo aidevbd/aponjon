@@ -194,11 +194,42 @@ const AdminChat = () => {
       if (error) throw error;
     } catch (err) {
       console.error("[catch]", err);
-      toast.error("মেসেজ পাঠাতে সমস্যা");
-      setMsgInput(text);
+      const failed: FailedChatMessage = {
+        id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        content: text,
+        imageUrl: null,
+        replyToId: null,
+        createdAt: new Date().toISOString(),
+      };
+      setFailedMessages(prev => [...prev, failed]);
+      toast.error("মেসেজ পাঠাতে সমস্যা — 'আবার পাঠান' চাপুন");
     } finally {
       setSending(false);
     }
+  };
+
+  const handleResendFailed = async (failedId: string) => {
+    if (!selectedUser) return;
+    const item = failedMessages.find(f => f.id === failedId);
+    if (!item) return;
+    setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: true } : f));
+    try {
+      const { error } = await supabase.rpc("send_admin_message", {
+        p_receiver_id: selectedUser.id,
+        p_content: item.content || undefined,
+        p_image_url: item.imageUrl || undefined,
+      } as any);
+      if (error) throw error;
+      setFailedMessages(prev => prev.filter(f => f.id !== failedId));
+      toast.success("মেসেজ পাঠানো হয়েছে");
+    } catch {
+      setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: false } : f));
+      toast.error("এখনো পাঠানো যাচ্ছে না");
+    }
+  };
+
+  const handleDeleteFailed = (failedId: string) => {
+    setFailedMessages(prev => prev.filter(f => f.id !== failedId));
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
