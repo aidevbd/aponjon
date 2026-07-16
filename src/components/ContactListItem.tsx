@@ -1,7 +1,6 @@
 import { Phone } from "lucide-react";
 import { CATEGORIES } from "@/lib/types";
 import { type ContactRow } from "@/lib/store";
-import { CategoryIcon } from "@/lib/categoryIcon";
 
 interface ContactListItemProps {
   contact: ContactRow;
@@ -42,8 +41,8 @@ export function ContactListItem({ contact, onClick }: ContactListItemProps) {
         </div>
         <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[hsl(var(--heirloom-ink-soft))]">
           {category && (
-            <span className="inline-flex items-center gap-1.5">
-              <CategoryIcon category={category.value} className="h-3 w-3 text-[hsl(var(--heirloom-gold-deep))]" />
+            <span className="inline-flex items-center gap-1">
+              <span>{category.icon}</span>
               <span>{category.value}</span>
             </span>
           )}
@@ -63,7 +62,7 @@ export function ContactListItem({ contact, onClick }: ContactListItemProps) {
         title="কল করুন"
         aria-label="কল করুন"
       >
-        <Phone className="h-3.5 w-3.5" strokeWidth={1.6} />
+        <Phone className="h-3.5 w-3.5" />
       </button>
     </div>
   );

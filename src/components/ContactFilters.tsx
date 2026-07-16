@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Search, SlidersHorizontal, X, ChevronDown } from "lucide-react";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
-import { CategoryIcon } from "@/lib/categoryIcon";
 
 interface ContactFiltersProps {
   search: string;
