@@ -25,6 +25,7 @@ import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
 import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
+import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
 import { notifyNewMessage } from "@/lib/notificationPrefs";
 
 
@@ -71,6 +72,7 @@ const Chat = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isOffline, setIsOffline] = useState(typeof navigator !== "undefined" ? !navigator.onLine : false);
   const [queuedCount, setQueuedCount] = useState(0);
+  const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
   const [contactPreviews, setContactPreviews] = useState<Record<string, ContactPreview>>({});
   const [actionMessage, setActionMessage] = useState<Message | null>(null);
   const [unsendTargetId, setUnsendTargetId] = useState<string | null>(null);
@@ -343,6 +345,7 @@ const Chat = () => {
   const handleSelectContact = (contact: ChatContact) => {
     setSelectedContact(contact);
     setQueuedCount(getOfflineQueueCountForContact(contact.id));
+    setFailedMessages([]);
     loadMessages(contact);
   };
 
@@ -430,13 +433,53 @@ const Chat = () => {
         setSession(null);
         toast.error("সেশন শেষ হয়ে গেছে। আবার লগইন করুন।");
       } else {
-        toast.error("মেসেজ পাঠাতে সমস্যা");
-        setMsgInput(text);
+        const failed: FailedChatMessage = {
+          id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          content: text,
+          imageUrl: null,
+          replyToId: replyingTo?.id || null,
+          replyContent: replyingTo?.content || null,
+          createdAt: new Date().toISOString(),
+        };
+        setFailedMessages(prev => [...prev, failed]);
+        setReplyingTo(null);
+        toast.error("মেসেজ পাঠাতে সমস্যা — নিচে 'আবার পাঠান' চাপুন");
       }
     } finally {
       setSending(false);
       restoreInputFocus(true);
     }
+  };
+
+  const handleResendFailed = async (failedId: string) => {
+    if (!session || !selectedContact) return;
+    const item = failedMessages.find(f => f.id === failedId);
+    if (!item) return;
+    setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: true } : f));
+    try {
+      await sendMessage(
+        session.token,
+        selectedContact.id,
+        item.content || undefined,
+        item.imageUrl || undefined,
+        item.replyToId || undefined,
+      );
+      setFailedMessages(prev => prev.filter(f => f.id !== failedId));
+      toast.success("মেসেজ পাঠানো হয়েছে");
+    } catch (err: any) {
+      setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: false } : f));
+      if (err?.message?.includes("Invalid session")) {
+        clearChatSession();
+        setSession(null);
+        toast.error("সেশন শেষ হয়ে গেছে। আবার লগইন করুন।");
+      } else {
+        toast.error("এখনো পাঠানো যাচ্ছে না");
+      }
+    }
+  };
+
+  const handleDeleteFailed = (failedId: string) => {
+    setFailedMessages(prev => prev.filter(f => f.id !== failedId));
   };
 
   const handleUnsendMessage = async () => {
@@ -524,8 +567,22 @@ const Chat = () => {
     setUploading(true);
     try {
       const url = await uploadChatImage(file, session.token);
-      await sendMessage(session.token, selectedContact.id, undefined, url, replyingTo?.id);
-      setReplyingTo(null);
+      try {
+        await sendMessage(session.token, selectedContact.id, undefined, url, replyingTo?.id);
+        setReplyingTo(null);
+      } catch (sendErr) {
+        const failed: FailedChatMessage = {
+          id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          content: null,
+          imageUrl: url,
+          replyToId: replyingTo?.id || null,
+          replyContent: replyingTo?.content || null,
+          createdAt: new Date().toISOString(),
+        };
+        setFailedMessages(prev => [...prev, failed]);
+        setReplyingTo(null);
+        toast.error("ছবি পাঠাতে সমস্যা — 'আবার পাঠান' চাপুন");
+      }
     } catch (err) {
       console.error("[catch]", err);
       toast.error("ছবি পাঠাতে সমস্যা");
@@ -880,6 +937,14 @@ const Chat = () => {
                   </div>
                 </div>
               )}
+
+              <FailedMessagesList
+                items={failedMessages}
+                onResend={handleResendFailed}
+                onDelete={handleDeleteFailed}
+              />
+
+
 
 
               <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-3 py-2 shrink-0 pb-[max(0.5rem,env(safe-area-inset-bottom))]">

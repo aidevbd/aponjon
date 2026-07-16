@@ -15,6 +15,7 @@ import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
 import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { ChatUserListSkeleton } from "@/components/skeletons/LoadingSkeletons";
+import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
 type Message = {
@@ -50,6 +51,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
   const [editingMsg, setEditingMsg] = useState<Message | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
@@ -225,6 +227,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
   const handleSelectUser = (user: ChatUser) => {
     setSelectedUser(user);
+    setFailedMessages([]);
     loadMessages(user);
   };
 
@@ -364,12 +367,47 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       setReplyingTo(null);
       await loadMessages(selectedUser);
     } catch {
-      toast.error("মেসেজ পাঠাতে সমস্যা");
-      setMsgInput(text);
+      const failed: FailedChatMessage = {
+        id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        content: text,
+        imageUrl: null,
+        replyToId: replyingTo?.id || null,
+        replyContent: replyingTo?.content || null,
+        createdAt: new Date().toISOString(),
+      };
+      setFailedMessages(prev => [...prev, failed]);
+      setReplyingTo(null);
+      toast.error("মেসেজ পাঠাতে সমস্যা — 'আবার পাঠান' চাপুন");
     } finally {
       setSending(false);
       restoreInputFocus(true);
     }
+  };
+
+  const handleResendFailed = async (failedId: string) => {
+    if (!selectedUser) return;
+    const item = failedMessages.find(f => f.id === failedId);
+    if (!item) return;
+    setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: true } : f));
+    try {
+      const { error } = await supabase.rpc("send_admin_message", {
+        p_receiver_id: selectedUser.id,
+        p_content: item.content || undefined,
+        p_image_url: item.imageUrl || undefined,
+        p_reply_to_id: item.replyToId || null,
+      } as any);
+      if (error) throw error;
+      setFailedMessages(prev => prev.filter(f => f.id !== failedId));
+      await loadMessages(selectedUser);
+      toast.success("মেসেজ পাঠানো হয়েছে");
+    } catch {
+      setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: false } : f));
+      toast.error("এখনো পাঠানো যাচ্ছে না");
+    }
+  };
+
+  const handleDeleteFailed = (failedId: string) => {
+    setFailedMessages(prev => prev.filter(f => f.id !== failedId));
   };
 
   const handleStartEdit = (msg: Message) => {
@@ -393,16 +431,30 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     setUploading(true);
     try {
       const url = await uploadChatImage(file);
-      const { error } = await supabase.rpc("send_admin_message", {
-        p_receiver_id: selectedUser.id,
-        p_image_url: url,
-        p_reply_to_id: replyingTo?.id || null,
-      } as any);
-      if (error) throw error;
-      setReplyingTo(null);
-      recentSendAtRef.current = Date.now();
-      await loadMessages(selectedUser);
-      restoreInputFocus(true);
+      try {
+        const { error } = await supabase.rpc("send_admin_message", {
+          p_receiver_id: selectedUser.id,
+          p_image_url: url,
+          p_reply_to_id: replyingTo?.id || null,
+        } as any);
+        if (error) throw error;
+        setReplyingTo(null);
+        recentSendAtRef.current = Date.now();
+        await loadMessages(selectedUser);
+        restoreInputFocus(true);
+      } catch {
+        const failed: FailedChatMessage = {
+          id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          content: null,
+          imageUrl: url,
+          replyToId: replyingTo?.id || null,
+          replyContent: replyingTo?.content || null,
+          createdAt: new Date().toISOString(),
+        };
+        setFailedMessages(prev => [...prev, failed]);
+        setReplyingTo(null);
+        toast.error("ছবি পাঠাতে সমস্যা — 'আবার পাঠান' চাপুন");
+      }
     } catch { toast.error("ছবি পাঠাতে সমস্যা"); }
     finally { setUploading(false); if (fileInputRef.current) fileInputRef.current.value = ""; }
   };
@@ -673,6 +725,12 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                 </div>
               </div>
             )}
+
+            <FailedMessagesList
+              items={failedMessages}
+              onResend={handleResendFailed}
+              onDelete={handleDeleteFailed}
+            />
 
             {/* Input */}
             <div className="border-t border-border/50 pt-3 px-1">

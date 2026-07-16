@@ -12,6 +12,7 @@ import { getSession } from "@/lib/store";
 import { toast } from "sonner";
 import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
 import { notifyNewMessage } from "@/lib/notificationPrefs";
+import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
 
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
@@ -35,6 +36,7 @@ const AdminChat = () => {
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
+  const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -159,6 +161,7 @@ const AdminChat = () => {
 
   const handleSelectUser = (user: ChatUser) => {
     setSelectedUser(user);
+    setFailedMessages([]);
     loadMessages(user);
   };
 
@@ -192,11 +195,42 @@ const AdminChat = () => {
       if (error) throw error;
     } catch (err) {
       console.error("[catch]", err);
-      toast.error("মেসেজ পাঠাতে সমস্যা");
-      setMsgInput(text);
+      const failed: FailedChatMessage = {
+        id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        content: text,
+        imageUrl: null,
+        replyToId: null,
+        createdAt: new Date().toISOString(),
+      };
+      setFailedMessages(prev => [...prev, failed]);
+      toast.error("মেসেজ পাঠাতে সমস্যা — 'আবার পাঠান' চাপুন");
     } finally {
       setSending(false);
     }
+  };
+
+  const handleResendFailed = async (failedId: string) => {
+    if (!selectedUser) return;
+    const item = failedMessages.find(f => f.id === failedId);
+    if (!item) return;
+    setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: true } : f));
+    try {
+      const { error } = await supabase.rpc("send_admin_message", {
+        p_receiver_id: selectedUser.id,
+        p_content: item.content || undefined,
+        p_image_url: item.imageUrl || undefined,
+      } as any);
+      if (error) throw error;
+      setFailedMessages(prev => prev.filter(f => f.id !== failedId));
+      toast.success("মেসেজ পাঠানো হয়েছে");
+    } catch {
+      setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: false } : f));
+      toast.error("এখনো পাঠানো যাচ্ছে না");
+    }
+  };
+
+  const handleDeleteFailed = (failedId: string) => {
+    setFailedMessages(prev => prev.filter(f => f.id !== failedId));
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,11 +240,23 @@ const AdminChat = () => {
     setUploading(true);
     try {
       const url = await uploadChatImage(file);
-      const { error } = await supabase.rpc("send_admin_message", {
-        p_receiver_id: selectedUser.id,
-        p_image_url: url,
-      });
-      if (error) throw error;
+      try {
+        const { error } = await supabase.rpc("send_admin_message", {
+          p_receiver_id: selectedUser.id,
+          p_image_url: url,
+        });
+        if (error) throw error;
+      } catch {
+        const failed: FailedChatMessage = {
+          id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          content: null,
+          imageUrl: url,
+          replyToId: null,
+          createdAt: new Date().toISOString(),
+        };
+        setFailedMessages(prev => [...prev, failed]);
+        toast.error("ছবি পাঠাতে সমস্যা — 'আবার পাঠান' চাপুন");
+      }
     } catch (err) {
       console.error("[catch]", err);
       toast.error("ছবি পাঠাতে সমস্যা");
@@ -399,7 +445,14 @@ const AdminChat = () => {
                 <div ref={messagesEndRef} />
               </div>
 
+              <FailedMessagesList
+                items={failedMessages}
+                onResend={handleResendFailed}
+                onDelete={handleDeleteFailed}
+              />
+
               <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-3 sm:px-4 py-3 shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+
                 <div className="flex items-center gap-1.5 sm:gap-2 w-full">
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" aria-label="ছবি পাঠান" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
