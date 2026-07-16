@@ -10,6 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { uploadChatImage, signMessagesImages } from "@/lib/chatSession";
 import { getSession } from "@/lib/store";
 import { toast } from "sonner";
+import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
+import { notifyNewMessage } from "@/lib/notificationPrefs";
+
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
 type Message = { id: string; sender_id: string; receiver_id: string; content: string | null; image_url: string | null; is_read: boolean; created_at: string };
