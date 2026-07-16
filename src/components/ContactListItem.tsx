@@ -9,6 +9,7 @@ interface ContactListItemProps {
   index: number;
   onClick: (contact: ContactRow) => void;
   query?: string;
+  highlighted?: boolean;
 }
 
 /** Return the first field (label + value) whose value matches the query. */
