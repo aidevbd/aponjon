@@ -17,7 +17,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ContactCard } from "@/components/ContactCard";
+
 import { ContactListItem } from "@/components/ContactListItem";
 import { ContactDetailSheet } from "@/components/ContactDetailSheet";
 import { ContactFilters } from "@/components/ContactFilters";
