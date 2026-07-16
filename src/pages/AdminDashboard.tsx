@@ -49,6 +49,8 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("contacts");
   
   const [selectedContact, setSelectedContact] = useState<ContactRow | null>(null);
+  const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
+  const openContactDetail = (c: ContactRow) => { setSelectedContact(c); setLastSelectedId(c.id); };
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [pendingDuplicate, setPendingDuplicate] = useState<{ existingName: string; phone: string } | null>(null);
   const birthdayNotified = useRef(false);
@@ -443,7 +445,7 @@ const AdminDashboard = () => {
             ) : (
               <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.55)] overflow-hidden">
                 {filtered.map((contact, i) => (
-                  <ContactListItem key={contact.id} contact={contact} index={i} onClick={setSelectedContact} query={search} />
+                  <ContactListItem key={contact.id} contact={contact} index={i} onClick={openContactDetail} query={search} highlighted={contact.id === lastSelectedId} />
                 ))}
               </div>
             )}
