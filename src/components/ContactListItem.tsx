@@ -1,13 +1,13 @@
 import {
   Phone,
-  Heart,
-  Users,
-  Handshake,
+  HeartHandshake,
+  Users2,
+  Coffee,
   Briefcase,
-  Home,
-  GraduationCap,
-  Siren,
-  Bookmark,
+  Trees,
+  BookOpen,
+  LifeBuoy,
+  Feather,
   type LucideIcon,
 } from "lucide-react";
 import { CATEGORIES } from "@/lib/types";
@@ -20,19 +20,19 @@ interface ContactListItemProps {
 }
 
 const CATEGORY_ICON: Record<string, LucideIcon> = {
-  "পরিবার": Heart,
-  "আত্মীয়": Users,
-  "বন্ধু": Handshake,
+  "পরিবার": HeartHandshake,
+  "আত্মীয়": Users2,
+  "বন্ধু": Coffee,
   "সহকর্মী": Briefcase,
-  "প্রতিবেশী": Home,
-  "শিক্ষক/গুরু": GraduationCap,
-  "জরুরি": Siren,
-  "অন্যান্য": Bookmark,
+  "প্রতিবেশী": Trees,
+  "শিক্ষক/গুরু": BookOpen,
+  "জরুরি": LifeBuoy,
+  "অন্যান্য": Feather,
 };
 
 export function ContactListItem({ contact, onClick }: ContactListItemProps) {
   const category = CATEGORIES.find((c) => c.value === contact.category);
-  const CategoryIcon = category ? CATEGORY_ICON[category.value] ?? Bookmark : null;
+  const CategoryIcon = category ? CATEGORY_ICON[category.value] ?? Feather : null;
   const isEmergency = contact.category === "জরুরি";
 
   const callPhone = (e: React.MouseEvent) => {
