@@ -166,62 +166,43 @@ function FilterModal({
         <div className="mx-5 h-px bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold)/0.5)] to-transparent" />
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
           {/* Category */}
-          <section className="space-y-2">
-            <div className="text-[10px] tracking-[0.2em] uppercase text-[hsl(var(--heirloom-ink-mute))]">
+          <section className="space-y-1.5">
+            <label className="text-[10px] tracking-[0.2em] uppercase text-[hsl(var(--heirloom-ink-mute))]">
               ক্যাটাগরি
-            </div>
-            <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.5)] overflow-hidden">
-              <OptionRow
-                selected={draftCat === "all"}
-                onClick={() => setDraftCat("all")}
-                label="সব ক্যাটাগরি"
-              />
+            </label>
+            <NativeSelect
+              value={draftCat}
+              onChange={setDraftCat}
+            >
+              <option value="all">সব ক্যাটাগরি</option>
               {CATEGORIES.map((cat) => {
                 const count = categoryCount[cat.value] || 0;
                 if (count === 0) return null;
                 return (
-                  <OptionRow
-                    key={cat.value}
-                    selected={draftCat === cat.value}
-                    onClick={() => setDraftCat(cat.value)}
-                    label={
-                      <span className="flex items-center gap-2">
-                        <span>{cat.icon}</span>
-                        <span>{cat.value}</span>
-                      </span>
-                    }
-                    trailing={
-                      <span className="text-[10px] text-[hsl(var(--heirloom-ink-mute))]">
-                        {count}
-                      </span>
-                    }
-                  />
+                  <option key={cat.value} value={cat.value}>
+                    {cat.icon} {cat.value} ({count})
+                  </option>
                 );
               })}
-            </div>
+            </NativeSelect>
           </section>
 
           {/* Blood group */}
-          <section className="space-y-2">
-            <div className="text-[10px] tracking-[0.2em] uppercase text-[hsl(var(--heirloom-ink-mute))]">
+          <section className="space-y-1.5">
+            <label className="text-[10px] tracking-[0.2em] uppercase text-[hsl(var(--heirloom-ink-mute))]">
               রক্তের গ্রুপ
-            </div>
-            <div className="grid grid-cols-4 gap-1.5">
-              <BgChip active={draftBg === "all"} onClick={() => setDraftBg("all")}>
-                সব
-              </BgChip>
+            </label>
+            <NativeSelect
+              value={draftBg}
+              onChange={setDraftBg}
+            >
+              <option value="all">সব গ্রুপ</option>
               {BLOOD_GROUPS.map((bg) => (
-                <BgChip
-                  key={bg}
-                  active={draftBg === bg}
-                  onClick={() => setDraftBg(bg)}
-                >
-                  {bg}
-                </BgChip>
+                <option key={bg} value={bg}>{bg}</option>
               ))}
-            </div>
+            </NativeSelect>
           </section>
         </div>
 
