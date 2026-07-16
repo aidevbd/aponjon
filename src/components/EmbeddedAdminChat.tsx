@@ -20,6 +20,8 @@ type ChatUser = { id: string; name: string; phone: string; photo_url: string | n
 type Message = {
   id: string; sender_id: string; receiver_id: string; content: string | null;
   image_url: string | null; is_read: boolean; created_at: string;
+  delivered_at?: string | null;
+
   deleted_by_sender?: boolean; edited_at?: string | null; original_content?: string | null;
   reply_to_id?: string | null; reply_content?: string | null; reply_sender_id?: string | null;
   is_pinned?: boolean;
@@ -212,10 +214,12 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     try {
       const { data, error } = await supabase.rpc("get_admin_messages", { p_other_id: user.id });
       if (error) throw error;
-      const signed = await signMessagesImages((data || []) as Message[]);
+      const signed = await signMessagesImages((data || []) as unknown as Message[]);
       setMessages(signed);
       setUnreadMap(prev => { const n = { ...prev }; delete n[user.id]; return n; });
+      void (async () => { try { await supabase.rpc("mark_conversation_delivered_admin", { p_other_id: user.id } as any); } catch {} })();
     } catch { toast.error("মেসেজ লোড করতে সমস্যা"); }
+
   }, []);
 
   const handleSelectUser = (user: ChatUser) => {
@@ -629,8 +633,9 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                         onQuickReact={(m, e) => handleReact(m as Message, e)}
                         onStartReply={(m) => handleStartReply(m as Message)}
                         onShowEditHistory={(m) => handleShowEditHistory(m as Message)}
-                        isDelivered
-                        showReceipt={isMine && msg.id === lastMineId}
+                        isDelivered={!!msg.delivered_at || !!msg.is_read}
+                        showReceipt={isMine && (!!showTail || msg.id === lastMineId)}
+
                       />
                     </div>
                   );

@@ -15,7 +15,7 @@ import { notifyNewMessage } from "@/lib/notificationPrefs";
 
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
-type Message = { id: string; sender_id: string; receiver_id: string; content: string | null; image_url: string | null; is_read: boolean; created_at: string };
+type Message = { id: string; sender_id: string; receiver_id: string; content: string | null; image_url: string | null; is_read: boolean; created_at: string; delivered_at?: string | null };
 
 const AdminChat = () => {
   const navigate = useNavigate();
@@ -102,6 +102,27 @@ const AdminChat = () => {
     return () => { supabase.removeChannel(channel); };
   }, [adminContactId]);
 
+  // Per-thread broadcast subscription — receives delivered/edit/unsend/reaction updates
+  useEffect(() => {
+    const sel = selectedUser;
+    if (!adminContactId || !sel) return;
+    const sortedIds = [adminContactId, sel.id].sort();
+    const topic = `msg:${sortedIds[0]}:${sortedIds[1]}`;
+    const channel = supabase
+      .channel(topic, { config: { private: false } })
+      .on("broadcast", { event: "msg_update" }, async () => {
+        try {
+          const { data } = await supabase.rpc("get_admin_messages", { p_other_id: sel.id });
+          const signed = await signMessagesImages((data || []) as unknown as Message[]);
+          setMessages(signed);
+        } catch {}
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [adminContactId, selectedUser]);
+
+
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -128,10 +149,12 @@ const AdminChat = () => {
     try {
       const { data, error } = await supabase.rpc("get_admin_messages", { p_other_id: user.id });
       if (error) throw error;
-      const signed = await signMessagesImages((data || []) as Message[]);
+      const signed = await signMessagesImages((data || []) as unknown as Message[]);
       setMessages(signed);
       setUnreadMap(prev => { const n = { ...prev }; delete n[user.id]; return n; });
+      void (async () => { try { await supabase.rpc("mark_conversation_delivered_admin", { p_other_id: user.id } as any); } catch {} })();
     } catch (err) { console.error("[catch]", err); toast.error("মেসেজ লোড করতে সমস্যা"); }
+
   }, []);
 
   const handleSelectUser = (user: ChatUser) => {
@@ -352,11 +375,22 @@ const AdminChat = () => {
                           <p className={`text-[10px] ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
                             {formatTime(msg.created_at)}
                           </p>
-                          {isMine && (
-                            <span className={`text-[10px] ${msg.is_read ? "text-primary-foreground/80" : "text-primary-foreground/40"}`}>
-                              {msg.is_read ? "✓✓" : "✓"}
-                            </span>
-                          )}
+                          {isMine && (() => {
+                            const state = msg.is_read ? "read" : msg.delivered_at ? "delivered" : "sent";
+                            const label = state === "read" ? "Seen" : state === "delivered" ? "Delivered" : "Sent";
+                            const glyph = state === "sent" ? "✓" : "✓✓";
+                            const tone = state === "read"
+                              ? "text-primary-foreground"
+                              : state === "delivered"
+                              ? "text-primary-foreground/80"
+                              : "text-primary-foreground/40";
+                            return (
+                              <span className={`text-[10px] flex items-center gap-0.5 ${tone}`} title={label} aria-label={label}>
+                                {glyph}
+                              </span>
+                            );
+                          })()}
+
                         </div>
                       </div>
                     </div>

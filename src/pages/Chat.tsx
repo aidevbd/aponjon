@@ -32,6 +32,8 @@ type ChatContact = { id: string; name: string; phone: string; photo_url: string 
 type Message = {
   id: string; sender_id: string; receiver_id: string; content: string | null;
   image_url: string | null; is_read: boolean; created_at: string;
+  delivered_at?: string | null;
+
   edited_at?: string | null; original_content?: string | null;
   reply_to_id?: string | null; reply_content?: string | null; reply_sender_id?: string | null;
   is_pinned?: boolean;
@@ -302,6 +304,9 @@ const Chat = () => {
         },
       }));
       setUnreadMap((prev) => { const n = { ...prev }; delete n[contact.id]; return n; });
+      // Fire-and-forget: mark inbound messages as delivered so the sender sees ✓✓
+      void (async () => { try { await supabase.rpc("mark_conversation_delivered", { p_token: session.token, p_other_id: contact.id } as any); } catch {} })();
+
     } catch (err) {
       console.error("[catch]", err);
       toast.error("মেসেজ লোড করতে সমস্যা");
@@ -820,8 +825,8 @@ const Chat = () => {
                           onQuickReact={(m, e) => handleReact(m, e)}
                           onStartReply={(m) => handleStartReply(m)}
                           onShowEditHistory={(m) => handleShowEditHistory(m)}
-                          isDelivered={!!msg.is_read || true}
-                          showReceipt={isMine && msg.id === lastMineId}
+                          isDelivered={!!msg.delivered_at || !!msg.is_read}
+                          showReceipt={isMine && (showTail || msg.id === lastMineId)}
                         />
                       </div>
                     );

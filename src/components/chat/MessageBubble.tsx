@@ -13,6 +13,8 @@ export type BubbleMessage = {
   image_url: string | null;
   is_read: boolean;
   created_at: string;
+  delivered_at?: string | null;
+
   edited_at?: string | null;
   reply_content?: string | null;
   reply_sender_id?: string | null;
