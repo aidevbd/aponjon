@@ -12,6 +12,7 @@ import { getSession } from "@/lib/store";
 import { toast } from "sonner";
 import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
 import { notifyNewMessage } from "@/lib/notificationPrefs";
+import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
 
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
