@@ -20,6 +20,8 @@ type ChatUser = { id: string; name: string; phone: string; photo_url: string | n
 type Message = {
   id: string; sender_id: string; receiver_id: string; content: string | null;
   image_url: string | null; is_read: boolean; created_at: string;
+  delivered_at?: string | null;
+
   deleted_by_sender?: boolean; edited_at?: string | null; original_content?: string | null;
   reply_to_id?: string | null; reply_content?: string | null; reply_sender_id?: string | null;
   is_pinned?: boolean;
