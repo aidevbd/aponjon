@@ -161,6 +161,7 @@ const AdminChat = () => {
 
   const handleSelectUser = (user: ChatUser) => {
     setSelectedUser(user);
+    setFailedMessages([]);
     loadMessages(user);
   };
 
