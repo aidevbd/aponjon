@@ -126,7 +126,7 @@ export function MessageBubble({
   }, []);
 
   const bubbleBase = cn(
-    "relative inline-block max-w-[78%] sm:max-w-[70%] px-3.5 py-2 text-sm break-words whitespace-pre-wrap leading-snug",
+    "relative inline-block max-w-full px-3.5 py-2 text-sm break-words whitespace-pre-wrap leading-snug",
     "transition-shadow",
     isMine
       ? "bg-primary text-primary-foreground"
