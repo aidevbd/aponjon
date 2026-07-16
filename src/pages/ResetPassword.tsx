@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, KeyRound, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Header } from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -26,8 +22,6 @@ const ResetPassword = () => {
         const code = url.searchParams.get("code");
         const hash = window.location.hash;
 
-        // 0) Check if there's already a valid session BEFORE touching the code
-        // (prevents "code already used" on refresh)
         const { data: existing } = await supabase.auth.getSession();
         if (existing.session) {
           if (mounted) setReady(true);
@@ -37,7 +31,6 @@ const ResetPassword = () => {
           return;
         }
 
-        // 1) Handle modern PKCE flow: ?code=...
         if (code) {
           const { data: ex, error: exErr } =
             await supabase.auth.exchangeCodeForSession(code);
@@ -49,7 +42,6 @@ const ResetPassword = () => {
           }
         }
 
-        // 2) Handle legacy implicit flow: #access_token=...&type=recovery
         if (hash && hash.includes("access_token")) {
           const params = new URLSearchParams(hash.substring(1));
           const access_token = params.get("access_token");
@@ -66,7 +58,6 @@ const ResetPassword = () => {
           }
         }
 
-        // 3) Nothing worked — wait briefly for onAuthStateChange (PASSWORD_RECOVERY)
         setTimeout(async () => {
           if (!mounted) return;
           const { data: { session } } = await supabase.auth.getSession();
@@ -85,7 +76,6 @@ const ResetPassword = () => {
       }
     };
 
-    // Listen for PASSWORD_RECOVERY event as well
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if ((event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") && session) {
         if (mounted) {
@@ -126,94 +116,107 @@ const ResetPassword = () => {
     }
   };
 
+  const subtitle = error
+    ? "লিংকটিতে সমস্যা হয়েছে।"
+    : ready
+    ? "নতুন পাসওয়ার্ড দিন — সাবধানে রাখবেন।"
+    : "লিংক যাচাই হচ্ছে...";
+
   return (
-    <div className="min-h-screen warm-gradient">
+    <div className="flex min-h-dvh flex-col bg-[hsl(var(--heirloom-bg))]">
       <Header />
-      <main className="container mx-auto px-4 py-20">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="mx-auto max-w-sm"
-        >
-          <div className="glass-card p-8">
-            <div className="text-center mb-8">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full hero-gradient shadow-rose">
-                <KeyRound className="h-8 w-8 text-primary-foreground" />
+
+      <main className="relative flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
+        <div className="mx-auto w-full max-w-2xl lg:max-w-3xl">
+          <motion.article
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="heirloom-page relative overflow-hidden rounded-sm border p-6 sm:p-10 md:p-14 lg:p-16"
+          >
+            <div aria-hidden className="heirloom-texture pointer-events-none absolute inset-0" />
+
+            <div aria-hidden className="heirloom-corner absolute left-0 top-0 h-10 w-10 sm:h-14 sm:w-14 border-l-2 border-t-2 rounded-tl-sm" />
+            <div aria-hidden className="heirloom-corner absolute right-0 top-0 h-10 w-10 sm:h-14 sm:w-14 border-r-2 border-t-2 rounded-tr-sm" />
+            <div aria-hidden className="heirloom-corner absolute bottom-0 left-0 h-10 w-10 sm:h-14 sm:w-14 border-b-2 border-l-2 rounded-bl-sm" />
+            <div aria-hidden className="heirloom-corner absolute bottom-0 right-0 h-10 w-10 sm:h-14 sm:w-14 border-b-2 border-r-2 rounded-br-sm" />
+
+            <div className="relative">
+              <div className="flex flex-col items-center text-center">
+                <h1 className="mt-8 font-display text-3xl leading-[1.15] tracking-tight text-[hsl(var(--heirloom-ink))] sm:mt-10 sm:text-4xl md:text-5xl">
+                  নতুন পাসওয়ার্ড
+                </h1>
+
+                <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
+
+                <p className="mt-5 max-w-md text-[15px] leading-[1.6] text-[hsl(var(--heirloom-ink-soft))] sm:text-base md:max-w-lg md:text-[17px]">
+                  {subtitle}
+                </p>
               </div>
-              <h1 className="text-xl font-display font-semibold text-foreground">
-                নতুন পাসওয়ার্ড সেট করুন
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                {error
-                  ? "ত্রুটি ঘটেছে"
-                  : ready
-                  ? "নতুন পাসওয়ার্ড দিন"
-                  : "লিংক যাচাই হচ্ছে..."}
-              </p>
+
+              <div className="mx-auto mt-10 w-full max-w-[420px] space-y-5 sm:mt-12">
+                {error && (
+                  <>
+                    <p className="rounded-sm border border-destructive/30 bg-destructive/5 px-4 py-4 text-center text-[14px] leading-[1.6] text-destructive">
+                      {error}
+                    </p>
+                    <button
+                      onClick={() => navigate("/forgot-password")}
+                      className="heirloom-btn-primary flex w-full items-center justify-center gap-2 rounded-sm px-5 py-4 text-[15px] font-medium transition-all duration-300"
+                    >
+                      নতুন রিসেট লিংক চান
+                    </button>
+                    <button
+                      onClick={() => navigate("/admin")}
+                      className="heirloom-btn-ghost flex w-full items-center justify-center gap-2 rounded-sm border px-5 py-3 text-[14px] font-medium transition-all duration-300"
+                    >
+                      লগইনে ফিরুন
+                    </button>
+                  </>
+                )}
+
+                {ready && !error && (
+                  <>
+                    <div className="space-y-2">
+                      <label htmlFor="password" className="block text-sm text-[hsl(var(--heirloom-ink-soft))]">
+                        নতুন পাসওয়ার্ড
+                      </label>
+                      <input
+                        id="password"
+                        type="password"
+                        placeholder="কমপক্ষে ৬ অক্ষর"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="heirloom-input w-full rounded-sm border px-4 py-3 text-[15px] outline-none"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="confirm" className="block text-sm text-[hsl(var(--heirloom-ink-soft))]">
+                        পাসওয়ার্ড নিশ্চিত করুন
+                      </label>
+                      <input
+                        id="confirm"
+                        type="password"
+                        placeholder="আবার লিখুন"
+                        value={confirm}
+                        onChange={(e) => setConfirm(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleReset()}
+                        className="heirloom-input w-full rounded-sm border px-4 py-3 text-[15px] outline-none"
+                      />
+                    </div>
+                    <button
+                      onClick={handleReset}
+                      disabled={loading}
+                      className="heirloom-btn-primary flex w-full items-center justify-center gap-2 rounded-sm px-5 py-4 text-[15px] font-medium transition-all duration-300 disabled:opacity-60 sm:text-base"
+                    >
+                      {loading ? "আপডেট হচ্ছে..." : "পাসওয়ার্ড আপডেট করুন"}
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
-
-            {error && (
-              <div className="space-y-4 text-center">
-                <div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-destructive/10 text-destructive">
-                  <AlertCircle className="h-6 w-6" />
-                  <p className="text-sm">{error}</p>
-                </div>
-                <Button
-                  onClick={() => navigate("/forgot-password")}
-                  variant="hero"
-                  className="w-full"
-                >
-                  নতুন রিসেট লিংক চান
-                </Button>
-                <Button
-                  onClick={() => navigate("/admin")}
-                  variant="ghost"
-                  className="w-full"
-                >
-                  লগইনে ফিরুন
-                </Button>
-              </div>
-            )}
-
-            {ready && !error && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="flex items-center gap-2">
-                    <Lock className="h-3.5 w-3.5 text-primary" /> নতুন পাসওয়ার্ড
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="কমপক্ষে ৬ অক্ষর"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="bg-card"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirm">পাসওয়ার্ড নিশ্চিত করুন</Label>
-                  <Input
-                    id="confirm"
-                    type="password"
-                    placeholder="আবার লিখুন"
-                    value={confirm}
-                    onChange={(e) => setConfirm(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleReset()}
-                    className="bg-card"
-                  />
-                </div>
-                <Button
-                  onClick={handleReset}
-                  variant="hero"
-                  className="w-full"
-                  disabled={loading}
-                >
-                  {loading ? "আপডেট হচ্ছে..." : "পাসওয়ার্ড আপডেট করুন"}
-                </Button>
-              </div>
-            )}
-          </div>
-        </motion.div>
+          </motion.article>
+        </div>
       </main>
     </div>
   );
