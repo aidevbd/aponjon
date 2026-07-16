@@ -49,8 +49,9 @@ export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
           <div>
             <h3 className="font-semibold text-foreground text-lg">{contact.name}</h3>
             {category && (
-              <span className="love-badge mt-1">
-                {category.icon} {category.value}
+              <span className="love-badge mt-1 inline-flex items-center gap-1">
+                <CategoryIcon category={category.value} className="h-3.5 w-3.5" />
+                {category.value}
               </span>
             )}
             {contact.custom_category && (
