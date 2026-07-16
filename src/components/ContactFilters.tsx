@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { Search, SlidersHorizontal, ChevronDown, X, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { Search, SlidersHorizontal, X, Check } from "lucide-react";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
 
 interface ContactFiltersProps {
@@ -19,14 +20,36 @@ export function ContactFilters({
   categoryCount,
 }: ContactFiltersProps) {
   const [open, setOpen] = useState(false);
+  const [draftCat, setDraftCat] = useState(filterCategory);
+  const [draftBg, setDraftBg] = useState(filterBloodGroup);
+
   const activeCount =
     (filterCategory !== "all" ? 1 : 0) + (filterBloodGroup !== "all" ? 1 : 0);
 
-  const activeCategory = CATEGORIES.find((c) => c.value === filterCategory);
+  useEffect(() => {
+    if (open) {
+      setDraftCat(filterCategory);
+      setDraftBg(filterBloodGroup);
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [open, filterCategory, filterBloodGroup]);
+
+  const apply = () => {
+    onCategoryChange(draftCat);
+    onBloodGroupChange(draftBg);
+    setOpen(false);
+  };
+
+  const reset = () => {
+    setDraftCat("all");
+    setDraftBg("all");
+  };
 
   return (
-    <div className="space-y-2">
-      {/* Row: search + filter toggle */}
+    <>
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[hsl(var(--heirloom-ink-mute))]" />
@@ -49,10 +72,9 @@ export function ContactFilters({
         </div>
 
         <button
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
+          onClick={() => setOpen(true)}
           className={`relative flex items-center gap-1.5 rounded-sm border px-3 py-2 text-[12px] transition-colors ${
-            open || activeCount > 0
+            activeCount > 0
               ? "border-[hsl(var(--heirloom-gold)/0.6)] bg-[hsl(var(--heirloom-gold)/0.1)] text-[hsl(var(--heirloom-gold-deep))]"
               : "border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.6)] text-[hsl(var(--heirloom-ink-soft))] hover:border-[hsl(var(--heirloom-gold)/0.4)]"
           }`}
@@ -67,176 +89,209 @@ export function ContactFilters({
         </button>
       </div>
 
-      {/* Expanded: dropdowns */}
-      {open && (
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          <FilterDropdown
-            label="ক্যাটাগরি"
-            active={filterCategory !== "all"}
-            activeLabel={activeCategory ? `${activeCategory.icon} ${activeCategory.value}` : undefined}
-            onClear={() => onCategoryChange("all")}
+      {open && createPortal(
+        <FilterModal
+          onClose={() => setOpen(false)}
+          draftCat={draftCat}
+          setDraftCat={setDraftCat}
+          draftBg={draftBg}
+          setDraftBg={setDraftBg}
+          categoryCount={categoryCount}
+          onApply={apply}
+          onReset={reset}
+        />,
+        document.body
+      )}
+    </>
+  );
+}
+
+function FilterModal({
+  onClose,
+  draftCat,
+  setDraftCat,
+  draftBg,
+  setDraftBg,
+  categoryCount,
+  onApply,
+  onReset,
+}: {
+  onClose: () => void;
+  draftCat: string;
+  setDraftCat: (v: string) => void;
+  draftBg: string;
+  setDraftBg: (v: string) => void;
+  categoryCount: Record<string, number>;
+  onApply: () => void;
+  onReset: () => void;
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center animate-in fade-in duration-200">
+      <div
+        onClick={onClose}
+        className="absolute inset-0 bg-[hsl(var(--heirloom-ink)/0.35)] backdrop-blur-sm"
+      />
+      <div className="relative w-full sm:max-w-md sm:mx-4 max-h-[85vh] flex flex-col rounded-t-2xl sm:rounded-lg border border-[hsl(var(--heirloom-gold)/0.35)] bg-[hsl(var(--heirloom-paper))] shadow-[0_-12px_40px_-12px_hsl(var(--heirloom-ink)/0.3)] sm:shadow-[0_20px_50px_-15px_hsl(var(--heirloom-ink)/0.3)] animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
+        {/* Handle (mobile) */}
+        <div className="flex justify-center pt-2 sm:hidden">
+          <div className="h-1 w-10 rounded-full bg-[hsl(var(--heirloom-line))]" />
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pt-4 pb-3">
+          <div>
+            <div className="text-[10px] tracking-[0.2em] uppercase text-[hsl(var(--heirloom-ink-mute))]">
+              ছাঁকনি
+            </div>
+            <h3 className="font-display text-lg text-[hsl(var(--heirloom-ink))]">
+              ফিল্টার
+            </h3>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="বন্ধ"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-[hsl(var(--heirloom-ink-soft))] hover:bg-[hsl(var(--heirloom-gold)/0.1)] hover:text-[hsl(var(--heirloom-ink))]"
           >
-            {(close) => (
-              <div className="max-h-64 overflow-y-auto py-1">
-                <DropdownItem
-                  selected={filterCategory === "all"}
-                  onClick={() => { onCategoryChange("all"); close(); }}
-                >
-                  সব ক্যাটাগরি
-                </DropdownItem>
-                {CATEGORIES.map((cat) => {
-                  const count = categoryCount[cat.value] || 0;
-                  if (count === 0) return null;
-                  return (
-                    <DropdownItem
-                      key={cat.value}
-                      selected={filterCategory === cat.value}
-                      onClick={() => { onCategoryChange(cat.value); close(); }}
-                    >
-                      <span className="flex-1 flex items-center gap-1.5">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Gold divider */}
+        <div className="mx-5 h-px bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold)/0.5)] to-transparent" />
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+          {/* Category */}
+          <section className="space-y-2">
+            <div className="text-[10px] tracking-[0.2em] uppercase text-[hsl(var(--heirloom-ink-mute))]">
+              ক্যাটাগরি
+            </div>
+            <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.5)] overflow-hidden">
+              <OptionRow
+                selected={draftCat === "all"}
+                onClick={() => setDraftCat("all")}
+                label="সব ক্যাটাগরি"
+              />
+              {CATEGORIES.map((cat) => {
+                const count = categoryCount[cat.value] || 0;
+                if (count === 0) return null;
+                return (
+                  <OptionRow
+                    key={cat.value}
+                    selected={draftCat === cat.value}
+                    onClick={() => setDraftCat(cat.value)}
+                    label={
+                      <span className="flex items-center gap-2">
                         <span>{cat.icon}</span>
                         <span>{cat.value}</span>
                       </span>
+                    }
+                    trailing={
                       <span className="text-[10px] text-[hsl(var(--heirloom-ink-mute))]">
                         {count}
                       </span>
-                    </DropdownItem>
-                  );
-                })}
-              </div>
-            )}
-          </FilterDropdown>
+                    }
+                  />
+                );
+              })}
+            </div>
+          </section>
 
-          <FilterDropdown
-            label="রক্ত"
-            active={filterBloodGroup !== "all"}
-            activeLabel={filterBloodGroup !== "all" ? filterBloodGroup : undefined}
-            onClear={() => onBloodGroupChange("all")}
-          >
-            {(close) => (
-              <div className="py-1">
-                <DropdownItem
-                  selected={filterBloodGroup === "all"}
-                  onClick={() => { onBloodGroupChange("all"); close(); }}
+          {/* Blood group */}
+          <section className="space-y-2">
+            <div className="text-[10px] tracking-[0.2em] uppercase text-[hsl(var(--heirloom-ink-mute))]">
+              রক্তের গ্রুপ
+            </div>
+            <div className="grid grid-cols-4 gap-1.5">
+              <BgChip active={draftBg === "all"} onClick={() => setDraftBg("all")}>
+                সব
+              </BgChip>
+              {BLOOD_GROUPS.map((bg) => (
+                <BgChip
+                  key={bg}
+                  active={draftBg === bg}
+                  onClick={() => setDraftBg(bg)}
                 >
-                  সব গ্রুপ
-                </DropdownItem>
-                <div className="grid grid-cols-4 gap-1 p-1.5">
-                  {BLOOD_GROUPS.map((bg) => {
-                    const active = filterBloodGroup === bg;
-                    return (
-                      <button
-                        key={bg}
-                        onClick={() => { onBloodGroupChange(active ? "all" : bg); close(); }}
-                        className={`rounded-sm border px-1.5 py-1.5 text-[11px] transition-colors ${
-                          active
-                            ? "bg-[hsl(var(--heirloom-gold)/0.15)] text-[hsl(var(--heirloom-gold-deep))] border-[hsl(var(--heirloom-gold)/0.6)]"
-                            : "bg-[hsl(var(--heirloom-paper)/0.6)] text-[hsl(var(--heirloom-ink-soft))] border-[hsl(var(--heirloom-line))] hover:border-[hsl(var(--heirloom-gold)/0.4)]"
-                        }`}
-                      >
-                        {bg}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </FilterDropdown>
-
-          {activeCount > 0 && (
-            <button
-              onClick={() => { onCategoryChange("all"); onBloodGroupChange("all"); }}
-              className="text-[11px] text-[hsl(var(--heirloom-gold-deep))] underline-offset-4 hover:underline"
-            >
-              রিসেট
-            </button>
-          )}
+                  {bg}
+                </BgChip>
+              ))}
+            </div>
+          </section>
         </div>
-      )}
-    </div>
-  );
-}
 
-function FilterDropdown({
-  label,
-  active,
-  activeLabel,
-  onClear,
-  children,
-}: {
-  label: string;
-  active: boolean;
-  activeLabel?: string;
-  onClear: () => void;
-  children: (close: () => void) => React.ReactNode;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, [open]);
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className={`flex items-center gap-1.5 rounded-sm border px-2.5 py-1.5 text-[12px] transition-colors ${
-          active
-            ? "border-[hsl(var(--heirloom-gold)/0.6)] bg-[hsl(var(--heirloom-gold)/0.1)] text-[hsl(var(--heirloom-gold-deep))]"
-            : "border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.6)] text-[hsl(var(--heirloom-ink-soft))] hover:border-[hsl(var(--heirloom-gold)/0.4)]"
-        }`}
-      >
-        <span className="max-w-[140px] truncate">{activeLabel || label}</span>
-        {active ? (
-          <span
-            role="button"
-            aria-label="ক্লিয়ার"
-            onClick={(e) => { e.stopPropagation(); onClear(); }}
-            className="flex h-3.5 w-3.5 items-center justify-center rounded-full text-[hsl(var(--heirloom-gold-deep))] hover:bg-[hsl(var(--heirloom-gold)/0.2)]"
+        {/* Footer */}
+        <div className="flex items-center gap-2 border-t border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper))] px-5 py-3">
+          <button
+            onClick={onReset}
+            className="text-[12px] text-[hsl(var(--heirloom-ink-soft))] underline-offset-4 hover:underline hover:text-[hsl(var(--heirloom-gold-deep))]"
           >
-            <X className="h-3 w-3" />
-          </span>
-        ) : (
-          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
-        )}
-      </button>
-
-      {open && (
-        <div className="absolute left-0 z-30 mt-1.5 min-w-[200px] rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper))] shadow-[0_12px_32px_-12px_hsl(var(--heirloom-ink)/0.25)]">
-          {children(() => setOpen(false))}
+            রিসেট
+          </button>
+          <div className="flex-1" />
+          <button
+            onClick={onApply}
+            className="heirloom-btn-primary rounded-sm px-5 py-2 text-[13px] tracking-wide"
+          >
+            প্রয়োগ কর
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
-function DropdownItem({
+function OptionRow({
   selected,
+  onClick,
+  label,
+  trailing,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  label: React.ReactNode;
+  trailing?: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex w-full items-center gap-2 border-b border-[hsl(var(--heirloom-line))] last:border-b-0 px-3 py-2.5 text-left text-[13px] transition-colors ${
+        selected
+          ? "bg-[hsl(var(--heirloom-gold)/0.12)] text-[hsl(var(--heirloom-gold-deep))]"
+          : "text-[hsl(var(--heirloom-ink))] hover:bg-[hsl(var(--heirloom-gold)/0.06)]"
+      }`}
+    >
+      <span className="flex-1">{label}</span>
+      {trailing}
+      {selected && <Check className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" />}
+    </button>
+  );
+}
+
+function BgChip({
+  active,
   onClick,
   children,
 }: {
-  selected: boolean;
+  active: boolean;
   onClick: () => void;
   children: React.ReactNode;
 }) {
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-[12px] transition-colors ${
-        selected
-          ? "bg-[hsl(var(--heirloom-gold)/0.12)] text-[hsl(var(--heirloom-gold-deep))]"
-          : "text-[hsl(var(--heirloom-ink-soft))] hover:bg-[hsl(var(--heirloom-gold)/0.06)]"
+      className={`rounded-sm border py-2 text-[12px] transition-colors ${
+        active
+          ? "bg-[hsl(var(--heirloom-gold)/0.15)] text-[hsl(var(--heirloom-gold-deep))] border-[hsl(var(--heirloom-gold)/0.6)]"
+          : "bg-[hsl(var(--heirloom-paper)/0.6)] text-[hsl(var(--heirloom-ink-soft))] border-[hsl(var(--heirloom-line))] hover:border-[hsl(var(--heirloom-gold)/0.4)]"
       }`}
     >
       {children}
-      {selected && <Check className="h-3 w-3 text-[hsl(var(--heirloom-gold-deep))]" />}
     </button>
   );
 }
