@@ -680,7 +680,10 @@ const Chat = () => {
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => setNotifPrefsOpen(true)} className="gap-2 text-sm">
+                  <Bell className="h-4 w-4" /> নোটিফিকেশন
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/")} className="gap-2 text-sm">
                   <Home className="h-4 w-4" /> হোম
                 </DropdownMenuItem>
@@ -688,6 +691,7 @@ const Chat = () => {
                   <LogOut className="h-4 w-4" /> লগআউট
                 </DropdownMenuItem>
               </DropdownMenuContent>
+
             </DropdownMenu>
           </div>
         </div>
