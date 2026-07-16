@@ -391,28 +391,6 @@ const AdminDashboard = () => {
                   <Download className="h-3.5 w-3.5" />
                   CSV
                 </button>
-                <div className="flex border border-[hsl(var(--heirloom-line))] rounded-sm overflow-hidden">
-                  <button
-                    onClick={() => setViewMode("list")}
-                    aria-label="লিস্ট ভিউ"
-                    aria-pressed={viewMode === "list"}
-                    className={`p-1.5 transition-colors ${viewMode === "list"
-                      ? "bg-[hsl(var(--heirloom-gold)/0.15)] text-[hsl(var(--heirloom-gold-deep))]"
-                      : "bg-[hsl(var(--heirloom-paper)/0.6)] text-[hsl(var(--heirloom-ink-mute))] hover:text-[hsl(var(--heirloom-ink))]"}`}
-                  >
-                    <List className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    onClick={() => setViewMode("grid")}
-                    aria-label="গ্রিড ভিউ"
-                    aria-pressed={viewMode === "grid"}
-                    className={`p-1.5 transition-colors border-l border-[hsl(var(--heirloom-line))] ${viewMode === "grid"
-                      ? "bg-[hsl(var(--heirloom-gold)/0.15)] text-[hsl(var(--heirloom-gold-deep))]"
-                      : "bg-[hsl(var(--heirloom-paper)/0.6)] text-[hsl(var(--heirloom-ink-mute))] hover:text-[hsl(var(--heirloom-ink))]"}`}
-                  >
-                    <LayoutGrid className="h-3.5 w-3.5" />
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -453,12 +431,6 @@ const AdminDashboard = () => {
                 >
                   ফিল্টার রিসেট করুন
                 </button>
-              </div>
-            ) : viewMode === "grid" ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {filtered.map((contact, i) => (
-                  <ContactCard key={contact.id} contact={contact} index={i} onEdit={handleEdit} onDelete={handleDelete} />
-                ))}
               </div>
             ) : (
               <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.55)] overflow-hidden">
