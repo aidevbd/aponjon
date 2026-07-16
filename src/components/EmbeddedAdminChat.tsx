@@ -227,6 +227,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
   const handleSelectUser = (user: ChatUser) => {
     setSelectedUser(user);
+    setFailedMessages([]);
     loadMessages(user);
   };
 
