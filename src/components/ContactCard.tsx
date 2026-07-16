@@ -1,5 +1,6 @@
 import { Phone, MessageCircle, Mail, MapPin, Droplets, Calendar, Edit3, Trash2, StickyNote, Send } from "lucide-react";
 import { CATEGORIES } from "@/lib/types";
+import { CategoryIcon } from "@/lib/categoryIcons";
 import { Button } from "@/components/ui/button";
 import { type ContactRow } from "@/lib/store";
 
