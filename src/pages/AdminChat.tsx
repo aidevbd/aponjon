@@ -375,11 +375,22 @@ const AdminChat = () => {
                           <p className={`text-[10px] ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
                             {formatTime(msg.created_at)}
                           </p>
-                          {isMine && (
-                            <span className={`text-[10px] ${msg.is_read ? "text-primary-foreground/80" : "text-primary-foreground/40"}`}>
-                              {msg.is_read ? "✓✓" : "✓"}
-                            </span>
-                          )}
+                          {isMine && (() => {
+                            const state = msg.is_read ? "read" : msg.delivered_at ? "delivered" : "sent";
+                            const label = state === "read" ? "Seen" : state === "delivered" ? "Delivered" : "Sent";
+                            const glyph = state === "sent" ? "✓" : "✓✓";
+                            const tone = state === "read"
+                              ? "text-primary-foreground"
+                              : state === "delivered"
+                              ? "text-primary-foreground/80"
+                              : "text-primary-foreground/40";
+                            return (
+                              <span className={`text-[10px] flex items-center gap-0.5 ${tone}`} title={label} aria-label={label}>
+                                {glyph}
+                              </span>
+                            );
+                          })()}
+
                         </div>
                       </div>
                     </div>
