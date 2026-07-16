@@ -89,10 +89,14 @@ const AdminChat = () => {
             setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
           }
         }
+        if (msg.receiver_id === adminId && msg.sender_id !== adminId) {
+          notifyNewMessage();
+        }
         if (msg.receiver_id === adminId && msg.sender_id !== sel?.id) {
           setUnreadMap(prev => ({ ...prev, [msg.sender_id]: (prev[msg.sender_id] || 0) + 1 }));
           loadChatUsers();
         }
+
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
