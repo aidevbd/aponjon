@@ -360,90 +360,114 @@ const AdminDashboard = () => {
         </TabsContent>
 
         {/* ===== কন্টাক্ট ট্যাব ===== */}
-        <TabsContent value="contacts" className="space-y-3 mt-0">
-          {/* Top bar: CSV + View toggle */}
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-1.5 shrink-0">
-              <Download className="h-4 w-4" /> CSV
-            </Button>
-            <div className="ml-auto flex border border-border rounded-lg overflow-hidden">
-              <button
-                onClick={() => setViewMode("list")}
-                aria-label="লিস্ট ভিউ"
-                aria-pressed={viewMode === "list"}
-                className={`p-1.5 transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}
-              >
-                <List className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setViewMode("grid")}
-                aria-label="গ্রিড ভিউ"
-                aria-pressed={viewMode === "grid"}
-                className={`p-1.5 transition-colors ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </button>
-
+        <TabsContent value="contacts" className="mt-0">
+          <div className="mx-auto w-full max-w-4xl space-y-6">
+            {/* Filters card */}
+            <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.55)] p-4 sm:p-5">
+              <ContactFilters
+                search={search}
+                onSearchChange={setSearch}
+                filterCategory={filterCategory}
+                onCategoryChange={setFilterCategory}
+                filterBloodGroup={filterBloodGroup}
+                onBloodGroupChange={setFilterBloodGroup}
+                categoryCount={stats.categoryCount}
+              />
             </div>
-          </div>
 
-          {/* Filters with pill categories */}
-          <ContactFilters
-            search={search}
-            onSearchChange={setSearch}
-            filterCategory={filterCategory}
-            onCategoryChange={setFilterCategory}
-            filterBloodGroup={filterBloodGroup}
-            onBloodGroupChange={setFilterBloodGroup}
-            categoryCount={stats.categoryCount}
-          />
-
-          {/* Results Count */}
-          <div className="text-xs text-muted-foreground">
-            {filtered.length === contacts.length
-              ? `মোট ${contacts.length} জন`
-              : `${filtered.length}/${contacts.length} জন দেখাচ্ছে`}
-          </div>
-
-          {/* Contact List / Empty State */}
-          {contacts.length === 0 ? (
-            /* Empty state CTA - no contacts at all */
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center py-16"
-            >
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                <Users className="h-8 w-8 text-primary" />
+            {/* Results bar */}
+            <div className="flex items-center justify-between gap-3 px-1">
+              <div className="text-[12px] text-[hsl(var(--heirloom-ink-soft))]">
+                {filtered.length === contacts.length
+                  ? <>মোট <span className="text-[hsl(var(--heirloom-gold-deep))]">{contacts.length}</span> জন</>
+                  : <><span className="text-[hsl(var(--heirloom-gold-deep))]">{filtered.length}</span> / {contacts.length} জন</>}
               </div>
-              <h3 className="text-lg font-display font-semibold text-foreground mb-1">কোনো কন্টাক্ট নেই</h3>
-              <p className="text-sm text-muted-foreground mb-4">আপনার প্রিয়জনদের তথ্য যোগ করা শুরু করুন!</p>
-              <Button variant="hero" size="lg" onClick={() => setShowAddModal(true)} className="gap-2">
-                <UserPlus className="h-5 w-5" /> প্রথম কন্টাক্ট যোগ করুন
-              </Button>
-            </motion.div>
-          ) : filtered.length === 0 ? (
-            /* Filter returned nothing */
-            <div className="text-center py-12 text-muted-foreground">
-              <Search className="h-10 w-10 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">কোনো কন্টাক্ট পাওয়া যায়নি</p>
-              <button onClick={() => { setSearch(""); setFilterCategory("all"); setFilterBloodGroup("all"); }} className="text-xs text-primary mt-2 hover:underline">
-                ফিল্টার রিসেট করুন
-              </button>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={handleExportCSV}
+                  className="flex items-center gap-1.5 rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.6)] px-3 py-1.5 text-[12px] text-[hsl(var(--heirloom-ink-soft))] transition-colors hover:border-[hsl(var(--heirloom-gold)/0.5)] hover:text-[hsl(var(--heirloom-gold-deep))]"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  CSV
+                </button>
+                <div className="flex border border-[hsl(var(--heirloom-line))] rounded-sm overflow-hidden">
+                  <button
+                    onClick={() => setViewMode("list")}
+                    aria-label="লিস্ট ভিউ"
+                    aria-pressed={viewMode === "list"}
+                    className={`p-1.5 transition-colors ${viewMode === "list"
+                      ? "bg-[hsl(var(--heirloom-gold)/0.15)] text-[hsl(var(--heirloom-gold-deep))]"
+                      : "bg-[hsl(var(--heirloom-paper)/0.6)] text-[hsl(var(--heirloom-ink-mute))] hover:text-[hsl(var(--heirloom-ink))]"}`}
+                  >
+                    <List className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    aria-label="গ্রিড ভিউ"
+                    aria-pressed={viewMode === "grid"}
+                    className={`p-1.5 transition-colors border-l border-[hsl(var(--heirloom-line))] ${viewMode === "grid"
+                      ? "bg-[hsl(var(--heirloom-gold)/0.15)] text-[hsl(var(--heirloom-gold-deep))]"
+                      : "bg-[hsl(var(--heirloom-paper)/0.6)] text-[hsl(var(--heirloom-ink-mute))] hover:text-[hsl(var(--heirloom-ink))]"}`}
+                  >
+                    <LayoutGrid className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
             </div>
-          ) : viewMode === "grid" ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {filtered.map((contact, i) => (
-                <ContactCard key={contact.id} contact={contact} index={i} onEdit={handleEdit} onDelete={handleDelete} />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-1">
-              {filtered.map((contact, i) => (
-                <ContactListItem key={contact.id} contact={contact} index={i} onClick={setSelectedContact} />
-              ))}
-            </div>
-          )}
+
+            {/* Contact List / Empty State */}
+            {contacts.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col items-center text-center py-16"
+              >
+                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.4)] bg-[hsl(var(--heirloom-gold)/0.08)]">
+                  <Users className="h-6 w-6 text-[hsl(var(--heirloom-gold-deep))]" />
+                </div>
+                <div aria-hidden className="mt-5 h-px w-24 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
+                <h3 className="mt-5 font-display text-2xl leading-[1.15] tracking-tight text-[hsl(var(--heirloom-ink))]">
+                  কোনো কন্টাক্ট নেই
+                </h3>
+                <p className="mt-3 max-w-sm text-[14px] leading-[1.6] text-[hsl(var(--heirloom-ink-soft))]">
+                  আপনার প্রিয়জনদের তথ্য যোগ করা শুরু করুন।
+                </p>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="heirloom-btn-primary mt-8 flex items-center justify-center gap-2 rounded-sm px-6 py-3 text-[14px] font-medium transition-all duration-300"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  প্রথম কন্টাক্ট যোগ করুন
+                </button>
+              </motion.div>
+            ) : filtered.length === 0 ? (
+              <div className="flex flex-col items-center text-center py-14">
+                <Search className="h-8 w-8 text-[hsl(var(--heirloom-ink-mute))] opacity-60" />
+                <p className="mt-4 text-[14px] text-[hsl(var(--heirloom-ink-soft))]">
+                  কোনো কন্টাক্ট পাওয়া যায়নি
+                </p>
+                <button
+                  onClick={() => { setSearch(""); setFilterCategory("all"); setFilterBloodGroup("all"); }}
+                  className="mt-3 text-[12px] text-[hsl(var(--heirloom-gold-deep))] underline-offset-4 hover:underline"
+                >
+                  ফিল্টার রিসেট করুন
+                </button>
+              </div>
+            ) : viewMode === "grid" ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {filtered.map((contact, i) => (
+                  <ContactCard key={contact.id} contact={contact} index={i} onEdit={handleEdit} onDelete={handleDelete} />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.55)] overflow-hidden">
+                {filtered.map((contact, i) => (
+                  <ContactListItem key={contact.id} contact={contact} index={i} onClick={setSelectedContact} />
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Contact Detail Sheet */}
           <ContactDetailSheet
@@ -481,9 +505,9 @@ const AdminDashboard = () => {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowAddModal(true)}
-          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full hero-gradient shadow-rose shadow-lg"
+          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.5)] bg-[hsl(var(--heirloom-paper))] text-[hsl(var(--heirloom-gold-deep))] shadow-[0_10px_30px_-10px_hsl(var(--heirloom-gold-deep)/0.4)] hover:bg-[hsl(var(--heirloom-cream)/0.9)] transition-colors"
         >
-          <Plus className="h-6 w-6 text-primary-foreground" />
+          <Plus className="h-6 w-6" />
         </motion.button>
       )}
 
