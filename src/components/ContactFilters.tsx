@@ -227,52 +227,26 @@ function FilterModal({
   );
 }
 
-function OptionRow({
-  selected,
-  onClick,
-  label,
-  trailing,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  label: React.ReactNode;
-  trailing?: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex w-full items-center gap-2 border-b border-[hsl(var(--heirloom-line))] last:border-b-0 px-3 py-2.5 text-left text-[13px] transition-colors ${
-        selected
-          ? "bg-[hsl(var(--heirloom-gold)/0.12)] text-[hsl(var(--heirloom-gold-deep))]"
-          : "text-[hsl(var(--heirloom-ink))] hover:bg-[hsl(var(--heirloom-gold)/0.06)]"
-      }`}
-    >
-      <span className="flex-1">{label}</span>
-      {trailing}
-      {selected && <Check className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" />}
-    </button>
-  );
-}
-
-function BgChip({
-  active,
-  onClick,
+function NativeSelect({
+  value,
+  onChange,
   children,
 }: {
-  active: boolean;
-  onClick: () => void;
+  value: string;
+  onChange: (v: string) => void;
   children: React.ReactNode;
 }) {
   return (
-    <button
-      onClick={onClick}
-      className={`rounded-sm border py-2 text-[12px] transition-colors ${
-        active
-          ? "bg-[hsl(var(--heirloom-gold)/0.15)] text-[hsl(var(--heirloom-gold-deep))] border-[hsl(var(--heirloom-gold)/0.6)]"
-          : "bg-[hsl(var(--heirloom-paper)/0.6)] text-[hsl(var(--heirloom-ink-soft))] border-[hsl(var(--heirloom-line))] hover:border-[hsl(var(--heirloom-gold)/0.4)]"
-      }`}
-    >
-      {children}
-    </button>
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="heirloom-input w-full appearance-none rounded-sm border px-3 py-2.5 pr-9 text-[13px] outline-none cursor-pointer"
+      >
+        {children}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--heirloom-ink-mute))]" />
+    </div>
   );
 }
+
