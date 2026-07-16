@@ -362,8 +362,8 @@ const AdminDashboard = () => {
         {/* ===== কন্টাক্ট ট্যাব ===== */}
         <TabsContent value="contacts" className="mt-0">
           <div className="mx-auto w-full max-w-4xl space-y-6">
-            {/* Filters card */}
-            <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.55)] p-4 sm:p-5">
+            {/* Filters */}
+            <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.5)] px-3 py-2.5">
               <ContactFilters
                 search={search}
                 onSearchChange={setSearch}
