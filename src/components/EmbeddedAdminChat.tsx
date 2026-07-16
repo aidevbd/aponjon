@@ -212,7 +212,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     try {
       const { data, error } = await supabase.rpc("get_admin_messages", { p_other_id: user.id });
       if (error) throw error;
-      const signed = await signMessagesImages((data || []) as Message[]);
+      const signed = await signMessagesImages((data || []) as unknown as Message[]);
       setMessages(signed);
       setUnreadMap(prev => { const n = { ...prev }; delete n[user.id]; return n; });
     } catch { toast.error("মেসেজ লোড করতে সমস্যা"); }
