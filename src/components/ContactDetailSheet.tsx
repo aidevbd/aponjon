@@ -87,7 +87,12 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
           <div className="text-center">
             <h2 className="text-xl font-display font-semibold text-foreground">{contact.name}</h2>
             <div className="flex items-center justify-center gap-2 mt-1">
-              {category && <span className="love-badge text-xs">{category.icon} {category.value}</span>}
+              {category && (
+                <span className="love-badge text-xs inline-flex items-center gap-1">
+                  <CategoryIcon category={category.value} className="h-3 w-3" />
+                  {category.value}
+                </span>
+              )}
               {contact.custom_category && <span className="love-badge text-xs">✨ {contact.custom_category}</span>}
               {contact.blood_group && (
                 <span className="text-xs bg-destructive/10 text-destructive rounded-full px-2 py-0.5 font-medium">{contact.blood_group}</span>
