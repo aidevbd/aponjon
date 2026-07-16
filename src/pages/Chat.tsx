@@ -89,6 +89,7 @@ const Chat = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const longPressTimeoutRef = useRef<number | null>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const msgUpdateTimerRef = useRef<number | null>(null);
 
   const restoreInputFocus = useCallback((force = false) => {
     const focusInput = () => {
