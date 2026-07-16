@@ -99,6 +99,7 @@ export type ChatMessageRow = {
   is_read: boolean;
   created_at: string;
   delivered_at: string | null;
+  read_at: string | null;
 
   edited_at: string | null;
   original_content: string | null;

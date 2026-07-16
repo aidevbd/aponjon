@@ -14,6 +14,7 @@ export type BubbleMessage = {
   is_read: boolean;
   created_at: string;
   delivered_at?: string | null;
+  read_at?: string | null;
 
   edited_at?: string | null;
   reply_content?: string | null;
@@ -281,29 +282,44 @@ export function MessageBubble({
         )}
 
         {/* Read receipt for last own message */}
-        {isMine && showReceipt && !isUnsent && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onShowReceipts?.(msg); }}
-            className="mt-0.5 mr-2 flex items-center gap-1 text-[10px] text-muted-foreground"
-          >
-            {msg.is_read ? (
-              <>
-                <CheckCheck className="h-3 w-3 text-primary" />
-                <span>Seen</span>
-              </>
-            ) : isDelivered ? (
-              <>
-                <CheckCheck className="h-3 w-3" />
-                <span>Delivered</span>
-              </>
-            ) : (
-              <>
-                <Check className="h-3 w-3" />
-                <span>Sent</span>
-              </>
-            )}
-          </button>
-        )}
+        {isMine && showReceipt && !isUnsent && (() => {
+          const fmt = (iso?: string | null) => {
+            if (!iso) return "";
+            const d = new Date(iso);
+            return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+          };
+          const sentTime = fmt(msg.created_at);
+          const deliveredTime = fmt(msg.delivered_at);
+          const readTime = fmt(msg.read_at);
+          return (
+            <button
+              onClick={(e) => { e.stopPropagation(); onShowReceipts?.(msg); }}
+              className="mt-0.5 mr-2 flex items-center gap-1 text-[10px] text-muted-foreground"
+              title={
+                (msg.is_read && readTime && `Seen ${readTime}`) ||
+                (msg.delivered_at && deliveredTime && `Delivered ${deliveredTime}`) ||
+                (sentTime && `Sent ${sentTime}`) || ""
+              }
+            >
+              {msg.is_read ? (
+                <>
+                  <CheckCheck className="h-3 w-3 text-primary" />
+                  <span>Seen{readTime ? ` · ${readTime}` : ""}</span>
+                </>
+              ) : isDelivered ? (
+                <>
+                  <CheckCheck className="h-3 w-3" />
+                  <span>Delivered{deliveredTime ? ` · ${deliveredTime}` : ""}</span>
+                </>
+              ) : (
+                <>
+                  <Check className="h-3 w-3" />
+                  <span>Sent{sentTime ? ` · ${sentTime}` : ""}</span>
+                </>
+              )}
+            </button>
+          );
+        })()}
       </motion.div>
 
       {/* Hover quick action bar (desktop) */}

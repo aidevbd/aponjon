@@ -216,6 +216,7 @@ export type Database = {
           is_pinned: boolean
           is_read: boolean
           original_content: string | null
+          read_at: string | null
           receiver_id: string
           reply_to_id: string | null
           sender_id: string
@@ -233,6 +234,7 @@ export type Database = {
           is_pinned?: boolean
           is_read?: boolean
           original_content?: string | null
+          read_at?: string | null
           receiver_id: string
           reply_to_id?: string | null
           sender_id: string
@@ -250,6 +252,7 @@ export type Database = {
           is_pinned?: boolean
           is_read?: boolean
           original_content?: string | null
+          read_at?: string | null
           receiver_id?: string
           reply_to_id?: string | null
           sender_id?: string
@@ -525,6 +528,7 @@ export type Database = {
           is_read: boolean
           original_content: string
           reactions: Json
+          read_at: string
           receiver_id: string
           reply_content: string
           reply_sender_id: string
@@ -577,6 +581,7 @@ export type Database = {
           is_read: boolean
           original_content: string
           reactions: Json
+          read_at: string
           receiver_id: string
           reply_content: string
           reply_sender_id: string
