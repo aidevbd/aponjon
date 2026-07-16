@@ -2,17 +2,43 @@ import { Phone } from "lucide-react";
 import { CATEGORIES } from "@/lib/types";
 import { getCategoryIcon } from "@/lib/categoryIcons";
 import { type ContactRow } from "@/lib/store";
+import { Highlight } from "@/lib/highlight";
 
 interface ContactListItemProps {
   contact: ContactRow;
   index: number;
   onClick: (contact: ContactRow) => void;
+  query?: string;
 }
 
-export function ContactListItem({ contact, onClick }: ContactListItemProps) {
+/** Return the first field (label + value) whose value matches the query. */
+function findMatchContext(contact: ContactRow, query: string) {
+  const q = query.trim().toLowerCase();
+  if (!q) return null;
+  const fields: Array<[string, string | null | undefined]> = [
+    ["ফোন", contact.phone],
+    ["নোট", contact.note],
+    ["ঠিকানা", contact.address],
+    ["ইমেইল", contact.email],
+    ["WhatsApp", contact.whatsapp],
+    ["IMO", contact.imo],
+    ["Telegram", contact.telegram],
+    ["Facebook", contact.facebook],
+  ];
+  for (const [label, value] of fields) {
+    if (value && value.toLowerCase().includes(q)) return { label, value };
+  }
+  return null;
+}
+
+export function ContactListItem({ contact, onClick, query = "" }: ContactListItemProps) {
   const category = CATEGORIES.find((c) => c.value === contact.category);
   const CategoryIcon = category ? getCategoryIcon(category.value) : null;
   const isEmergency = contact.category === "জরুরি";
+
+  const q = query.trim();
+  const nameMatches = q && contact.name.toLowerCase().includes(q.toLowerCase());
+  const matchCtx = q && !nameMatches ? findMatchContext(contact, q) : null;
 
   const callPhone = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -40,8 +66,16 @@ export function ContactListItem({ contact, onClick }: ContactListItemProps) {
       {/* Name + meta */}
       <div className="flex-1 min-w-0">
         <div className="text-[14px] text-[hsl(var(--heirloom-ink))] truncate">
-          {contact.name}
+          <Highlight text={contact.name} query={q} />
         </div>
+
+        {matchCtx && (
+          <div className="mt-0.5 text-[11px] text-[hsl(var(--heirloom-ink-soft))] truncate">
+            <span className="text-[hsl(var(--heirloom-ink-mute))]">{matchCtx.label}: </span>
+            <Highlight text={matchCtx.value ?? ""} query={q} />
+          </div>
+        )}
+
         <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[hsl(var(--heirloom-ink-soft))]">
           {category && CategoryIcon && (
             <span

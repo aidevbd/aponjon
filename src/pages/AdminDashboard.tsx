@@ -99,18 +99,26 @@ const AdminDashboard = () => {
   };
 
   const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
     return contacts.filter((c) => {
-      const matchSearch = !search ||
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.phone.includes(search) ||
-        (c.blood_group && c.blood_group.toLowerCase().includes(search.toLowerCase())) ||
-        (c.note && c.note.toLowerCase().includes(search.toLowerCase())) ||
-        (c.address && c.address.toLowerCase().includes(search.toLowerCase()));
+      const matchSearch = !q ||
+        c.name.toLowerCase().includes(q) ||
+        c.phone.toLowerCase().includes(q) ||
+        (c.blood_group && c.blood_group.toLowerCase().includes(q)) ||
+        (c.note && c.note.toLowerCase().includes(q)) ||
+        (c.address && c.address.toLowerCase().includes(q)) ||
+        (c.email && c.email.toLowerCase().includes(q)) ||
+        (c.whatsapp && c.whatsapp.toLowerCase().includes(q)) ||
+        (c.imo && c.imo.toLowerCase().includes(q)) ||
+        (c.telegram && c.telegram.toLowerCase().includes(q)) ||
+        (c.facebook && c.facebook.toLowerCase().includes(q)) ||
+        (c.custom_category && c.custom_category.toLowerCase().includes(q));
       const matchCategory = filterCategory === "all" || c.category === filterCategory;
       const matchBlood = filterBloodGroup === "all" || c.blood_group === filterBloodGroup;
       return matchSearch && matchCategory && matchBlood;
     });
   }, [contacts, search, filterCategory, filterBloodGroup]);
+
 
   const stats = useMemo(() => {
     const categoryCount: Record<string, number> = {};
@@ -435,7 +443,7 @@ const AdminDashboard = () => {
             ) : (
               <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.55)] overflow-hidden">
                 {filtered.map((contact, i) => (
-                  <ContactListItem key={contact.id} contact={contact} index={i} onClick={setSelectedContact} />
+                  <ContactListItem key={contact.id} contact={contact} index={i} onClick={setSelectedContact} query={search} />
                 ))}
               </div>
             )}
