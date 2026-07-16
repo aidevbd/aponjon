@@ -1,4 +1,15 @@
-import { Phone } from "lucide-react";
+import {
+  Phone,
+  Heart,
+  Users,
+  Handshake,
+  Briefcase,
+  Home,
+  GraduationCap,
+  Siren,
+  Bookmark,
+  type LucideIcon,
+} from "lucide-react";
 import { CATEGORIES } from "@/lib/types";
 import { type ContactRow } from "@/lib/store";
 
@@ -8,8 +19,21 @@ interface ContactListItemProps {
   onClick: (contact: ContactRow) => void;
 }
 
+const CATEGORY_ICON: Record<string, LucideIcon> = {
+  "পরিবার": Heart,
+  "আত্মীয়": Users,
+  "বন্ধু": Handshake,
+  "সহকর্মী": Briefcase,
+  "প্রতিবেশী": Home,
+  "শিক্ষক/গুরু": GraduationCap,
+  "জরুরি": Siren,
+  "অন্যান্য": Bookmark,
+};
+
 export function ContactListItem({ contact, onClick }: ContactListItemProps) {
   const category = CATEGORIES.find((c) => c.value === contact.category);
+  const CategoryIcon = category ? CATEGORY_ICON[category.value] ?? Bookmark : null;
+  const isEmergency = contact.category === "জরুরি";
 
   const callPhone = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -39,18 +63,25 @@ export function ContactListItem({ contact, onClick }: ContactListItemProps) {
         <div className="text-[14px] text-[hsl(var(--heirloom-ink))] truncate">
           {contact.name}
         </div>
-        <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[hsl(var(--heirloom-ink-soft))]">
-          {category && (
-            <span className="inline-flex items-center gap-1">
-              <span>{category.icon}</span>
+        <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[hsl(var(--heirloom-ink-soft))]">
+          {category && CategoryIcon && (
+            <span
+              className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border ${
+                isEmergency
+                  ? "border-[hsl(var(--primary)/0.35)] bg-[hsl(var(--primary)/0.08)] text-[hsl(var(--primary))]"
+                  : "border-[hsl(var(--heirloom-gold)/0.3)] bg-[hsl(var(--heirloom-gold)/0.06)] text-[hsl(var(--heirloom-gold-deep))]"
+              }`}
+              title={category.value}
+              aria-label={category.value}
+            >
+              <CategoryIcon className="h-3 w-3" strokeWidth={1.75} />
               <span>{category.value}</span>
             </span>
           )}
           {contact.blood_group && (
-            <>
-              <span className="text-[hsl(var(--heirloom-line))]">·</span>
-              <span className="text-[hsl(var(--heirloom-gold-deep))]">{contact.blood_group}</span>
-            </>
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border border-[hsl(var(--primary)/0.3)] bg-[hsl(var(--primary)/0.06)] text-[hsl(var(--primary))] font-medium">
+              {contact.blood_group}
+            </span>
           )}
         </div>
       </div>
