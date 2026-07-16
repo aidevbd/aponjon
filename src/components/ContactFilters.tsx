@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Search, SlidersHorizontal, X, Check } from "lucide-react";
+import { Search, SlidersHorizontal, X, ChevronDown } from "lucide-react";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
 
 interface ContactFiltersProps {
@@ -166,62 +166,43 @@ function FilterModal({
         <div className="mx-5 h-px bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold)/0.5)] to-transparent" />
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
           {/* Category */}
-          <section className="space-y-2">
-            <div className="text-[10px] tracking-[0.2em] uppercase text-[hsl(var(--heirloom-ink-mute))]">
+          <section className="space-y-1.5">
+            <label className="text-[10px] tracking-[0.2em] uppercase text-[hsl(var(--heirloom-ink-mute))]">
               ক্যাটাগরি
-            </div>
-            <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.5)] overflow-hidden">
-              <OptionRow
-                selected={draftCat === "all"}
-                onClick={() => setDraftCat("all")}
-                label="সব ক্যাটাগরি"
-              />
+            </label>
+            <NativeSelect
+              value={draftCat}
+              onChange={setDraftCat}
+            >
+              <option value="all">সব ক্যাটাগরি</option>
               {CATEGORIES.map((cat) => {
                 const count = categoryCount[cat.value] || 0;
                 if (count === 0) return null;
                 return (
-                  <OptionRow
-                    key={cat.value}
-                    selected={draftCat === cat.value}
-                    onClick={() => setDraftCat(cat.value)}
-                    label={
-                      <span className="flex items-center gap-2">
-                        <span>{cat.icon}</span>
-                        <span>{cat.value}</span>
-                      </span>
-                    }
-                    trailing={
-                      <span className="text-[10px] text-[hsl(var(--heirloom-ink-mute))]">
-                        {count}
-                      </span>
-                    }
-                  />
+                  <option key={cat.value} value={cat.value}>
+                    {cat.icon} {cat.value} ({count})
+                  </option>
                 );
               })}
-            </div>
+            </NativeSelect>
           </section>
 
           {/* Blood group */}
-          <section className="space-y-2">
-            <div className="text-[10px] tracking-[0.2em] uppercase text-[hsl(var(--heirloom-ink-mute))]">
+          <section className="space-y-1.5">
+            <label className="text-[10px] tracking-[0.2em] uppercase text-[hsl(var(--heirloom-ink-mute))]">
               রক্তের গ্রুপ
-            </div>
-            <div className="grid grid-cols-4 gap-1.5">
-              <BgChip active={draftBg === "all"} onClick={() => setDraftBg("all")}>
-                সব
-              </BgChip>
+            </label>
+            <NativeSelect
+              value={draftBg}
+              onChange={setDraftBg}
+            >
+              <option value="all">সব গ্রুপ</option>
               {BLOOD_GROUPS.map((bg) => (
-                <BgChip
-                  key={bg}
-                  active={draftBg === bg}
-                  onClick={() => setDraftBg(bg)}
-                >
-                  {bg}
-                </BgChip>
+                <option key={bg} value={bg}>{bg}</option>
               ))}
-            </div>
+            </NativeSelect>
           </section>
         </div>
 
@@ -246,52 +227,26 @@ function FilterModal({
   );
 }
 
-function OptionRow({
-  selected,
-  onClick,
-  label,
-  trailing,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  label: React.ReactNode;
-  trailing?: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex w-full items-center gap-2 border-b border-[hsl(var(--heirloom-line))] last:border-b-0 px-3 py-2.5 text-left text-[13px] transition-colors ${
-        selected
-          ? "bg-[hsl(var(--heirloom-gold)/0.12)] text-[hsl(var(--heirloom-gold-deep))]"
-          : "text-[hsl(var(--heirloom-ink))] hover:bg-[hsl(var(--heirloom-gold)/0.06)]"
-      }`}
-    >
-      <span className="flex-1">{label}</span>
-      {trailing}
-      {selected && <Check className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" />}
-    </button>
-  );
-}
-
-function BgChip({
-  active,
-  onClick,
+function NativeSelect({
+  value,
+  onChange,
   children,
 }: {
-  active: boolean;
-  onClick: () => void;
+  value: string;
+  onChange: (v: string) => void;
   children: React.ReactNode;
 }) {
   return (
-    <button
-      onClick={onClick}
-      className={`rounded-sm border py-2 text-[12px] transition-colors ${
-        active
-          ? "bg-[hsl(var(--heirloom-gold)/0.15)] text-[hsl(var(--heirloom-gold-deep))] border-[hsl(var(--heirloom-gold)/0.6)]"
-          : "bg-[hsl(var(--heirloom-paper)/0.6)] text-[hsl(var(--heirloom-ink-soft))] border-[hsl(var(--heirloom-line))] hover:border-[hsl(var(--heirloom-gold)/0.4)]"
-      }`}
-    >
-      {children}
-    </button>
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="heirloom-input w-full appearance-none rounded-sm border px-3 py-2.5 pr-9 text-[13px] outline-none cursor-pointer"
+      >
+        {children}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--heirloom-ink-mute))]" />
+    </div>
   );
 }
+
