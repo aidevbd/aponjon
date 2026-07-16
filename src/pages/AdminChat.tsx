@@ -36,6 +36,7 @@ const AdminChat = () => {
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
+  const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
