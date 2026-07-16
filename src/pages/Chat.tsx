@@ -566,8 +566,22 @@ const Chat = () => {
     setUploading(true);
     try {
       const url = await uploadChatImage(file, session.token);
-      await sendMessage(session.token, selectedContact.id, undefined, url, replyingTo?.id);
-      setReplyingTo(null);
+      try {
+        await sendMessage(session.token, selectedContact.id, undefined, url, replyingTo?.id);
+        setReplyingTo(null);
+      } catch (sendErr) {
+        const failed: FailedChatMessage = {
+          id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          content: null,
+          imageUrl: url,
+          replyToId: replyingTo?.id || null,
+          replyContent: replyingTo?.content || null,
+          createdAt: new Date().toISOString(),
+        };
+        setFailedMessages(prev => [...prev, failed]);
+        setReplyingTo(null);
+        toast.error("ছবি পাঠাতে সমস্যা — 'আবার পাঠান' চাপুন");
+      }
     } catch (err) {
       console.error("[catch]", err);
       toast.error("ছবি পাঠাতে সমস্যা");
