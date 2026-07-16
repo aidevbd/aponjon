@@ -89,6 +89,7 @@ const Chat = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const longPressTimeoutRef = useRef<number | null>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const msgUpdateTimerRef = useRef<number | null>(null);
 
   const restoreInputFocus = useCallback((force = false) => {
     const focusInput = () => {
@@ -194,10 +195,19 @@ const Chat = () => {
         const inThread =
           (data.sender_id === selectedContact.id && data.receiver_id === session.contactId) ||
           (data.sender_id === session.contactId && data.receiver_id === selectedContact.id);
-        if (inThread) void loadMessages(selectedContact);
+        if (!inThread) return;
+        // Coalesce bursty msg_update events (delivered/read fire once per message)
+        if (msgUpdateTimerRef.current) return;
+        msgUpdateTimerRef.current = window.setTimeout(() => {
+          msgUpdateTimerRef.current = null;
+          void loadMessages(selectedContact);
+        }, 200);
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+      if (msgUpdateTimerRef.current) { clearTimeout(msgUpdateTimerRef.current); msgUpdateTimerRef.current = null; }
+    };
   }, [session, selectedContact]);
 
   useEffect(() => {

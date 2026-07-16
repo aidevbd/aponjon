@@ -110,17 +110,26 @@ const AdminChat = () => {
     if (!adminContactId || !sel) return;
     const sortedIds = [adminContactId, sel.id].sort();
     const topic = `msg:${sortedIds[0]}:${sortedIds[1]}`;
+    let timer: number | null = null;
     const channel = supabase
       .channel(topic, { config: { private: false } })
-      .on("broadcast", { event: "msg_update" }, async () => {
-        try {
-          const { data } = await supabase.rpc("get_admin_messages", { p_other_id: sel.id });
-          const signed = await signMessagesImages((data || []) as unknown as Message[]);
-          setMessages(signed);
-        } catch {}
+      .on("broadcast", { event: "msg_update" }, () => {
+        // Coalesce bursts (delivered/read fires per message)
+        if (timer) return;
+        timer = window.setTimeout(async () => {
+          timer = null;
+          try {
+            const { data } = await supabase.rpc("get_admin_messages", { p_other_id: sel.id });
+            const signed = await signMessagesImages((data || []) as unknown as Message[]);
+            setMessages(signed);
+          } catch {}
+        }, 200);
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      if (timer) { clearTimeout(timer); timer = null; }
+      supabase.removeChannel(channel);
+    };
   }, [adminContactId, selectedUser]);
 
 

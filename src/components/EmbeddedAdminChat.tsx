@@ -66,6 +66,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const lastTypingRef = useRef(0);
   const recentSendAtRef = useRef(0);
   const messageListRef = useRef<HTMLDivElement>(null);
+  const msgUpdateTimerRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -140,10 +141,19 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
         const inThread =
           (data.sender_id === selectedUser.id && data.receiver_id === adminContactId) ||
           (data.sender_id === adminContactId && data.receiver_id === selectedUser.id);
-        if (inThread) void loadMessages(selectedUser);
+        if (!inThread) return;
+        // Coalesce bursty msg_update events (delivered/read fire once per message)
+        if (msgUpdateTimerRef.current) return;
+        msgUpdateTimerRef.current = window.setTimeout(() => {
+          msgUpdateTimerRef.current = null;
+          void loadMessages(selectedUser);
+        }, 200);
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+      if (msgUpdateTimerRef.current) { clearTimeout(msgUpdateTimerRef.current); msgUpdateTimerRef.current = null; }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminContactId, selectedUser]);
 
