@@ -102,6 +102,21 @@ const AdminChat = () => {
     return () => { supabase.removeChannel(channel); };
   }, [adminContactId]);
 
+  // Per-thread broadcast subscription — receives delivered/edit/unsend/reaction updates
+  useEffect(() => {
+    if (!adminContactId || !selectedUser) return;
+    const sortedIds = [adminContactId, selectedUser.id].sort();
+    const topic = `msg:${sortedIds[0]}:${sortedIds[1]}`;
+    const channel = supabase
+      .channel(topic, { config: { private: false } })
+      .on("broadcast", { event: "msg_update" }, () => {
+        void loadMessages(selectedUser);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [adminContactId, selectedUser, loadMessages]);
+
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
