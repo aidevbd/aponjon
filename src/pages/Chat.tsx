@@ -846,27 +846,22 @@ const Chat = () => {
                 </div>
               )}
 
-              <div className="px-4 pt-2">
-                <div className={`flex items-center gap-2 text-[11px] ${statusTone}`}>
-                  {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : isOffline ? <WifiOff className="h-3.5 w-3.5" /> : queuedCount > 0 ? <Clock3 className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
-                  <span>{statusLabel}</span>
-                </div>
-              </div>
-
-              {(isOffline || queuedCount > 0) && (
-                <div className="px-4 pt-2">
-                  <div className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-muted/60 px-3 py-2 text-[11px] text-muted-foreground">
-                    <span>
-                      {isOffline ? "আপনি এখন অফলাইনে আছেন" : "কানেকশন ফিরে এসেছে"}
-                    </span>
+              {(sending || isOffline || queuedCount > 0) && (
+                <div className="px-4 pt-1.5">
+                  <div className={`flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-muted/60 px-3 py-1.5 text-[11px] ${statusTone}`}>
+                    <div className="flex items-center gap-2 min-w-0">
+                      {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : isOffline ? <WifiOff className="h-3.5 w-3.5 shrink-0" /> : <Clock3 className="h-3.5 w-3.5 shrink-0" />}
+                      <span className="truncate">{statusLabel}</span>
+                    </div>
                     {queuedCount > 0 && (
-                      <span className="rounded-full bg-card px-2 py-0.5 text-foreground">
+                      <span className="rounded-full bg-card px-2 py-0.5 text-foreground shrink-0">
                         {queuedCount}টি pending
                       </span>
                     )}
                   </div>
                 </div>
               )}
+
 
               <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-3 py-2 shrink-0">
                 <div className="flex items-center gap-1.5 sm:gap-2 w-full">
