@@ -170,10 +170,14 @@ const Chat = () => {
         )) {
           void loadMessages(selectedContact);
         }
+        if (data.receiver_id === session.contactId && data.sender_id !== session.contactId) {
+          notifyNewMessage();
+        }
         if (data.receiver_id === session.contactId && data.sender_id !== selectedContact?.id) {
           setUnreadMap((prev) => ({ ...prev, [data.sender_id]: (prev[data.sender_id] || 0) + 1 }));
         }
       })
+
       .on("broadcast", { event: "msg_update" }, (payload) => {
         const data = payload.payload as { id: string; sender_id: string; receiver_id: string; event: string };
         if (!data || !selectedContact) return;
