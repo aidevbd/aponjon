@@ -24,6 +24,9 @@ import { MessageBubble } from "@/components/chat/MessageBubble";
 import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
 import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
+import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
+import { notifyNewMessage } from "@/lib/notificationPrefs";
+
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
 type Message = {
