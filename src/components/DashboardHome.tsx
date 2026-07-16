@@ -1,5 +1,6 @@
 import { UserPlus, Download, MessageCircle, Activity, Cake } from "lucide-react";
 import { CATEGORIES } from "@/lib/types";
+import { CategoryIcon } from "@/lib/categoryIcons";
 import { type ContactRow } from "@/lib/store";
 
 interface DashboardHomeProps {
