@@ -51,6 +51,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
   const [editingMsg, setEditingMsg] = useState<Message | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
