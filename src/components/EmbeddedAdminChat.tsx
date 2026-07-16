@@ -726,6 +726,12 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
               </div>
             )}
 
+            <FailedMessagesList
+              items={failedMessages}
+              onResend={handleResendFailed}
+              onDelete={handleDeleteFailed}
+            />
+
             {/* Input */}
             <div className="border-t border-border/50 pt-3 px-1">
               <div className="flex items-center gap-1.5 sm:gap-2 w-full">
