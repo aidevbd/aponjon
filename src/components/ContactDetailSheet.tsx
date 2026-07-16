@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Phone, MessageCircle, Video, Send, Mail, MapPin, Droplets, Calendar, Edit3, Trash2, StickyNote, Copy, FileText, ExternalLink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/types";
+import { CategoryIcon } from "@/lib/categoryIcons";
 import { type ContactRow } from "@/lib/store";
 import { toast } from "sonner";
 
