@@ -72,6 +72,7 @@ const Chat = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isOffline, setIsOffline] = useState(typeof navigator !== "undefined" ? !navigator.onLine : false);
   const [queuedCount, setQueuedCount] = useState(0);
+  const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
   const [contactPreviews, setContactPreviews] = useState<Record<string, ContactPreview>>({});
   const [actionMessage, setActionMessage] = useState<Message | null>(null);
   const [unsendTargetId, setUnsendTargetId] = useState<string | null>(null);
