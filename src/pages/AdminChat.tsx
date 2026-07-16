@@ -240,11 +240,23 @@ const AdminChat = () => {
     setUploading(true);
     try {
       const url = await uploadChatImage(file);
-      const { error } = await supabase.rpc("send_admin_message", {
-        p_receiver_id: selectedUser.id,
-        p_image_url: url,
-      });
-      if (error) throw error;
+      try {
+        const { error } = await supabase.rpc("send_admin_message", {
+          p_receiver_id: selectedUser.id,
+          p_image_url: url,
+        });
+        if (error) throw error;
+      } catch {
+        const failed: FailedChatMessage = {
+          id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          content: null,
+          imageUrl: url,
+          replyToId: null,
+          createdAt: new Date().toISOString(),
+        };
+        setFailedMessages(prev => [...prev, failed]);
+        toast.error("ছবি পাঠাতে সমস্যা — 'আবার পাঠান' চাপুন");
+      }
     } catch (err) {
       console.error("[catch]", err);
       toast.error("ছবি পাঠাতে সমস্যা");
