@@ -366,12 +366,47 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       setReplyingTo(null);
       await loadMessages(selectedUser);
     } catch {
-      toast.error("মেসেজ পাঠাতে সমস্যা");
-      setMsgInput(text);
+      const failed: FailedChatMessage = {
+        id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        content: text,
+        imageUrl: null,
+        replyToId: replyingTo?.id || null,
+        replyContent: replyingTo?.content || null,
+        createdAt: new Date().toISOString(),
+      };
+      setFailedMessages(prev => [...prev, failed]);
+      setReplyingTo(null);
+      toast.error("মেসেজ পাঠাতে সমস্যা — 'আবার পাঠান' চাপুন");
     } finally {
       setSending(false);
       restoreInputFocus(true);
     }
+  };
+
+  const handleResendFailed = async (failedId: string) => {
+    if (!selectedUser) return;
+    const item = failedMessages.find(f => f.id === failedId);
+    if (!item) return;
+    setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: true } : f));
+    try {
+      const { error } = await supabase.rpc("send_admin_message", {
+        p_receiver_id: selectedUser.id,
+        p_content: item.content || undefined,
+        p_image_url: item.imageUrl || undefined,
+        p_reply_to_id: item.replyToId || null,
+      } as any);
+      if (error) throw error;
+      setFailedMessages(prev => prev.filter(f => f.id !== failedId));
+      await loadMessages(selectedUser);
+      toast.success("মেসেজ পাঠানো হয়েছে");
+    } catch {
+      setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: false } : f));
+      toast.error("এখনো পাঠানো যাচ্ছে না");
+    }
+  };
+
+  const handleDeleteFailed = (failedId: string) => {
+    setFailedMessages(prev => prev.filter(f => f.id !== failedId));
   };
 
   const handleStartEdit = (msg: Message) => {
