@@ -305,7 +305,7 @@ const Chat = () => {
       }));
       setUnreadMap((prev) => { const n = { ...prev }; delete n[contact.id]; return n; });
       // Fire-and-forget: mark inbound messages as delivered so the sender sees ✓✓
-      void supabase.rpc("mark_conversation_delivered", { p_token: session.token, p_other_id: contact.id } as any).catch(() => {});
+      void (async () => { try { await supabase.rpc("mark_conversation_delivered", { p_token: session.token, p_other_id: contact.id } as any); } catch {} })();
 
     } catch (err) {
       console.error("[catch]", err);
