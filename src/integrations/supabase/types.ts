@@ -209,6 +209,7 @@ export type Database = {
           created_at: string
           deleted_by_sender: boolean
           deleted_for: string[]
+          delivered_at: string | null
           edited_at: string | null
           id: string
           image_url: string | null
@@ -225,6 +226,7 @@ export type Database = {
           created_at?: string
           deleted_by_sender?: boolean
           deleted_for?: string[]
+          delivered_at?: string | null
           edited_at?: string | null
           id?: string
           image_url?: string | null
@@ -241,6 +243,7 @@ export type Database = {
           created_at?: string
           deleted_by_sender?: boolean
           deleted_for?: string[]
+          delivered_at?: string | null
           edited_at?: string | null
           id?: string
           image_url?: string | null
@@ -513,6 +516,7 @@ export type Database = {
           content: string
           created_at: string
           deleted_by_sender: boolean
+          delivered_at: string
           edited_at: string
           has_edit_history: boolean
           id: string
@@ -564,6 +568,7 @@ export type Database = {
         Returns: {
           content: string
           created_at: string
+          delivered_at: string
           edited_at: string
           has_edit_history: boolean
           id: string
@@ -605,6 +610,14 @@ export type Database = {
           p_target_type?: string
         }
         Returns: string
+      }
+      mark_conversation_delivered: {
+        Args: { p_other_id: string; p_token: string }
+        Returns: number
+      }
+      mark_conversation_delivered_admin: {
+        Args: { p_other_id: string }
+        Returns: number
       }
       react_to_message: {
         Args: { p_emoji: string; p_message_id: string; p_token: string }
