@@ -826,7 +826,7 @@ const Chat = () => {
                           onStartReply={(m) => handleStartReply(m)}
                           onShowEditHistory={(m) => handleShowEditHistory(m)}
                           isDelivered={!!msg.delivered_at || !!msg.is_read}
-                          showReceipt={isMine && msg.id === lastMineId}
+                          showReceipt={isMine && (showTail || msg.id === lastMineId)}
                         />
                       </div>
                     );
