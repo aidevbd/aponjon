@@ -66,6 +66,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const lastTypingRef = useRef(0);
   const recentSendAtRef = useRef(0);
   const messageListRef = useRef<HTMLDivElement>(null);
+  const msgUpdateTimerRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
