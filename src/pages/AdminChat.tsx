@@ -238,9 +238,10 @@ const AdminChat = () => {
   }
 
   return (
-    <div className="min-h-dvh warm-gradient flex flex-col">
+    <div className="h-dvh warm-gradient flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md shrink-0">
+
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             {selectedUser ? (
@@ -276,7 +277,7 @@ const AdminChat = () => {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col container mx-auto max-w-2xl lg:max-w-4xl w-full">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden container mx-auto max-w-2xl lg:max-w-4xl w-full">
         <AnimatePresence mode="wait">
           {!selectedUser ? (
             <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 px-4 py-4">
@@ -314,8 +315,9 @@ const AdminChat = () => {
               )}
             </motion.div>
           ) : (
-            <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
-              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
+            <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="flex-1 overflow-y-auto px-4 py-4 pb-2 space-y-2">
+
                 {messages.length === 0 && (
                   <div className="text-center py-16 text-muted-foreground">
                     <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
@@ -348,7 +350,7 @@ const AdminChat = () => {
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-3 sm:px-4 py-3">
+              <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-3 sm:px-4 py-3 shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
                 <div className="flex items-center gap-1.5 sm:gap-2 w-full">
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" aria-label="ছবি পাঠান" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
