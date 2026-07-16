@@ -431,16 +431,30 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     setUploading(true);
     try {
       const url = await uploadChatImage(file);
-      const { error } = await supabase.rpc("send_admin_message", {
-        p_receiver_id: selectedUser.id,
-        p_image_url: url,
-        p_reply_to_id: replyingTo?.id || null,
-      } as any);
-      if (error) throw error;
-      setReplyingTo(null);
-      recentSendAtRef.current = Date.now();
-      await loadMessages(selectedUser);
-      restoreInputFocus(true);
+      try {
+        const { error } = await supabase.rpc("send_admin_message", {
+          p_receiver_id: selectedUser.id,
+          p_image_url: url,
+          p_reply_to_id: replyingTo?.id || null,
+        } as any);
+        if (error) throw error;
+        setReplyingTo(null);
+        recentSendAtRef.current = Date.now();
+        await loadMessages(selectedUser);
+        restoreInputFocus(true);
+      } catch {
+        const failed: FailedChatMessage = {
+          id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          content: null,
+          imageUrl: url,
+          replyToId: replyingTo?.id || null,
+          replyContent: replyingTo?.content || null,
+          createdAt: new Date().toISOString(),
+        };
+        setFailedMessages(prev => [...prev, failed]);
+        setReplyingTo(null);
+        toast.error("ছবি পাঠাতে সমস্যা — 'আবার পাঠান' চাপুন");
+      }
     } catch { toast.error("ছবি পাঠাতে সমস্যা"); }
     finally { setUploading(false); if (fileInputRef.current) fileInputRef.current.value = ""; }
   };
