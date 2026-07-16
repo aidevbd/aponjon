@@ -443,7 +443,7 @@ const AdminDashboard = () => {
             ) : (
               <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.55)] overflow-hidden">
                 {filtered.map((contact, i) => (
-                  <ContactListItem key={contact.id} contact={contact} index={i} onClick={setSelectedContact} />
+                  <ContactListItem key={contact.id} contact={contact} index={i} onClick={setSelectedContact} query={search} />
                 ))}
               </div>
             )}
