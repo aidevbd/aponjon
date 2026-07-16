@@ -32,7 +32,7 @@ function findMatchContext(contact: ContactRow, query: string) {
   return null;
 }
 
-export function ContactListItem({ contact, onClick, query = "" }: ContactListItemProps) {
+export function ContactListItem({ contact, onClick, query = "", highlighted = false }: ContactListItemProps) {
   const category = CATEGORIES.find((c) => c.value === contact.category);
   const CategoryIcon = category ? getCategoryIcon(category.value) : null;
   const isEmergency = contact.category === "জরুরি";
@@ -49,7 +49,7 @@ export function ContactListItem({ contact, onClick, query = "" }: ContactListIte
   return (
     <div
       onClick={() => onClick(contact)}
-      className="group flex items-center gap-3 px-3.5 py-3 border-b border-[hsl(var(--heirloom-line)/0.7)] cursor-pointer transition-colors hover:bg-[hsl(var(--heirloom-cream)/0.45)]"
+      className={`group flex items-center gap-3 px-3.5 py-3 border-b border-[hsl(var(--heirloom-line)/0.7)] cursor-pointer transition-colors hover:bg-[hsl(var(--heirloom-cream)/0.45)] ${highlighted ? "bg-[hsl(var(--heirloom-gold)/0.10)]" : ""}`}
     >
       {/* Avatar */}
       {contact.photo_url ? (
