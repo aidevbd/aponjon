@@ -303,8 +303,9 @@ const Chat = () => {
     } catch {}
   };
 
-  const loadMessages = useCallback(async (contact: ChatContact) => {
+  const loadMessages = useCallback(async (contact: ChatContact, opts?: { silent?: boolean }) => {
     if (!session) return;
+    if (!opts?.silent) setMessagesLoading(true);
     try {
       const raw = await getMessages(session.token, contact.id);
       const data = await signMessagesImages(raw, session.token);
@@ -324,6 +325,8 @@ const Chat = () => {
     } catch (err) {
       console.error("[catch]", err);
       toast.error("মেসেজ লোড করতে সমস্যা");
+    } finally {
+      if (!opts?.silent) setMessagesLoading(false);
     }
   }, [session]);
 
