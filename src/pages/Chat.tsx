@@ -825,7 +825,7 @@ const Chat = () => {
                           onQuickReact={(m, e) => handleReact(m, e)}
                           onStartReply={(m) => handleStartReply(m)}
                           onShowEditHistory={(m) => handleShowEditHistory(m)}
-                          isDelivered={!!msg.is_read || true}
+                          isDelivered={!!msg.delivered_at || !!msg.is_read}
                           showReceipt={isMine && msg.id === lastMineId}
                         />
                       </div>
