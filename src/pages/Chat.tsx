@@ -432,13 +432,53 @@ const Chat = () => {
         setSession(null);
         toast.error("সেশন শেষ হয়ে গেছে। আবার লগইন করুন।");
       } else {
-        toast.error("মেসেজ পাঠাতে সমস্যা");
-        setMsgInput(text);
+        const failed: FailedChatMessage = {
+          id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          content: text,
+          imageUrl: null,
+          replyToId: replyingTo?.id || null,
+          replyContent: replyingTo?.content || null,
+          createdAt: new Date().toISOString(),
+        };
+        setFailedMessages(prev => [...prev, failed]);
+        setReplyingTo(null);
+        toast.error("মেসেজ পাঠাতে সমস্যা — নিচে 'আবার পাঠান' চাপুন");
       }
     } finally {
       setSending(false);
       restoreInputFocus(true);
     }
+  };
+
+  const handleResendFailed = async (failedId: string) => {
+    if (!session || !selectedContact) return;
+    const item = failedMessages.find(f => f.id === failedId);
+    if (!item) return;
+    setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: true } : f));
+    try {
+      await sendMessage(
+        session.token,
+        selectedContact.id,
+        item.content || undefined,
+        item.imageUrl || undefined,
+        item.replyToId || undefined,
+      );
+      setFailedMessages(prev => prev.filter(f => f.id !== failedId));
+      toast.success("মেসেজ পাঠানো হয়েছে");
+    } catch (err: any) {
+      setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: false } : f));
+      if (err?.message?.includes("Invalid session")) {
+        clearChatSession();
+        setSession(null);
+        toast.error("সেশন শেষ হয়ে গেছে। আবার লগইন করুন।");
+      } else {
+        toast.error("এখনো পাঠানো যাচ্ছে না");
+      }
+    }
+  };
+
+  const handleDeleteFailed = (failedId: string) => {
+    setFailedMessages(prev => prev.filter(f => f.id !== failedId));
   };
 
   const handleUnsendMessage = async () => {
