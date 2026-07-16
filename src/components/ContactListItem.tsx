@@ -32,7 +32,7 @@ const CATEGORY_ICON: Record<string, LucideIcon> = {
 
 export function ContactListItem({ contact, onClick }: ContactListItemProps) {
   const category = CATEGORIES.find((c) => c.value === contact.category);
-  const CategoryIcon = category ? CATEGORY_ICON[category.value] ?? Bookmark : null;
+  const CategoryIcon = category ? CATEGORY_ICON[category.value] ?? Feather : null;
   const isEmergency = contact.category === "জরুরি";
 
   const callPhone = (e: React.MouseEvent) => {
