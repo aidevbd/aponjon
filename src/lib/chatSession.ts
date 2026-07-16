@@ -117,7 +117,7 @@ export async function getMessages(token: string, otherId: string) {
     p_other_id: otherId,
   });
   if (error) throw error;
-  return (data || []) as ChatMessageRow[];
+  return (data || []) as unknown as ChatMessageRow[];
 }
 
 export async function reactToMessage(token: string, messageId: string, emoji: string) {
