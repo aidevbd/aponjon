@@ -958,7 +958,10 @@ const Chat = () => {
         currentContent={editHistoryFor?.content || null}
         loading={editHistoryLoading}
       />
+
+      <NotificationPreferencesDialog open={notifPrefsOpen} onOpenChange={setNotifPrefsOpen} />
     </div>
+
   );
 };
 
