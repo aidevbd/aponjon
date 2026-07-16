@@ -18,15 +18,32 @@ interface ContactDetailSheetProps {
 export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }: ContactDetailSheetProps) {
   useEffect(() => {
     if (!open) return;
-    const previousOverflow = document.body.style.overflow;
+    // Preserve underlying page scroll position while the sheet is open,
+    // so search results and scroll offset are intact after closing.
+    const scrollY = window.scrollY;
+    const previousBodyOverflow = document.body.style.overflow;
     const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyPosition = document.body.style.position;
+    const previousBodyTop = document.body.style.top;
+    const previousBodyWidth = document.body.style.width;
+
     document.body.style.overflow = "hidden";
     document.documentElement.style.overflow = "hidden";
+    // Lock body in place at current scroll so iOS/Android don't jump to top.
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+
     return () => {
-      document.body.style.overflow = previousOverflow;
+      document.body.style.overflow = previousBodyOverflow;
       document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.position = previousBodyPosition;
+      document.body.style.top = previousBodyTop;
+      document.body.style.width = previousBodyWidth;
+      window.scrollTo(0, scrollY);
     };
   }, [open]);
+
 
   if (!contact) return null;
 
