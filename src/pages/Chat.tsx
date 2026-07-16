@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Lock, Phone, X, Loader2, Pencil, Reply, Search, Pin, MoreVertical, Home, LogOut, WifiOff, Clock3, CheckCircle2 } from "lucide-react";
+import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Lock, Phone, X, Loader2, Pencil, Reply, Search, Pin, MoreVertical, Home, LogOut, WifiOff, Clock3, CheckCircle2, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -24,6 +24,9 @@ import { MessageBubble } from "@/components/chat/MessageBubble";
 import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
 import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
+import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
+import { notifyNewMessage } from "@/lib/notificationPrefs";
+
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
 type Message = {
@@ -71,7 +74,9 @@ const Chat = () => {
   const [editHistoryFor, setEditHistoryFor] = useState<Message | null>(null);
   const [editHistory, setEditHistory] = useState<{ previous_content: string; edited_at: string }[]>([]);
   const [editHistoryLoading, setEditHistoryLoading] = useState(false);
+  const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const lastTypingRef = useRef(0);
   const recentSendAtRef = useRef(0);
   const messageListRef = useRef<HTMLDivElement>(null);
@@ -170,10 +175,14 @@ const Chat = () => {
         )) {
           void loadMessages(selectedContact);
         }
+        if (data.receiver_id === session.contactId && data.sender_id !== session.contactId) {
+          notifyNewMessage();
+        }
         if (data.receiver_id === session.contactId && data.sender_id !== selectedContact?.id) {
           setUnreadMap((prev) => ({ ...prev, [data.sender_id]: (prev[data.sender_id] || 0) + 1 }));
         }
       })
+
       .on("broadcast", { event: "msg_update" }, (payload) => {
         const data = payload.payload as { id: string; sender_id: string; receiver_id: string; event: string };
         if (!data || !selectedContact) return;
@@ -671,7 +680,10 @@ const Chat = () => {
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => setNotifPrefsOpen(true)} className="gap-2 text-sm">
+                  <Bell className="h-4 w-4" /> নোটিফিকেশন
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/")} className="gap-2 text-sm">
                   <Home className="h-4 w-4" /> হোম
                 </DropdownMenuItem>
@@ -679,6 +691,7 @@ const Chat = () => {
                   <LogOut className="h-4 w-4" /> লগআউট
                 </DropdownMenuItem>
               </DropdownMenuContent>
+
             </DropdownMenu>
           </div>
         </div>
@@ -945,7 +958,10 @@ const Chat = () => {
         currentContent={editHistoryFor?.content || null}
         loading={editHistoryLoading}
       />
+
+      <NotificationPreferencesDialog open={notifPrefsOpen} onOpenChange={setNotifPrefsOpen} />
     </div>
+
   );
 };
 

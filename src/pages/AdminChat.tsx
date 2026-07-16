@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, X, Loader2, Settings } from "lucide-react";
+import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, X, Loader2, Settings, Bell } from "lucide-react";
 import { ChatUserListSkeleton } from "@/components/skeletons/LoadingSkeletons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { uploadChatImage, signMessagesImages } from "@/lib/chatSession";
 import { getSession } from "@/lib/store";
 import { toast } from "sonner";
+import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
+import { notifyNewMessage } from "@/lib/notificationPrefs";
+
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
 type Message = { id: string; sender_id: string; receiver_id: string; content: string | null; image_url: string | null; is_read: boolean; created_at: string };
@@ -31,6 +34,8 @@ const AdminChat = () => {
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -84,10 +89,14 @@ const AdminChat = () => {
             setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
           }
         }
+        if (msg.receiver_id === adminId && msg.sender_id !== adminId) {
+          notifyNewMessage();
+        }
         if (msg.receiver_id === adminId && msg.sender_id !== sel?.id) {
           setUnreadMap(prev => ({ ...prev, [msg.sender_id]: (prev[msg.sender_id] || 0) + 1 }));
           loadChatUsers();
         }
+
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -271,11 +280,17 @@ const AdminChat = () => {
               </div>
             )}
           </div>
-          <Button variant="ghost" size="sm" onClick={() => navigate("/admin/dashboard")} className="text-xs gap-1">
-            <Heart className="h-3.5 w-3.5" /> ড্যাশবোর্ড
-          </Button>
+          <div className="flex items-center gap-1 shrink-0">
+            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="নোটিফিকেশন সেটিংস" onClick={() => setNotifPrefsOpen(true)}>
+              <Bell className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/dashboard")} className="text-xs gap-1">
+              <Heart className="h-3.5 w-3.5" /> ড্যাশবোর্ড
+            </Button>
+          </div>
         </div>
       </header>
+
 
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden container mx-auto max-w-2xl lg:max-w-4xl w-full">
         <AnimatePresence mode="wait">
@@ -373,7 +388,10 @@ const AdminChat = () => {
           )}
         </AnimatePresence>
       </div>
+
+      <NotificationPreferencesDialog open={notifPrefsOpen} onOpenChange={setNotifPrefsOpen} />
     </div>
+
   );
 };
 
