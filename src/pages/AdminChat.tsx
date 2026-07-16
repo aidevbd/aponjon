@@ -104,17 +104,23 @@ const AdminChat = () => {
 
   // Per-thread broadcast subscription — receives delivered/edit/unsend/reaction updates
   useEffect(() => {
-    if (!adminContactId || !selectedUser) return;
-    const sortedIds = [adminContactId, selectedUser.id].sort();
+    const sel = selectedUser;
+    if (!adminContactId || !sel) return;
+    const sortedIds = [adminContactId, sel.id].sort();
     const topic = `msg:${sortedIds[0]}:${sortedIds[1]}`;
     const channel = supabase
       .channel(topic, { config: { private: false } })
-      .on("broadcast", { event: "msg_update" }, () => {
-        void loadMessages(selectedUser);
+      .on("broadcast", { event: "msg_update" }, async () => {
+        try {
+          const { data } = await supabase.rpc("get_admin_messages", { p_other_id: sel.id });
+          const signed = await signMessagesImages((data || []) as unknown as Message[]);
+          setMessages(signed);
+        } catch {}
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [adminContactId, selectedUser, loadMessages]);
+  }, [adminContactId, selectedUser]);
+
 
 
   useEffect(() => {
