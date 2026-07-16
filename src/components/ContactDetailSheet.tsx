@@ -101,50 +101,6 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
           </div>
         </div>
 
-        {/* সারাংশ — instant snapshot: phone + short note + quick actions */}
-        <div className="mb-5 rounded-xl border border-border bg-card p-4">
-          <button
-            type="button"
-            onClick={() => callPhone(contact.phone)}
-            className="flex w-full items-center gap-2 text-left"
-          >
-            <Phone className="h-4 w-4 text-primary shrink-0" />
-            <span className="text-base font-medium text-foreground truncate">{contact.phone}</span>
-          </button>
-
-          {contact.note && (
-            <div className="mt-2 flex items-start gap-2 text-sm text-muted-foreground">
-              <StickyNote className="h-3.5 w-3.5 mt-0.5 text-primary/70 shrink-0" />
-              <p className="line-clamp-2 leading-snug">{contact.note}</p>
-            </div>
-          )}
-
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => callPhone(contact.phone)}
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-border bg-secondary/60 py-2 text-xs font-medium text-foreground transition-colors hover:bg-secondary"
-            >
-              <Phone className="h-3.5 w-3.5 text-primary" /> কল
-            </button>
-            <button
-              type="button"
-              onClick={() => hasWhatsApp && openWhatsApp(contact.whatsapp!.split(",")[0].trim())}
-              disabled={!hasWhatsApp}
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-border bg-secondary/60 py-2 text-xs font-medium text-foreground transition-colors hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <MessageCircle className="h-3.5 w-3.5 text-primary" /> WhatsApp
-            </button>
-            <button
-              type="button"
-              onClick={() => hasIMO && openIMO(contact.imo!.split(",")[0].trim())}
-              disabled={!hasIMO}
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-border bg-secondary/60 py-2 text-xs font-medium text-foreground transition-colors hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <Video className="h-3.5 w-3.5 text-primary" /> IMO
-            </button>
-          </div>
-        </div>
 
         {/* Quick Action Grid - 2x2 like reference */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
