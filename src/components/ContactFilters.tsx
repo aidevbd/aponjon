@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Search, SlidersHorizontal, X, Check, ChevronDown } from "lucide-react";
+import { Search, SlidersHorizontal, X, ChevronDown } from "lucide-react";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
 
 interface ContactFiltersProps {
