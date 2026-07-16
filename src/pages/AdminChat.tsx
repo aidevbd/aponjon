@@ -388,7 +388,10 @@ const AdminChat = () => {
           )}
         </AnimatePresence>
       </div>
+
+      <NotificationPreferencesDialog open={notifPrefsOpen} onOpenChange={setNotifPrefsOpen} />
     </div>
+
   );
 };
 
