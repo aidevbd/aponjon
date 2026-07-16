@@ -270,55 +270,76 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen warm-gradient relative">
-      {/* Compact Header */}
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-card">
-        <div className="container mx-auto flex h-12 items-center justify-between px-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full hero-gradient shadow-rose">
-              <Heart className="h-3.5 w-3.5 text-primary-foreground fill-current" />
+    <div className="min-h-dvh bg-[hsl(var(--heirloom-bg))] relative">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.85)] backdrop-blur">
+        <div className="container mx-auto flex h-14 items-center justify-between px-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.5)] bg-[hsl(var(--heirloom-gold)/0.08)]">
+              <Heart className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))] fill-current" />
             </div>
-            <span className="text-sm font-display font-semibold text-foreground">আপনজন</span>
-            <span className="love-badge text-[10px]">অ্যাডমিন</span>
+            <span className="font-display text-[17px] tracking-tight text-[hsl(var(--heirloom-ink))]">আপনজন</span>
+            <span className="hidden sm:inline text-[10px] tracking-[0.15em] uppercase text-[hsl(var(--heirloom-gold-deep))] border-l border-[hsl(var(--heirloom-line))] pl-2.5 ml-0.5">
+              অ্যাডমিন
+            </span>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-1.5 text-destructive hover:text-destructive h-8 text-xs">
-            <LogOut className="h-3.5 w-3.5" /> লগআউট
-          </Button>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-[13px] text-[hsl(var(--heirloom-ink-soft))] transition-colors hover:text-destructive"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">লগআউট</span>
+          </button>
         </div>
       </header>
 
       {/* Tab-Based Content */}
-      <main className="container mx-auto px-3 sm:px-4 py-3 max-w-7xl">
+      <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-6xl">
         <h1 className="sr-only">অ্যাডমিন ড্যাশবোর্ড</h1>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
 
-        <TabsList className="w-full grid grid-cols-5 h-auto sm:h-10 mb-4 p-1 gap-0.5">
-          <TabsTrigger value="dashboard" className="flex-col sm:flex-row gap-0.5 sm:gap-1 text-[10px] sm:text-sm px-1 py-1.5 sm:py-1">
+        <TabsList className="w-full grid grid-cols-5 h-auto mb-8 p-1 gap-0.5 bg-[hsl(var(--heirloom-paper)/0.7)] border border-[hsl(var(--heirloom-line))] rounded-sm">
+          <TabsTrigger
+            value="dashboard"
+            className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-[10px] sm:text-[13px] px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-[hsl(var(--heirloom-cream)/0.8)] data-[state=active]:text-[hsl(var(--heirloom-gold-deep))] data-[state=active]:shadow-none text-[hsl(var(--heirloom-ink-soft))]"
+          >
             <LayoutDashboard className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">ড্যাশবোর্ড</span>
             <span className="sm:hidden">হোম</span>
           </TabsTrigger>
-          <TabsTrigger value="contacts" className="flex-col sm:flex-row gap-0.5 sm:gap-1 text-[10px] sm:text-sm px-1 py-1.5 sm:py-1">
+          <TabsTrigger
+            value="contacts"
+            className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-[10px] sm:text-[13px] px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-[hsl(var(--heirloom-cream)/0.8)] data-[state=active]:text-[hsl(var(--heirloom-gold-deep))] data-[state=active]:shadow-none text-[hsl(var(--heirloom-ink-soft))]"
+          >
             <Users className="h-3.5 w-3.5" />
             <span className="inline-flex items-center gap-1">
               <span>কন্টাক্ট</span>
-              <span className="text-[9px] bg-primary/10 text-primary rounded-full px-1">{stats.total}</span>
+              <span className="text-[10px] text-[hsl(var(--heirloom-ink-mute))]">{stats.total}</span>
             </span>
           </TabsTrigger>
-          <TabsTrigger value="chat" className="flex-col sm:flex-row gap-0.5 sm:gap-1 text-[10px] sm:text-sm relative px-1 py-1.5 sm:py-1">
+          <TabsTrigger
+            value="chat"
+            className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-[10px] sm:text-[13px] relative px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-[hsl(var(--heirloom-cream)/0.8)] data-[state=active]:text-[hsl(var(--heirloom-gold-deep))] data-[state=active]:shadow-none text-[hsl(var(--heirloom-ink-soft))]"
+          >
             <MessageCircle className="h-3.5 w-3.5" />
             <span>চ্যাট</span>
             {totalUnread > 0 && (
-              <span className="absolute top-0.5 right-1 sm:static sm:ml-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[9px] font-bold px-1">
+              <span className="absolute top-1 right-1 sm:static sm:ml-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[hsl(var(--heirloom-gold-deep))] text-[hsl(var(--heirloom-paper))] text-[9px] font-medium px-1">
                 {totalUnread}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="logs" className="flex-col sm:flex-row gap-0.5 sm:gap-1 text-[10px] sm:text-sm px-1 py-1.5 sm:py-1">
+          <TabsTrigger
+            value="logs"
+            className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-[10px] sm:text-[13px] px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-[hsl(var(--heirloom-cream)/0.8)] data-[state=active]:text-[hsl(var(--heirloom-gold-deep))] data-[state=active]:shadow-none text-[hsl(var(--heirloom-ink-soft))]"
+          >
             <Activity className="h-3.5 w-3.5" />
             <span>লগ</span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="flex-col sm:flex-row gap-0.5 sm:gap-1 text-[10px] sm:text-sm px-1 py-1.5 sm:py-1">
+          <TabsTrigger
+            value="settings"
+            className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-[10px] sm:text-[13px] px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-[hsl(var(--heirloom-cream)/0.8)] data-[state=active]:text-[hsl(var(--heirloom-gold-deep))] data-[state=active]:shadow-none text-[hsl(var(--heirloom-ink-soft))]"
+          >
             <Settings className="h-3.5 w-3.5" />
             <span>সেটিংস</span>
           </TabsTrigger>
