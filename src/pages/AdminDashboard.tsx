@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, LogOut, Users, Heart, Download, Edit3, X, Cake, Gift, Plus,
   Droplets, Phone, MessageCircle, Mail, MapPin, Calendar, Lock, StickyNote,
-  Globe, LayoutDashboard, UserPlus, Facebook, LayoutGrid, List, Send, Activity, Settings
+  Globe, LayoutDashboard, UserPlus, Facebook, Send, Activity, Settings
 } from "lucide-react";
 import { PhoneWithMessengers, PhoneEntry, deriveMessengers, parseMessengersToPhones } from "@/components/PhoneWithMessengers";
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,7 @@ const AdminDashboard = () => {
   const [isAddingContact, setIsAddingContact] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
   const [activeTab, setActiveTab] = useState("contacts");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  
   const [selectedContact, setSelectedContact] = useState<ContactRow | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [pendingDuplicate, setPendingDuplicate] = useState<{ existingName: string; phone: string } | null>(null);
