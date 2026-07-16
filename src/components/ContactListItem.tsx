@@ -19,33 +19,50 @@ export function ContactListItem({ contact, onClick }: ContactListItemProps) {
   return (
     <div
       onClick={() => onClick(contact)}
-      className="contact-surface flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-card cursor-pointer transition-colors border border-transparent hover:border-border/50"
+      className="group flex items-center gap-3 px-3.5 py-3 border-b border-[hsl(var(--heirloom-line)/0.7)] cursor-pointer transition-colors hover:bg-[hsl(var(--heirloom-cream)/0.45)]"
     >
       {/* Avatar */}
       {contact.photo_url ? (
-        <img src={contact.photo_url} alt={contact.name} className="h-9 w-9 rounded-full object-cover border border-primary/20 shrink-0" />
+        <img
+          src={contact.photo_url}
+          alt={contact.name}
+          className="h-10 w-10 rounded-full object-cover border border-[hsl(var(--heirloom-gold)/0.35)] shrink-0"
+        />
       ) : (
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm shrink-0">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.4)] bg-[hsl(var(--heirloom-gold)/0.08)] text-[hsl(var(--heirloom-gold-deep))] font-display text-[15px] shrink-0">
           {contact.name.charAt(0)}
         </div>
       )}
 
-      {/* Name + category */}
+      {/* Name + meta */}
       <div className="flex-1 min-w-0">
-        <span className="font-medium text-sm text-foreground truncate block">{contact.name}</span>
-        {category && (
-          <span className="text-[10px] text-muted-foreground">{category.icon} {category.value}</span>
-        )}
+        <div className="text-[14px] text-[hsl(var(--heirloom-ink))] truncate">
+          {contact.name}
+        </div>
+        <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[hsl(var(--heirloom-ink-soft))]">
+          {category && (
+            <span className="inline-flex items-center gap-1">
+              <span>{category.icon}</span>
+              <span>{category.value}</span>
+            </span>
+          )}
+          {contact.blood_group && (
+            <>
+              <span className="text-[hsl(var(--heirloom-line))]">·</span>
+              <span className="text-[hsl(var(--heirloom-gold-deep))]">{contact.blood_group}</span>
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Call button */}
+      {/* Call */}
       <button
         onClick={callPhone}
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.4)] bg-[hsl(var(--heirloom-gold)/0.06)] text-[hsl(var(--heirloom-gold-deep))] transition-colors hover:bg-[hsl(var(--heirloom-gold)/0.15)] shrink-0"
         title="কল করুন"
         aria-label="কল করুন"
       >
-        <Phone className="h-4 w-4" />
+        <Phone className="h-3.5 w-3.5" />
       </button>
     </div>
   );
