@@ -172,7 +172,11 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
         );
 
         if (isCurrentThread) {
-          if (msg.image_url) {
+          if (msg.sender_id === selectedUser!.id) {
+            // Inbound from the user we're viewing — refetch so the server marks it read
+            // and broadcasts a `read` event back to the sender for live seen updates.
+            void loadMessages(selectedUser!);
+          } else if (msg.image_url) {
             void signMessagesImages([msg]).then(([signed]) => {
               setMessages((prev) => upsertMessage(prev, signed));
             });
