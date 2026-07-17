@@ -22,6 +22,7 @@ import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/Fa
 import { upsertMessage, reconcileMessages } from "@/lib/chatMessageUtils";
 import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
+import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
 type Message = {
@@ -44,6 +45,19 @@ interface EmbeddedAdminChatProps {
 
 export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const isTouch = useIsTouchDevice();
+  const viewportHeight = useVisualViewportHeight();
+  const shellRef = useRef<HTMLDivElement>(null);
+  const [shellTop, setShellTop] = useState(0);
+  useEffect(() => {
+    const measure = () => {
+      if (!shellRef.current) return;
+      setShellTop(shellRef.current.getBoundingClientRect().top);
+    };
+    measure();
+    const id = window.setTimeout(measure, 50);
+    window.addEventListener("resize", measure);
+    return () => { window.clearTimeout(id); window.removeEventListener("resize", measure); };
+  }, [viewportHeight]);
   const [adminContactId, setAdminContactId] = useState<string | null>(null);
   const [needsSetup, setNeedsSetup] = useState(false);
   const [setupName, setSetupName] = useState("");
@@ -604,7 +618,17 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: "calc(100dvh - 160px)", minHeight: "400px" }}>
+    <div
+      ref={shellRef}
+      className="flex flex-col"
+      style={{
+        height: viewportHeight
+          ? `${Math.max(320, viewportHeight - shellTop)}px`
+          : "calc(100dvh - 160px)",
+        minHeight: "320px",
+      }}
+    >
+
       <AnimatePresence mode="wait">
         {!selectedUser ? (
           <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 overflow-y-auto">
