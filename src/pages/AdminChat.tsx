@@ -436,14 +436,21 @@ const AdminChat = () => {
               <button onClick={() => setSelectedUser(null)} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
                 <ArrowLeft className="h-5 w-5" />
                 <div className="flex items-center gap-2">
-                  {selectedUser.photo_url ? (
-                    <img src={selectedUser.photo_url} alt={selectedUser.name} className="h-8 w-8 rounded-full object-cover border border-primary/20" />
-                  ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</div>
-                  )}
-                  <div>
-                    <span className="font-semibold text-sm">{selectedUser.name}</span>
-                    <span className="text-[10px] text-muted-foreground ml-2">{selectedUser.phone}</span>
+                  <div className="relative shrink-0">
+                    {selectedUser.photo_url ? (
+                      <img src={selectedUser.photo_url} alt={selectedUser.name} className="h-8 w-8 rounded-full object-cover border border-primary/20" />
+                    ) : (
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</div>
+                    )}
+                    {presenceMap[selectedUser.id]?.isOnline && (
+                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-card" />
+                    )}
+                  </div>
+                  <div className="text-left leading-tight">
+                    <div className="font-semibold text-sm">{selectedUser.name}</div>
+                    <div className={`text-[10px] ${presenceMap[selectedUser.id]?.isOnline ? "text-emerald-500" : "text-muted-foreground"}`}>
+                      {formatLastSeen(presenceMap[selectedUser.id]) || selectedUser.phone}
+                    </div>
                   </div>
                 </div>
               </button>
