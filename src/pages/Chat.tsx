@@ -349,7 +349,7 @@ const Chat = () => {
     if (!opts?.silent) setMessagesLoading(true);
     try {
       const raw = await getMessages(session.token, contact.id);
-      const data = await signMessagesImages(raw, session.token);
+      const data = await signMessagesImages(raw, session.token).catch(() => raw);
       setMessages(prev => {
         // Preserve optimistic pending temps whose real counterpart isn't on the server yet.
         const pendings = prev.filter(m => m.pending);
