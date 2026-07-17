@@ -957,7 +957,7 @@ const Chat = () => {
                       const showTail = !sameAsNext;
                       const showAvatar = !isMine && !sameAsNext;
                       return (
-                        <div key={msg.id}>
+                        <div key={msg.id} className={msg.pending ? "opacity-70" : ""}>
                           {showDateHeader && (
                             <div className="flex justify-center my-3">
                               <span className="text-[10px] text-muted-foreground bg-muted/60 px-3 py-0.5 rounded-full">{getDateLabel(msg.created_at)}</span>
