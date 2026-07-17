@@ -208,6 +208,19 @@ const AdminChat = () => {
     finally { setMessagesLoading(false); }
   }, []);
 
+  const formatLastSeen = (p?: { isOnline: boolean; lastSeen: string }) => {
+    if (!p) return null;
+    if (p.isOnline) return "এখন অনলাইন";
+    const diff = Date.now() - new Date(p.lastSeen).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "একটু আগে সক্রিয়";
+    if (mins < 60) return `${mins} মিনিট আগে সক্রিয়`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs} ঘণ্টা আগে সক্রিয়`;
+    const days = Math.floor(hrs / 24);
+    return `${days} দিন আগে সক্রিয়`;
+  };
+
   const handleSelectUser = (user: ChatUser) => {
     setSelectedUser(user);
     setFailedMessages([]);
