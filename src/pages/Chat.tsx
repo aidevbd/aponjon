@@ -1096,7 +1096,7 @@ const Chat = () => {
                       {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4 text-primary" />}
                     </Button>
                   </div>
-                  <Input
+                  <AutoResizeTextarea
                     ref={inputRef}
                     placeholder={editingMsg ? "এডিট করুন..." : "মেসেজ লিখুন..."}
                     value={msgInput}
@@ -1107,7 +1107,8 @@ const Chat = () => {
                         void handleSend();
                       }
                     }}
-                    className="bg-background/50 text-sm h-9 flex-1 min-w-0"
+                    className="flex-1 min-w-0"
+                    maxHeight={120}
                   />
                   <Button
                     type="button"
