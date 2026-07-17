@@ -179,6 +179,21 @@ const AdminChat = () => {
     loadMessages(user);
   };
 
+  // Consistency check: when the tab becomes visible or connection returns,
+  // resync the current thread so we don't miss any events fired while hidden.
+  useEffect(() => {
+    if (!selectedUser) return;
+    const resync = () => {
+      if (document.visibilityState === "visible") void loadMessages(selectedUser);
+    };
+    document.addEventListener("visibilitychange", resync);
+    window.addEventListener("online", resync);
+    return () => {
+      document.removeEventListener("visibilitychange", resync);
+      window.removeEventListener("online", resync);
+    };
+  }, [selectedUser, loadMessages]);
+
   const handleSetup = async () => {
     if (!setupName.trim()) { toast.error("নাম দিন"); return; }
     setSetupLoading(true);
