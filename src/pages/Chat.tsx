@@ -310,7 +310,7 @@ const Chat = () => {
     if (!opts?.silent) setMessagesLoading(true);
     try {
       const raw = await getMessages(session.token, contact.id);
-      const data = await signMessagesImages(raw, session.token);
+      const data = reconcileMessages(await signMessagesImages(raw, session.token));
       setMessages(data);
       const lastMessage = data[data.length - 1];
       setContactPreviews((prev) => ({
