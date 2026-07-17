@@ -1104,7 +1104,7 @@ const Chat = () => {
                     value={msgInput}
                     onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
+                      if (e.key === "Enter" && !e.shiftKey && !isTouch) {
                         e.preventDefault();
                         void handleSend();
                       }
