@@ -496,14 +496,21 @@ const AdminChat = () => {
                       onClick={() => handleSelectUser(u)}
                       className="w-full flex items-center gap-3 rounded-xl p-3 hover:bg-card/80 transition-colors text-left border border-transparent hover:border-border/50"
                     >
-                      {u.photo_url ? (
-                        <img src={u.photo_url} alt={u.name} className="h-11 w-11 rounded-full object-cover border border-primary/20 shrink-0" />
-                      ) : (
-                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">{u.name.charAt(0)}</div>
-                      )}
+                      <div className="relative shrink-0">
+                        {u.photo_url ? (
+                          <img src={u.photo_url} alt={u.name} className="h-11 w-11 rounded-full object-cover border border-primary/20" />
+                        ) : (
+                          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">{u.name.charAt(0)}</div>
+                        )}
+                        {presenceMap[u.id]?.isOnline && (
+                          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-500 border-2 border-card" />
+                        )}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-foreground text-sm">{u.name}</div>
-                        <div className="text-xs text-muted-foreground truncate">{u.phone}</div>
+                        <div className={`text-xs truncate ${presenceMap[u.id]?.isOnline ? "text-emerald-500" : "text-muted-foreground"}`}>
+                          {formatLastSeen(presenceMap[u.id]) || u.phone}
+                        </div>
                       </div>
                       {unreadMap[u.id] && (
                         <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[10px] font-bold px-1.5">
