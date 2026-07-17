@@ -186,14 +186,12 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     supabase.channel(channelName).send({ type: "broadcast", event: "typing", payload: { sender_id: adminContactId } });
   };
 
-  useEffect(() => {
-    if (messages.length === 0 || !messageListRef.current) return;
-    const keepKeyboardStable = document.activeElement === inputRef.current;
-    messageListRef.current.scrollTo({
-      top: messageListRef.current.scrollHeight,
-      behavior: keepKeyboardStable ? "auto" : "smooth",
-    });
-  }, [messages]);
+  const { newBelowCount, scrollToBottom, resetForNewThread } = useSmartAutoScroll(
+    messageListRef,
+    messages,
+    adminContactId,
+  );
+
 
   useEffect(() => {
     const total = Object.values(unreadMap).reduce((a, b) => a + b, 0);
