@@ -211,37 +211,44 @@ export function extractChatImagePath(urlOrPath: string): string | null {
 }
 
 export async function getSignedChatImageUrl(urlOrPath: string, sessionToken?: string): Promise<string | null> {
-  const path = extractChatImagePath(urlOrPath);
-  if (!path) return null;
-  const cached = _signedUrlCache.get(path);
-  if (cached && cached.exp > Date.now()) return cached.url;
+  try {
+    const path = extractChatImagePath(urlOrPath);
+    if (!path) return null;
+    const cached = _signedUrlCache.get(path);
+    if (cached && cached.exp > Date.now()) return cached.url;
 
-  const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL as string;
-  const anonKey = (import.meta as any).env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    apikey: anonKey,
-  };
-  // Prefer authenticated admin session; fall back to chat session token
-  const { data: authData } = await supabase.auth.getSession();
-  if (authData.session?.access_token) {
-    headers["Authorization"] = `Bearer ${authData.session.access_token}`;
-  } else {
-    headers["Authorization"] = `Bearer ${anonKey}`;
+    const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL as string;
+    const anonKey = (import.meta as any).env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      apikey: anonKey,
+      Authorization: `Bearer ${anonKey}`,
+    };
+    // Prefer authenticated admin session; fall back to anon + optional chat-session header
+    try {
+      const { data: authData } = await supabase.auth.getSession();
+      if (authData.session?.access_token) {
+        headers["Authorization"] = `Bearer ${authData.session.access_token}`;
+      }
+    } catch { /* ignore — fall back to anon */ }
+    if (sessionToken) headers["x-chat-session"] = sessionToken;
+
+    const res = await fetch(`${supabaseUrl}/functions/v1/sign-chat-image`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ path }),
+    });
+    if (!res.ok) return null;
+    const json = await res.json().catch(() => null);
+    if (!json?.signedUrl) return null;
+    _signedUrlCache.set(path, { url: json.signedUrl, exp: Date.now() + 50 * 60 * 1000 });
+    return json.signedUrl as string;
+  } catch {
+    // Network error or unexpected failure — degrade gracefully so message loading never fails
+    return null;
   }
-  if (sessionToken) headers["x-chat-session"] = sessionToken;
-
-  const res = await fetch(`${supabaseUrl}/functions/v1/sign-chat-image`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ path }),
-  });
-  if (!res.ok) return null;
-  const json = await res.json().catch(() => null);
-  if (!json?.signedUrl) return null;
-  _signedUrlCache.set(path, { url: json.signedUrl, exp: Date.now() + 50 * 60 * 1000 });
-  return json.signedUrl as string;
 }
+
 
 export async function signMessagesImages<T extends { image_url: string | null }>(
   messages: T[],
