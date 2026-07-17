@@ -46,6 +46,8 @@ type Message = {
   unsent_at?: string | null;
   has_edit_history?: boolean;
   reactions?: { emoji: string; reactor_id: string }[];
+  // Client-only: optimistic pending flag (message in-flight)
+  pending?: boolean;
 };
 
 type ContactPreview = {
