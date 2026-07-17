@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Reply, CheckCheck, Check } from "lucide-react";
+import { Reply, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type ReactionEntry = { emoji: string; reactor_id: string };
