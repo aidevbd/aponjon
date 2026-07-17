@@ -435,7 +435,8 @@ const AdminChat = () => {
             </motion.div>
           ) : (
             <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div className="flex-1 overflow-y-auto px-4 py-4 pb-2 space-y-2">
+              <div className="relative flex-1 flex flex-col min-h-0">
+              <div ref={messageListRef} className="flex-1 overflow-y-auto px-4 py-4 pb-2 space-y-2">
                 {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
                 {!messagesLoading && messages.length === 0 && (
                   <div className="text-center py-16 text-muted-foreground">
@@ -479,6 +480,14 @@ const AdminChat = () => {
                 })}
                 <div ref={messagesEndRef} />
               </div>
+              <JumpToLatest
+                show={newBelowCount > 0}
+                count={newBelowCount}
+                onClick={() => scrollToBottom(true)}
+                className="bottom-3"
+              />
+              </div>
+
 
               <FailedMessagesList
                 items={failedMessages}
