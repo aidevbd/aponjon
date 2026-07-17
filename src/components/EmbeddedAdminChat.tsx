@@ -894,6 +894,6 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
         currentContent={editHistoryFor?.content || null}
         loading={editHistoryLoading}
       />
-    </div>
+    </EmbeddedChatShell>
   );
 }
