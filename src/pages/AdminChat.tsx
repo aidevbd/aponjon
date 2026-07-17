@@ -205,6 +205,37 @@ const AdminChat = () => {
     };
   }, [selectedUser, loadMessages]);
 
+  // Typing indicator — subscribe to the shared per-conversation channel
+  useEffect(() => {
+    if (!adminContactId || !selectedUser) { setIsOtherTyping(false); typingChannelRef.current = null; return; }
+    const channelName = `typing:${[adminContactId, selectedUser.id].sort().join(":")}`;
+    const channel = supabase.channel(channelName)
+      .on("broadcast", { event: "typing" }, (payload) => {
+        if (payload.payload?.sender_id === selectedUser.id) {
+          setIsOtherTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setIsOtherTyping(false), 3000);
+        }
+      })
+      .subscribe();
+    typingChannelRef.current = channel;
+    return () => {
+      typingChannelRef.current = null;
+      supabase.removeChannel(channel);
+      setIsOtherTyping(false);
+    };
+  }, [adminContactId, selectedUser]);
+
+  const emitTyping = () => {
+    if (!adminContactId || !selectedUser) return;
+    const now = Date.now();
+    if (now - lastTypingRef.current < 2000) return;
+    lastTypingRef.current = now;
+    const channel = typingChannelRef.current;
+    if (!channel) return;
+    void channel.send({ type: "broadcast", event: "typing", payload: { sender_id: adminContactId } });
+  };
+
   const handleSetup = async () => {
     if (!setupName.trim()) { toast.error("নাম দিন"); return; }
     setSetupLoading(true);
