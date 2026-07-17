@@ -469,25 +469,55 @@ const Chat = () => {
       return;
     }
 
+    // Optimistic insert — bubble appears instantly; auto-retry on transient failures.
+    const tempId = `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const nowIso = new Date().toISOString();
+    const optimistic: Message = {
+      id: tempId,
+      sender_id: session.contactId,
+      receiver_id: selectedContact.id,
+      content: text,
+      image_url: null,
+      is_read: false,
+      created_at: nowIso,
+      delivered_at: null,
+      read_at: null,
+      reply_to_id: replyingTo?.id || null,
+      reply_content: replyingTo?.content || null,
+      reply_sender_id: replyingTo?.sender_id || null,
+      reactions: [],
+      pending: true,
+    };
+    setMessages(prev => [...prev, optimistic]);
+    const replyIdSnapshot = replyingTo?.id || undefined;
+    setReplyingTo(null);
+
     try {
-      await sendMessage(session.token, selectedContact.id, text, undefined, replyingTo?.id);
-      setReplyingTo(null);
+      const realId = await sendWithRetry(() =>
+        sendMessage(session.token, selectedContact.id, text, undefined, replyIdSnapshot)
+      );
+      // Swap tempId → real id and clear pending. If a broadcast refetch already
+      // reconciled the temp away, this no-op is harmless.
+      setMessages(prev => prev.map(m =>
+        m.id === tempId ? { ...m, id: (realId as string) || m.id, pending: false } : m
+      ));
     } catch (err: any) {
       if (err?.message?.includes("Invalid session")) {
         clearChatSession();
         setSession(null);
         toast.error("সেশন শেষ হয়ে গেছে। আবার লগইন করুন।");
       } else {
+        // Drop the optimistic bubble and fall back to the visible failed list for manual resend.
+        setMessages(prev => prev.filter(m => m.id !== tempId));
         const failed: FailedChatMessage = {
           id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           content: text,
           imageUrl: null,
-          replyToId: replyingTo?.id || null,
-          replyContent: replyingTo?.content || null,
-          createdAt: new Date().toISOString(),
+          replyToId: replyIdSnapshot || null,
+          replyContent: optimistic.reply_content || null,
+          createdAt: nowIso,
         };
         setFailedMessages(prev => [...prev, failed]);
-        setReplyingTo(null);
         toast.error("মেসেজ পাঠাতে সমস্যা — নিচে 'আবার পাঠান' চাপুন");
       }
     } finally {
@@ -496,19 +526,37 @@ const Chat = () => {
     }
   };
 
+  // Retry helper: 3 attempts with exponential backoff, aborts early on offline / auth errors.
+  const sendWithRetry = async <T,>(fn: () => Promise<T>, tries = 3): Promise<T> => {
+    let lastErr: any;
+    for (let i = 0; i < tries; i++) {
+      try {
+        return await fn();
+      } catch (err: any) {
+        lastErr = err;
+        if (err?.message?.includes("Invalid session")) throw err;
+        if (typeof navigator !== "undefined" && !navigator.onLine) throw err;
+        if (i < tries - 1) {
+          await new Promise(r => setTimeout(r, 500 * Math.pow(2, i)));
+        }
+      }
+    }
+    throw lastErr;
+  };
+
   const handleResendFailed = async (failedId: string) => {
     if (!session || !selectedContact) return;
     const item = failedMessages.find(f => f.id === failedId);
     if (!item) return;
     setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: true } : f));
     try {
-      await sendMessage(
+      await sendWithRetry(() => sendMessage(
         session.token,
         selectedContact.id,
         item.content || undefined,
         item.imageUrl || undefined,
         item.replyToId || undefined,
-      );
+      ));
       setFailedMessages(prev => prev.filter(f => f.id !== failedId));
       toast.success("মেসেজ পাঠানো হয়েছে");
     } catch (err: any) {
