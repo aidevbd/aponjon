@@ -232,7 +232,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       const { data, error } = await supabase.rpc("get_admin_messages", { p_other_id: user.id });
       if (error) throw error;
       const signed = await signMessagesImages((data || []) as unknown as Message[]);
-      setMessages(signed);
+      setMessages(reconcileMessages(signed));
       setUnreadMap(prev => { const n = { ...prev }; delete n[user.id]; return n; });
       void (async () => { try { await supabase.rpc("mark_conversation_delivered_admin", { p_other_id: user.id } as any); } catch {} })();
     } catch { toast.error("মেসেজ লোড করতে সমস্যা"); }
@@ -245,6 +245,20 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     setMessages([]);
     loadMessages(user);
   };
+
+  // Consistency check: resync current thread on tab focus / online.
+  useEffect(() => {
+    if (!selectedUser) return;
+    const resync = () => {
+      if (document.visibilityState === "visible") void loadMessages(selectedUser);
+    };
+    document.addEventListener("visibilitychange", resync);
+    window.addEventListener("online", resync);
+    return () => {
+      document.removeEventListener("visibilitychange", resync);
+      window.removeEventListener("online", resync);
+    };
+  }, [selectedUser, loadMessages]);
 
   const handleSetup = async () => {
     if (!setupName.trim()) { toast.error("নাম দিন"); return; }
