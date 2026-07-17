@@ -48,6 +48,16 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const viewportHeight = useVisualViewportHeight();
   const shellRef = useRef<HTMLDivElement>(null);
   const [shellTop, setShellTop] = useState(0);
+  useEffect(() => {
+    const measure = () => {
+      if (!shellRef.current) return;
+      setShellTop(shellRef.current.getBoundingClientRect().top);
+    };
+    measure();
+    const id = window.setTimeout(measure, 50);
+    window.addEventListener("resize", measure);
+    return () => { window.clearTimeout(id); window.removeEventListener("resize", measure); };
+  }, [viewportHeight]);
   const [adminContactId, setAdminContactId] = useState<string | null>(null);
   const [needsSetup, setNeedsSetup] = useState(false);
   const [setupName, setSetupName] = useState("");
