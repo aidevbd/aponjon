@@ -81,6 +81,31 @@ const AdminChat = () => {
     loadUnread();
   }, [adminContactId]);
 
+  // Admin heartbeat + poll presence for chat users
+  useEffect(() => {
+    if (!adminContactId) return;
+    const beat = () => { supabase.rpc("update_admin_presence").catch(() => {}); };
+    beat();
+    const hb = setInterval(beat, 30_000);
+    return () => clearInterval(hb);
+  }, [adminContactId]);
+
+  useEffect(() => {
+    if (!adminContactId || chatUsers.length === 0) return;
+    let stop = false;
+    const load = async () => {
+      const ids = chatUsers.map((u) => u.id);
+      const { data } = await supabase.rpc("get_user_presence", { p_contact_ids: ids });
+      if (stop || !data) return;
+      const map: Record<string, { isOnline: boolean; lastSeen: string }> = {};
+      (data as any[]).forEach((p) => { map[p.contact_id] = { isOnline: p.is_online, lastSeen: p.last_seen_at }; });
+      setPresenceMap(map);
+    };
+    load();
+    const t = setInterval(load, 20_000);
+    return () => { stop = true; clearInterval(t); };
+  }, [adminContactId, chatUsers]);
+
   // Realtime — subscribe once per admin contact; read latest selectedUser via refs to avoid stale closure
   useEffect(() => {
     if (!adminContactId) return;
