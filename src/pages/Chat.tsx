@@ -1031,7 +1031,7 @@ const Chat = () => {
 
               {isOtherTyping && (
                 <div className="px-4 pb-1">
-                  <TypingIndicator name={selectedContact?.name} />
+                  <TypingIndicator />
                 </div>
               )}
 
