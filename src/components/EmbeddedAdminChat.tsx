@@ -243,6 +243,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     setSelectedUser(user);
     setFailedMessages([]);
     setMessages([]);
+    resetForNewThread();
     loadMessages(user);
   };
 
