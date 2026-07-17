@@ -18,6 +18,7 @@ import { upsertMessage, reconcileMessages } from "@/lib/chatMessageUtils";
 import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
+import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
 
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
