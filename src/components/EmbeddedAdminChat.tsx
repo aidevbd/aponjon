@@ -22,6 +22,7 @@ import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/Fa
 import { upsertMessage, reconcileMessages } from "@/lib/chatMessageUtils";
 import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
+import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
 type Message = {
@@ -604,7 +605,8 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: "calc(100dvh - 160px)", minHeight: "400px" }}>
+    <EmbeddedChatShell>
+
       <AnimatePresence mode="wait">
         {!selectedUser ? (
           <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 overflow-y-auto">
