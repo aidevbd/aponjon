@@ -53,12 +53,37 @@ export function useSmartAutoScroll<T extends { id: string; sender_id: string }>(
     const grew = messages.length > prevLenRef.current;
     prevLenRef.current = messages.length;
 
-    // Initial load / thread switch: jump instantly, no counter.
+    // Initial load / thread switch: jump instantly, and keep pinned to bottom
+    // while images/media load in and grow the container height.
     if (lastIdRef.current === null && lastId) {
       lastIdRef.current = lastId;
-      requestAnimationFrame(() => {
-        el.scrollTo({ top: el.scrollHeight, behavior: "auto" });
+      const pinToBottom = () => el.scrollTo({ top: el.scrollHeight, behavior: "auto" });
+      requestAnimationFrame(pinToBottom);
+      // Re-pin on subsequent frames as images/layout settle.
+      const timeouts = [50, 150, 300, 600, 1000, 1500].map((ms) =>
+        window.setTimeout(pinToBottom, ms),
+      );
+      // Observe size growth of the content and re-pin until the user scrolls.
+      let userScrolled = false;
+      const onUserScroll = () => { userScrolled = true; };
+      el.addEventListener("scroll", onUserScroll, { passive: true, once: true });
+      const ro = typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => { if (!userScrolled) pinToBottom(); })
+        : null;
+      if (ro && el.firstElementChild) ro.observe(el.firstElementChild);
+      window.setTimeout(() => {
+        ro?.disconnect();
+        el.removeEventListener("scroll", onUserScroll);
+      }, 2000);
+      // Also re-pin once all images inside the list have loaded.
+      const imgs = Array.from(el.querySelectorAll("img"));
+      imgs.forEach((img) => {
+        if (!img.complete) {
+          img.addEventListener("load", pinToBottom, { once: true });
+          img.addEventListener("error", pinToBottom, { once: true });
+        }
       });
+      timeouts.forEach(() => {}); // keep reference
       setNewBelowCount(0);
       return;
     }
