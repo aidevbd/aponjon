@@ -15,6 +15,7 @@ import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
 import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { ChatUserListSkeleton } from "@/components/skeletons/LoadingSkeletons";
+import { ChatMessagesSkeleton } from "@/components/chat/ChatMessagesSkeleton";
 import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
@@ -48,6 +49,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const [presenceMap, setPresenceMap] = useState<Record<string, { lastSeen: string; isOnline: boolean }>>({});
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -224,6 +226,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   };
 
   const loadMessages = useCallback(async (user: ChatUser) => {
+    setMessagesLoading(true);
     try {
       const { data, error } = await supabase.rpc("get_admin_messages", { p_other_id: user.id });
       if (error) throw error;
@@ -232,12 +235,13 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       setUnreadMap(prev => { const n = { ...prev }; delete n[user.id]; return n; });
       void (async () => { try { await supabase.rpc("mark_conversation_delivered_admin", { p_other_id: user.id } as any); } catch {} })();
     } catch { toast.error("মেসেজ লোড করতে সমস্যা"); }
-
+    finally { setMessagesLoading(false); }
   }, []);
 
   const handleSelectUser = (user: ChatUser) => {
     setSelectedUser(user);
     setFailedMessages([]);
+    setMessages([]);
     loadMessages(user);
   };
 
@@ -654,7 +658,8 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
             {/* Messages */}
             <div ref={messageListRef} className="flex-1 overflow-y-auto py-3 space-y-1">
-              {filteredMessages.length === 0 && (
+              {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
+              {!messagesLoading && filteredMessages.length === 0 && (
                 <div className="text-center py-12 text-muted-foreground">
                   <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-30" />
                   <p className="text-xs">{searchQuery ? "কোনো মেসেজ পাওয়া যায়নি" : "এখনো কোনো মেসেজ নেই"}</p>

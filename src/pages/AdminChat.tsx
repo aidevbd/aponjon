@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, X, Loader2, Settings, Bell } from "lucide-react";
 import { ChatUserListSkeleton } from "@/components/skeletons/LoadingSkeletons";
+import { ChatMessagesSkeleton } from "@/components/chat/ChatMessagesSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +33,7 @@ const AdminChat = () => {
   const selectedUserRef = useRef<ChatUser | null>(null);
   const adminContactIdRef = useRef<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -157,6 +159,7 @@ const AdminChat = () => {
   };
 
   const loadMessages = useCallback(async (user: ChatUser) => {
+    setMessagesLoading(true);
     try {
       const { data, error } = await supabase.rpc("get_admin_messages", { p_other_id: user.id });
       if (error) throw error;
@@ -165,12 +168,13 @@ const AdminChat = () => {
       setUnreadMap(prev => { const n = { ...prev }; delete n[user.id]; return n; });
       void (async () => { try { await supabase.rpc("mark_conversation_delivered_admin", { p_other_id: user.id } as any); } catch {} })();
     } catch (err) { console.error("[catch]", err); toast.error("মেসেজ লোড করতে সমস্যা"); }
-
+    finally { setMessagesLoading(false); }
   }, []);
 
   const handleSelectUser = (user: ChatUser) => {
     setSelectedUser(user);
     setFailedMessages([]);
+    setMessages([]);
     loadMessages(user);
   };
 
@@ -410,8 +414,8 @@ const AdminChat = () => {
           ) : (
             <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0 overflow-hidden">
               <div className="flex-1 overflow-y-auto px-4 py-4 pb-2 space-y-2">
-
-                {messages.length === 0 && (
+                {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
+                {!messagesLoading && messages.length === 0 && (
                   <div className="text-center py-16 text-muted-foreground">
                     <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
                     <p className="text-sm">এখনো কোনো মেসেজ নেই</p>

@@ -26,6 +26,7 @@ import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
 import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
+import { ChatMessagesSkeleton } from "@/components/chat/ChatMessagesSkeleton";
 import { notifyNewMessage } from "@/lib/notificationPrefs";
 
 
@@ -60,6 +61,7 @@ const Chat = () => {
   const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
   const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -302,8 +304,9 @@ const Chat = () => {
     } catch {}
   };
 
-  const loadMessages = useCallback(async (contact: ChatContact) => {
+  const loadMessages = useCallback(async (contact: ChatContact, opts?: { silent?: boolean }) => {
     if (!session) return;
+    if (!opts?.silent) setMessagesLoading(true);
     try {
       const raw = await getMessages(session.token, contact.id);
       const data = await signMessagesImages(raw, session.token);
@@ -323,6 +326,8 @@ const Chat = () => {
     } catch (err) {
       console.error("[catch]", err);
       toast.error("মেসেজ লোড করতে সমস্যা");
+    } finally {
+      if (!opts?.silent) setMessagesLoading(false);
     }
   }, [session]);
 
@@ -356,6 +361,7 @@ const Chat = () => {
     setSelectedContact(contact);
     setQueuedCount(getOfflineQueueCountForContact(contact.id));
     setFailedMessages([]);
+    setMessages([]);
     loadMessages(contact);
   };
 
@@ -849,7 +855,8 @@ const Chat = () => {
           ) : (
             <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0 overflow-hidden">
               <div ref={messageListRef} className="flex-1 overflow-y-auto px-4 py-4 pb-2 space-y-1">
-                {filteredMessages.length === 0 && (
+                {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
+                {!messagesLoading && filteredMessages.length === 0 && (
                   <div className="text-center py-16 text-muted-foreground">
                     <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
                     <p className="text-sm">{searchQuery ? "কোনো মেসেজ পাওয়া যায়নি" : "এখনো কোনো মেসেজ নেই"}</p>
