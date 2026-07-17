@@ -284,7 +284,7 @@ export function MessageBubble({
           </button>
         )}
 
-        {/* Read receipt for last own message */}
+        {/* Messenger-style read receipt: tiny avatar when seen, ring/check for delivered/sent */}
         {isMine && showReceipt && !isUnsent && (() => {
           const fmt = (iso?: string | null) => {
             if (!iso) return "";
@@ -294,36 +294,39 @@ export function MessageBubble({
           const sentTime = fmt(msg.created_at);
           const deliveredTime = fmt(msg.delivered_at);
           const readTime = fmt(msg.read_at);
+          const title =
+            (msg.is_read && readTime && `Seen ${readTime}`) ||
+            (msg.delivered_at && deliveredTime && `Delivered ${deliveredTime}`) ||
+            (sentTime && `Sent ${sentTime}`) || "";
           return (
             <button
               onClick={(e) => { e.stopPropagation(); onShowReceipts?.(msg); }}
-              className="mt-0.5 mr-2 flex items-center gap-1 text-[10px] text-muted-foreground"
-              title={
-                (msg.is_read && readTime && `Seen ${readTime}`) ||
-                (msg.delivered_at && deliveredTime && `Delivered ${deliveredTime}`) ||
-                (sentTime && `Sent ${sentTime}`) || ""
-              }
+              className="mt-0.5 mr-1 flex items-center"
+              title={title}
+              aria-label={title}
             >
               {msg.is_read ? (
-                <>
-                  <CheckCheck className="h-3 w-3 text-primary" />
-                  <span>Seen{readTime ? ` · ${readTime}` : ""}</span>
-                </>
+                avatarUrl ? (
+                  <img src={avatarUrl} alt="" className="h-3.5 w-3.5 rounded-full object-cover ring-1 ring-background" />
+                ) : (
+                  <span className="h-3.5 w-3.5 rounded-full bg-primary/80 text-primary-foreground text-[8px] font-bold flex items-center justify-center ring-1 ring-background">
+                    {otherName.charAt(0)}
+                  </span>
+                )
               ) : isDelivered ? (
-                <>
-                  <CheckCheck className="h-3 w-3" />
-                  <span>Delivered{deliveredTime ? ` · ${deliveredTime}` : ""}</span>
-                </>
+                <span className="h-3.5 w-3.5 rounded-full bg-foreground/70 text-background flex items-center justify-center">
+                  <Check className="h-2.5 w-2.5" strokeWidth={3} />
+                </span>
               ) : (
-                <>
-                  <Check className="h-3 w-3" />
-                  <span>Sent{sentTime ? ` · ${sentTime}` : ""}</span>
-                </>
+                <span className="h-3.5 w-3.5 rounded-full border border-foreground/40 flex items-center justify-center">
+                  <Check className="h-2 w-2 text-foreground/60" strokeWidth={3} />
+                </span>
               )}
             </button>
           );
         })()}
       </motion.div>
+
 
       {/* Hover quick action bar (desktop) */}
       <AnimatePresence>
