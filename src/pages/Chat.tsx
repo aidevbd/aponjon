@@ -314,8 +314,17 @@ const Chat = () => {
     if (!opts?.silent) setMessagesLoading(true);
     try {
       const raw = await getMessages(session.token, contact.id);
-      const data = reconcileMessages(await signMessagesImages(raw, session.token));
-      setMessages(data);
+      const data = await signMessagesImages(raw, session.token);
+      setMessages(prev => {
+        // Preserve optimistic pending temps whose real counterpart isn't on the server yet.
+        const pendings = prev.filter(m => m.pending);
+        const survivors = pendings.filter(p => !data.some(d =>
+          d.sender_id === p.sender_id &&
+          (d.content ?? null) === (p.content ?? null) &&
+          (d.image_url ?? null) === (p.image_url ?? null)
+        ));
+        return reconcileMessages([...(data as Message[]), ...survivors]);
+      });
       const lastMessage = data[data.length - 1];
       setContactPreviews((prev) => ({
         ...prev,
