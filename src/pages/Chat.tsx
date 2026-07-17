@@ -27,6 +27,7 @@ import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
 import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
 import { ChatMessagesSkeleton } from "@/components/chat/ChatMessagesSkeleton";
+import { reconcileMessages } from "@/lib/chatMessageUtils";
 import { notifyNewMessage } from "@/lib/notificationPrefs";
 
 
