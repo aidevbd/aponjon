@@ -29,6 +29,8 @@ import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/Fa
 import { ChatMessagesSkeleton } from "@/components/chat/ChatMessagesSkeleton";
 import { reconcileMessages } from "@/lib/chatMessageUtils";
 import { notifyNewMessage } from "@/lib/notificationPrefs";
+import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
+import { JumpToLatest } from "@/components/chat/JumpToLatest";
 
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
@@ -244,14 +246,14 @@ const Chat = () => {
     void channel.send({ type: "broadcast", event: "typing", payload: { sender_id: session.contactId } });
   };
 
-  useEffect(() => {
-    if (messages.length === 0 || !messageListRef.current) return;
-    const keepKeyboardStable = document.activeElement === inputRef.current;
-    messageListRef.current.scrollTo({
-      top: messageListRef.current.scrollHeight,
-      behavior: keepKeyboardStable ? "auto" : "smooth",
-    });
+  const { newBelowCount, scrollToBottom, resetForNewThread } = useSmartAutoScroll(
+    messageListRef,
+    messages,
+    session?.contactId,
+  );
 
+  // On own-send, restore keyboard focus without losing state.
+  useEffect(() => {
     if (Date.now() - recentSendAtRef.current < 1500) {
       restoreInputFocus(true);
     }
@@ -363,6 +365,7 @@ const Chat = () => {
     setQueuedCount(getOfflineQueueCountForContact(contact.id));
     setFailedMessages([]);
     setMessages([]);
+    resetForNewThread();
     loadMessages(contact);
   };
 
@@ -869,60 +872,68 @@ const Chat = () => {
             </motion.div>
           ) : (
             <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div ref={messageListRef} className="flex-1 overflow-y-auto px-4 py-4 pb-2 space-y-1">
-                {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
-                {!messagesLoading && filteredMessages.length === 0 && (
-                  <div className="text-center py-16 text-muted-foreground">
-                    <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">{searchQuery ? "কোনো মেসেজ পাওয়া যায়নি" : "এখনো কোনো মেসেজ নেই"}</p>
-                    {!searchQuery && <p className="text-xs mt-1">নিচের বক্সে লিখে প্রথম মেসেজ শুরু করুন</p>}
-                  </div>
-                )}
-                {(() => {
-                  // Find last own message id for receipt rendering
-                  let lastMineId: string | null = null;
-                  for (let i = filteredMessages.length - 1; i >= 0; i--) {
-                    if (filteredMessages[i].sender_id === session.contactId) { lastMineId = filteredMessages[i].id; break; }
-                  }
-                  return filteredMessages.map((msg, idx) => {
-                    const isMine = msg.sender_id === session.contactId;
-                    const showDateHeader = !searchQuery && shouldShowDateHeader(filteredMessages, idx);
-                    const prev = idx > 0 ? filteredMessages[idx - 1] : null;
-                    const next = idx < filteredMessages.length - 1 ? filteredMessages[idx + 1] : null;
-                    const sameAsNext = next && next.sender_id === msg.sender_id && (new Date(next.created_at).getTime() - new Date(msg.created_at).getTime() < 5 * 60 * 1000);
-                    const sameAsPrev = prev && prev.sender_id === msg.sender_id && (new Date(msg.created_at).getTime() - new Date(prev.created_at).getTime() < 5 * 60 * 1000);
-                    const showTail = !sameAsNext;
-                    const showAvatar = !isMine && !sameAsNext;
-                    return (
-                      <div key={msg.id}>
-                        {showDateHeader && (
-                          <div className="flex justify-center my-3">
-                            <span className="text-[10px] text-muted-foreground bg-muted/60 px-3 py-0.5 rounded-full">{getDateLabel(msg.created_at)}</span>
-                          </div>
-                        )}
-                        {!sameAsPrev && !isMine && (
-                          <div className="text-[10px] text-muted-foreground ml-10 mb-0.5">{selectedContact?.name}</div>
-                        )}
-                        <MessageBubble
-                          msg={msg}
-                          isMine={isMine}
-                          myId={session.contactId}
-                          otherName={selectedContact?.name || ""}
-                          showTail={showTail}
-                          showAvatar={showAvatar}
-                          avatarUrl={selectedContact?.photo_url || null}
-                          onOpenActions={(m) => setActionMessage(m)}
-                          onQuickReact={(m, e) => handleReact(m, e)}
-                          onStartReply={(m) => handleStartReply(m)}
-                          onShowEditHistory={(m) => handleShowEditHistory(m)}
-                          isDelivered={!!msg.delivered_at || !!msg.is_read}
-                          showReceipt={isMine && (showTail || msg.id === lastMineId)}
-                        />
-                      </div>
-                    );
-                  });
-                })()}
-                <div className="h-0" />
+              <div className="relative flex-1 flex flex-col min-h-0">
+                <div ref={messageListRef} className="flex-1 overflow-y-auto px-4 py-4 pb-2 space-y-1">
+                  {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
+                  {!messagesLoading && filteredMessages.length === 0 && (
+                    <div className="text-center py-16 text-muted-foreground">
+                      <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                      <p className="text-sm">{searchQuery ? "কোনো মেসেজ পাওয়া যায়নি" : "এখনো কোনো মেসেজ নেই"}</p>
+                      {!searchQuery && <p className="text-xs mt-1">নিচের বক্সে লিখে প্রথম মেসেজ শুরু করুন</p>}
+                    </div>
+                  )}
+                  {(() => {
+                    // Find last own message id for receipt rendering
+                    let lastMineId: string | null = null;
+                    for (let i = filteredMessages.length - 1; i >= 0; i--) {
+                      if (filteredMessages[i].sender_id === session.contactId) { lastMineId = filteredMessages[i].id; break; }
+                    }
+                    return filteredMessages.map((msg, idx) => {
+                      const isMine = msg.sender_id === session.contactId;
+                      const showDateHeader = !searchQuery && shouldShowDateHeader(filteredMessages, idx);
+                      const prev = idx > 0 ? filteredMessages[idx - 1] : null;
+                      const next = idx < filteredMessages.length - 1 ? filteredMessages[idx + 1] : null;
+                      const sameAsNext = next && next.sender_id === msg.sender_id && (new Date(next.created_at).getTime() - new Date(msg.created_at).getTime() < 5 * 60 * 1000);
+                      const sameAsPrev = prev && prev.sender_id === msg.sender_id && (new Date(msg.created_at).getTime() - new Date(prev.created_at).getTime() < 5 * 60 * 1000);
+                      const showTail = !sameAsNext;
+                      const showAvatar = !isMine && !sameAsNext;
+                      return (
+                        <div key={msg.id}>
+                          {showDateHeader && (
+                            <div className="flex justify-center my-3">
+                              <span className="text-[10px] text-muted-foreground bg-muted/60 px-3 py-0.5 rounded-full">{getDateLabel(msg.created_at)}</span>
+                            </div>
+                          )}
+                          {!sameAsPrev && !isMine && (
+                            <div className="text-[10px] text-muted-foreground ml-10 mb-0.5">{selectedContact?.name}</div>
+                          )}
+                          <MessageBubble
+                            msg={msg}
+                            isMine={isMine}
+                            myId={session.contactId}
+                            otherName={selectedContact?.name || ""}
+                            showTail={showTail}
+                            showAvatar={showAvatar}
+                            avatarUrl={selectedContact?.photo_url || null}
+                            onOpenActions={(m) => setActionMessage(m)}
+                            onQuickReact={(m, e) => handleReact(m, e)}
+                            onStartReply={(m) => handleStartReply(m)}
+                            onShowEditHistory={(m) => handleShowEditHistory(m)}
+                            isDelivered={!!msg.delivered_at || !!msg.is_read}
+                            showReceipt={isMine && (showTail || msg.id === lastMineId)}
+                          />
+                        </div>
+                      );
+                    });
+                  })()}
+                  <div className="h-0" />
+                </div>
+                <JumpToLatest
+                  show={newBelowCount > 0}
+                  count={newBelowCount}
+                  onClick={() => scrollToBottom(true)}
+                  className="bottom-3"
+                />
               </div>
 
               {isOtherTyping && (

@@ -15,6 +15,8 @@ import { NotificationPreferencesDialog } from "@/components/chat/NotificationPre
 import { notifyNewMessage } from "@/lib/notificationPrefs";
 import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
 import { upsertMessage, reconcileMessages } from "@/lib/chatMessageUtils";
+import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
+import { JumpToLatest } from "@/components/chat/JumpToLatest";
 
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
@@ -42,6 +44,7 @@ const AdminChat = () => {
   const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageListRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { selectedUserRef.current = selectedUser; }, [selectedUser]);
@@ -137,9 +140,11 @@ const AdminChat = () => {
 
 
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  const { newBelowCount, scrollToBottom, resetForNewThread } = useSmartAutoScroll(
+    messageListRef,
+    messages,
+    adminContactId,
+  );
 
   const loadChatUsers = async () => {
     try {
@@ -176,6 +181,7 @@ const AdminChat = () => {
     setSelectedUser(user);
     setFailedMessages([]);
     setMessages([]);
+    resetForNewThread();
     loadMessages(user);
   };
 
@@ -429,7 +435,8 @@ const AdminChat = () => {
             </motion.div>
           ) : (
             <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div className="flex-1 overflow-y-auto px-4 py-4 pb-2 space-y-2">
+              <div className="relative flex-1 flex flex-col min-h-0">
+              <div ref={messageListRef} className="flex-1 overflow-y-auto px-4 py-4 pb-2 space-y-2">
                 {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
                 {!messagesLoading && messages.length === 0 && (
                   <div className="text-center py-16 text-muted-foreground">
@@ -473,6 +480,14 @@ const AdminChat = () => {
                 })}
                 <div ref={messagesEndRef} />
               </div>
+              <JumpToLatest
+                show={newBelowCount > 0}
+                count={newBelowCount}
+                onClick={() => scrollToBottom(true)}
+                className="bottom-3"
+              />
+              </div>
+
 
               <FailedMessagesList
                 items={failedMessages}

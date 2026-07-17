@@ -18,6 +18,8 @@ import { ChatUserListSkeleton } from "@/components/skeletons/LoadingSkeletons";
 import { ChatMessagesSkeleton } from "@/components/chat/ChatMessagesSkeleton";
 import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
 import { upsertMessage, reconcileMessages } from "@/lib/chatMessageUtils";
+import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
+import { JumpToLatest } from "@/components/chat/JumpToLatest";
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
 type Message = {
@@ -184,14 +186,12 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     supabase.channel(channelName).send({ type: "broadcast", event: "typing", payload: { sender_id: adminContactId } });
   };
 
-  useEffect(() => {
-    if (messages.length === 0 || !messageListRef.current) return;
-    const keepKeyboardStable = document.activeElement === inputRef.current;
-    messageListRef.current.scrollTo({
-      top: messageListRef.current.scrollHeight,
-      behavior: keepKeyboardStable ? "auto" : "smooth",
-    });
-  }, [messages]);
+  const { newBelowCount, scrollToBottom, resetForNewThread } = useSmartAutoScroll(
+    messageListRef,
+    messages,
+    adminContactId,
+  );
+
 
   useEffect(() => {
     const total = Object.values(unreadMap).reduce((a, b) => a + b, 0);
@@ -243,6 +243,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     setSelectedUser(user);
     setFailedMessages([]);
     setMessages([]);
+    resetForNewThread();
     loadMessages(user);
   };
 
@@ -672,6 +673,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
             )}
 
             {/* Messages */}
+            <div className="relative flex-1 flex flex-col min-h-0">
             <div ref={messageListRef} className="flex-1 overflow-y-auto py-3 space-y-1">
               {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
               {!messagesLoading && filteredMessages.length === 0 && (
@@ -726,6 +728,14 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
               })()}
               <div className="h-0" />
             </div>
+            <JumpToLatest
+              show={newBelowCount > 0}
+              count={newBelowCount}
+              onClick={() => scrollToBottom(true)}
+              className="bottom-3"
+            />
+            </div>
+
 
             {isOtherTyping && (
               <div className="pb-1">
