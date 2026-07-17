@@ -181,6 +181,7 @@ const AdminChat = () => {
     setSelectedUser(user);
     setFailedMessages([]);
     setMessages([]);
+    resetForNewThread();
     loadMessages(user);
   };
 
