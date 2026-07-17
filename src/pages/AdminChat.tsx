@@ -140,9 +140,11 @@ const AdminChat = () => {
 
 
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  const { newBelowCount, scrollToBottom, resetForNewThread } = useSmartAutoScroll(
+    messageListRef,
+    messages,
+    adminContactId,
+  );
 
   const loadChatUsers = async () => {
     try {
