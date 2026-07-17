@@ -20,6 +20,7 @@ import { JumpToLatest } from "@/components/chat/JumpToLatest";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
 import { AutoResizeTextarea } from "@/components/chat/AutoResizeTextarea";
+import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
 
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
