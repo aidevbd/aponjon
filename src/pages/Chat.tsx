@@ -361,6 +361,7 @@ const Chat = () => {
     setSelectedContact(contact);
     setQueuedCount(getOfflineQueueCountForContact(contact.id));
     setFailedMessages([]);
+    setMessages([]);
     loadMessages(contact);
   };
 
