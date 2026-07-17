@@ -179,6 +179,23 @@ const AdminChat = () => {
     adminContactId,
   );
 
+  // Keyboard open / viewport change: keep latest message in view if user was near bottom.
+  const prevViewportRef = useRef<number>(viewportHeight);
+  useEffect(() => {
+    const el = messageListRef.current;
+    if (!el || !viewportHeight) return;
+    const prev = prevViewportRef.current;
+    prevViewportRef.current = viewportHeight;
+    if (viewportHeight === prev) return;
+    const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+    if (distance <= 150) {
+      requestAnimationFrame(() => {
+        el.scrollTo({ top: el.scrollHeight, behavior: "auto" });
+      });
+    }
+  }, [viewportHeight]);
+
+
   const loadChatUsers = async () => {
     try {
       const { data, error } = await supabase.rpc("get_admin_chat_users");

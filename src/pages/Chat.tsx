@@ -256,6 +256,23 @@ const Chat = () => {
     session?.contactId,
   );
 
+  // When viewport height changes (e.g. keyboard opens), keep the latest message in view
+  // if the user was already near the bottom of the conversation.
+  const prevViewportRef = useRef<number>(viewportHeight);
+  useEffect(() => {
+    const el = messageListRef.current;
+    if (!el || !viewportHeight) return;
+    const prev = prevViewportRef.current;
+    prevViewportRef.current = viewportHeight;
+    if (viewportHeight === prev) return;
+    const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+    if (distance <= 150) {
+      requestAnimationFrame(() => {
+        el.scrollTo({ top: el.scrollHeight, behavior: "auto" });
+      });
+    }
+  }, [viewportHeight]);
+
   // On own-send, restore keyboard focus without losing state.
   useEffect(() => {
     if (Date.now() - recentSendAtRef.current < 1500) {
