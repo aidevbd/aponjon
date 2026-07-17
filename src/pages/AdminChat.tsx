@@ -514,6 +514,11 @@ const AdminChat = () => {
                     </div>
                   );
                 })}
+                {isOtherTyping && (
+                  <div className="flex justify-start">
+                    <TypingIndicator name={selectedUser?.name} />
+                  </div>
+                )}
                 <div ref={messagesEndRef} />
               </div>
               <JumpToLatest
