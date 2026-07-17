@@ -138,7 +138,10 @@ const AdminChat = () => {
           (msg.sender_id === sel.id && msg.receiver_id === adminId) ||
           (msg.sender_id === adminId && msg.receiver_id === sel.id)
         )) {
-          if (msg.image_url) {
+          if (msg.sender_id === sel!.id) {
+            // Inbound from viewed user — refetch so server marks read & broadcasts `read`
+            void loadMessages(sel!);
+          } else if (msg.image_url) {
             void signMessagesImages([msg]).then(([signed]) => {
               setMessages(prev => upsertMessage(prev, signed));
             });
