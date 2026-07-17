@@ -17,6 +17,7 @@ import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/Fa
 import { upsertMessage, reconcileMessages } from "@/lib/chatMessageUtils";
 import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
+import { TypingIndicator } from "@/components/chat/TypingIndicator";
 
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
@@ -42,10 +43,14 @@ const AdminChat = () => {
   const [uploading, setUploading] = useState(false);
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
+  const [isOtherTyping, setIsOtherTyping] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastTypingRef = useRef(0);
 
   useEffect(() => { selectedUserRef.current = selectedUser; }, [selectedUser]);
   useEffect(() => { adminContactIdRef.current = adminContactId; }, [adminContactId]);
@@ -199,6 +204,37 @@ const AdminChat = () => {
       window.removeEventListener("online", resync);
     };
   }, [selectedUser, loadMessages]);
+
+  // Typing indicator — subscribe to the shared per-conversation channel
+  useEffect(() => {
+    if (!adminContactId || !selectedUser) { setIsOtherTyping(false); typingChannelRef.current = null; return; }
+    const channelName = `typing:${[adminContactId, selectedUser.id].sort().join(":")}`;
+    const channel = supabase.channel(channelName)
+      .on("broadcast", { event: "typing" }, (payload) => {
+        if (payload.payload?.sender_id === selectedUser.id) {
+          setIsOtherTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setIsOtherTyping(false), 3000);
+        }
+      })
+      .subscribe();
+    typingChannelRef.current = channel;
+    return () => {
+      typingChannelRef.current = null;
+      supabase.removeChannel(channel);
+      setIsOtherTyping(false);
+    };
+  }, [adminContactId, selectedUser]);
+
+  const emitTyping = () => {
+    if (!adminContactId || !selectedUser) return;
+    const now = Date.now();
+    if (now - lastTypingRef.current < 2000) return;
+    lastTypingRef.current = now;
+    const channel = typingChannelRef.current;
+    if (!channel) return;
+    void channel.send({ type: "broadcast", event: "typing", payload: { sender_id: adminContactId } });
+  };
 
   const handleSetup = async () => {
     if (!setupName.trim()) { toast.error("নাম দিন"); return; }
@@ -478,6 +514,11 @@ const AdminChat = () => {
                     </div>
                   );
                 })}
+                {isOtherTyping && (
+                  <div className="flex justify-start">
+                    <TypingIndicator name={selectedUser?.name} />
+                  </div>
+                )}
                 <div ref={messagesEndRef} />
               </div>
               <JumpToLatest
@@ -505,7 +546,7 @@ const AdminChat = () => {
                   <Input
                     placeholder="উত্তর লিখুন..."
                     value={msgInput}
-                    onChange={(e) => setMsgInput(e.target.value)}
+                    onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
                     onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                     className="bg-background/50 text-sm h-9 flex-1 min-w-0"
                     disabled={sending}

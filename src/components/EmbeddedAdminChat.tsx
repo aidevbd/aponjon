@@ -74,6 +74,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const msgUpdateTimerRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const restoreInputFocus = useCallback((force = false) => {
     requestAnimationFrame(() => {
@@ -163,7 +164,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   }, [adminContactId, selectedUser]);
 
   useEffect(() => {
-    if (!adminContactId || !selectedUser) { setIsOtherTyping(false); return; }
+    if (!adminContactId || !selectedUser) { setIsOtherTyping(false); typingChannelRef.current = null; return; }
     const channelName = `typing:${[adminContactId, selectedUser.id].sort().join(":")}`;
     const channel = supabase.channel(channelName)
       .on("broadcast", { event: "typing" }, (payload) => {
@@ -174,7 +175,12 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
         }
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); setIsOtherTyping(false); };
+    typingChannelRef.current = channel;
+    return () => {
+      typingChannelRef.current = null;
+      supabase.removeChannel(channel);
+      setIsOtherTyping(false);
+    };
   }, [adminContactId, selectedUser]);
 
   const emitTyping = () => {
@@ -182,8 +188,9 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     const now = Date.now();
     if (now - lastTypingRef.current < 2000) return;
     lastTypingRef.current = now;
-    const channelName = `typing:${[adminContactId, selectedUser.id].sort().join(":")}`;
-    supabase.channel(channelName).send({ type: "broadcast", event: "typing", payload: { sender_id: adminContactId } });
+    const channel = typingChannelRef.current;
+    if (!channel) return;
+    void channel.send({ type: "broadcast", event: "typing", payload: { sender_id: adminContactId } });
   };
 
   const { newBelowCount, scrollToBottom, resetForNewThread } = useSmartAutoScroll(
