@@ -180,6 +180,11 @@ export async function uploadChatImage(file: File, sessionToken?: string): Promis
     apikey: anonKey,
     Authorization: `Bearer ${anonKey}`,
   };
+  // Prefer authenticated admin session (required for storage RLS when no chat-session token exists)
+  const { data: authData } = await supabase.auth.getSession();
+  if (authData.session?.access_token) {
+    headers["Authorization"] = `Bearer ${authData.session.access_token}`;
+  }
   if (sessionToken) headers["x-chat-session"] = sessionToken;
 
   const res = await fetch(
