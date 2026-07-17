@@ -29,6 +29,7 @@ type Message = { id: string; sender_id: string; receiver_id: string; content: st
 const AdminChat = () => {
   const navigate = useNavigate();
   const viewportHeight = useVisualViewportHeight();
+  const isTouch = useIsTouchDevice();
   const [adminContactId, setAdminContactId] = useState<string | null>(null);
   const [needsSetup, setNeedsSetup] = useState(false);
   const [setupName, setSetupName] = useState("");
