@@ -58,6 +58,7 @@ type ContactPreview = {
 
 const Chat = () => {
   const navigate = useNavigate();
+  const viewportHeight = useVisualViewportHeight();
   const [session, setSession] = useState<ChatSession | null>(null);
   const [loginPhone, setLoginPhone] = useState("");
   const [loginSecret, setLoginSecret] = useState("");
