@@ -129,19 +129,22 @@ export function MessageBubble({
   }, []);
 
   const bubbleBase = cn(
-    "relative inline-block max-w-full px-3.5 py-2 text-sm break-words whitespace-pre-wrap leading-snug",
+    "relative inline-block max-w-full px-3.5 py-2 text-[15px] break-words whitespace-pre-wrap leading-snug shadow-sm",
     "transition-shadow",
+    isMine ? "chat-bubble-mine" : "chat-bubble-other",
+    // Messenger-style stacked corners: rounded pill on top, sharper corner near tail
     isMine
-      ? "bg-primary text-primary-foreground"
-      : "bg-card border border-border/50 text-foreground",
-    // Messenger-style rounded corners with tail on the last bubble of a group
-    isMine
-      ? showTail
-        ? "rounded-2xl rounded-br-md"
-        : "rounded-2xl rounded-br-2xl"
-      : showTail
-        ? "rounded-2xl rounded-bl-md"
-        : "rounded-2xl rounded-bl-2xl",
+      ? cn(
+          "rounded-[18px]",
+          !showTail && "rounded-br-[6px]",
+          // when part of a group above, sharpen top-right
+          "data-[grouped-above=true]:rounded-tr-[6px]",
+        )
+      : cn(
+          "rounded-[18px]",
+          !showTail && "rounded-bl-[6px]",
+          "data-[grouped-above=true]:rounded-tl-[6px]",
+        ),
     highlight && "ring-2 ring-primary/50",
     msg.is_pinned && "ring-1 ring-primary/30",
     isUnsent && "italic opacity-60 border border-dashed",
