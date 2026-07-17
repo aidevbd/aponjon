@@ -15,6 +15,8 @@ import { NotificationPreferencesDialog } from "@/components/chat/NotificationPre
 import { notifyNewMessage } from "@/lib/notificationPrefs";
 import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
 import { upsertMessage, reconcileMessages } from "@/lib/chatMessageUtils";
+import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
+import { JumpToLatest } from "@/components/chat/JumpToLatest";
 
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
