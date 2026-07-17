@@ -608,7 +608,16 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   }
 
   return (
-    <EmbeddedChatShell>
+    <div
+      ref={shellRef}
+      className="flex flex-col"
+      style={{
+        height: viewportHeight
+          ? `${Math.max(320, viewportHeight - shellTop)}px`
+          : "calc(100dvh - 160px)",
+        minHeight: "320px",
+      }}
+    >
 
       <AnimatePresence mode="wait">
         {!selectedUser ? (
