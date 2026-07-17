@@ -20,6 +20,7 @@ import { JumpToLatest } from "@/components/chat/JumpToLatest";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
 import { AutoResizeTextarea } from "@/components/chat/AutoResizeTextarea";
+import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
 
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
@@ -28,6 +29,7 @@ type Message = { id: string; sender_id: string; receiver_id: string; content: st
 const AdminChat = () => {
   const navigate = useNavigate();
   const viewportHeight = useVisualViewportHeight();
+  const isTouch = useIsTouchDevice();
   const [adminContactId, setAdminContactId] = useState<string | null>(null);
   const [needsSetup, setNeedsSetup] = useState(false);
   const [setupName, setSetupName] = useState("");
@@ -620,7 +622,7 @@ const AdminChat = () => {
                     placeholder="উত্তর লিখুন..."
                     value={msgInput}
                     onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
-                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !isTouch) { e.preventDefault(); handleSend(); } }}
                     className="flex-1 min-w-0"
                     disabled={sending}
                     maxHeight={120}

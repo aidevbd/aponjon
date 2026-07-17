@@ -33,6 +33,7 @@ import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
 import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
 import { AutoResizeTextarea } from "@/components/chat/AutoResizeTextarea";
+import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
 
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
@@ -60,6 +61,7 @@ type ContactPreview = {
 const Chat = () => {
   const navigate = useNavigate();
   const viewportHeight = useVisualViewportHeight();
+  const isTouch = useIsTouchDevice();
   const [session, setSession] = useState<ChatSession | null>(null);
   const [loginPhone, setLoginPhone] = useState("");
   const [loginSecret, setLoginSecret] = useState("");
@@ -1102,7 +1104,7 @@ const Chat = () => {
                     value={msgInput}
                     onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
+                      if (e.key === "Enter" && !e.shiftKey && !isTouch) {
                         e.preventDefault();
                         void handleSend();
                       }

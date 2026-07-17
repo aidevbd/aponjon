@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { AutoResizeTextarea } from "@/components/chat/AutoResizeTextarea";
+import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadChatImage, signMessagesImages } from "@/lib/chatSession";
@@ -42,6 +43,7 @@ interface EmbeddedAdminChatProps {
 }
 
 export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
+  const isTouch = useIsTouchDevice();
   const [adminContactId, setAdminContactId] = useState<string | null>(null);
   const [needsSetup, setNeedsSetup] = useState(false);
   const [setupName, setSetupName] = useState("");
@@ -794,7 +796,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                   value={msgInput}
                   onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
+                    if (e.key === "Enter" && !e.shiftKey && !isTouch) {
                       e.preventDefault();
                       void handleSend();
                     }
