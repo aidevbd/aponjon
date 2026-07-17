@@ -84,7 +84,7 @@ const AdminChat = () => {
   // Admin heartbeat + poll presence for chat users
   useEffect(() => {
     if (!adminContactId) return;
-    const beat = () => { supabase.rpc("update_admin_presence").catch(() => {}); };
+    const beat = async () => { try { await supabase.rpc("update_admin_presence"); } catch {} };
     beat();
     const hb = setInterval(beat, 30_000);
     return () => clearInterval(hb);
