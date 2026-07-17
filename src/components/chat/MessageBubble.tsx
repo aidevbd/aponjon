@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Reply, Check } from "lucide-react";
+import { Reply, CheckCheck, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type ReactionEntry = { emoji: string; reactor_id: string };
@@ -129,22 +129,19 @@ export function MessageBubble({
   }, []);
 
   const bubbleBase = cn(
-    "relative inline-block max-w-full px-3.5 py-2 text-[15px] break-words whitespace-pre-wrap leading-snug shadow-sm",
+    "relative inline-block max-w-full px-3.5 py-2 text-sm break-words whitespace-pre-wrap leading-snug",
     "transition-shadow",
-    isMine ? "chat-bubble-mine" : "chat-bubble-other",
-    // Messenger-style stacked corners: rounded pill on top, sharper corner near tail
     isMine
-      ? cn(
-          "rounded-[18px]",
-          !showTail && "rounded-br-[6px]",
-          // when part of a group above, sharpen top-right
-          "data-[grouped-above=true]:rounded-tr-[6px]",
-        )
-      : cn(
-          "rounded-[18px]",
-          !showTail && "rounded-bl-[6px]",
-          "data-[grouped-above=true]:rounded-tl-[6px]",
-        ),
+      ? "bg-primary text-primary-foreground"
+      : "bg-card border border-border/50 text-foreground",
+    // Messenger-style rounded corners with tail on the last bubble of a group
+    isMine
+      ? showTail
+        ? "rounded-2xl rounded-br-md"
+        : "rounded-2xl rounded-br-2xl"
+      : showTail
+        ? "rounded-2xl rounded-bl-md"
+        : "rounded-2xl rounded-bl-2xl",
     highlight && "ring-2 ring-primary/50",
     msg.is_pinned && "ring-1 ring-primary/30",
     isUnsent && "italic opacity-60 border border-dashed",
@@ -284,7 +281,7 @@ export function MessageBubble({
           </button>
         )}
 
-        {/* Messenger-style read receipt: tiny avatar when seen, ring/check for delivered/sent */}
+        {/* Read receipt for last own message */}
         {isMine && showReceipt && !isUnsent && (() => {
           const fmt = (iso?: string | null) => {
             if (!iso) return "";
@@ -294,39 +291,36 @@ export function MessageBubble({
           const sentTime = fmt(msg.created_at);
           const deliveredTime = fmt(msg.delivered_at);
           const readTime = fmt(msg.read_at);
-          const title =
-            (msg.is_read && readTime && `Seen ${readTime}`) ||
-            (msg.delivered_at && deliveredTime && `Delivered ${deliveredTime}`) ||
-            (sentTime && `Sent ${sentTime}`) || "";
           return (
             <button
               onClick={(e) => { e.stopPropagation(); onShowReceipts?.(msg); }}
-              className="mt-0.5 mr-1 flex items-center"
-              title={title}
-              aria-label={title}
+              className="mt-0.5 mr-2 flex items-center gap-1 text-[10px] text-muted-foreground"
+              title={
+                (msg.is_read && readTime && `Seen ${readTime}`) ||
+                (msg.delivered_at && deliveredTime && `Delivered ${deliveredTime}`) ||
+                (sentTime && `Sent ${sentTime}`) || ""
+              }
             >
               {msg.is_read ? (
-                avatarUrl ? (
-                  <img src={avatarUrl} alt="" className="h-3.5 w-3.5 rounded-full object-cover ring-1 ring-background" />
-                ) : (
-                  <span className="h-3.5 w-3.5 rounded-full bg-primary/80 text-primary-foreground text-[8px] font-bold flex items-center justify-center ring-1 ring-background">
-                    {otherName.charAt(0)}
-                  </span>
-                )
+                <>
+                  <CheckCheck className="h-3 w-3 text-primary" />
+                  <span>Seen{readTime ? ` · ${readTime}` : ""}</span>
+                </>
               ) : isDelivered ? (
-                <span className="h-3.5 w-3.5 rounded-full bg-foreground/70 text-background flex items-center justify-center">
-                  <Check className="h-2.5 w-2.5" strokeWidth={3} />
-                </span>
+                <>
+                  <CheckCheck className="h-3 w-3" />
+                  <span>Delivered{deliveredTime ? ` · ${deliveredTime}` : ""}</span>
+                </>
               ) : (
-                <span className="h-3.5 w-3.5 rounded-full border border-foreground/40 flex items-center justify-center">
-                  <Check className="h-2 w-2 text-foreground/60" strokeWidth={3} />
-                </span>
+                <>
+                  <Check className="h-3 w-3" />
+                  <span>Sent{sentTime ? ` · ${sentTime}` : ""}</span>
+                </>
               )}
             </button>
           );
         })()}
       </motion.div>
-
 
       {/* Hover quick action bar (desktop) */}
       <AnimatePresence>
