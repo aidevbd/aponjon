@@ -871,7 +871,13 @@ const Chat = () => {
               )}
             </motion.div>
           ) : (
-            <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative flex-1 flex flex-col min-h-0 overflow-hidden">
+              <JumpToLatest
+                show={newBelowCount > 0}
+                count={newBelowCount}
+                onClick={() => scrollToBottom(true)}
+                className="bottom-2"
+              />
               <div ref={messageListRef} className="flex-1 overflow-y-auto px-4 py-4 pb-2 space-y-1">
                 {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
                 {!messagesLoading && filteredMessages.length === 0 && (
