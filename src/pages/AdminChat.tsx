@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
 import { notifyNewMessage } from "@/lib/notificationPrefs";
 import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
+import { upsertMessage, reconcileMessages } from "@/lib/chatMessageUtils";
 
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
@@ -87,10 +88,10 @@ const AdminChat = () => {
         )) {
           if (msg.image_url) {
             void signMessagesImages([msg]).then(([signed]) => {
-              setMessages(prev => prev.some(m => m.id === signed.id) ? prev : [...prev, signed]);
+              setMessages(prev => upsertMessage(prev, signed));
             });
           } else {
-            setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
+            setMessages(prev => upsertMessage(prev, msg));
           }
         }
         if (msg.receiver_id === adminId && msg.sender_id !== adminId) {
@@ -123,7 +124,7 @@ const AdminChat = () => {
           try {
             const { data } = await supabase.rpc("get_admin_messages", { p_other_id: sel.id });
             const signed = await signMessagesImages((data || []) as unknown as Message[]);
-            setMessages(signed);
+            setMessages(reconcileMessages(signed));
           } catch {}
         }, 200);
       })
@@ -164,7 +165,7 @@ const AdminChat = () => {
       const { data, error } = await supabase.rpc("get_admin_messages", { p_other_id: user.id });
       if (error) throw error;
       const signed = await signMessagesImages((data || []) as unknown as Message[]);
-      setMessages(signed);
+      setMessages(reconcileMessages(signed));
       setUnreadMap(prev => { const n = { ...prev }; delete n[user.id]; return n; });
       void (async () => { try { await supabase.rpc("mark_conversation_delivered_admin", { p_other_id: user.id } as any); } catch {} })();
     } catch (err) { console.error("[catch]", err); toast.error("মেসেজ লোড করতে সমস্যা"); }
@@ -177,6 +178,21 @@ const AdminChat = () => {
     setMessages([]);
     loadMessages(user);
   };
+
+  // Consistency check: when the tab becomes visible or connection returns,
+  // resync the current thread so we don't miss any events fired while hidden.
+  useEffect(() => {
+    if (!selectedUser) return;
+    const resync = () => {
+      if (document.visibilityState === "visible") void loadMessages(selectedUser);
+    };
+    document.addEventListener("visibilitychange", resync);
+    window.addEventListener("online", resync);
+    return () => {
+      document.removeEventListener("visibilitychange", resync);
+      window.removeEventListener("online", resync);
+    };
+  }, [selectedUser, loadMessages]);
 
   const handleSetup = async () => {
     if (!setupName.trim()) { toast.error("নাম দিন"); return; }

@@ -27,6 +27,7 @@ import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
 import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
 import { ChatMessagesSkeleton } from "@/components/chat/ChatMessagesSkeleton";
+import { reconcileMessages } from "@/lib/chatMessageUtils";
 import { notifyNewMessage } from "@/lib/notificationPrefs";
 
 
@@ -309,7 +310,7 @@ const Chat = () => {
     if (!opts?.silent) setMessagesLoading(true);
     try {
       const raw = await getMessages(session.token, contact.id);
-      const data = await signMessagesImages(raw, session.token);
+      const data = reconcileMessages(await signMessagesImages(raw, session.token));
       setMessages(data);
       const lastMessage = data[data.length - 1];
       setContactPreviews((prev) => ({
@@ -364,6 +365,20 @@ const Chat = () => {
     setMessages([]);
     loadMessages(contact);
   };
+
+  // Consistency check: resync current thread on tab focus / online events.
+  useEffect(() => {
+    if (!session || !selectedContact) return;
+    const resync = () => {
+      if (document.visibilityState === "visible") void loadMessages(selectedContact, { silent: true });
+    };
+    document.addEventListener("visibilitychange", resync);
+    window.addEventListener("online", resync);
+    return () => {
+      document.removeEventListener("visibilitychange", resync);
+      window.removeEventListener("online", resync);
+    };
+  }, [session, selectedContact, loadMessages]);
 
   const handleLogin = async () => {
     if (!loginPhone.trim() || !loginSecret.trim()) {
