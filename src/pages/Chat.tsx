@@ -33,6 +33,7 @@ import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
 import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
 import { AutoResizeTextarea } from "@/components/chat/AutoResizeTextarea";
+import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
 
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
