@@ -728,6 +728,14 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
               })()}
               <div className="h-0" />
             </div>
+            <JumpToLatest
+              show={newBelowCount > 0}
+              count={newBelowCount}
+              onClick={() => scrollToBottom(true)}
+              className="bottom-3"
+            />
+            </div>
+
 
             {isOtherTyping && (
               <div className="pb-1">
