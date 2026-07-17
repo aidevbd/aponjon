@@ -113,6 +113,38 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     return () => clearInterval(heartbeat);
   }, [adminContactId]);
 
+  // Live presence: poll periodically AND subscribe to user_presence realtime updates
+  useEffect(() => {
+    if (!adminContactId || chatUsers.length === 0) return;
+    let stopped = false;
+    const ids = chatUsers.map(u => u.id);
+    const refresh = async () => {
+      try {
+        const { data } = await supabase.rpc("get_user_presence", { p_contact_ids: ids });
+        if (stopped || !data) return;
+        const map: Record<string, { lastSeen: string; isOnline: boolean }> = {};
+        (data as any[]).forEach((p) => { map[p.contact_id] = { lastSeen: p.last_seen_at, isOnline: p.is_online }; });
+        setPresenceMap(map);
+      } catch {}
+    };
+    refresh();
+    const poll = setInterval(refresh, 15000);
+    const idSet = new Set(ids);
+    const channel = supabase
+      .channel(`presence-embed-${adminContactId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_presence" }, (payload) => {
+        const row: any = payload.new || payload.old;
+        if (!row || !idSet.has(row.contact_id)) return;
+        setPresenceMap(prev => ({
+          ...prev,
+          [row.contact_id]: { lastSeen: row.last_seen_at, isOnline: !!row.is_online },
+        }));
+      })
+      .subscribe();
+    return () => { stopped = true; clearInterval(poll); supabase.removeChannel(channel); };
+  }, [adminContactId, chatUsers]);
+
+
   useEffect(() => {
     if (!adminContactId) return;
     const channel = supabase
