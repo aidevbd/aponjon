@@ -98,8 +98,8 @@ const AdminChat = () => {
   useEffect(() => {
     if (!adminContactId || chatUsers.length === 0) return;
     let stop = false;
+    const ids = chatUsers.map((u) => u.id);
     const load = async () => {
-      const ids = chatUsers.map((u) => u.id);
       const { data } = await supabase.rpc("get_user_presence", { p_contact_ids: ids });
       if (stop || !data) return;
       const map: Record<string, { isOnline: boolean; lastSeen: string }> = {};
@@ -107,9 +107,22 @@ const AdminChat = () => {
       setPresenceMap(map);
     };
     load();
-    const t = setInterval(load, 20_000);
-    return () => { stop = true; clearInterval(t); };
+    const t = setInterval(load, 15000);
+    const idSet = new Set(ids);
+    const channel = supabase
+      .channel(`presence-admin-${adminContactId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_presence" }, (payload) => {
+        const row: any = payload.new || payload.old;
+        if (!row || !idSet.has(row.contact_id)) return;
+        setPresenceMap(prev => ({
+          ...prev,
+          [row.contact_id]: { isOnline: !!row.is_online, lastSeen: row.last_seen_at },
+        }));
+      })
+      .subscribe();
+    return () => { stop = true; clearInterval(t); supabase.removeChannel(channel); };
   }, [adminContactId, chatUsers]);
+
 
   // Realtime — subscribe once per admin contact; read latest selectedUser via refs to avoid stale closure
   useEffect(() => {
