@@ -366,6 +366,20 @@ const Chat = () => {
     loadMessages(contact);
   };
 
+  // Consistency check: resync current thread on tab focus / online events.
+  useEffect(() => {
+    if (!session || !selectedContact) return;
+    const resync = () => {
+      if (document.visibilityState === "visible") void loadMessages(selectedContact, { silent: true });
+    };
+    document.addEventListener("visibilitychange", resync);
+    window.addEventListener("online", resync);
+    return () => {
+      document.removeEventListener("visibilitychange", resync);
+      window.removeEventListener("online", resync);
+    };
+  }, [session, selectedContact, loadMessages]);
+
   const handleLogin = async () => {
     if (!loginPhone.trim() || !loginSecret.trim()) {
       toast.error("ফোন নম্বর ও সিক্রেট কোড দিন");
