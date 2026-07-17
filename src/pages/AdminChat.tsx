@@ -19,6 +19,7 @@ import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
+import { AutoResizeTextarea } from "@/components/chat/AutoResizeTextarea";
 
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
@@ -610,18 +611,19 @@ const AdminChat = () => {
 
               <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-3 sm:px-4 py-3 shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
 
-                <div className="flex items-center gap-1.5 sm:gap-2 w-full">
+                <div className="flex items-end gap-1.5 sm:gap-2 w-full">
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" aria-label="ছবি পাঠান" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                     {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4 text-primary" />}
                   </Button>
-                  <Input
+                  <AutoResizeTextarea
                     placeholder="উত্তর লিখুন..."
                     value={msgInput}
                     onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
-                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-                    className="bg-background/50 text-sm h-9 flex-1 min-w-0"
+                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                    className="flex-1 min-w-0"
                     disabled={sending}
+                    maxHeight={120}
                   />
                   <Button variant="hero" size="icon" className="h-9 w-9 shrink-0 rounded-full" aria-label="মেসেজ পাঠান" onClick={handleSend} disabled={sending || !msgInput.trim()}>
                     <Send className="h-4 w-4" />

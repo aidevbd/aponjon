@@ -4,6 +4,7 @@ import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Loader2, Set
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
+import { AutoResizeTextarea } from "@/components/chat/AutoResizeTextarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadChatImage, signMessagesImages } from "@/lib/chatSession";
@@ -73,7 +74,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const messageListRef = useRef<HTMLDivElement>(null);
   const msgUpdateTimerRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const restoreInputFocus = useCallback((force = false) => {
@@ -781,13 +782,13 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
             {/* Input */}
             <div className="border-t border-border/50 pt-3 px-1">
-              <div className="flex items-center gap-1.5 sm:gap-2 w-full">
+              <div className="flex items-end gap-1.5 sm:gap-2 w-full">
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 <EmojiPicker inputRef={inputRef} onSelect={(emoji) => setMsgInput(prev => prev + emoji)} />
                 <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" aria-label="ছবি পাঠান" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                   {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4 text-primary" />}
                 </Button>
-                <Input
+                <AutoResizeTextarea
                   ref={inputRef}
                   placeholder={editingMsg ? "এডিট করুন..." : "উত্তর লিখুন..."}
                   value={msgInput}
@@ -798,7 +799,8 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
                       void handleSend();
                     }
                   }}
-                  className="bg-card h-9 text-sm flex-1 min-w-0"
+                  className="bg-card flex-1 min-w-0"
+                  maxHeight={120}
                 />
                 <Button
                   type="button"

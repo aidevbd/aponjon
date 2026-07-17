@@ -32,6 +32,7 @@ import { notifyNewMessage } from "@/lib/notificationPrefs";
 import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
 import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
+import { AutoResizeTextarea } from "@/components/chat/AutoResizeTextarea";
 
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
@@ -95,7 +96,7 @@ const Chat = () => {
   const recentSendAtRef = useRef(0);
   const messageListRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const longPressTimeoutRef = useRef<number | null>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const msgUpdateTimerRef = useRef<number | null>(null);
@@ -1081,7 +1082,7 @@ const Chat = () => {
 
 
               <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-3 py-2 shrink-0 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-                <div className="flex items-center gap-1.5 sm:gap-2 w-full">
+                <div className="flex items-end gap-1.5 sm:gap-2 w-full">
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   <div className="flex items-center shrink-0">
                     <EmojiPicker inputRef={inputRef} onSelect={(emoji) => setMsgInput(prev => prev + emoji)} />
@@ -1095,7 +1096,7 @@ const Chat = () => {
                       {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4 text-primary" />}
                     </Button>
                   </div>
-                  <Input
+                  <AutoResizeTextarea
                     ref={inputRef}
                     placeholder={editingMsg ? "এডিট করুন..." : "মেসেজ লিখুন..."}
                     value={msgInput}
@@ -1106,7 +1107,8 @@ const Chat = () => {
                         void handleSend();
                       }
                     }}
-                    className="bg-background/50 text-sm h-9 flex-1 min-w-0"
+                    className="flex-1 min-w-0"
+                    maxHeight={120}
                   />
                   <Button
                     type="button"
