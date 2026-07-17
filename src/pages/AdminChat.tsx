@@ -44,6 +44,7 @@ const AdminChat = () => {
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
+  const [presenceMap, setPresenceMap] = useState<Record<string, { isOnline: boolean; lastSeen: string }>>({});
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
@@ -79,6 +80,31 @@ const AdminChat = () => {
     loadChatUsers();
     loadUnread();
   }, [adminContactId]);
+
+  // Admin heartbeat + poll presence for chat users
+  useEffect(() => {
+    if (!adminContactId) return;
+    const beat = async () => { try { await supabase.rpc("update_admin_presence"); } catch {} };
+    beat();
+    const hb = setInterval(beat, 30_000);
+    return () => clearInterval(hb);
+  }, [adminContactId]);
+
+  useEffect(() => {
+    if (!adminContactId || chatUsers.length === 0) return;
+    let stop = false;
+    const load = async () => {
+      const ids = chatUsers.map((u) => u.id);
+      const { data } = await supabase.rpc("get_user_presence", { p_contact_ids: ids });
+      if (stop || !data) return;
+      const map: Record<string, { isOnline: boolean; lastSeen: string }> = {};
+      (data as any[]).forEach((p) => { map[p.contact_id] = { isOnline: p.is_online, lastSeen: p.last_seen_at }; });
+      setPresenceMap(map);
+    };
+    load();
+    const t = setInterval(load, 20_000);
+    return () => { stop = true; clearInterval(t); };
+  }, [adminContactId, chatUsers]);
 
   // Realtime — subscribe once per admin contact; read latest selectedUser via refs to avoid stale closure
   useEffect(() => {
@@ -181,6 +207,19 @@ const AdminChat = () => {
     } catch (err) { console.error("[catch]", err); toast.error("মেসেজ লোড করতে সমস্যা"); }
     finally { setMessagesLoading(false); }
   }, []);
+
+  const formatLastSeen = (p?: { isOnline: boolean; lastSeen: string }) => {
+    if (!p) return null;
+    if (p.isOnline) return "এখন অনলাইন";
+    const diff = Date.now() - new Date(p.lastSeen).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "একটু আগে সক্রিয়";
+    if (mins < 60) return `${mins} মিনিট আগে সক্রিয়`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs} ঘণ্টা আগে সক্রিয়`;
+    const days = Math.floor(hrs / 24);
+    return `${days} দিন আগে সক্রিয়`;
+  };
 
   const handleSelectUser = (user: ChatUser) => {
     setSelectedUser(user);
@@ -397,14 +436,21 @@ const AdminChat = () => {
               <button onClick={() => setSelectedUser(null)} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
                 <ArrowLeft className="h-5 w-5" />
                 <div className="flex items-center gap-2">
-                  {selectedUser.photo_url ? (
-                    <img src={selectedUser.photo_url} alt={selectedUser.name} className="h-8 w-8 rounded-full object-cover border border-primary/20" />
-                  ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</div>
-                  )}
-                  <div>
-                    <span className="font-semibold text-sm">{selectedUser.name}</span>
-                    <span className="text-[10px] text-muted-foreground ml-2">{selectedUser.phone}</span>
+                  <div className="relative shrink-0">
+                    {selectedUser.photo_url ? (
+                      <img src={selectedUser.photo_url} alt={selectedUser.name} className="h-8 w-8 rounded-full object-cover border border-primary/20" />
+                    ) : (
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</div>
+                    )}
+                    {presenceMap[selectedUser.id]?.isOnline && (
+                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-card" />
+                    )}
+                  </div>
+                  <div className="text-left leading-tight">
+                    <div className="font-semibold text-sm">{selectedUser.name}</div>
+                    <div className={`text-[10px] ${presenceMap[selectedUser.id]?.isOnline ? "text-emerald-500" : "text-muted-foreground"}`}>
+                      {formatLastSeen(presenceMap[selectedUser.id]) || selectedUser.phone}
+                    </div>
                   </div>
                 </div>
               </button>
@@ -450,14 +496,21 @@ const AdminChat = () => {
                       onClick={() => handleSelectUser(u)}
                       className="w-full flex items-center gap-3 rounded-xl p-3 hover:bg-card/80 transition-colors text-left border border-transparent hover:border-border/50"
                     >
-                      {u.photo_url ? (
-                        <img src={u.photo_url} alt={u.name} className="h-11 w-11 rounded-full object-cover border border-primary/20 shrink-0" />
-                      ) : (
-                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold shrink-0">{u.name.charAt(0)}</div>
-                      )}
+                      <div className="relative shrink-0">
+                        {u.photo_url ? (
+                          <img src={u.photo_url} alt={u.name} className="h-11 w-11 rounded-full object-cover border border-primary/20" />
+                        ) : (
+                          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">{u.name.charAt(0)}</div>
+                        )}
+                        {presenceMap[u.id]?.isOnline && (
+                          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-500 border-2 border-card" />
+                        )}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-foreground text-sm">{u.name}</div>
-                        <div className="text-xs text-muted-foreground truncate">{u.phone}</div>
+                        <div className={`text-xs truncate ${presenceMap[u.id]?.isOnline ? "text-emerald-500" : "text-muted-foreground"}`}>
+                          {formatLastSeen(presenceMap[u.id]) || u.phone}
+                        </div>
                       </div>
                       {unreadMap[u.id] && (
                         <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[10px] font-bold px-1.5">
