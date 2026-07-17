@@ -29,6 +29,8 @@ import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/Fa
 import { ChatMessagesSkeleton } from "@/components/chat/ChatMessagesSkeleton";
 import { reconcileMessages } from "@/lib/chatMessageUtils";
 import { notifyNewMessage } from "@/lib/notificationPrefs";
+import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
+import { JumpToLatest } from "@/components/chat/JumpToLatest";
 
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
