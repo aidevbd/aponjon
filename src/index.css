@@ -43,6 +43,14 @@
     --warm-cream: 30 40% 96%;
     --gold: 40 70% 55%;
 
+    /* Facebook Messenger chat bubble palette */
+    --chat-mine-from: 214 100% 59%;   /* #0084ff */
+    --chat-mine-to: 265 83% 58%;      /* #a033ff */
+    --chat-mine-foreground: 0 0% 100%;
+    --chat-other-bg: 210 17% 93%;     /* #e4e6eb */
+    --chat-other-foreground: 220 13% 13%;
+    --chat-surface: 0 0% 100%;
+
     --messenger-whatsapp-bg: 142 70% 92%;
     --messenger-whatsapp-text: 142 70% 28%;
     --messenger-imo-bg: 217 70% 92%;
@@ -77,6 +85,21 @@
     --heirloom-gold: 42 55% 55%;
     --heirloom-gold-deep: 34 45% 42%;
     --heirloom-seal: 26 38% 34%;
+  }
+}
+
+@layer components {
+  .chat-bubble-mine {
+    background-image: linear-gradient(135deg, hsl(var(--chat-mine-from)), hsl(var(--chat-mine-to)));
+    color: hsl(var(--chat-mine-foreground));
+  }
+  .chat-bubble-other {
+    background-color: hsl(var(--chat-other-bg));
+    color: hsl(var(--chat-other-foreground));
+    border: none;
+  }
+  .chat-scroll-surface {
+    background: hsl(var(--chat-surface));
   }
 }
 
