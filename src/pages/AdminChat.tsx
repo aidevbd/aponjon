@@ -32,6 +32,7 @@ const AdminChat = () => {
   const selectedUserRef = useRef<ChatUser | null>(null);
   const adminContactIdRef = useRef<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
