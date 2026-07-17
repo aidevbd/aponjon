@@ -18,6 +18,7 @@ import { upsertMessage, reconcileMessages } from "@/lib/chatMessageUtils";
 import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
+import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
 
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
@@ -25,6 +26,7 @@ type Message = { id: string; sender_id: string; receiver_id: string; content: st
 
 const AdminChat = () => {
   const navigate = useNavigate();
+  const viewportHeight = useVisualViewportHeight();
   const [adminContactId, setAdminContactId] = useState<string | null>(null);
   const [needsSetup, setNeedsSetup] = useState(false);
   const [setupName, setSetupName] = useState("");
@@ -426,7 +428,7 @@ const AdminChat = () => {
   }
 
   return (
-    <div className="h-dvh warm-gradient flex flex-col overflow-hidden">
+    <div className="warm-gradient flex flex-col overflow-hidden" style={{ height: viewportHeight ? `${viewportHeight}px` : "100dvh" }}>
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md shrink-0">
 
