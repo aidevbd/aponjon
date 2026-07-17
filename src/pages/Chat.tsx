@@ -371,6 +371,18 @@ const Chat = () => {
     return () => window.removeEventListener("online", deliverQueued);
   }, [session, selectedContact, loadMessages]);
 
+  // Auto-retry any failed-in-flight messages when the network comes back.
+  useEffect(() => {
+    if (failedMessages.length === 0) return;
+    const retryAll = () => {
+      if (!navigator.onLine) return;
+      failedMessages.forEach(f => { if (!f.retrying) void handleResendFailed(f.id); });
+    };
+    window.addEventListener("online", retryAll);
+    return () => window.removeEventListener("online", retryAll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [failedMessages]);
+
   const handleSelectContact = (contact: ChatContact) => {
     setSelectedContact(contact);
     setQueuedCount(getOfflineQueueCountForContact(contact.id));
