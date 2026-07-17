@@ -622,7 +622,7 @@ const AdminChat = () => {
                     placeholder="উত্তর লিখুন..."
                     value={msgInput}
                     onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
-                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !isTouch) { e.preventDefault(); handleSend(); } }}
                     className="flex-1 min-w-0"
                     disabled={sending}
                     maxHeight={120}
