@@ -546,7 +546,7 @@ const AdminChat = () => {
                   <Input
                     placeholder="উত্তর লিখুন..."
                     value={msgInput}
-                    onChange={(e) => setMsgInput(e.target.value)}
+                    onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
                     onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                     className="bg-background/50 text-sm h-9 flex-1 min-w-0"
                     disabled={sending}
