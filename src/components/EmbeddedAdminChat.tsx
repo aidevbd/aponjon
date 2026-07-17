@@ -122,10 +122,10 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
         if (isCurrentThread) {
           if (msg.image_url) {
             void signMessagesImages([msg]).then(([signed]) => {
-              setMessages((prev) => (prev.some((m) => m.id === signed.id) ? prev : [...prev, signed]));
+              setMessages((prev) => upsertMessage(prev, signed));
             });
           } else {
-            setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+            setMessages((prev) => upsertMessage(prev, msg));
           }
           return;
         }
