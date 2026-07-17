@@ -165,7 +165,7 @@ const AdminChat = () => {
       const { data, error } = await supabase.rpc("get_admin_messages", { p_other_id: user.id });
       if (error) throw error;
       const signed = await signMessagesImages((data || []) as unknown as Message[]);
-      setMessages(signed);
+      setMessages(reconcileMessages(signed));
       setUnreadMap(prev => { const n = { ...prev }; delete n[user.id]; return n; });
       void (async () => { try { await supabase.rpc("mark_conversation_delivered_admin", { p_other_id: user.id } as any); } catch {} })();
     } catch (err) { console.error("[catch]", err); toast.error("মেসেজ লোড করতে সমস্যা"); }
