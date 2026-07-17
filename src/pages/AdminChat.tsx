@@ -44,6 +44,7 @@ const AdminChat = () => {
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
+  const [presenceMap, setPresenceMap] = useState<Record<string, { isOnline: boolean; lastSeen: string }>>({});
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
