@@ -124,7 +124,7 @@ const AdminChat = () => {
           try {
             const { data } = await supabase.rpc("get_admin_messages", { p_other_id: sel.id });
             const signed = await signMessagesImages((data || []) as unknown as Message[]);
-            setMessages(signed);
+            setMessages(reconcileMessages(signed));
           } catch {}
         }, 200);
       })
