@@ -44,6 +44,7 @@ const AdminChat = () => {
   const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageListRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { selectedUserRef.current = selectedUser; }, [selectedUser]);
