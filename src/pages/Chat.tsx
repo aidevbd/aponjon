@@ -246,14 +246,14 @@ const Chat = () => {
     void channel.send({ type: "broadcast", event: "typing", payload: { sender_id: session.contactId } });
   };
 
-  useEffect(() => {
-    if (messages.length === 0 || !messageListRef.current) return;
-    const keepKeyboardStable = document.activeElement === inputRef.current;
-    messageListRef.current.scrollTo({
-      top: messageListRef.current.scrollHeight,
-      behavior: keepKeyboardStable ? "auto" : "smooth",
-    });
+  const { newBelowCount, scrollToBottom, resetForNewThread } = useSmartAutoScroll(
+    messageListRef,
+    messages,
+    session?.contactId,
+  );
 
+  // On own-send, restore keyboard focus without losing state.
+  useEffect(() => {
     if (Date.now() - recentSendAtRef.current < 1500) {
       restoreInputFocus(true);
     }
