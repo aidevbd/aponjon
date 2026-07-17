@@ -17,6 +17,7 @@ import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/Fa
 import { upsertMessage, reconcileMessages } from "@/lib/chatMessageUtils";
 import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
+import { TypingIndicator } from "@/components/chat/TypingIndicator";
 
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
