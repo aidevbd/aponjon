@@ -428,7 +428,7 @@ const AdminChat = () => {
   }
 
   return (
-    <div className="h-dvh warm-gradient flex flex-col overflow-hidden">
+    <div className="warm-gradient flex flex-col overflow-hidden" style={{ height: viewportHeight ? `${viewportHeight}px` : "100dvh" }}>
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md shrink-0">
 
