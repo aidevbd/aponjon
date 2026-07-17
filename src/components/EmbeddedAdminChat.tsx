@@ -43,6 +43,7 @@ interface EmbeddedAdminChatProps {
 }
 
 export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
+  const isTouch = useIsTouchDevice();
   const [adminContactId, setAdminContactId] = useState<string | null>(null);
   const [needsSetup, setNeedsSetup] = useState(false);
   const [setupName, setSetupName] = useState("");
