@@ -49,6 +49,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const [presenceMap, setPresenceMap] = useState<Record<string, { lastSeen: string; isOnline: boolean }>>({});
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
