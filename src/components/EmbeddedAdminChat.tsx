@@ -893,7 +893,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
                         showTail={!!showTail}
                         showAvatar={!!showAvatar}
                         avatarUrl={selectedUser?.photo_url || null}
-                        onOpenActions={(m) => setActionMessage(m as Message)}
+                        onOpenActions={(m, rect) => { setActionMessage(m as Message); setActionAnchor(rect); }}
                         onQuickReact={(m, e) => handleReact(m as Message, e)}
                         onStartReply={(m) => handleStartReply(m as Message)}
                         onShowEditHistory={(m) => handleShowEditHistory(m as Message)}
