@@ -30,7 +30,7 @@ export function MessageActionSheet({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[80vh]">
+      <DrawerContent className="max-h-[80vh] sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:max-w-md sm:w-full">
         <DrawerHeader className="pb-2">
           <DrawerTitle className="text-sm font-medium text-muted-foreground">মেসেজ অপশন</DrawerTitle>
         </DrawerHeader>
