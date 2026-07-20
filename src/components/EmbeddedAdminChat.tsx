@@ -134,6 +134,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [actionMessage, setActionMessage] = useState<Message | null>(null);
+  const [actionAnchor, setActionAnchor] = useState<DOMRect | null>(null);
   const [unsendTargetId, setUnsendTargetId] = useState<string | null>(null);
   const [editHistoryFor, setEditHistoryFor] = useState<Message | null>(null);
   const [editHistory, setEditHistory] = useState<{ previous_content: string; edited_at: string }[]>([]);
@@ -892,7 +893,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
                         showTail={!!showTail}
                         showAvatar={!!showAvatar}
                         avatarUrl={selectedUser?.photo_url || null}
-                        onOpenActions={(m) => setActionMessage(m as Message)}
+                        onOpenActions={(m, rect) => { setActionMessage(m as Message); setActionAnchor(rect); }}
                         onQuickReact={(m, e) => handleReact(m as Message, e)}
                         onStartReply={(m) => handleStartReply(m as Message)}
                         onShowEditHistory={(m) => handleShowEditHistory(m as Message)}
@@ -1011,7 +1012,8 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
         message={actionMessage as any}
         isMine={actionMessage?.sender_id === adminContactId}
         canPin
-        onOpenChange={(open) => !open && setActionMessage(null)}
+        anchorRect={actionAnchor}
+        onOpenChange={(open) => { if (!open) { setActionMessage(null); setActionAnchor(null); } }}
         onReact={(emoji) => actionMessage && handleReact(actionMessage, emoji)}
         onReply={() => actionMessage && handleStartReply(actionMessage)}
         onEdit={() => actionMessage && handleStartEdit(actionMessage)}

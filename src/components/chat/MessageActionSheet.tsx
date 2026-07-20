@@ -1,5 +1,5 @@
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Reply, Pencil, Copy, Trash2, RotateCcw, Pin, History } from "lucide-react";
 import { toast } from "sonner";
 import type { BubbleMessage } from "./MessageBubble";
@@ -10,6 +10,7 @@ interface MessageActionSheetProps {
   message: BubbleMessage | null;
   isMine: boolean;
   canPin?: boolean;
+  anchorRect?: DOMRect | null;
   onOpenChange: (open: boolean) => void;
   onReact: (emoji: string) => void;
   onReply: () => void;
@@ -20,108 +21,138 @@ interface MessageActionSheetProps {
   onShowEditHistory?: () => void;
 }
 
+const POPUP_WIDTH = 240;
+const GAP = 8;
+const MARGIN = 8;
+
 export function MessageActionSheet({
-  open, message, isMine, canPin, onOpenChange,
+  open, message, isMine, canPin, anchorRect, onOpenChange,
   onReact, onReply, onEdit, onUnsend, onRemoveForMe, onTogglePin, onShowEditHistory,
 }: MessageActionSheetProps) {
-  if (!message) return null;
+  const popupRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+
+  useLayoutEffect(() => {
+    if (!open || !anchorRect) { setPos(null); return; }
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const height = popupRef.current?.offsetHeight ?? 320;
+
+    // Preferred side: opposite of the message side
+    let left = isMine
+      ? anchorRect.left - POPUP_WIDTH - GAP
+      : anchorRect.right + GAP;
+
+    // Flip if it overflows
+    if (left < MARGIN) left = Math.min(anchorRect.right + GAP, vw - POPUP_WIDTH - MARGIN);
+    if (left + POPUP_WIDTH > vw - MARGIN) left = Math.max(anchorRect.left - POPUP_WIDTH - GAP, MARGIN);
+    // Final clamp
+    left = Math.max(MARGIN, Math.min(left, vw - POPUP_WIDTH - MARGIN));
+
+    let top = anchorRect.top;
+    if (top + height > vh - MARGIN) top = vh - height - MARGIN;
+    top = Math.max(MARGIN, top);
+
+    setPos({ top, left });
+  }, [open, anchorRect, isMine, message?.id]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onOpenChange(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onOpenChange]);
+
+  if (!open || !message) return null;
   const isUnsent = !!message.unsent_at;
   const canEdit = isMine && !isUnsent && !!message.content;
 
-  return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[80vh] sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:max-w-md sm:w-full">
-        <DrawerHeader className="pb-2">
-          <DrawerTitle className="text-sm font-medium text-muted-foreground">মেসেজ অপশন</DrawerTitle>
-        </DrawerHeader>
+  const close = () => onOpenChange(false);
 
+  return createPortal(
+    <div className="fixed inset-0 z-[100]" onClick={close}>
+      <div
+        ref={popupRef}
+        onClick={(e) => e.stopPropagation()}
+        style={pos ? { top: pos.top, left: pos.left, width: POPUP_WIDTH } : { top: -9999, left: -9999, width: POPUP_WIDTH }}
+        className="fixed rounded-2xl border border-border bg-popover text-popover-foreground shadow-xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-100"
+      >
         {/* Quick reactions */}
         {!isUnsent && (
-          <div className="px-4 pb-3">
-            <div className="flex items-center justify-around bg-muted/50 rounded-full py-2">
-              {QUICK_EMOJIS.map((emoji) => (
-                <button
-                  key={emoji}
-                  onClick={() => { onReact(emoji); onOpenChange(false); }}
-                  className="text-2xl hover:scale-125 transition-transform"
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
+          <div className="flex items-center justify-between gap-0.5 px-2 py-2 border-b border-border">
+            {QUICK_EMOJIS.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => { onReact(emoji); close(); }}
+                className="text-xl leading-none hover:scale-125 transition-transform p-1"
+              >
+                {emoji}
+              </button>
+            ))}
           </div>
         )}
 
-        <div className="px-3 pb-6 space-y-1">
+        <div className="py-1">
           {!isUnsent && (
-            <ActionRow icon={<Reply className="h-4 w-4" />} label="রিপ্লাই" onClick={() => { onReply(); onOpenChange(false); }} />
+            <Row icon={<Reply className="h-4 w-4" />} label="রিপ্লাই" onClick={() => { onReply(); close(); }} />
           )}
-
           {message.content && !isUnsent && (
-            <ActionRow
+            <Row
               icon={<Copy className="h-4 w-4" />}
               label="কপি করুন"
               onClick={() => {
                 navigator.clipboard.writeText(message.content!);
                 toast.success("কপি হয়েছে");
-                onOpenChange(false);
+                close();
               }}
             />
           )}
-
           {canEdit && (
-            <ActionRow icon={<Pencil className="h-4 w-4" />} label="এডিট" onClick={() => { onEdit(); onOpenChange(false); }} />
+            <Row icon={<Pencil className="h-4 w-4" />} label="এডিট" onClick={() => { onEdit(); close(); }} />
           )}
-
           {message.has_edit_history && onShowEditHistory && (
-            <ActionRow
-              icon={<History className="h-4 w-4" />}
-              label="এডিট ইতিহাস"
-              onClick={() => { onShowEditHistory(); onOpenChange(false); }}
-            />
+            <Row icon={<History className="h-4 w-4" />} label="এডিট ইতিহাস" onClick={() => { onShowEditHistory(); close(); }} />
           )}
-
           {canPin && onTogglePin && !isUnsent && (
-            <ActionRow
+            <Row
               icon={<Pin className="h-4 w-4" />}
               label={message.is_pinned ? "আনপিন" : "পিন"}
-              onClick={() => { onTogglePin(); onOpenChange(false); }}
+              onClick={() => { onTogglePin(); close(); }}
             />
           )}
 
           <div className="h-px bg-border my-1" />
 
-          <ActionRow
+          <Row
             icon={<RotateCcw className="h-4 w-4" />}
             label="শুধু আমার থেকে সরান"
-            onClick={() => { onRemoveForMe(); onOpenChange(false); }}
+            onClick={() => { onRemoveForMe(); close(); }}
           />
-
           {isMine && !isUnsent && (
-            <ActionRow
+            <Row
               icon={<Trash2 className="h-4 w-4" />}
               label="সবার জন্য আনসেন্ড"
               destructive
-              onClick={() => { onUnsend(); onOpenChange(false); }}
+              onClick={() => { onUnsend(); close(); }}
             />
           )}
         </div>
-      </DrawerContent>
-    </Drawer>
+      </div>
+    </div>,
+    document.body,
   );
 }
 
-function ActionRow({
+function Row({
   icon, label, onClick, destructive,
 }: { icon: React.ReactNode; label: string; onClick: () => void; destructive?: boolean }) {
   return (
-    <Button
-      variant="ghost"
-      className={`w-full justify-start gap-3 h-11 text-[15px] ${destructive ? "text-destructive hover:text-destructive" : ""}`}
+    <button
       onClick={onClick}
+      className={`w-full flex items-center gap-3 px-3 py-2 text-[14px] text-left hover:bg-muted transition-colors ${destructive ? "text-destructive" : ""}`}
     >
       {icon}
-      {label}
-    </Button>
+      <span>{label}</span>
+    </button>
   );
 }
