@@ -1023,7 +1023,7 @@ const Chat = () => {
                             showTail={showTail}
                             showAvatar={showAvatar}
                             avatarUrl={selectedContact?.photo_url || null}
-                            onOpenActions={(m, rect) => { setActionMessage(m); setActionAnchor(rect); }}
+                            onOpenActions={(m, rect, el) => { setActionMessage(m); setActionAnchor(rect); setActionAnchorEl(el ?? null); }}
                             onQuickReact={(m, e) => handleReact(m, e)}
                             onStartReply={(m) => handleStartReply(m)}
                             onShowEditHistory={(m) => handleShowEditHistory(m)}
