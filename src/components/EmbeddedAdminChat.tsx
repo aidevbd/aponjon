@@ -375,6 +375,9 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     } catch { toast.error("মেসেজ লোড করতে সমস্যা"); }
     finally { setMessagesLoading(false); }
   }, []);
+  const loadMessagesRef = useRef(loadMessages);
+  useEffect(() => { loadMessagesRef.current = loadMessages; }, [loadMessages]);
+
 
   const handleSelectUser = (user: ChatUser) => {
     // Save current draft for the previous chat before switching
