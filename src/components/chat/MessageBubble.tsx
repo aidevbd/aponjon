@@ -37,7 +37,7 @@ interface MessageBubbleProps {
   showTail: boolean; // last in a row from same sender
   showAvatar?: boolean; // for incoming, show avatar near tail
   avatarUrl?: string | null;
-  onOpenActions: (msg: BubbleMessage, anchorRect: DOMRect | null) => void;
+  onOpenActions: (msg: BubbleMessage, anchorRect: DOMRect | null, anchorEl?: HTMLElement | null) => void;
   onQuickReact: (msg: BubbleMessage, emoji: string) => void;
   onStartReply: (msg: BubbleMessage) => void;
   onShowEditHistory?: (msg: BubbleMessage) => void;
