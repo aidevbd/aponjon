@@ -849,42 +849,59 @@ const Chat = () => {
     <div className="warm-gradient flex flex-col overflow-hidden fixed inset-0" style={{ height: viewportHeight ? `${viewportHeight}px` : "100dvh" }}>
       <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md shrink-0 pt-[env(safe-area-inset-top)]">
         <div className="container mx-auto max-w-3xl lg:max-w-4xl flex h-14 items-center justify-between px-4 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            {selectedContact ? (
-              <button onClick={() => { setSelectedContact(null); setSearchOpen(false); setSearchQuery(""); }} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors min-w-0">
-                <ArrowLeft className="h-5 w-5 shrink-0" />
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="relative shrink-0">
-                    {selectedContact.photo_url ? (
-                      <img src={selectedContact.photo_url} alt={selectedContact.name} className="h-8 w-8 rounded-full object-cover border border-primary/20" />
-                    ) : (
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedContact.name.charAt(0)}</div>
-                    )}
-                    {presenceMap[selectedContact.id]?.is_online && (
-                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-card" />
-                    )}
+          <div className="flex items-center gap-2 min-w-0 flex-1 relative">
+            <AnimatePresence mode="wait" initial={false}>
+              {selectedContact ? (
+                <motion.button
+                  key={`hdr-thread-${selectedContact.id}`}
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 12 }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
+                  onClick={() => { setSelectedContact(null); setSearchOpen(false); setSearchQuery(""); }}
+                  className="flex items-center gap-2 text-foreground hover:text-primary transition-colors min-w-0"
+                >
+                  <ArrowLeft className="h-5 w-5 shrink-0" />
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="relative shrink-0">
+                      {selectedContact.photo_url ? (
+                        <img src={selectedContact.photo_url} alt={selectedContact.name} className="h-8 w-8 rounded-full object-cover border border-primary/20" />
+                      ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedContact.name.charAt(0)}</div>
+                      )}
+                      {presenceMap[selectedContact.id]?.is_online && (
+                        <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-card" />
+                      )}
+                    </div>
+                    <div className="min-w-0 text-left">
+                      <span className="font-semibold text-sm truncate block">{selectedContact.name}</span>
+                      {presenceMap[selectedContact.id] && (
+                        <p className={`text-[10px] truncate ${presenceMap[selectedContact.id].is_online ? "text-emerald-500" : "text-muted-foreground"}`}>
+                          {formatLastSeen(presenceMap[selectedContact.id])}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <span className="font-semibold text-sm truncate block">{selectedContact.name}</span>
-                    {presenceMap[selectedContact.id] && (
-                      <p className={`text-[10px] truncate ${presenceMap[selectedContact.id].is_online ? "text-emerald-500" : "text-muted-foreground"}`}>
-                        {formatLastSeen(presenceMap[selectedContact.id])}
-                      </p>
-                    )}
+                </motion.button>
+              ) : (
+                <motion.div
+                  key="hdr-list"
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -12 }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
+                  className="flex items-center gap-2"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full hero-gradient shadow-rose">
+                    <MessageCircle className="h-4 w-4 text-primary-foreground" />
                   </div>
-                </div>
-              </button>
-            ) : (
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full hero-gradient shadow-rose">
-                  <MessageCircle className="h-4 w-4 text-primary-foreground" />
-                </div>
-                <div>
-                  <span className="font-display font-semibold text-foreground text-sm">মেসেজ</span>
-                  <span className="ml-2 text-xs text-muted-foreground">{session.name}</span>
-                </div>
-              </div>
-            )}
+                  <div>
+                    <span className="font-display font-semibold text-foreground text-sm">মেসেজ</span>
+                    <span className="ml-2 text-xs text-muted-foreground">{session.name}</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           <div className="flex items-center gap-1 shrink-0">
             {selectedContact && (
