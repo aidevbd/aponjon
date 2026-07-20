@@ -10,7 +10,7 @@ export function useSmartAutoScroll<T extends { id: string; sender_id: string }>(
   containerRef: React.RefObject<HTMLElement>,
   messages: T[],
   myId: string | null | undefined,
-  threshold = 100,
+  threshold = 220,
 ) {
   const [isNearBottom, setIsNearBottom] = useState(true);
   const [newBelowCount, setNewBelowCount] = useState(0);
