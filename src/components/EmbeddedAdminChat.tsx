@@ -47,6 +47,9 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const isTouch = useIsTouchDevice();
   const viewportHeight = useVisualViewportHeight();
   const shellRef = useRef<HTMLDivElement>(null);
+  const selectedUserRef = useRef<ChatUser | null>(null);
+  const isTouchRef = useRef(isTouch);
+  useEffect(() => { isTouchRef.current = isTouch; }, [isTouch]);
   const [shellTop, setShellTop] = useState(0);
   useEffect(() => {
     const measure = () => {
@@ -81,7 +84,22 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     }
     let io: IntersectionObserver | null = null;
     if (typeof IntersectionObserver !== "undefined" && shellRef.current) {
-      io = new IntersectionObserver(() => measure());
+      io = new IntersectionObserver((entries) => {
+        measure();
+        // When the chat shell becomes visible (e.g. after switching Tabs),
+        // auto-focus the input and pin scroll to the latest message.
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio > 0) {
+            if (selectedUserRef.current && !isTouchRef.current) {
+              restoreInputFocus(true);
+            }
+            requestAnimationFrame(() => {
+              const list = messageListRef.current;
+              if (list) list.scrollTop = list.scrollHeight;
+            });
+          }
+        }
+      }, { threshold: [0, 0.1] });
       io.observe(shellRef.current);
     }
     return () => {
@@ -336,10 +354,12 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
   const handleSelectUser = (user: ChatUser) => {
     setSelectedUser(user);
+    selectedUserRef.current = user;
     setFailedMessages([]);
     setMessages([]);
     resetForNewThread();
     loadMessages(user);
+    if (!isTouch) restoreInputFocus(true);
   };
 
   // Consistency check: resync current thread on tab focus / online.
@@ -721,7 +741,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
           <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
             {/* Thread Header */}
             <div className="flex items-center gap-2 pb-3 border-b border-border/50">
-              <button onClick={() => { setSelectedUser(null); setSearchOpen(false); setSearchQuery(""); }} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors flex-1 min-w-0">
+              <button onClick={() => { setSelectedUser(null); selectedUserRef.current = null; setSearchOpen(false); setSearchQuery(""); }} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors flex-1 min-w-0">
                 <ArrowLeft className="h-4 w-4 shrink-0" />
                 <div className="relative shrink-0">
                   {selectedUser.photo_url ? (
