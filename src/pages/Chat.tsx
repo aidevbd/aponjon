@@ -62,6 +62,19 @@ const Chat = () => {
   const navigate = useNavigate();
   const viewportHeight = useVisualViewportHeight();
   const isTouch = useIsTouchDevice();
+
+  // Lock body scroll while chat page is open so the fixed viewport never
+  // shows blank space when mobile browser chrome hides/shows.
+  useEffect(() => {
+    const prevHtml = document.documentElement.style.overflow;
+    const prevBody = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.documentElement.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
+    };
+  }, []);
   const [session, setSession] = useState<ChatSession | null>(null);
   const [loginPhone, setLoginPhone] = useState("");
   const [loginSecret, setLoginSecret] = useState("");
