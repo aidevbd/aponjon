@@ -22,10 +22,15 @@ function saveSeen(map: Record<string, number>) {
  * - Suppresses alerts while the user is actively on /chat
  */
 export function useGlobalChatNotifier() {
-  const [totalUnread, setTotalUnread] = useState(0);
+  const [totalUnread, setTotalUnread] = useState<number>(() =>
+    Object.values(loadSeen()).reduce((a, b) => a + (Number(b) || 0), 0),
+  );
   const [hasSession, setHasSession] = useState<boolean>(() => !!getChatSession());
   const seenRef = useRef<Record<string, number>>(loadSeen());
-  const firstRunRef = useRef(true);
+  // If we have a persisted baseline from a previous session, treat the first
+  // poll as a real diff so messages that arrived while the tab was closed
+  // still trigger a notification.
+  const firstRunRef = useRef(Object.keys(loadSeen()).length === 0);
 
   useEffect(() => {
     // Re-check session on focus / storage changes
