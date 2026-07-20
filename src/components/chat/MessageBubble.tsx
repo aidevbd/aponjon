@@ -88,7 +88,7 @@ export function MessageBubble({
     longPressTimerRef.current = window.setTimeout(() => {
       if (movedRef.current) return;
       const rect = wrapperRef.current?.getBoundingClientRect() || null;
-      onOpenActions(msg, rect);
+      onOpenActions(msg, rect, wrapperRef.current);
       if (navigator.vibrate) navigator.vibrate(10);
     }, 420);
   };
@@ -216,7 +216,7 @@ export function MessageBubble({
         onContextMenu={(e) => {
           e.preventDefault();
           const rect = wrapperRef.current?.getBoundingClientRect() || null;
-          onOpenActions(msg, rect);
+          onOpenActions(msg, rect, wrapperRef.current);
         }}
       >
         {/* Reply quote */}
@@ -361,7 +361,7 @@ export function MessageBubble({
               onClick={(e) => {
                 e.stopPropagation();
                 const rect = wrapperRef.current?.getBoundingClientRect() || null;
-                onOpenActions(msg, rect);
+                onOpenActions(msg, rect, wrapperRef.current);
               }}
               className="h-6 w-6 flex items-center justify-center hover:bg-muted rounded-full text-base leading-none"
               title="More"
