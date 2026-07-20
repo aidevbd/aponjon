@@ -336,6 +336,10 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
     onUnreadChange?.(total);
   }, [unreadMap, onUnreadChange]);
 
+  useEffect(() => {
+    onActiveChatChange?.(!!selectedUser);
+  }, [selectedUser, onActiveChatChange]);
+
   const loadChatUsers = async () => {
     try {
       const { data, error } = await supabase.rpc("get_admin_chat_users");
