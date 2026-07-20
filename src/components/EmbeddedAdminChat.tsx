@@ -354,10 +354,12 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
   const handleSelectUser = (user: ChatUser) => {
     setSelectedUser(user);
+    selectedUserRef.current = user;
     setFailedMessages([]);
     setMessages([]);
     resetForNewThread();
     loadMessages(user);
+    if (!isTouch) restoreInputFocus(true);
   };
 
   // Consistency check: resync current thread on tab focus / online.
