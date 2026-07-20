@@ -70,7 +70,7 @@ export function ContactDetailSheet({ contact, open, onClose, onEdit, onDelete }:
   if (!open) return null;
 
   return createPortal(
-    <div className="contact-detail-root fixed inset-0 z-[100] overflow-y-auto bg-background/70 md:backdrop-blur-sm md:flex md:items-center md:justify-center md:p-4">
+    <div className="contact-detail-root fixed inset-0 z-[100] overflow-y-auto no-scrollbar bg-background/70 md:backdrop-blur-sm md:flex md:items-center md:justify-center md:p-4">
       <div
         role="dialog"
         aria-modal="true"

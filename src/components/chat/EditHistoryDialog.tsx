@@ -18,7 +18,7 @@ export function EditHistoryDialog({ open, onOpenChange, history, currentContent,
         {loading ? (
           <p className="text-sm text-muted-foreground py-4 text-center">লোড হচ্ছে...</p>
         ) : (
-          <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+          <div className="space-y-3 max-h-[60vh] overflow-y-auto no-scrollbar">
             {history.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-2">আগের কোনো ভার্সন নেই।</p>
             )}
