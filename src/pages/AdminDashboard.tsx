@@ -465,7 +465,7 @@ const AdminDashboard = () => {
 
         {/* ===== চ্যাট ট্যাব ===== */}
         <TabsContent value="chat" className="mt-0">
-          <EmbeddedAdminChat onUnreadChange={(count) => setTotalUnread(count)} />
+          <EmbeddedAdminChat onUnreadChange={(count) => setTotalUnread(count)} onActiveChatChange={setChatOpen} />
         </TabsContent>
 
         {/* ===== লগ ট্যাব ===== */}
