@@ -466,9 +466,9 @@ const AdminChat = () => {
   return (
     <div className="warm-gradient flex flex-col overflow-hidden" style={{ height: viewportHeight ? `${viewportHeight}px` : "100dvh" }}>
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md shrink-0">
+      <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md shrink-0 pt-[env(safe-area-inset-top)]">
 
-        <div className="container mx-auto flex h-14 items-center justify-between px-4">
+        <div className="container mx-auto flex h-14 items-center justify-between px-4 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
           <div className="flex items-center gap-2">
             {selectedUser ? (
               <button onClick={() => setSelectedUser(null)} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
