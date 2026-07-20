@@ -833,7 +833,7 @@ const Chat = () => {
 
   // ============ CHAT INTERFACE ============
   return (
-    <div className="warm-gradient flex flex-col overflow-hidden" style={{ height: viewportHeight ? `${viewportHeight}px` : "100dvh" }}>
+    <div className="warm-gradient flex flex-col overflow-hidden fixed inset-0" style={{ height: viewportHeight ? `${viewportHeight}px` : "100dvh" }}>
       <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md shrink-0">
         <div className="container mx-auto max-w-3xl lg:max-w-4xl flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-2 min-w-0 flex-1">
