@@ -744,7 +744,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
             {/* Messages */}
             <div className="relative flex-1 flex flex-col min-h-0">
-            <div ref={messageListRef} className="flex-1 overflow-y-auto overflow-x-hidden py-3 space-y-1">
+            <div ref={messageListRef} className="chat-scroll flex-1 overflow-y-auto overflow-x-hidden py-3 space-y-1">
               {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
               {!messagesLoading && filteredMessages.length === 0 && (
                 <div className="text-center py-12 text-muted-foreground">
