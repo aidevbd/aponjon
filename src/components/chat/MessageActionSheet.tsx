@@ -11,6 +11,7 @@ interface MessageActionSheetProps {
   isMine: boolean;
   canPin?: boolean;
   anchorRect?: DOMRect | null;
+  anchorEl?: HTMLElement | null;
   onOpenChange: (open: boolean) => void;
   onReact: (emoji: string) => void;
   onReply: () => void;
@@ -26,35 +27,66 @@ const GAP = 8;
 const MARGIN = 8;
 
 export function MessageActionSheet({
-  open, message, isMine, canPin, anchorRect, onOpenChange,
+  open, message, isMine, canPin, anchorRect, anchorEl, onOpenChange,
   onReact, onReply, onEdit, onUnsend, onRemoveForMe, onTogglePin, onShowEditHistory,
 }: MessageActionSheetProps) {
   const popupRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
 
   useLayoutEffect(() => {
-    if (!open || !anchorRect) { setPos(null); return; }
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const height = popupRef.current?.offsetHeight ?? 320;
+    if (!open) { setPos(null); return; }
 
-    // Preferred side: opposite of the message side
-    let left = isMine
-      ? anchorRect.left - POPUP_WIDTH - GAP
-      : anchorRect.right + GAP;
+    const compute = () => {
+      const rect = anchorEl?.getBoundingClientRect() ?? anchorRect ?? null;
+      if (!rect) { setPos(null); return; }
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const height = popupRef.current?.offsetHeight ?? 320;
 
-    // Flip if it overflows
-    if (left < MARGIN) left = Math.min(anchorRect.right + GAP, vw - POPUP_WIDTH - MARGIN);
-    if (left + POPUP_WIDTH > vw - MARGIN) left = Math.max(anchorRect.left - POPUP_WIDTH - GAP, MARGIN);
-    // Final clamp
-    left = Math.max(MARGIN, Math.min(left, vw - POPUP_WIDTH - MARGIN));
+      let left = isMine
+        ? rect.left - POPUP_WIDTH - GAP
+        : rect.right + GAP;
 
-    let top = anchorRect.top;
-    if (top + height > vh - MARGIN) top = vh - height - MARGIN;
-    top = Math.max(MARGIN, top);
+      if (left < MARGIN) left = Math.min(rect.right + GAP, vw - POPUP_WIDTH - MARGIN);
+      if (left + POPUP_WIDTH > vw - MARGIN) left = Math.max(rect.left - POPUP_WIDTH - GAP, MARGIN);
+      left = Math.max(MARGIN, Math.min(left, vw - POPUP_WIDTH - MARGIN));
 
-    setPos({ top, left });
-  }, [open, anchorRect, isMine, message?.id]);
+      let top = rect.top;
+      if (top + height > vh - MARGIN) top = vh - height - MARGIN;
+      top = Math.max(MARGIN, top);
+
+      setPos({ top, left });
+    };
+
+    compute();
+
+    let rafId = 0;
+    const schedule = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => { rafId = 0; compute(); });
+    };
+
+    window.addEventListener("scroll", schedule, true);
+    window.addEventListener("resize", schedule);
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", schedule);
+    vv?.addEventListener("scroll", schedule);
+
+    let ro: ResizeObserver | null = null;
+    if (anchorEl && typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(schedule);
+      ro.observe(anchorEl);
+    }
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", schedule, true);
+      window.removeEventListener("resize", schedule);
+      vv?.removeEventListener("resize", schedule);
+      vv?.removeEventListener("scroll", schedule);
+      ro?.disconnect();
+    };
+  }, [open, anchorEl, anchorRect, isMine, message?.id]);
 
   useEffect(() => {
     if (!open) return;
@@ -62,6 +94,7 @@ export function MessageActionSheet({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onOpenChange]);
+
 
   if (!open || !message) return null;
   const isUnsent = !!message.unsent_at;
