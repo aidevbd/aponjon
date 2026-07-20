@@ -252,8 +252,9 @@ export function MessageBubble({
                         parent.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`;
                       }
                     }}
-                    onClick={(e) => { e.stopPropagation(); window.open(msg.image_url!, "_blank"); }}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); window.open(msg.image_url!, "_blank"); } }}
+                    onClick={(e) => { e.stopPropagation(); setLightboxOpen(true); }}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); setLightboxOpen(true); } }}
+
                   />
                 </div>
               )}
