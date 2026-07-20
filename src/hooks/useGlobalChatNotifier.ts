@@ -22,7 +22,9 @@ function saveSeen(map: Record<string, number>) {
  * - Suppresses alerts while the user is actively on /chat
  */
 export function useGlobalChatNotifier() {
-  const [totalUnread, setTotalUnread] = useState(0);
+  const [totalUnread, setTotalUnread] = useState<number>(() =>
+    Object.values(loadSeen()).reduce((a, b) => a + (Number(b) || 0), 0),
+  );
   const [hasSession, setHasSession] = useState<boolean>(() => !!getChatSession());
   const seenRef = useRef<Record<string, number>>(loadSeen());
   // If we have a persisted baseline from a previous session, treat the first
