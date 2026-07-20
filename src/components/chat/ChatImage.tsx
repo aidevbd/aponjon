@@ -58,10 +58,14 @@ export function ChatImage({
     <div
       ref={wrapRef}
       className={cn(
-        "relative mb-1.5 overflow-hidden rounded-lg bg-muted/40",
+        "relative overflow-hidden rounded-lg bg-muted/40",
         className,
       )}
-      style={{ width: `min(${maxWidth}px, 100%)`, aspectRatio: initialAspect }}
+      style={{
+        width: `min(${maxWidth}px, 72vw)`,
+        maxWidth: "100%",
+        aspectRatio: initialAspect,
+      }}
     >
       {/* Shimmer skeleton */}
       {!loaded && !errored && (
