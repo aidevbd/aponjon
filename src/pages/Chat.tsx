@@ -88,6 +88,7 @@ const Chat = () => {
   const [contactPreviews, setContactPreviews] = useState<Record<string, ContactPreview>>({});
   const [actionMessage, setActionMessage] = useState<Message | null>(null);
   const [actionAnchor, setActionAnchor] = useState<DOMRect | null>(null);
+  const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
   const [unsendTargetId, setUnsendTargetId] = useState<string | null>(null);
   const [editHistoryFor, setEditHistoryFor] = useState<Message | null>(null);
   const [editHistory, setEditHistory] = useState<{ previous_content: string; edited_at: string }[]>([]);
@@ -1022,7 +1023,7 @@ const Chat = () => {
                             showTail={showTail}
                             showAvatar={showAvatar}
                             avatarUrl={selectedContact?.photo_url || null}
-                            onOpenActions={(m, rect) => { setActionMessage(m); setActionAnchor(rect); }}
+                            onOpenActions={(m, rect, el) => { setActionMessage(m); setActionAnchor(rect); setActionAnchorEl(el ?? null); }}
                             onQuickReact={(m, e) => handleReact(m, e)}
                             onStartReply={(m) => handleStartReply(m)}
                             onShowEditHistory={(m) => handleShowEditHistory(m)}
@@ -1165,7 +1166,8 @@ const Chat = () => {
         message={actionMessage}
         isMine={actionMessage?.sender_id === session.contactId}
         anchorRect={actionAnchor}
-        onOpenChange={(open) => { if (!open) { setActionMessage(null); setActionAnchor(null); } }}
+        anchorEl={actionAnchorEl}
+        onOpenChange={(open) => { if (!open) { setActionMessage(null); setActionAnchor(null); setActionAnchorEl(null); } }}
         onReact={(emoji) => actionMessage && handleReact(actionMessage, emoji)}
         onReply={() => actionMessage && handleStartReply(actionMessage)}
         onEdit={() => actionMessage && handleStartEdit(actionMessage)}
