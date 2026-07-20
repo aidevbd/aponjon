@@ -661,9 +661,9 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       ref={shellRef}
       className="flex flex-col"
       style={{
-        height: viewportHeight
-          ? `${Math.max(320, viewportHeight - shellTop)}px`
-          : "calc(100dvh - 160px)",
+        height: viewportHeight && shellTop > 0
+          ? `${Math.max(320, viewportHeight - shellTop - 16)}px`
+          : "calc(100dvh - 220px)",
         minHeight: "320px",
       }}
     >
