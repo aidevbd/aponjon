@@ -41,9 +41,10 @@ type Message = {
 
 interface EmbeddedAdminChatProps {
   onUnreadChange?: (count: number) => void;
+  onActiveChatChange?: (open: boolean) => void;
 }
 
-export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
+export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: EmbeddedAdminChatProps) {
   const isTouch = useIsTouchDevice();
   const viewportHeight = useVisualViewportHeight();
   const shellRef = useRef<HTMLDivElement>(null);
@@ -334,6 +335,10 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     const total = Object.values(unreadMap).reduce((a, b) => a + b, 0);
     onUnreadChange?.(total);
   }, [unreadMap, onUnreadChange]);
+
+  useEffect(() => {
+    onActiveChatChange?.(!!selectedUser);
+  }, [selectedUser, onActiveChatChange]);
 
   const loadChatUsers = async () => {
     try {
