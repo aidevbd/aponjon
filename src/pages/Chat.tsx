@@ -962,7 +962,7 @@ const Chat = () => {
 
         <AnimatePresence mode="wait" initial={false}>
           {!selectedContact ? (
-            <motion.div key="contacts" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 px-4 py-4">
+            <motion.div key="contacts" initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }} className="flex-1 px-4 py-4 overflow-y-auto chat-scroll">
               {contacts.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground">
                   <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-30" />
