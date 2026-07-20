@@ -27,8 +27,39 @@ export function useSmartAutoScroll<T extends { id: string; sender_id: string }>(
   const scrollToBottom = useCallback((smooth = true) => {
     const el = containerRef.current;
     if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: smooth ? "smooth" : "auto" });
     setNewBelowCount(0);
+    if (!smooth) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "auto" });
+      return;
+    }
+    // Messenger-style eased smooth scroll: distance-aware duration + easeOutCubic.
+    const start = el.scrollTop;
+    const end = el.scrollHeight - el.clientHeight;
+    const distance = end - start;
+    if (Math.abs(distance) < 2) return;
+    const duration = Math.min(520, Math.max(220, Math.abs(distance) * 0.6));
+    const startTime = performance.now();
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+    let cancelled = false;
+    const onUserInterrupt = () => { cancelled = true; };
+    el.addEventListener("wheel", onUserInterrupt, { passive: true, once: true });
+    el.addEventListener("touchstart", onUserInterrupt, { passive: true, once: true });
+    const step = (now: number) => {
+      if (cancelled) {
+        el.removeEventListener("wheel", onUserInterrupt);
+        el.removeEventListener("touchstart", onUserInterrupt);
+        return;
+      }
+      const t = Math.min(1, (now - startTime) / duration);
+      el.scrollTop = start + distance * easeOutCubic(t);
+      if (t < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.removeEventListener("wheel", onUserInterrupt);
+        el.removeEventListener("touchstart", onUserInterrupt);
+      }
+    };
+    requestAnimationFrame(step);
   }, [containerRef]);
 
   // Track scroll position
@@ -95,14 +126,11 @@ export function useSmartAutoScroll<T extends { id: string; sender_id: string }>(
     const near = checkNearBottom();
 
     if (mine || near) {
-      requestAnimationFrame(() => {
-        el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-      });
-      setNewBelowCount(0);
+      requestAnimationFrame(() => scrollToBottom(true));
     } else {
       setNewBelowCount((n) => n + 1);
     }
-  }, [messages, myId, containerRef, checkNearBottom]);
+  }, [messages, myId, containerRef, checkNearBottom, scrollToBottom]);
 
   // Reset when container ref detaches (thread switch handled by consumer resetting messages).
   const resetForNewThread = useCallback(() => {
