@@ -138,7 +138,7 @@ export function AdminActivityLog() {
       </div>
 
       {/* Log entries */}
-      <div className="space-y-1.5 max-h-[60vh] overflow-y-auto">
+      <div className="space-y-1.5 max-h-[60vh] overflow-y-auto no-scrollbar">
         {logs.length === 0 && !loading && (
           <div className="text-center py-8 text-muted-foreground">
             <Activity className="h-8 w-8 mx-auto mb-2 opacity-30" />

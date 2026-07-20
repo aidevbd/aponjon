@@ -166,7 +166,7 @@ function FilterModal({
         <div className="mx-5 h-px bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold)/0.5)] to-transparent" />
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-5 py-5 space-y-4">
           {/* Category */}
           <section className="space-y-1.5">
             <label className="text-[10px] tracking-[0.2em] uppercase text-[hsl(var(--heirloom-ink-mute))]">

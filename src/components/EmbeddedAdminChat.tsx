@@ -725,7 +725,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
 
       <AnimatePresence mode="wait">
         {!selectedUser ? (
-          <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 overflow-y-auto">
+          <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 overflow-y-auto no-scrollbar">
             {chatUsers.length === 0 ? (
               <div className="text-center py-16 text-muted-foreground">
                 <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
