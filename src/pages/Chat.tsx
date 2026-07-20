@@ -88,6 +88,7 @@ const Chat = () => {
   const [contactPreviews, setContactPreviews] = useState<Record<string, ContactPreview>>({});
   const [actionMessage, setActionMessage] = useState<Message | null>(null);
   const [actionAnchor, setActionAnchor] = useState<DOMRect | null>(null);
+  const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
   const [unsendTargetId, setUnsendTargetId] = useState<string | null>(null);
   const [editHistoryFor, setEditHistoryFor] = useState<Message | null>(null);
   const [editHistory, setEditHistory] = useState<{ previous_content: string; edited_at: string }[]>([]);
