@@ -15,6 +15,7 @@ import ResetPassword from "./pages/ResetPassword";
 import OAuthConsent from "./pages/OAuthConsent";
 import NotFound from "./pages/NotFound";
 import { AdminProtectedRoute } from "./components/AdminProtectedRoute";
+import { ChatFloatingButton } from "./components/ChatFloatingButton";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <ChatFloatingButton />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
