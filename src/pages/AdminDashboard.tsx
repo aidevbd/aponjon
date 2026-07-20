@@ -47,6 +47,8 @@ const AdminDashboard = () => {
   const [isAddingContact, setIsAddingContact] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
   const [activeTab, setActiveTab] = useState("contacts");
+  const [chatOpen, setChatOpen] = useState(false);
+  const immersive = chatOpen && activeTab === "chat";
   
   const [selectedContact, setSelectedContact] = useState<ContactRow | null>(null);
   const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
