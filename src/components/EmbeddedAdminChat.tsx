@@ -1012,7 +1012,8 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
         message={actionMessage as any}
         isMine={actionMessage?.sender_id === adminContactId}
         canPin
-        onOpenChange={(open) => !open && setActionMessage(null)}
+        anchorRect={actionAnchor}
+        onOpenChange={(open) => { if (!open) { setActionMessage(null); setActionAnchor(null); } }}
         onReact={(emoji) => actionMessage && handleReact(actionMessage, emoji)}
         onReply={() => actionMessage && handleStartReply(actionMessage)}
         onEdit={() => actionMessage && handleStartEdit(actionMessage)}
