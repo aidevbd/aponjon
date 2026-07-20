@@ -1009,7 +1009,7 @@ const Chat = () => {
               )}
             </motion.div>
           ) : (
-            <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <motion.div key="thread" initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 24 }} transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }} className="flex-1 flex flex-col min-h-0 overflow-hidden">
               <div className="relative flex-1 flex flex-col min-h-0">
                 <div ref={messageListRef} className="chat-scroll flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 pb-2 space-y-1">
                   {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
