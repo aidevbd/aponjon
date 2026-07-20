@@ -61,7 +61,9 @@ export function MessageBubble({
   const longPressTimerRef = useRef<number | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [showQuickBar, setShowQuickBar] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const movedRef = useRef(false);
+
 
   const isUnsent = !!msg.unsent_at;
 
