@@ -1164,7 +1164,8 @@ const Chat = () => {
         open={!!actionMessage}
         message={actionMessage}
         isMine={actionMessage?.sender_id === session.contactId}
-        onOpenChange={(open) => !open && setActionMessage(null)}
+        anchorRect={actionAnchor}
+        onOpenChange={(open) => { if (!open) { setActionMessage(null); setActionAnchor(null); } }}
         onReact={(emoji) => actionMessage && handleReact(actionMessage, emoji)}
         onReply={() => actionMessage && handleStartReply(actionMessage)}
         onEdit={() => actionMessage && handleStartEdit(actionMessage)}
