@@ -146,6 +146,20 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
+  // Per-chat draft persistence (survives tab switch + refresh)
+  const DRAFTS_STORAGE_KEY = "admin-chat-drafts-v1";
+  const draftsRef = useRef<Record<string, string>>({});
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(DRAFTS_STORAGE_KEY);
+      if (raw) draftsRef.current = JSON.parse(raw) || {};
+    } catch {}
+  }, []);
+  const persistDrafts = useCallback(() => {
+    try { sessionStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(draftsRef.current)); } catch {}
+  }, []);
+
+
   const restoreInputFocus = useCallback((force = false) => {
     requestAnimationFrame(() => {
       const input = inputRef.current;
