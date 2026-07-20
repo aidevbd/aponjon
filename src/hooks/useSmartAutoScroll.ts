@@ -130,7 +130,7 @@ export function useSmartAutoScroll<T extends { id: string; sender_id: string }>(
     } else {
       setNewBelowCount((n) => n + 1);
     }
-  }, [messages, myId, containerRef, checkNearBottom]);
+  }, [messages, myId, containerRef, checkNearBottom, scrollToBottom]);
 
   // Reset when container ref detaches (thread switch handled by consumer resetting messages).
   const resetForNewThread = useCallback(() => {
