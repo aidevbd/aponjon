@@ -960,7 +960,7 @@ const Chat = () => {
           </div>
         )}
 
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           {!selectedContact ? (
             <motion.div key="contacts" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 px-4 py-4">
               {contacts.length === 0 ? (
