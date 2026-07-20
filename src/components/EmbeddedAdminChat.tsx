@@ -81,7 +81,22 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     }
     let io: IntersectionObserver | null = null;
     if (typeof IntersectionObserver !== "undefined" && shellRef.current) {
-      io = new IntersectionObserver(() => measure());
+      io = new IntersectionObserver((entries) => {
+        measure();
+        // When the chat shell becomes visible (e.g. after switching Tabs),
+        // auto-focus the input and pin scroll to the latest message.
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio > 0) {
+            if (selectedUserRef.current && !isTouchRef.current) {
+              restoreInputFocus(true);
+            }
+            requestAnimationFrame(() => {
+              const list = messageListRef.current;
+              if (list) list.scrollTop = list.scrollHeight;
+            });
+          }
+        }
+      }, { threshold: [0, 0.1] });
       io.observe(shellRef.current);
     }
     return () => {
