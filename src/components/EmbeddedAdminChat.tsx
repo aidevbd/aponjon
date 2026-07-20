@@ -261,26 +261,36 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
           void loadChatUsers();
         }
       })
-      .on("broadcast", { event: "msg_update" }, (payload) => {
-        const data = payload.payload as { id: string; sender_id: string; receiver_id: string; event: string };
-        if (!data || !selectedUser) return;
-        const inThread =
-          (data.sender_id === selectedUser.id && data.receiver_id === adminContactId) ||
-          (data.sender_id === adminContactId && data.receiver_id === selectedUser.id);
-        if (!inThread) return;
-        // Coalesce bursty msg_update events (delivered/read fire once per message)
-        if (msgUpdateTimerRef.current) return;
-        msgUpdateTimerRef.current = window.setTimeout(() => {
-          msgUpdateTimerRef.current = null;
-          void loadMessages(selectedUser);
-        }, 200);
-      })
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
       if (msgUpdateTimerRef.current) { clearTimeout(msgUpdateTimerRef.current); msgUpdateTimerRef.current = null; }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adminContactId, selectedUser]);
+
+  // Per-thread broadcast: receive delivered/read/edit/unsend/reaction updates
+  // published by RPCs via realtime.send to `msg:<a>:<b>`.
+  useEffect(() => {
+    if (!adminContactId || !selectedUser) return;
+    const sortedIds = [adminContactId, selectedUser.id].sort();
+    const topic = `msg:${sortedIds[0]}:${sortedIds[1]}`;
+    let timer: number | null = null;
+    const channel = supabase
+      .channel(topic, { config: { private: false } })
+      .on("broadcast", { event: "msg_update" }, () => {
+        if (timer) return;
+        timer = window.setTimeout(() => {
+          timer = null;
+          const fn = loadMessagesRef.current;
+          if (fn && selectedUserRef.current) void fn(selectedUserRef.current);
+        }, 200);
+      })
+      .subscribe();
+    return () => {
+      if (timer) { clearTimeout(timer); timer = null; }
+      supabase.removeChannel(channel);
+    };
   }, [adminContactId, selectedUser]);
 
   useEffect(() => {
@@ -365,6 +375,9 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
     } catch { toast.error("মেসেজ লোড করতে সমস্যা"); }
     finally { setMessagesLoading(false); }
   }, []);
+  const loadMessagesRef = useRef(loadMessages);
+  useEffect(() => { loadMessagesRef.current = loadMessages; }, [loadMessages]);
+
 
   const handleSelectUser = (user: ChatUser) => {
     // Save current draft for the previous chat before switching
