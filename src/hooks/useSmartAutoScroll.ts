@@ -126,10 +126,7 @@ export function useSmartAutoScroll<T extends { id: string; sender_id: string }>(
     const near = checkNearBottom();
 
     if (mine || near) {
-      requestAnimationFrame(() => {
-        el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-      });
-      setNewBelowCount(0);
+      requestAnimationFrame(() => scrollToBottom(true));
     } else {
       setNewBelowCount((n) => n + 1);
     }
