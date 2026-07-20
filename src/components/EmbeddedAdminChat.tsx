@@ -367,14 +367,35 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   }, []);
 
   const handleSelectUser = (user: ChatUser) => {
+    // Save current draft for the previous chat before switching
+    const prev = selectedUserRef.current;
+    if (prev && !editingMsg) {
+      const t = msgInput;
+      if (t && t.length > 0) draftsRef.current[prev.id] = t;
+      else delete draftsRef.current[prev.id];
+      persistDrafts();
+    }
     setSelectedUser(user);
     selectedUserRef.current = user;
     setFailedMessages([]);
     setMessages([]);
+    setEditingMsg(null);
+    setReplyingTo(null);
+    setMsgInput(draftsRef.current[user.id] || "");
     resetForNewThread();
     loadMessages(user);
     if (!isTouch) restoreInputFocus(true);
   };
+
+  // Persist draft as the admin types (skip while editing an existing message)
+  useEffect(() => {
+    const user = selectedUserRef.current;
+    if (!user || editingMsg) return;
+    if (msgInput && msgInput.length > 0) draftsRef.current[user.id] = msgInput;
+    else delete draftsRef.current[user.id];
+    persistDrafts();
+  }, [msgInput, editingMsg, persistDrafts]);
+
 
   // Consistency check: resync current thread on tab focus / online.
   useEffect(() => {
