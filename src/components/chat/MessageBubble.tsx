@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Reply, CheckCheck, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImageLightbox } from "./ImageLightbox";
+import { ChatImage } from "./ChatImage";
+
 
 
 export type ReactionEntry = { emoji: string; reactor_id: string };
@@ -232,32 +234,13 @@ export function MessageBubble({
           ) : (
             <>
               {msg.image_url && (
-                <div
-                  className="relative mb-1.5 overflow-hidden rounded-lg bg-muted/40"
-                  style={{ width: "min(240px, 100%)", aspectRatio: "4 / 3" }}
-                >
-                  <img
-                    src={msg.image_url}
-                    alt="পাঠানো ছবি"
-                    role="button"
-                    tabIndex={0}
-                    aria-label="ছবি বড় করে দেখুন"
-                    loading="lazy"
-                    decoding="async"
-                    className="absolute inset-0 h-full w-full object-cover cursor-pointer"
-                    onLoad={(e) => {
-                      const img = e.currentTarget;
-                      const parent = img.parentElement as HTMLElement | null;
-                      if (parent && img.naturalWidth && img.naturalHeight) {
-                        parent.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`;
-                      }
-                    }}
-                    onClick={(e) => { e.stopPropagation(); setLightboxOpen(true); }}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); setLightboxOpen(true); } }}
-
-                  />
-                </div>
+                <ChatImage
+                  src={msg.image_url}
+                  alt="পাঠানো ছবি"
+                  onOpen={() => setLightboxOpen(true)}
+                />
               )}
+
 
 
               {msg.content && <span>{msg.content}</span>}
