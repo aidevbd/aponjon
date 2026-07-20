@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Reply, CheckCheck, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ImageLightbox } from "./ImageLightbox";
+
 
 export type ReactionEntry = { emoji: string; reactor_id: string };
 
@@ -59,7 +61,9 @@ export function MessageBubble({
   const longPressTimerRef = useRef<number | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [showQuickBar, setShowQuickBar] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const movedRef = useRef(false);
+
 
   const isUnsent = !!msg.unsent_at;
 
@@ -248,8 +252,9 @@ export function MessageBubble({
                         parent.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`;
                       }
                     }}
-                    onClick={(e) => { e.stopPropagation(); window.open(msg.image_url!, "_blank"); }}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); window.open(msg.image_url!, "_blank"); } }}
+                    onClick={(e) => { e.stopPropagation(); setLightboxOpen(true); }}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); setLightboxOpen(true); } }}
+
                   />
                 </div>
               )}
@@ -374,8 +379,14 @@ export function MessageBubble({
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ImageLightbox
+        src={lightboxOpen ? msg.image_url : null}
+        onClose={() => setLightboxOpen(false)}
+      />
     </div>
   );
 }
+
 
 export { QUICK_EMOJIS };
