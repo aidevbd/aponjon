@@ -1111,7 +1111,7 @@ const Chat = () => {
 
 
 
-              <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-3 py-2 shrink-0 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+              <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm py-2 shrink-0 pb-[max(0.5rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
                 <div className="flex items-end gap-1.5 sm:gap-2 w-full">
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   <div className="flex items-center shrink-0">
