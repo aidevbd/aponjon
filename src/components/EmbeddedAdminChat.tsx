@@ -50,13 +50,48 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const [shellTop, setShellTop] = useState(0);
   useEffect(() => {
     const measure = () => {
-      if (!shellRef.current) return;
-      setShellTop(shellRef.current.getBoundingClientRect().top);
+      const el = shellRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      // Ignore stale zero-height measurements from hidden TabsContent —
+      // otherwise the shell overflows the viewport and hides the input.
+      if (rect.height === 0 && rect.top === 0) return;
+      setShellTop(Math.max(0, rect.top));
     };
     measure();
-    const id = window.setTimeout(measure, 50);
+    // Re-measure across a few animation frames so we catch the moment the
+    // Radix TabsContent flips from hidden -> visible.
+    const rafIds: number[] = [];
+    const scheduleRaf = () => {
+      const id = requestAnimationFrame(() => {
+        measure();
+        if (rafIds.length < 6) scheduleRaf();
+      });
+      rafIds.push(id);
+    };
+    scheduleRaf();
+    const timeouts = [50, 200, 500].map((ms) => window.setTimeout(measure, ms));
     window.addEventListener("resize", measure);
-    return () => { window.clearTimeout(id); window.removeEventListener("resize", measure); };
+    window.addEventListener("scroll", measure, { passive: true });
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined" && shellRef.current) {
+      ro = new ResizeObserver(() => measure());
+      ro.observe(shellRef.current);
+      if (document.body) ro.observe(document.body);
+    }
+    let io: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== "undefined" && shellRef.current) {
+      io = new IntersectionObserver(() => measure());
+      io.observe(shellRef.current);
+    }
+    return () => {
+      rafIds.forEach((id) => cancelAnimationFrame(id));
+      timeouts.forEach((id) => window.clearTimeout(id));
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure);
+      ro?.disconnect();
+      io?.disconnect();
+    };
   }, [viewportHeight]);
   const [adminContactId, setAdminContactId] = useState<string | null>(null);
   const [needsSetup, setNeedsSetup] = useState(false);
@@ -626,9 +661,9 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       ref={shellRef}
       className="flex flex-col"
       style={{
-        height: viewportHeight
-          ? `${Math.max(320, viewportHeight - shellTop)}px`
-          : "calc(100dvh - 160px)",
+        height: viewportHeight && shellTop > 0
+          ? `${Math.max(320, viewportHeight - shellTop - 16)}px`
+          : "calc(100dvh - 220px)",
         minHeight: "320px",
       }}
     >
