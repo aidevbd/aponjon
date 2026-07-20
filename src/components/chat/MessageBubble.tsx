@@ -134,13 +134,21 @@ export function MessageBubble({
     };
   }, []);
 
-  const bubbleBase = cn(
-    "relative inline-block max-w-full px-3.5 py-2 text-[15px] leading-[1.45] break-words whitespace-pre-wrap [overflow-wrap:anywhere] [word-break:break-word]",
+  const hasImage = !!msg.image_url && !isUnsent;
+  const hasText = !!msg.content && !isUnsent;
+  const imageOnly = hasImage && !hasText;
 
+  const bubbleBase = cn(
+    "relative inline-block max-w-full text-[15px] leading-[1.45] break-words whitespace-pre-wrap [overflow-wrap:anywhere] [word-break:break-word]",
+    imageOnly ? "p-1" : "px-3.5 py-2",
     "transition-shadow",
-    isMine
-      ? "bg-primary text-primary-foreground"
-      : "bg-card border border-border/50 text-foreground",
+    isUnsent
+      ? "bg-card border border-dashed border-border text-foreground"
+      : imageOnly
+        ? "bg-transparent"
+        : isMine
+          ? "bg-primary text-primary-foreground"
+          : "bg-card border border-border/50 text-foreground",
     // Messenger-style rounded corners with tail on the last bubble of a group
     isMine
       ? showTail
@@ -151,7 +159,7 @@ export function MessageBubble({
         : "rounded-2xl rounded-bl-2xl",
     highlight && "ring-2 ring-primary/50",
     msg.is_pinned && "ring-1 ring-primary/30",
-    isUnsent && "italic opacity-60 border border-dashed",
+    isUnsent && "italic opacity-60",
   );
 
   return (
@@ -238,10 +246,9 @@ export function MessageBubble({
                   src={msg.image_url}
                   alt="পাঠানো ছবি"
                   onOpen={() => setLightboxOpen(true)}
+                  className={hasText ? "mb-1.5" : undefined}
                 />
               )}
-
-
 
               {msg.content && <span>{msg.content}</span>}
             </>
