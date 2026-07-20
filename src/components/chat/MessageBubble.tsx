@@ -379,8 +379,14 @@ export function MessageBubble({
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ImageLightbox
+        src={lightboxOpen ? msg.image_url : null}
+        onClose={() => setLightboxOpen(false)}
+      />
     </div>
   );
 }
+
 
 export { QUICK_EMOJIS };
