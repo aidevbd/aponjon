@@ -847,8 +847,8 @@ const Chat = () => {
   // ============ CHAT INTERFACE ============
   return (
     <div className="warm-gradient flex flex-col overflow-hidden fixed inset-0" style={{ height: viewportHeight ? `${viewportHeight}px` : "100dvh" }}>
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md shrink-0">
-        <div className="container mx-auto max-w-3xl lg:max-w-4xl flex h-14 items-center justify-between px-4">
+      <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md shrink-0 pt-[env(safe-area-inset-top)]">
+        <div className="container mx-auto max-w-3xl lg:max-w-4xl flex h-14 items-center justify-between px-4 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {selectedContact ? (
               <button onClick={() => { setSelectedContact(null); setSearchOpen(false); setSearchQuery(""); }} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors min-w-0">
@@ -1111,7 +1111,7 @@ const Chat = () => {
 
 
 
-              <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm px-3 py-2 shrink-0 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+              <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm py-2 shrink-0 pb-[max(0.5rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
                 <div className="flex items-end gap-1.5 sm:gap-2 w-full">
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   <div className="flex items-center shrink-0">
