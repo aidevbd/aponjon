@@ -741,7 +741,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
           <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
             {/* Thread Header */}
             <div className="flex items-center gap-2 pb-3 border-b border-border/50">
-              <button onClick={() => { setSelectedUser(null); setSearchOpen(false); setSearchQuery(""); }} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors flex-1 min-w-0">
+              <button onClick={() => { setSelectedUser(null); selectedUserRef.current = null; setSearchOpen(false); setSearchQuery(""); }} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors flex-1 min-w-0">
                 <ArrowLeft className="h-4 w-4 shrink-0" />
                 <div className="relative shrink-0">
                   {selectedUser.photo_url ? (
