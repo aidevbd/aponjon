@@ -47,6 +47,9 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
   const isTouch = useIsTouchDevice();
   const viewportHeight = useVisualViewportHeight();
   const shellRef = useRef<HTMLDivElement>(null);
+  const selectedUserRef = useRef<ChatUser | null>(null);
+  const isTouchRef = useRef(isTouch);
+  useEffect(() => { isTouchRef.current = isTouch; }, [isTouch]);
   const [shellTop, setShellTop] = useState(0);
   useEffect(() => {
     const measure = () => {
