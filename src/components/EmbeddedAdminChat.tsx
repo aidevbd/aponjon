@@ -282,7 +282,8 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
         if (timer) return;
         timer = window.setTimeout(() => {
           timer = null;
-          void loadMessages(selectedUser);
+          const fn = loadMessagesRef.current;
+          if (fn && selectedUserRef.current) void fn(selectedUserRef.current);
         }, 200);
       })
       .subscribe();
@@ -290,7 +291,7 @@ export function EmbeddedAdminChat({ onUnreadChange }: EmbeddedAdminChatProps) {
       if (timer) { clearTimeout(timer); timer = null; }
       supabase.removeChannel(channel);
     };
-  }, [adminContactId, selectedUser, loadMessages]);
+  }, [adminContactId, selectedUser]);
 
   useEffect(() => {
     if (!adminContactId || !selectedUser) { setIsOtherTyping(false); typingChannelRef.current = null; return; }
