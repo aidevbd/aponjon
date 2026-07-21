@@ -166,6 +166,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
   const lastTypingRef = useRef(0);
   const recentSendAtRef = useRef(0);
   const messageListRef = useRef<HTMLDivElement>(null);
+  const pendingInitialScrollRef = useRef(false);
   const msgUpdateTimerRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -193,6 +194,21 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
         input.focus({ preventScroll: true });
       }
     });
+  }, []);
+
+  const forceScrollToLatest = useCallback((smooth = false) => {
+    const run = () => {
+      const list = messageListRef.current;
+      if (!list) return;
+      const top = Math.max(0, list.scrollHeight - list.clientHeight);
+      list.scrollTo({ top, behavior: smooth ? "smooth" : "auto" });
+    };
+
+    requestAnimationFrame(() => {
+      run();
+      requestAnimationFrame(run);
+    });
+    [80, 180, 360, 700, 1200].forEach((ms) => window.setTimeout(run, ms));
   }, []);
 
   useEffect(() => {
@@ -354,6 +370,12 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
     adminContactId,
   );
 
+  useEffect(() => {
+    if (!selectedUser || messagesLoading || messages.length === 0 || !pendingInitialScrollRef.current) return;
+    pendingInitialScrollRef.current = false;
+    forceScrollToLatest(false);
+  }, [selectedUser, messagesLoading, messages.length, forceScrollToLatest]);
+
 
   useEffect(() => {
     const total = Object.values(unreadMap).reduce((a, b) => a + b, 0);
@@ -438,11 +460,13 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
     selectedUserRef.current = user;
     setFailedMessages([]);
     setMessages([]);
+    pendingInitialScrollRef.current = true;
     setEditingMsg(null);
     setReplyingTo(null);
     setMsgInput(draftsRef.current[user.id] || "");
     resetForNewThread();
     loadMessages(user);
+    forceScrollToLatest(false);
     if (!isTouch) restoreInputFocus(true);
   };
 
