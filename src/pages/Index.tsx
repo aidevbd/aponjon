@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 
 const Index = () => {
   return (
-    <div className="flex min-h-dvh flex-col bg-[hsl(var(--heirloom-bg))]">
+    <div className="flex min-h-app flex-col bg-[hsl(var(--heirloom-bg))]">
       <Header />
 
       <main className="relative flex flex-1 items-center justify-center px-4 py-6 sm:px-6 sm:py-12 lg:py-10">

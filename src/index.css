@@ -407,6 +407,12 @@
 }
 
 @layer utilities {
+  /* Page-shell min-height that accounts for the fixed mobile bottom nav so
+     short pages do NOT create a phantom scroll gap below the fold. */
+  .min-h-app {
+    min-height: calc(100dvh - var(--mobile-bottom-nav-h, 0px));
+  }
+
   @keyframes reply-jump-pulse {
     0%   { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.55); }
     50%  { box-shadow: 0 0 0 8px hsl(var(--primary) / 0); }
@@ -416,3 +422,4 @@
     animation: reply-jump-pulse 1.6s ease-out 2;
   }
 }
+
