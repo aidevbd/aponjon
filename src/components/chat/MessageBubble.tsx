@@ -4,6 +4,7 @@ import { Reply, CheckCheck, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImageLightbox } from "./ImageLightbox";
 import { ChatImage } from "./ChatImage";
+import { Highlight } from "@/lib/highlight";
 
 
 
@@ -43,6 +44,7 @@ interface MessageBubbleProps {
   onShowEditHistory?: (msg: BubbleMessage) => void;
   onShowReceipts?: (msg: BubbleMessage) => void;
   highlight?: boolean;
+  highlightQuery?: string;
   isDelivered?: boolean; // sent but not yet read
   showReceipt?: boolean; // last of mine in conversation
 }
@@ -54,7 +56,7 @@ const SWIPE_THRESHOLD = 60;
 export function MessageBubble({
   msg, isMine, myId, otherName, showTail, showAvatar, avatarUrl,
   onOpenActions, onQuickReact, onStartReply, onShowEditHistory, onShowReceipts,
-  highlight, isDelivered, showReceipt,
+  highlight, highlightQuery, isDelivered, showReceipt,
 }: MessageBubbleProps) {
   const [dragX, setDragX] = useState(0);
   const startXRef = useRef<number | null>(null);
@@ -250,7 +252,7 @@ export function MessageBubble({
                 />
               )}
 
-              {msg.content && <span>{msg.content}</span>}
+              {msg.content && <span>{highlightQuery ? <Highlight text={msg.content} query={highlightQuery} /> : msg.content}</span>}
             </>
           )}
         </div>

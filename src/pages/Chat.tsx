@@ -1076,6 +1076,7 @@ const Chat = () => {
                             onShowEditHistory={(m) => handleShowEditHistory(m)}
                             isDelivered={!!msg.delivered_at || !!msg.is_read}
                             showReceipt={isMine && (showTail || msg.id === lastMineId)}
+                            highlightQuery={searchQuery}
                           />
                         </div>
                       );

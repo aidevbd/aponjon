@@ -1011,6 +1011,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
                         onShowEditHistory={(m) => handleShowEditHistory(m as Message)}
                         isDelivered={!!msg.delivered_at || !!msg.is_read}
                         showReceipt={isMine && (!!showTail || msg.id === lastMineId)}
+                        highlightQuery={searchQuery}
 
                       />
                     </div>
