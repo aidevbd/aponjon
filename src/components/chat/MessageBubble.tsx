@@ -22,6 +22,7 @@ export type BubbleMessage = {
   read_at?: string | null;
 
   edited_at?: string | null;
+  reply_to_id?: string | null;
   reply_content?: string | null;
   reply_sender_id?: string | null;
   is_pinned?: boolean;
@@ -43,6 +44,7 @@ interface MessageBubbleProps {
   onStartReply: (msg: BubbleMessage) => void;
   onShowEditHistory?: (msg: BubbleMessage) => void;
   onShowReceipts?: (msg: BubbleMessage) => void;
+  onJumpToReply?: (replyToId: string) => void;
   highlight?: boolean;
   highlightQuery?: string;
   isDelivered?: boolean; // sent but not yet read
@@ -55,7 +57,7 @@ const SWIPE_THRESHOLD = 60;
 
 export function MessageBubble({
   msg, isMine, myId, otherName, showTail, showAvatar, avatarUrl,
-  onOpenActions, onQuickReact, onStartReply, onShowEditHistory, onShowReceipts,
+  onOpenActions, onQuickReact, onStartReply, onShowEditHistory, onShowReceipts, onJumpToReply,
   highlight, highlightQuery, isDelivered, showReceipt,
 }: MessageBubbleProps) {
   const [dragX, setDragX] = useState(0);
@@ -167,9 +169,11 @@ export function MessageBubble({
   return (
     <div
       ref={wrapperRef}
+      data-msg-id={msg.id}
       className={cn(
-        "group/msg relative flex w-full mb-0.5 select-none",
+        "group/msg relative flex w-full mb-0.5 select-none scroll-mt-24 transition-shadow duration-300",
         isMine ? "justify-end pl-10" : "justify-start pr-10",
+        highlight && "rounded-xl ring-2 ring-primary/60 ring-offset-2 ring-offset-background",
       )}
       onMouseEnter={() => setShowQuickBar(true)}
       onMouseLeave={() => setShowQuickBar(false)}
@@ -223,17 +227,24 @@ export function MessageBubble({
       >
         {/* Reply quote */}
         {msg.reply_content && (
-          <div className={cn(
-            "max-w-[75%] mb-1 px-2.5 py-1 rounded-lg text-[11px] border-l-2 -mb-1.5 pb-3",
-            isMine
-              ? "bg-primary/10 border-primary/40 text-foreground/80 mr-2"
-              : "bg-muted border-primary/40 text-foreground/80 ml-2",
-          )}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (msg.reply_to_id && onJumpToReply) onJumpToReply(msg.reply_to_id);
+            }}
+            className={cn(
+              "max-w-[75%] mb-1 px-2.5 py-1 rounded-lg text-[11px] border-l-2 -mb-1.5 pb-3 text-left cursor-pointer hover:opacity-90 active:opacity-80 transition-opacity",
+              isMine
+                ? "bg-primary/10 border-primary/40 text-foreground/80 mr-2"
+                : "bg-muted border-primary/40 text-foreground/80 ml-2",
+            )}
+          >
             <div className="font-semibold opacity-75">
               {msg.reply_sender_id === myId ? "আপনি" : otherName}
             </div>
             <div className="truncate opacity-80">{msg.reply_content}</div>
-          </div>
+          </button>
         )}
 
         <div className={bubbleBase}>

@@ -383,6 +383,19 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
     adminContactId,
   );
 
+  const [highlightedMsgId, setHighlightedMsgId] = useState<string | null>(null);
+  const highlightTimerRef = useRef<number | null>(null);
+  const jumpToMessage = (id: string) => {
+    const container = messageListRef.current;
+    if (!container) return;
+    const el = container.querySelector<HTMLElement>(`[data-msg-id="${id}"]`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightedMsgId(id);
+    if (highlightTimerRef.current) window.clearTimeout(highlightTimerRef.current);
+    highlightTimerRef.current = window.setTimeout(() => setHighlightedMsgId(null), 1800);
+  };
+
   useEffect(() => {
     if (!selectedUser || messagesLoading || messages.length === 0 || !pendingInitialScrollRef.current) return;
     pendingInitialScrollRef.current = false;
@@ -1025,10 +1038,11 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
                         onQuickReact={(m, e) => handleReact(m as Message, e)}
                         onStartReply={(m) => handleStartReply(m as Message)}
                         onShowEditHistory={(m) => handleShowEditHistory(m as Message)}
+                        onJumpToReply={jumpToMessage}
                         isDelivered={!!msg.delivered_at || !!msg.is_read}
                         showReceipt={isMine && (!!showTail || msg.id === lastMineId)}
                         highlightQuery={searchQuery}
-
+                        highlight={msg.id === highlightedMsgId}
                       />
                     </div>
                   );

@@ -288,6 +288,19 @@ const Chat = () => {
     session?.contactId,
   );
 
+  const [highlightedMsgId, setHighlightedMsgId] = useState<string | null>(null);
+  const highlightTimerRef = useRef<number | null>(null);
+  const jumpToMessage = (id: string) => {
+    const container = messageListRef.current;
+    if (!container) return;
+    const el = container.querySelector<HTMLElement>(`[data-msg-id="${id}"]`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightedMsgId(id);
+    if (highlightTimerRef.current) window.clearTimeout(highlightTimerRef.current);
+    highlightTimerRef.current = window.setTimeout(() => setHighlightedMsgId(null), 1800);
+  };
+
   // When viewport height changes (e.g. keyboard opens), keep the latest message in view
   // if the user was already near the bottom of the conversation.
   const prevViewportRef = useRef<number>(viewportHeight);
@@ -1074,9 +1087,11 @@ const Chat = () => {
                             onQuickReact={(m, e) => handleReact(m, e)}
                             onStartReply={(m) => handleStartReply(m)}
                             onShowEditHistory={(m) => handleShowEditHistory(m)}
+                            onJumpToReply={jumpToMessage}
                             isDelivered={!!msg.delivered_at || !!msg.is_read}
                             showReceipt={isMine && (showTail || msg.id === lastMineId)}
                             highlightQuery={searchQuery}
+                            highlight={msg.id === highlightedMsgId}
                           />
                         </div>
                       );
