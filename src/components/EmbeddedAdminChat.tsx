@@ -907,7 +907,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
-                {searchQuery && <p className="text-[10px] text-muted-foreground mt-1">{filteredMessages.length} টি মেসেজ পাওয়া গেছে</p>}
+                
               </div>
             )}
 
