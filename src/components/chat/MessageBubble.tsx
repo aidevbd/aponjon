@@ -226,17 +226,24 @@ export function MessageBubble({
       >
         {/* Reply quote */}
         {msg.reply_content && (
-          <div className={cn(
-            "max-w-[75%] mb-1 px-2.5 py-1 rounded-lg text-[11px] border-l-2 -mb-1.5 pb-3",
-            isMine
-              ? "bg-primary/10 border-primary/40 text-foreground/80 mr-2"
-              : "bg-muted border-primary/40 text-foreground/80 ml-2",
-          )}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (msg.reply_to_id && onJumpToReply) onJumpToReply(msg.reply_to_id);
+            }}
+            className={cn(
+              "max-w-[75%] mb-1 px-2.5 py-1 rounded-lg text-[11px] border-l-2 -mb-1.5 pb-3 text-left cursor-pointer hover:opacity-90 active:opacity-80 transition-opacity",
+              isMine
+                ? "bg-primary/10 border-primary/40 text-foreground/80 mr-2"
+                : "bg-muted border-primary/40 text-foreground/80 ml-2",
+            )}
+          >
             <div className="font-semibold opacity-75">
               {msg.reply_sender_id === myId ? "আপনি" : otherName}
             </div>
             <div className="truncate opacity-80">{msg.reply_content}</div>
-          </div>
+          </button>
         )}
 
         <div className={bubbleBase}>
