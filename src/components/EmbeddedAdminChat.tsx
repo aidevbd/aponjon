@@ -162,6 +162,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
   const [unsendTargetId, setUnsendTargetId] = useState<string | null>(null);
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [editHistoryFor, setEditHistoryFor] = useState<Message | null>(null);
   const [editHistory, setEditHistory] = useState<{ previous_content: string; edited_at: string }[]>([]);
   const [editHistoryLoading, setEditHistoryLoading] = useState(false);
