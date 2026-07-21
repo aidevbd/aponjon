@@ -624,6 +624,10 @@ export type Database = {
         Args: { p_other_id: string }
         Returns: number
       }
+      mark_conversation_read_admin: {
+        Args: { p_other_id: string }
+        Returns: number
+      }
       react_to_message: {
         Args: { p_emoji: string; p_message_id: string; p_token: string }
         Returns: boolean
