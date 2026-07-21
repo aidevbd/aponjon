@@ -297,6 +297,18 @@
     box-shadow: 20px 20px 60px -15px hsl(26 40% 30% / 0.12),
                 0 1px 0 hsl(42 60% 100% / 0.6) inset;
   }
+  /* Mobile: strip the framed-card look for a native, edge-to-edge feel */
+  @media (max-width: 639px) {
+    .heirloom-page {
+      background-color: transparent;
+      border-color: transparent;
+      box-shadow: none;
+    }
+    .heirloom-corner,
+    .heirloom-texture {
+      display: none !important;
+    }
+  }
   .heirloom-texture {
     background-image:
       radial-gradient(hsl(var(--heirloom-ink) / 0.045) 1px, transparent 1px),
