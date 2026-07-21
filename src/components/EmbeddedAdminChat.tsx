@@ -902,24 +902,24 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
               <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-full" aria-label="মেসেজ খুঁজুন" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
                 <Search className="h-4 w-4" />
               </Button>
-              <DropdownMenu>
+              <DropdownMenu open={settingsOpen} onOpenChange={setSettingsOpen} modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-full" aria-label="সেটিংস ও অপশন">
                     <Settings2 className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52">
-                  <DropdownMenuItem onClick={() => setNotifPrefsOpen(true)} className="gap-2 text-sm">
+                <DropdownMenuContent align="end" sideOffset={8} className="z-[70] w-52">
+                  <DropdownMenuItem onSelect={() => { setSettingsOpen(false); setNotifPrefsOpen(true); }} className="gap-2 text-sm">
                     <Bell className="h-4 w-4" /> নোটিফিকেশন সেটিংস
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => scrollToBottom(true)}
+                    onSelect={() => { setSettingsOpen(false); scrollToBottom(true); }}
                     className="gap-2 text-sm"
                   >
                     <ArrowDownToLine className="h-4 w-4" /> সর্বশেষ মেসেজে যান
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => { if (selectedUser) void loadMessages(selectedUser); }}
+                    onSelect={() => { setSettingsOpen(false); if (selectedUser) void loadMessages(selectedUser); }}
                     className="gap-2 text-sm"
                   >
                     <RefreshCw className="h-4 w-4" /> রিফ্রেশ
