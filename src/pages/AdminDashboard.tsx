@@ -22,7 +22,7 @@ import { ContactListItem } from "@/components/ContactListItem";
 import { ContactDetailSheet } from "@/components/ContactDetailSheet";
 import { ContactFilters } from "@/components/ContactFilters";
 import { VirtualContactList } from "@/components/VirtualContactList";
-import { GroupedContactList } from "@/components/GroupedContactList";
+
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { matchesFuzzy } from "@/lib/banglaSearch";
 
@@ -48,7 +48,7 @@ const AdminDashboard = () => {
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterBloodGroup, setFilterBloodGroup] = useState("all");
-  const [groupMode, setGroupMode] = useState<"az" | "category" | "none">("az");
+  
   const [editingContact, setEditingContact] = useState<ContactRow | null>(null);
   const [editForm, setEditForm] = useState<Partial<ContactRow>>({});
   const [editPhones, setEditPhones] = useState<PhoneEntry[]>([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]);
@@ -448,36 +448,11 @@ const AdminDashboard = () => {
               />
             </div>
 
-            {/* Filtered count + Group toggle */}
-            {contacts.length > 0 && (
-              <div className="flex items-center justify-between gap-3 px-1">
-                <div className="text-[12px] text-[hsl(var(--heirloom-ink-soft))]">
-                  {filtered.length !== contacts.length && (
-                    <>
-                      <span className="text-[hsl(var(--heirloom-gold-deep))]">{filtered.length}</span>
-                      {" / "}{contacts.length} জন মিলেছে
-                    </>
-                  )}
-                </div>
-                <div className="flex items-center gap-0.5 rounded-full border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.6)] p-0.5">
-                  {([
-                    { k: "az", label: "ক-A" },
-                    { k: "category", label: "ক্যাটাগরি" },
-                    { k: "none", label: "সব" },
-                  ] as const).map(({ k, label }) => (
-                    <button
-                      key={k}
-                      onClick={() => setGroupMode(k)}
-                      className={`rounded-full px-2.5 py-1 text-[11px] transition-colors ${
-                        groupMode === k
-                          ? "bg-[hsl(var(--heirloom-gold)/0.15)] text-[hsl(var(--heirloom-gold-deep))]"
-                          : "text-[hsl(var(--heirloom-ink-soft))] hover:text-[hsl(var(--heirloom-ink))]"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
+            {/* Filtered count */}
+            {contacts.length > 0 && filtered.length !== contacts.length && (
+              <div className="px-1 text-[12px] text-[hsl(var(--heirloom-ink-soft))]">
+                <span className="text-[hsl(var(--heirloom-gold-deep))]">{filtered.length}</span>
+                {" / "}{contacts.length} জন মিলেছে
               </div>
             )}
 
@@ -519,22 +494,15 @@ const AdminDashboard = () => {
                   ফিল্টার রিসেট করুন
                 </button>
               </div>
-            ) : groupMode === "none" ? (
+            ) : (
               <VirtualContactList
                 contacts={filtered}
                 query={debouncedSearch}
                 highlightedId={lastSelectedId}
                 onClick={openContactDetail}
               />
-            ) : (
-              <GroupedContactList
-                contacts={filtered}
-                query={debouncedSearch}
-                highlightedId={lastSelectedId}
-                onClick={openContactDetail}
-                groupBy={groupMode}
-              />
             )}
+
           </div>
 
           {/* Contact Detail Sheet */}
