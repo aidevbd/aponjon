@@ -22,7 +22,7 @@ import { ContactListItem } from "@/components/ContactListItem";
 import { ContactDetailSheet } from "@/components/ContactDetailSheet";
 import { ContactFilters } from "@/components/ContactFilters";
 import { VirtualContactList } from "@/components/VirtualContactList";
-import { GroupedContactList } from "@/components/GroupedContactList";
+
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { matchesFuzzy } from "@/lib/banglaSearch";
 
