@@ -69,32 +69,6 @@ const Index = () => {
         </div>
       </main>
 
-      {/* Mobile sticky CTA bar */}
-      <motion.div
-        initial={{ y: 40, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.35, duration: 0.4, ease: "easeOut" }}
-        className="heirloom-sticky-bar fixed inset-x-0 bottom-0 z-40 border-t px-3 pt-3 sm:hidden"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
-      >
-        <div className="mx-auto flex max-w-md items-stretch gap-2">
-          <Link
-            to="/add"
-            className="heirloom-btn-primary group flex flex-[1.35] items-center justify-center gap-1.5 rounded-sm px-3 py-3 text-[13.5px] font-medium"
-          >
-            <PlusCircle className="h-4 w-4" aria-hidden />
-            <span>যোগ করি</span>
-            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden />
-          </Link>
-          <Link
-            to="/access"
-            className="heirloom-btn-ghost flex flex-1 items-center justify-center gap-1.5 rounded-sm border px-3 py-3 text-[13.5px] font-medium"
-          >
-            <Search className="h-4 w-4" aria-hidden />
-            <span>দেখতে চাই</span>
-          </Link>
-        </div>
-      </motion.div>
     </div>
   );
 };
