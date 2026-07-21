@@ -7,6 +7,7 @@ import {
   getNotificationPrefs,
   setNotificationPrefs,
   notifyNewMessage,
+  playChime,
   triggerVibration,
   type NotificationPrefs,
 } from "@/lib/notificationPrefs";
@@ -82,7 +83,7 @@ export function NotificationPreferencesDialog({ open, onOpenChange }: Props) {
             className="text-xs"
             onClick={() => {
               if (prefs.vibration) triggerVibration();
-              if (prefs.sound) notifyNewMessage();
+              if (prefs.sound) void playChime().catch(() => {});
             }}
           >
             টেস্ট করুন
