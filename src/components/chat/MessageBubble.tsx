@@ -252,7 +252,7 @@ export function MessageBubble({
                 />
               )}
 
-              {msg.content && <span>{msg.content}</span>}
+              {msg.content && <span>{highlightQuery ? <Highlight text={msg.content} query={highlightQuery} /> : msg.content}</span>}
             </>
           )}
         </div>
