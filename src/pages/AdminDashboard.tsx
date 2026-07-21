@@ -35,6 +35,7 @@ import { AdminActivityLog } from "@/components/AdminActivityLog";
 import { logAdminActivity } from "@/lib/adminLog";
 import { ChangePasswordForm } from "@/components/ChangePasswordForm";
 import { AdminDashboardSkeleton } from "@/components/skeletons/LoadingSkeletons";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const ADMIN_TABS = ["dashboard", "contacts", "chat", "logs", "settings"] as const;
 
