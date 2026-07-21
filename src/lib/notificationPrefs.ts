@@ -134,7 +134,7 @@ export function triggerVibration(pattern: number | number[] = VIBRATION_PATTERN)
   return ok;
 }
 
-async function playChime() {
+export async function playChime() {
   const ctx = createCtx();
   if (!ctx) return;
   try {
