@@ -26,7 +26,7 @@ export function ChatFloatingButton() {
       initial={{ opacity: 0, scale: 0.8, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 260, damping: 22 }}
-      className="fixed z-40 right-4 sm:right-6"
+      className="fixed z-40 right-4 sm:right-6 hidden sm:block"
       style={{ bottom: "calc(env(safe-area-inset-bottom) + 5.5rem)" }}
     >
       <Link
