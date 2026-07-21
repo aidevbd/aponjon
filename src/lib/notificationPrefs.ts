@@ -82,22 +82,25 @@ function ensureAudioUnlockBinding() {
 if (typeof window !== "undefined") ensureAudioUnlockBinding();
 
 // --- Vibration unlock -----------------------------------------------------
-// Chrome/Android require a prior user gesture on the page before
-// `navigator.vibrate` will actually vibrate. Register a no-op vibration on
-// the first interaction so later programmatic calls succeed.
+// Android Chrome/Firefox use "sticky activation" for the Vibration API: after
+// any real tap/key interaction on the page, later realtime callbacks may vibrate.
+// Mark activation from the gesture itself and keep a tiny best-effort API call
+// so WebViews that need a direct call during the gesture are also primed.
 let vibrationUnlockBound = false;
 let vibrationUnlocked = false;
+
+const VIBRATION_PATTERN = [90, 35, 140, 35, 90];
 
 function ensureVibrationUnlockBinding() {
   if (vibrationUnlockBound || typeof window === "undefined") return;
   if (typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return;
   vibrationUnlockBound = true;
   const unlock = () => {
+    vibrationUnlocked = true;
     try {
-      navigator.vibrate(1); // imperceptible; counts as activation
-      vibrationUnlocked = true;
-      removeListeners();
+      navigator.vibrate(0); // cancel any stale buzz; the gesture itself activates the document
     } catch {}
+    removeListeners();
   };
   const opts = { capture: true, passive: true } as AddEventListenerOptions;
   const events = ["pointerdown", "touchstart", "keydown", "click", "mousedown"];
@@ -111,12 +114,24 @@ if (typeof window !== "undefined") ensureVibrationUnlockBinding();
 
 function doVibrate(pattern: number | number[]): boolean {
   if (typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return false;
-  if (typeof document !== "undefined" && document.visibilityState === "hidden") return false;
+  ensureVibrationUnlockBinding();
   try {
-    return navigator.vibrate(pattern) === true;
+    // Cancel an in-flight vibration first; several Android devices ignore a
+    // new pattern while the previous one is still settling.
+    navigator.vibrate(0);
+    const ok = navigator.vibrate(pattern);
+    return ok !== false;
   } catch {
     return false;
   }
+}
+
+export function triggerVibration(pattern: number | number[] = VIBRATION_PATTERN): boolean {
+  const ok = doVibrate(pattern);
+  if (!ok) {
+    window.setTimeout(() => doVibrate(pattern), 60);
+  }
+  return ok;
 }
 
 async function playChime() {
@@ -149,11 +164,7 @@ export function notifyNewMessage() {
     void playChime().catch(() => {});
   }
   if (prefs.vibration) {
-    const pattern = [60, 40, 90, 40, 60];
-    const ok = doVibrate(pattern);
-    if (!ok && !vibrationUnlocked) {
-      setTimeout(() => doVibrate(pattern), 0);
-    }
+    triggerVibration(vibrationUnlocked ? VIBRATION_PATTERN : [120, 45, 160, 45, 120]);
   }
 }
 
