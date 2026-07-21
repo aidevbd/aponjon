@@ -825,38 +825,64 @@ const Chat = () => {
     return (
       <div className="min-h-screen warm-gradient">
         <Header />
-        <main className="container mx-auto px-4 py-16">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mx-auto max-w-sm">
-            <div className="glass-card p-8">
-              <div className="text-center mb-8">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full hero-gradient shadow-rose">
-                  <MessageCircle className="h-8 w-8 text-primary-foreground" />
-                </div>
-                <h1 className="text-xl font-display font-semibold text-foreground">প্রাইভেট মেসেজ</h1>
-                <p className="text-sm text-muted-foreground mt-1">সিক্রেট কোড দিয়ে লগইন করুন</p>
+        <main className="container mx-auto px-4 py-10 sm:py-16">
+          <div className="mx-auto grid w-full max-w-5xl gap-10 lg:grid-cols-[1.05fr_1fr] lg:items-center">
+            {/* Left: heirloom promise (desktop only) */}
+            <aside className="hidden lg:flex lg:flex-col lg:gap-5 lg:pr-8">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.4)] bg-[hsl(var(--heirloom-gold)/0.08)]">
+                <Lock className="h-5 w-5 text-[hsl(var(--heirloom-gold-deep))]" />
               </div>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-primary" /> ফোন নম্বর</Label>
-                  <Input placeholder="01XXXXXXXXX" value={loginPhone} onChange={(e) => setLoginPhone(e.target.value)} className="bg-card" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-primary" /> সিক্রেট কোড</Label>
-                  <Input type="password" placeholder="আপনার সিক্রেট কোড" value={loginSecret} onChange={(e) => setLoginSecret(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleLogin()} className="bg-card" />
-                </div>
-                <Button onClick={handleLogin} variant="hero" className="w-full" disabled={loginLoading}>
-                  <MessageCircle className="h-4 w-4 mr-1" /> {loginLoading ? "যাচাই হচ্ছে..." : "চ্যাট শুরু করুন"}
-                </Button>
-              </div>
-              <p className="text-[11px] text-muted-foreground text-center mt-4">
-                🔒 আপনার মেসেজ সম্পূর্ণ প্রাইভেট ও সিকিউর
+              <h1 className="font-display text-4xl leading-[1.1] tracking-tight text-[hsl(var(--heirloom-ink))]">
+                প্রাইভেট মেসেজ
+              </h1>
+              <div aria-hidden className="h-px w-24 bg-gradient-to-r from-[hsl(var(--heirloom-gold))] to-transparent" />
+              <p className="text-[15px] leading-[1.7] text-[hsl(var(--heirloom-ink-soft))]">
+                আপনার সিক্রেট কোড দিয়ে সাইন-ইন করলেই একটি নিরাপদ, শান্ত কথোপকথনের জায়গা খুলবে — শুধু আপনি আর আপনজন।
               </p>
-            </div>
-          </motion.div>
+              <ul className="space-y-2 text-sm text-[hsl(var(--heirloom-ink-soft))]">
+                <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--heirloom-gold))]" /> রিয়েল-টাইম মেসেজ ও অনলাইন স্ট্যাটাস</li>
+                <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--heirloom-gold))]" /> সম্পূর্ণ end-to-end প্রাইভেট</li>
+                <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--heirloom-gold))]" /> ছবি, রিপ্লাই ও রিঅ্যাকশন সাপোর্ট</li>
+              </ul>
+            </aside>
+
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mx-auto w-full max-w-sm lg:max-w-md lg:mx-0">
+              <div className="glass-card p-8">
+                <div className="text-center mb-8 lg:hidden">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full hero-gradient shadow-rose">
+                    <MessageCircle className="h-8 w-8 text-primary-foreground" />
+                  </div>
+                  <h1 className="text-xl font-display font-semibold text-foreground">প্রাইভেট মেসেজ</h1>
+                  <p className="text-sm text-muted-foreground mt-1">সিক্রেট কোড দিয়ে লগইন করুন</p>
+                </div>
+                <div className="hidden lg:block mb-6">
+                  <h2 className="text-lg font-display font-semibold text-foreground">সাইন-ইন</h2>
+                  <p className="text-sm text-muted-foreground mt-1">ফোন নম্বর ও সিক্রেট কোড দিন</p>
+                </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-primary" /> ফোন নম্বর</Label>
+                    <Input placeholder="01XXXXXXXXX" value={loginPhone} onChange={(e) => setLoginPhone(e.target.value)} className="bg-card" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-primary" /> সিক্রেট কোড</Label>
+                    <Input type="password" placeholder="আপনার সিক্রেট কোড" value={loginSecret} onChange={(e) => setLoginSecret(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleLogin()} className="bg-card" />
+                  </div>
+                  <Button onClick={handleLogin} variant="hero" className="w-full" disabled={loginLoading}>
+                    <MessageCircle className="h-4 w-4 mr-1" /> {loginLoading ? "যাচাই হচ্ছে..." : "চ্যাট শুরু করুন"}
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground text-center mt-4">
+                  🔒 আপনার মেসেজ সম্পূর্ণ প্রাইভেট ও সিকিউর
+                </p>
+              </div>
+            </motion.div>
+          </div>
         </main>
       </div>
     );
   }
+
 
   // ============ CHAT INTERFACE ============
   return (
