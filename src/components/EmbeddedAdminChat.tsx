@@ -76,7 +76,9 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
     const measure = () => {
       const el = shellRef.current;
       if (!el) return;
-      if (isMobile && selectedUserRef.current) {
+      // When a chat thread is open the dashboard enters immersive mode
+      // (header + tabs hidden), so the shell should own the full viewport.
+      if (selectedUserRef.current) {
         setShellTop(0);
         return;
       }
@@ -86,6 +88,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
       if (rect.height === 0 && rect.top === 0) return;
       setShellTop(Math.max(0, rect.top));
     };
+
     measure();
     // Re-measure across a few animation frames so we catch the moment the
     // Radix TabsContent flips from hidden -> visible.
@@ -388,7 +391,11 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
 
   useEffect(() => {
     onActiveChatChange?.(!!selectedUser);
+    // When a chat opens/closes the dashboard toggles immersive mode.
+    // Reset shellTop so the shell height recalculates against the new layout.
+    if (selectedUser) setShellTop(0);
   }, [selectedUser, onActiveChatChange]);
+
 
   useEffect(() => {
     if (!isMobile || !selectedUser) return;
