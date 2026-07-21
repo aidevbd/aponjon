@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Loader2, Settings, Pencil, Reply, Search, X } from "lucide-react";
+import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Loader2, Settings, Pencil, Reply, Search, X, Settings2, Bell, ArrowDownToLine, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
 import { Input } from "@/components/ui/input";
 import { AutoResizeTextarea } from "@/components/chat/AutoResizeTextarea";
 import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
@@ -159,6 +161,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
   const [actionAnchor, setActionAnchor] = useState<DOMRect | null>(null);
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
   const [unsendTargetId, setUnsendTargetId] = useState<string | null>(null);
+  const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [editHistoryFor, setEditHistoryFor] = useState<Message | null>(null);
   const [editHistory, setEditHistory] = useState<{ previous_content: string; edited_at: string }[]>([]);
   const [editHistoryLoading, setEditHistoryLoading] = useState(false);
@@ -899,6 +902,30 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
               <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-full" aria-label="মেসেজ খুঁজুন" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
                 <Search className="h-4 w-4" />
               </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-full" aria-label="সেটিংস ও অপশন">
+                    <Settings2 className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52">
+                  <DropdownMenuItem onClick={() => setNotifPrefsOpen(true)} className="gap-2 text-sm">
+                    <Bell className="h-4 w-4" /> নোটিফিকেশন সেটিংস
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => scrollToBottom(true)}
+                    className="gap-2 text-sm"
+                  >
+                    <ArrowDownToLine className="h-4 w-4" /> সর্বশেষ মেসেজে যান
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => { if (selectedUser) void loadMessages(selectedUser); }}
+                    className="gap-2 text-sm"
+                  >
+                    <RefreshCw className="h-4 w-4" /> রিফ্রেশ
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
 
@@ -1115,6 +1142,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
         currentContent={editHistoryFor?.content || null}
         loading={editHistoryLoading}
       />
+      <NotificationPreferencesDialog open={notifPrefsOpen} onOpenChange={setNotifPrefsOpen} />
     </div>
   );
 }
