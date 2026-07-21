@@ -327,7 +327,7 @@ const AdminDashboard = () => {
   return (
     <div className={`bg-[hsl(var(--heirloom-bg))] relative ${chatFullscreen ? "h-dvh flex flex-col overflow-hidden" : "min-h-dvh"}`}>
       {/* Header */}
-      <header className={`sticky top-0 z-50 border-b border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.85)] backdrop-blur ${immersive ? "hidden" : ""}`}>
+      <header className={`sticky top-0 z-50 shrink-0 border-b border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.85)] backdrop-blur ${immersive ? "hidden" : ""}`}>
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.5)] bg-[hsl(var(--heirloom-gold)/0.08)]">
