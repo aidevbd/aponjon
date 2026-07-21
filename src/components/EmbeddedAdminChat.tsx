@@ -907,7 +907,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
-                {searchQuery && <p className="text-[10px] text-muted-foreground mt-1">{filteredMessages.length} টি মেসেজ পাওয়া গেছে</p>}
+                
               </div>
             )}
 
@@ -915,9 +915,6 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
             {pinnedMessages.length > 0 && !searchOpen && (
               <div className="pt-2 px-1">
                 <div className="bg-accent/50 rounded-lg p-2 border border-border/50">
-                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
-                    📌 পিন করা মেসেজ
-                  </div>
                   {pinnedMessages.slice(0, 2).map(pm => (
                     <p key={pm.id} className="text-xs text-foreground truncate">📌 {pm.content || "ছবি"}</p>
                   ))}
@@ -955,9 +952,6 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
                         <div className="flex justify-center my-3">
                           <span className="text-[10px] text-muted-foreground bg-muted/60 px-3 py-0.5 rounded-full">{getDateLabel(msg.created_at)}</span>
                         </div>
-                      )}
-                      {!sameAsPrev && !isMine && (
-                        <div className="text-[10px] text-muted-foreground ml-10 mb-0.5">{selectedUser?.name}</div>
                       )}
                       <MessageBubble
                         msg={msg as any}
