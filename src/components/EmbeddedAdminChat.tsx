@@ -984,7 +984,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
 
             {/* Messages */}
             <div className="relative z-0 flex-1 flex flex-col min-h-0 overflow-hidden">
-            <div ref={messageListRef} className={`chat-scroll flex-1 overflow-y-auto overflow-x-hidden pb-3 ${searchOpen ? "pt-5" : "pt-3"} space-y-1`}>
+            <div ref={messageListRef} className={`chat-scroll flex-1 overflow-y-auto overflow-x-hidden px-3 sm:px-4 md:px-5 pb-3 ${searchOpen ? "pt-5" : "pt-3"} space-y-1`}>
               {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
               {!messagesLoading && filteredMessages.length === 0 && (
                 <div className="text-center py-12 text-muted-foreground">
