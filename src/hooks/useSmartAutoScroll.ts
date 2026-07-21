@@ -127,6 +127,24 @@ export function useSmartAutoScroll<T extends { id: string; sender_id: string }>(
 
     if (mine || near) {
       requestAnimationFrame(() => scrollToBottom(true));
+      // Re-scroll smoothly after images/media within the new message load in.
+      const lastChild = el.lastElementChild?.lastElementChild as HTMLElement | null;
+      const imgs = lastChild ? Array.from(lastChild.querySelectorAll("img")) : [];
+      imgs.forEach((img) => {
+        if (!img.complete) {
+          const rescroll = () => {
+            if (checkNearBottom()) scrollToBottom(true);
+          };
+          img.addEventListener("load", rescroll, { once: true });
+          img.addEventListener("error", rescroll, { once: true });
+        }
+      });
+      // Safety re-pin passes for layout settle.
+      [120, 320, 640].forEach((ms) =>
+        window.setTimeout(() => {
+          if (checkNearBottom()) scrollToBottom(true);
+        }, ms),
+      );
     } else {
       setNewBelowCount((n) => n + 1);
     }
