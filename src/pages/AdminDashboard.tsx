@@ -325,7 +325,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-dvh bg-[hsl(var(--heirloom-bg))] relative">
+    <div className={`bg-[hsl(var(--heirloom-bg))] relative ${chatFullscreen ? "h-dvh flex flex-col overflow-hidden" : "min-h-dvh"}`}>
       {/* Header */}
       <header className={`sticky top-0 z-50 border-b border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.85)] backdrop-blur ${immersive ? "hidden" : ""}`}>
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
