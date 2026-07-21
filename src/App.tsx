@@ -15,6 +15,7 @@ import OAuthConsent from "./pages/OAuthConsent";
 import NotFound from "./pages/NotFound";
 import { AdminProtectedRoute } from "./components/AdminProtectedRoute";
 import { ChatFloatingButton } from "./components/ChatFloatingButton";
+import { MobileBottomNav } from "./components/MobileBottomNav";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
         <ChatFloatingButton />
+        <MobileBottomNav />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
