@@ -138,7 +138,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
       ro?.disconnect();
       io?.disconnect();
     };
-  }, [viewportHeight, isMobile, selectedUser]);
+  }, [viewportHeight, isMobile]);
   const [adminContactId, setAdminContactId] = useState<string | null>(null);
   const [needsSetup, setNeedsSetup] = useState(false);
   const [setupName, setSetupName] = useState("");
