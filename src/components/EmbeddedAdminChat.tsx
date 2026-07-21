@@ -1163,6 +1163,9 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
+
+
 
       <AlertDialog open={!!unsendTargetId} onOpenChange={(open) => !open && setUnsendTargetId(null)}>
         <AlertDialogContent>
