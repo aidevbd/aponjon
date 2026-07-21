@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import {
   getNotificationPrefs,
   setNotificationPrefs,
-  notifyNewMessage,
   playChime,
   triggerVibration,
   type NotificationPrefs,
