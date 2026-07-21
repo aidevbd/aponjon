@@ -904,7 +904,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
 
             {/* Search bar */}
             {searchOpen && (
-              <div className="relative z-40 isolate shrink-0 -mx-1 bg-[hsl(var(--heirloom-bg))] px-2 pt-2 pb-3 shadow-[0_10px_22px_-20px_hsl(var(--heirloom-ink)/0.38)] before:pointer-events-none before:absolute before:inset-x-0 before:-bottom-3 before:h-3 before:bg-gradient-to-b before:from-[hsl(var(--heirloom-bg))] before:to-transparent">
+              <div className="relative z-40 isolate shrink-0 -mx-1 bg-[hsl(var(--heirloom-bg))] px-2 pt-2 pb-2 border-b border-[hsl(var(--heirloom-line))]">
                 <div className="group relative z-10 flex items-center">
                   <Search className="pointer-events-none absolute left-3 h-4 w-4 text-muted-foreground" />
                   <Input
