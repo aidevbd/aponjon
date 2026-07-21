@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, LogOut, Users, Heart, Download, Edit3, X, Cake, Gift, Plus,
@@ -36,8 +36,11 @@ import { logAdminActivity } from "@/lib/adminLog";
 import { ChangePasswordForm } from "@/components/ChangePasswordForm";
 import { AdminDashboardSkeleton } from "@/components/skeletons/LoadingSkeletons";
 
+const ADMIN_TABS = ["dashboard", "contacts", "chat", "logs", "settings"] as const;
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [contacts, setContacts] = useState<ContactRow[]>([]);
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
@@ -49,9 +52,22 @@ const AdminDashboard = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [isAddingContact, setIsAddingContact] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
-  const [activeTab, setActiveTab] = useState("contacts");
+  const urlTab = searchParams.get("tab");
+  const activeTab = (ADMIN_TABS as readonly string[]).includes(urlTab || "") ? (urlTab as string) : "contacts";
+  const setActiveTab = (tab: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (tab === "contacts") next.delete("tab"); else next.set("tab", tab);
+    setSearchParams(next, { replace: true });
+  };
   const [chatOpen, setChatOpen] = useState(false);
   const immersive = chatOpen && activeTab === "chat";
+
+  // Signal immersive state to the global bottom nav so it can hide
+  useEffect(() => {
+    if (immersive) document.body.setAttribute("data-immersive", "true");
+    else document.body.removeAttribute("data-immersive");
+    return () => { document.body.removeAttribute("data-immersive"); };
+  }, [immersive]);
   
   const [selectedContact, setSelectedContact] = useState<ContactRow | null>(null);
   const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
