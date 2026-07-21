@@ -22,6 +22,7 @@ export type BubbleMessage = {
   read_at?: string | null;
 
   edited_at?: string | null;
+  reply_to_id?: string | null;
   reply_content?: string | null;
   reply_sender_id?: string | null;
   is_pinned?: boolean;
