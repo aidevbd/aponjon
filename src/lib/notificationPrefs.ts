@@ -40,53 +40,55 @@ export function subscribeNotificationPrefs(handler: (prefs: NotificationPrefs) =
 
 let audioCtx: AudioContext | null = null;
 let audioUnlockBound = false;
+let audioUnlocked = false;
 
-function ensureAudioUnlockBinding() {
-  if (audioUnlockBound || typeof window === "undefined") return;
-  audioUnlockBound = true;
-  const unlock = () => {
-    try {
-      const Ctx = (window.AudioContext || (window as any).webkitAudioContext);
-      if (!Ctx) return;
-      if (!audioCtx) audioCtx = new Ctx();
-      if (audioCtx.state === "suspended") void audioCtx.resume().catch(() => {});
-      // Play a silent buffer to fully unlock on iOS Safari
-      const buf = audioCtx.createBuffer(1, 1, 22050);
-      const src = audioCtx.createBufferSource();
-      src.buffer = buf;
-      src.connect(audioCtx.destination);
-      src.start(0);
-    } catch {}
-  };
-  const opts = { once: true, capture: true, passive: true } as AddEventListenerOptions;
-  window.addEventListener("pointerdown", unlock, opts);
-  window.addEventListener("touchstart", unlock, opts);
-  window.addEventListener("keydown", unlock, opts);
-  window.addEventListener("click", unlock, opts);
-}
-
-function getAudioCtx(): AudioContext | null {
-  if (typeof window === "undefined") return null;
+function createCtx(): AudioContext | null {
   try {
-    if (!audioCtx) {
-      const Ctx = (window.AudioContext || (window as any).webkitAudioContext);
-      if (!Ctx) return null;
-      audioCtx = new Ctx();
-    }
-    if (audioCtx.state === "suspended") void audioCtx.resume().catch(() => {});
+    const Ctx = (window.AudioContext || (window as any).webkitAudioContext);
+    if (!Ctx) return null;
+    if (!audioCtx) audioCtx = new Ctx();
     return audioCtx;
   } catch {
     return null;
   }
 }
 
-// Bind unlock listeners as soon as the module loads on the client.
-ensureAudioUnlockBinding();
+function ensureAudioUnlockBinding() {
+  if (audioUnlockBound || typeof window === "undefined") return;
+  audioUnlockBound = true;
+  const unlock = async () => {
+    const ctx = createCtx();
+    if (!ctx) return;
+    try {
+      if (ctx.state === "suspended") await ctx.resume();
+      // Play a silent buffer to fully unlock on iOS Safari / some desktops
+      const buf = ctx.createBuffer(1, 1, 22050);
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(ctx.destination);
+      src.start(0);
+      audioUnlocked = ctx.state === "running";
+      if (audioUnlocked) removeListeners();
+    } catch {}
+  };
+  const opts = { capture: true, passive: true } as AddEventListenerOptions;
+  const events = ["pointerdown", "touchstart", "keydown", "click", "mousedown"];
+  const removeListeners = () => {
+    events.forEach((e) => window.removeEventListener(e, unlock, opts));
+  };
+  events.forEach((e) => window.addEventListener(e, unlock, opts));
+}
 
-function playChime() {
-  const ctx = getAudioCtx();
+if (typeof window !== "undefined") ensureAudioUnlockBinding();
+
+async function playChime() {
+  const ctx = createCtx();
   if (!ctx) return;
-  const now = ctx.currentTime;
+  try {
+    if (ctx.state === "suspended") await ctx.resume();
+  } catch {}
+  if (ctx.state !== "running") return; // still blocked by autoplay policy
+  const now = ctx.currentTime + 0.02;
   const notes = [880, 1175]; // A5, D6 — short warm ping
   notes.forEach((freq, i) => {
     const osc = ctx.createOscillator();
@@ -94,7 +96,7 @@ function playChime() {
     osc.type = "sine";
     osc.frequency.setValueAtTime(freq, now + i * 0.08);
     gain.gain.setValueAtTime(0.0001, now + i * 0.08);
-    gain.gain.exponentialRampToValueAtTime(0.12, now + i * 0.08 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.18, now + i * 0.08 + 0.02);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.08 + 0.22);
     osc.connect(gain).connect(ctx.destination);
     osc.start(now + i * 0.08);
@@ -106,9 +108,10 @@ function playChime() {
 export function notifyNewMessage() {
   const prefs = getNotificationPrefs();
   if (prefs.sound) {
-    try { playChime(); } catch {}
+    void playChime().catch(() => {});
   }
   if (prefs.vibration && typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
     try { navigator.vibrate([40, 30, 40]); } catch {}
   }
 }
+
