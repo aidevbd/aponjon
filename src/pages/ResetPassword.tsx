@@ -123,7 +123,7 @@ const ResetPassword = () => {
     : "লিংক যাচাই হচ্ছে...";
 
   return (
-    <div className="flex min-h-dvh flex-col bg-[hsl(var(--heirloom-bg))]">
+    <div className="flex min-h-app flex-col bg-[hsl(var(--heirloom-bg))]">
       <Header />
 
       <main className="relative flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-10">
