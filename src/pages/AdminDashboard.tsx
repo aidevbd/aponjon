@@ -22,7 +22,9 @@ import { ContactListItem } from "@/components/ContactListItem";
 import { ContactDetailSheet } from "@/components/ContactDetailSheet";
 import { ContactFilters } from "@/components/ContactFilters";
 import { VirtualContactList } from "@/components/VirtualContactList";
+import { GroupedContactList } from "@/components/GroupedContactList";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { matchesFuzzy } from "@/lib/banglaSearch";
 
 import { DashboardHome } from "@/components/DashboardHome";
 import { PhotoUpload } from "@/components/PhotoUpload";
@@ -46,6 +48,7 @@ const AdminDashboard = () => {
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterBloodGroup, setFilterBloodGroup] = useState("all");
+  const [groupMode, setGroupMode] = useState<"az" | "category" | "none">("az");
   const [editingContact, setEditingContact] = useState<ContactRow | null>(null);
   const [editForm, setEditForm] = useState<Partial<ContactRow>>({});
   const [editPhones, setEditPhones] = useState<PhoneEntry[]>([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]);
@@ -144,20 +147,12 @@ const AdminDashboard = () => {
   const debouncedSearch = useDebouncedValue(search, 150);
 
   const filtered = useMemo(() => {
-    const q = debouncedSearch.trim().toLowerCase();
+    const q = debouncedSearch.trim();
     return contacts.filter((c) => {
-      const matchSearch = !q ||
-        c.name.toLowerCase().includes(q) ||
-        c.phone.toLowerCase().includes(q) ||
-        (c.blood_group && c.blood_group.toLowerCase().includes(q)) ||
-        (c.note && c.note.toLowerCase().includes(q)) ||
-        (c.address && c.address.toLowerCase().includes(q)) ||
-        (c.email && c.email.toLowerCase().includes(q)) ||
-        (c.whatsapp && c.whatsapp.toLowerCase().includes(q)) ||
-        (c.imo && c.imo.toLowerCase().includes(q)) ||
-        (c.telegram && c.telegram.toLowerCase().includes(q)) ||
-        (c.facebook && c.facebook.toLowerCase().includes(q)) ||
-        (c.custom_category && c.custom_category.toLowerCase().includes(q));
+      const matchSearch = !q || [
+        c.name, c.phone, c.blood_group, c.note, c.address, c.email,
+        c.whatsapp, c.imo, c.telegram, c.facebook, c.custom_category,
+      ].some((v) => matchesFuzzy(v, q));
       const matchCategory = filterCategory === "all" || c.category === filterCategory;
       const matchBlood = filterBloodGroup === "all" || c.blood_group === filterBloodGroup;
       return matchSearch && matchCategory && matchBlood;
@@ -453,11 +448,36 @@ const AdminDashboard = () => {
               />
             </div>
 
-            {/* Filtered count — only when filtering is active */}
-            {filtered.length !== contacts.length && (
-              <div className="px-1 text-[12px] text-[hsl(var(--heirloom-ink-soft))]">
-                <span className="text-[hsl(var(--heirloom-gold-deep))]">{filtered.length}</span>
-                {" / "}{contacts.length} জন মিলেছে
+            {/* Filtered count + Group toggle */}
+            {contacts.length > 0 && (
+              <div className="flex items-center justify-between gap-3 px-1">
+                <div className="text-[12px] text-[hsl(var(--heirloom-ink-soft))]">
+                  {filtered.length !== contacts.length && (
+                    <>
+                      <span className="text-[hsl(var(--heirloom-gold-deep))]">{filtered.length}</span>
+                      {" / "}{contacts.length} জন মিলেছে
+                    </>
+                  )}
+                </div>
+                <div className="flex items-center gap-0.5 rounded-full border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.6)] p-0.5">
+                  {([
+                    { k: "az", label: "ক-A" },
+                    { k: "category", label: "ক্যাটাগরি" },
+                    { k: "none", label: "সব" },
+                  ] as const).map(({ k, label }) => (
+                    <button
+                      key={k}
+                      onClick={() => setGroupMode(k)}
+                      className={`rounded-full px-2.5 py-1 text-[11px] transition-colors ${
+                        groupMode === k
+                          ? "bg-[hsl(var(--heirloom-gold)/0.15)] text-[hsl(var(--heirloom-gold-deep))]"
+                          : "text-[hsl(var(--heirloom-ink-soft))] hover:text-[hsl(var(--heirloom-ink))]"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -499,14 +519,21 @@ const AdminDashboard = () => {
                   ফিল্টার রিসেট করুন
                 </button>
               </div>
-            ) : (
+            ) : groupMode === "none" ? (
               <VirtualContactList
                 contacts={filtered}
                 query={debouncedSearch}
                 highlightedId={lastSelectedId}
                 onClick={openContactDetail}
               />
-
+            ) : (
+              <GroupedContactList
+                contacts={filtered}
+                query={debouncedSearch}
+                highlightedId={lastSelectedId}
+                onClick={openContactDetail}
+                groupBy={groupMode}
+              />
             )}
           </div>
 
