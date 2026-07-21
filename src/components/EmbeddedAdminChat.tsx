@@ -912,7 +912,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     autoFocus
-                    className="h-10 rounded-full border-border/60 bg-card/80 pl-10 pr-10 text-sm shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-primary/40"
+                    className="h-10 rounded-full border-border/60 bg-background pl-10 pr-10 text-sm shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-primary/40"
                   />
                   <button
                     type="button"
