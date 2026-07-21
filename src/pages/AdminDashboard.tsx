@@ -532,7 +532,23 @@ const AdminDashboard = () => {
         </TabsContent>
 
         {/* ===== সেটিংস ট্যাব ===== */}
-        <TabsContent value="settings" className="mt-0">
+        <TabsContent value="settings" className="mt-0 space-y-6">
+          {/* Data management */}
+          <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.6)] p-4 sm:p-5">
+            <h3 className="font-display text-lg text-[hsl(var(--heirloom-ink))]">ডেটা ব্যাকআপ</h3>
+            <p className="mt-1 text-[13px] leading-[1.6] text-[hsl(var(--heirloom-ink-soft))]">
+              সব কন্টাক্টের একটি CSV কপি ডাউনলোড করে নিরাপদে সংরক্ষণ করুন।
+            </p>
+            <button
+              onClick={handleExportCSV}
+              disabled={contacts.length === 0}
+              className="mt-4 inline-flex items-center gap-2 rounded-sm border border-[hsl(var(--heirloom-gold)/0.5)] bg-[hsl(var(--heirloom-paper))] px-4 py-2 text-[13px] text-[hsl(var(--heirloom-gold-deep))] transition-colors hover:bg-[hsl(var(--heirloom-cream)/0.6)] disabled:opacity-50"
+            >
+              <Download className="h-4 w-4" />
+              CSV ডাউনলোড করুন {contacts.length > 0 && <span className="text-[hsl(var(--heirloom-ink-soft))]">({contacts.length})</span>}
+            </button>
+          </div>
+
           <ChangePasswordForm />
         </TabsContent>
      </Tabs>
