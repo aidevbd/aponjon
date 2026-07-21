@@ -915,9 +915,6 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
             {pinnedMessages.length > 0 && !searchOpen && (
               <div className="pt-2 px-1">
                 <div className="bg-accent/50 rounded-lg p-2 border border-border/50">
-                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
-                    📌 পিন করা মেসেজ
-                  </div>
                   {pinnedMessages.slice(0, 2).map(pm => (
                     <p key={pm.id} className="text-xs text-foreground truncate">📌 {pm.content || "ছবি"}</p>
                   ))}
