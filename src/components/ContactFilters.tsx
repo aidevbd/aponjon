@@ -16,6 +16,7 @@ interface ContactFiltersProps {
   categoryCount: Record<string, number>;
   contacts?: ContactRow[];
   onPickContact?: (contact: ContactRow) => void;
+  totalCount?: number;
 }
 
 type Suggestion = {
@@ -72,6 +73,7 @@ export function ContactFilters({
   categoryCount,
   contacts = [],
   onPickContact,
+  totalCount,
 }: ContactFiltersProps) {
   const [open, setOpen] = useState(false);
   const [draftCat, setDraftCat] = useState(filterCategory);
@@ -154,7 +156,7 @@ export function ContactFilters({
           <input
             ref={inputRef}
             type="text"
-            placeholder="নাম, নম্বর, কি-ওয়ার্ড..."
+            placeholder={totalCount && totalCount > 0 ? `${totalCount} জনের মধ্যে সার্চ করুন...` : "নাম, নম্বর, কি-ওয়ার্ড..."}
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             onFocus={() => setFocused(true)}

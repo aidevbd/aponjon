@@ -449,27 +449,17 @@ const AdminDashboard = () => {
                 categoryCount={stats.categoryCount}
                 contacts={contacts}
                 onPickContact={openContactDetail}
+                totalCount={contacts.length}
               />
             </div>
 
-            {/* Results bar */}
-            <div className="flex items-center justify-between gap-3 px-1">
-              <div className="text-[12px] text-[hsl(var(--heirloom-ink-soft))]">
-                {filtered.length === contacts.length
-                  ? <>মোট <span className="text-[hsl(var(--heirloom-gold-deep))]">{contacts.length}</span> জন</>
-                  : <><span className="text-[hsl(var(--heirloom-gold-deep))]">{filtered.length}</span> / {contacts.length} জন</>}
+            {/* Filtered count — only when filtering is active */}
+            {filtered.length !== contacts.length && (
+              <div className="px-1 text-[12px] text-[hsl(var(--heirloom-ink-soft))]">
+                <span className="text-[hsl(var(--heirloom-gold-deep))]">{filtered.length}</span>
+                {" / "}{contacts.length} জন মিলেছে
               </div>
-
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={handleExportCSV}
-                  className="flex items-center gap-1.5 rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.6)] px-3 py-1.5 text-[12px] text-[hsl(var(--heirloom-ink-soft))] transition-colors hover:border-[hsl(var(--heirloom-gold)/0.5)] hover:text-[hsl(var(--heirloom-gold-deep))]"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  CSV
-                </button>
-              </div>
-            </div>
+            )}
 
             {/* Contact List / Empty State */}
             {contacts.length === 0 ? (
@@ -542,7 +532,23 @@ const AdminDashboard = () => {
         </TabsContent>
 
         {/* ===== সেটিংস ট্যাব ===== */}
-        <TabsContent value="settings" className="mt-0">
+        <TabsContent value="settings" className="mt-0 space-y-6">
+          {/* Data management */}
+          <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.6)] p-4 sm:p-5">
+            <h3 className="font-display text-lg text-[hsl(var(--heirloom-ink))]">ডেটা ব্যাকআপ</h3>
+            <p className="mt-1 text-[13px] leading-[1.6] text-[hsl(var(--heirloom-ink-soft))]">
+              সব কন্টাক্টের একটি CSV কপি ডাউনলোড করে নিরাপদে সংরক্ষণ করুন।
+            </p>
+            <button
+              onClick={handleExportCSV}
+              disabled={contacts.length === 0}
+              className="mt-4 inline-flex items-center gap-2 rounded-sm border border-[hsl(var(--heirloom-gold)/0.5)] bg-[hsl(var(--heirloom-paper))] px-4 py-2 text-[13px] text-[hsl(var(--heirloom-gold-deep))] transition-colors hover:bg-[hsl(var(--heirloom-cream)/0.6)] disabled:opacity-50"
+            >
+              <Download className="h-4 w-4" />
+              CSV ডাউনলোড করুন {contacts.length > 0 && <span className="text-[hsl(var(--heirloom-ink-soft))]">({contacts.length})</span>}
+            </button>
+          </div>
+
           <ChangePasswordForm />
         </TabsContent>
      </Tabs>
