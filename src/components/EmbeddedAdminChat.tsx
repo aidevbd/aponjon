@@ -46,9 +46,12 @@ type Message = {
 interface EmbeddedAdminChatProps {
   onUnreadChange?: (count: number) => void;
   onActiveChatChange?: (open: boolean) => void;
+  /** When true, the shell fills its parent height (parent must be flex/grid with a definite height). */
+  fillHeight?: boolean;
 }
 
-export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: EmbeddedAdminChatProps) {
+export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeight }: EmbeddedAdminChatProps) {
+
   const isTouch = useIsTouchDevice();
   const isMobile = useIsMobile();
   const viewportHeight = useVisualViewportHeight();
@@ -802,9 +805,12 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
   const mobileThreadMode = isMobile && !!selectedUser;
   const shellHeight = mobileThreadMode
     ? (viewportHeight ? `${viewportHeight}px` : "100dvh")
-    : viewportHeight
-      ? `${Math.max(320, viewportHeight - shellTop - (shellTop > 0 ? 16 : 0))}px`
-      : "calc(100dvh - 220px)";
+    : fillHeight
+      ? "100%"
+      : viewportHeight
+        ? `${Math.max(320, viewportHeight - shellTop - (shellTop > 0 ? 16 : 0))}px`
+        : "calc(100dvh - 220px)";
+
 
   if (loading) {
     return (

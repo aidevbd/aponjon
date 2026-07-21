@@ -63,8 +63,23 @@ const AdminDashboard = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const isMobile = useIsMobile();
   const immersive = chatOpen && activeTab === "chat" && isMobile;
+  const chatFullscreen = activeTab === "chat" && !isMobile;
 
-
+  // Auto-hide the tabs bar on desktop when the user scrolls down; reveal at top.
+  const [tabsHidden, setTabsHidden] = useState(false);
+  useEffect(() => {
+    if (isMobile || chatFullscreen) { setTabsHidden(false); return; }
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y <= 8) setTabsHidden(false);
+      else if (y > lastY + 4) setTabsHidden(true);
+      else if (y < lastY - 4) setTabsHidden(false);
+      lastY = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isMobile, chatFullscreen, activeTab]);
 
   // Signal immersive state to the global bottom nav so it can hide
   useEffect(() => {
@@ -72,6 +87,7 @@ const AdminDashboard = () => {
     else document.body.removeAttribute("data-immersive");
     return () => { document.body.removeAttribute("data-immersive"); };
   }, [immersive]);
+
   
   const [selectedContact, setSelectedContact] = useState<ContactRow | null>(null);
   const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
@@ -309,9 +325,9 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-dvh bg-[hsl(var(--heirloom-bg))] relative">
+    <div className={`bg-[hsl(var(--heirloom-bg))] relative ${chatFullscreen ? "h-dvh flex flex-col overflow-hidden" : "min-h-dvh"}`}>
       {/* Header */}
-      <header className={`sticky top-0 z-50 border-b border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.85)] backdrop-blur ${immersive ? "hidden" : ""}`}>
+      <header className={`sticky top-0 z-50 shrink-0 border-b border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.85)] backdrop-blur ${immersive ? "hidden" : ""}`}>
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.5)] bg-[hsl(var(--heirloom-gold)/0.08)]">
@@ -349,11 +365,15 @@ const AdminDashboard = () => {
 
 
       {/* Tab-Based Content */}
-      <main className={`container mx-auto max-w-6xl ${immersive ? "px-0 py-0" : "px-3 sm:px-4 py-6 sm:py-8"}`}>
+      <main className={`container mx-auto max-w-6xl ${immersive ? "px-0 py-0" : chatFullscreen ? "flex-1 min-h-0 flex flex-col px-3 sm:px-4 pt-3 pb-3" : "px-3 sm:px-4 py-6 sm:py-8"}`}>
         <h1 className="sr-only">অ্যাডমিন ড্যাশবোর্ড</h1>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className={chatFullscreen ? "flex-1 min-h-0 flex flex-col" : ""}>
 
-        <TabsList className={`w-full grid grid-cols-5 h-auto mb-8 p-1 gap-0.5 bg-[hsl(var(--heirloom-paper)/0.7)] border border-[hsl(var(--heirloom-line))] rounded-sm ${immersive ? "hidden" : ""}`}>
+        <TabsList
+          className={`w-full grid grid-cols-5 h-auto p-1 gap-0.5 bg-[hsl(var(--heirloom-paper)/0.7)] border border-[hsl(var(--heirloom-line))] rounded-sm transition-transform duration-300 ${immersive ? "hidden" : ""} ${chatFullscreen ? "mb-3 shrink-0" : "mb-8 sm:sticky sm:top-14 sm:z-40"} ${tabsHidden ? "sm:-translate-y-[calc(100%+3.5rem)] sm:opacity-0 sm:pointer-events-none" : ""}`}
+        >
+
+
           <TabsTrigger
             value="dashboard"
             className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-[10px] sm:text-[13px] px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-[hsl(var(--heirloom-cream)/0.8)] data-[state=active]:text-[hsl(var(--heirloom-gold-deep))] data-[state=active]:shadow-none text-[hsl(var(--heirloom-ink-soft))]"
@@ -511,9 +531,10 @@ const AdminDashboard = () => {
         </TabsContent>
 
         {/* ===== চ্যাট ট্যাব ===== */}
-        <TabsContent value="chat" className="mt-0">
-          <EmbeddedAdminChat onUnreadChange={(count) => setTotalUnread(count)} onActiveChatChange={setChatOpen} />
+        <TabsContent value="chat" className={`mt-0 ${chatFullscreen ? "flex-1 min-h-0 data-[state=active]:flex flex-col" : ""}`}>
+          <EmbeddedAdminChat onUnreadChange={(count) => setTotalUnread(count)} onActiveChatChange={setChatOpen} fillHeight={chatFullscreen} />
         </TabsContent>
+
 
         {/* ===== লগ ট্যাব ===== */}
         <TabsContent value="logs" className="mt-0">
