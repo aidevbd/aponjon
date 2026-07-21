@@ -32,7 +32,7 @@ export function NotificationPreferencesDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-sm z-[100]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
             <Bell className="h-4 w-4 text-primary" /> নোটিফিকেশন সেটিংস
