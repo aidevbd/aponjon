@@ -22,40 +22,69 @@ interface MessageActionSheetProps {
   onShowEditHistory?: () => void;
 }
 
-const POPUP_WIDTH = 240;
+const MENU_WIDTH = 232;
+const REACTIONS_WIDTH = 280;
 const GAP = 8;
 const MARGIN = 8;
+const MOBILE_BP = 640;
 
 export function MessageActionSheet({
   open, message, isMine, canPin, anchorRect, anchorEl, onOpenChange,
   onReact, onReply, onEdit, onUnsend, onRemoveForMe, onTogglePin, onShowEditHistory,
 }: MessageActionSheetProps) {
-  const popupRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const reactionsRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < MOBILE_BP : false
+  );
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(null);
+  const [reactionsPos, setReactionsPos] = useState<{ top: number; left: number } | null>(null);
 
   useLayoutEffect(() => {
-    if (!open) { setPos(null); return; }
+    if (!open) { setMenuPos(null); setReactionsPos(null); return; }
 
     const compute = () => {
+      const mobile = window.innerWidth < MOBILE_BP;
+      setIsMobile(mobile);
+      if (mobile) return; // bottom sheet uses CSS
+
       const rect = anchorEl?.getBoundingClientRect() ?? anchorRect ?? null;
-      if (!rect) { setPos(null); return; }
+      if (!rect) return;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const height = popupRef.current?.offsetHeight ?? 320;
+      const menuH = menuRef.current?.offsetHeight ?? 260;
+      const reactionsH = reactionsRef.current?.offsetHeight ?? 48;
 
-      let left = isMine
-        ? rect.left - POPUP_WIDTH - GAP
-        : rect.right + GAP;
+      // Reactions bar: above the bubble, aligned to bubble's inner edge
+      let rLeft = isMine ? rect.right - REACTIONS_WIDTH : rect.left;
+      rLeft = Math.max(MARGIN, Math.min(rLeft, vw - REACTIONS_WIDTH - MARGIN));
+      let rTop = rect.top - reactionsH - GAP;
+      // If no room above, place below the bubble
+      const reactionsBelow = rTop < MARGIN;
+      if (reactionsBelow) rTop = rect.bottom + GAP;
 
-      if (left < MARGIN) left = Math.min(rect.right + GAP, vw - POPUP_WIDTH - MARGIN);
-      if (left + POPUP_WIDTH > vw - MARGIN) left = Math.max(rect.left - POPUP_WIDTH - GAP, MARGIN);
-      left = Math.max(MARGIN, Math.min(left, vw - POPUP_WIDTH - MARGIN));
+      // Menu: on the free side of the bubble; if not enough side room, place below
+      let mLeft = isMine ? rect.left - MENU_WIDTH - GAP : rect.right + GAP;
+      let placeBesideMenu = mLeft >= MARGIN && mLeft + MENU_WIDTH <= vw - MARGIN;
+      let mTop: number;
+      if (placeBesideMenu) {
+        mTop = rect.top;
+        if (mTop + menuH > vh - MARGIN) mTop = Math.max(MARGIN, vh - menuH - MARGIN);
+      } else {
+        // Stack menu under the reactions bar (or under bubble)
+        mLeft = isMine ? rect.right - MENU_WIDTH : rect.left;
+        mLeft = Math.max(MARGIN, Math.min(mLeft, vw - MENU_WIDTH - MARGIN));
+        const baseTop = reactionsBelow ? rTop + reactionsH + GAP : rect.bottom + GAP;
+        mTop = baseTop;
+        if (mTop + menuH > vh - MARGIN) {
+          // Try above the reactions
+          const alt = (reactionsBelow ? rect.top : rTop) - menuH - GAP;
+          mTop = alt >= MARGIN ? alt : Math.max(MARGIN, vh - menuH - MARGIN);
+        }
+      }
 
-      let top = rect.top;
-      if (top + height > vh - MARGIN) top = vh - height - MARGIN;
-      top = Math.max(MARGIN, top);
-
-      setPos({ top, left });
+      setReactionsPos({ top: rTop, left: rLeft });
+      setMenuPos({ top: mTop, left: mLeft });
     };
 
     compute();
@@ -95,81 +124,119 @@ export function MessageActionSheet({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onOpenChange]);
 
-
   if (!open || !message) return null;
   const isUnsent = !!message.unsent_at;
   const canEdit = isMine && !isUnsent && !!message.content;
 
   const close = () => onOpenChange(false);
 
+  const reactionsBar = !isUnsent && (
+    <div
+      ref={reactionsRef}
+      onClick={(e) => e.stopPropagation()}
+      className="flex items-center gap-1 rounded-full border border-border bg-popover px-2 py-1.5 shadow-xl"
+    >
+      {QUICK_EMOJIS.map((emoji) => (
+        <button
+          key={emoji}
+          onClick={() => { onReact(emoji); close(); }}
+          className="text-2xl leading-none hover:scale-125 active:scale-110 transition-transform p-1"
+          aria-label={`React ${emoji}`}
+        >
+          {emoji}
+        </button>
+      ))}
+    </div>
+  );
+
+  const menuItems = (
+    <>
+      {!isUnsent && (
+        <Row icon={<Reply className="h-4 w-4" />} label="রিপ্লাই" onClick={() => { onReply(); close(); }} />
+      )}
+      {message.content && !isUnsent && (
+        <Row
+          icon={<Copy className="h-4 w-4" />}
+          label="কপি করুন"
+          onClick={() => {
+            navigator.clipboard.writeText(message.content!);
+            toast.success("কপি হয়েছে");
+            close();
+          }}
+        />
+      )}
+      {canEdit && (
+        <Row icon={<Pencil className="h-4 w-4" />} label="এডিট" onClick={() => { onEdit(); close(); }} />
+      )}
+      {message.has_edit_history && onShowEditHistory && (
+        <Row icon={<History className="h-4 w-4" />} label="এডিট ইতিহাস" onClick={() => { onShowEditHistory(); close(); }} />
+      )}
+      {canPin && onTogglePin && !isUnsent && (
+        <Row
+          icon={<Pin className="h-4 w-4" />}
+          label={message.is_pinned ? "আনপিন" : "পিন"}
+          onClick={() => { onTogglePin(); close(); }}
+        />
+      )}
+
+      <div className="h-px bg-border my-1" />
+
+      <Row
+        icon={<RotateCcw className="h-4 w-4" />}
+        label="শুধু আমার থেকে সরান"
+        onClick={() => { onRemoveForMe(); close(); }}
+      />
+      {isMine && !isUnsent && (
+        <Row
+          icon={<Trash2 className="h-4 w-4" />}
+          label="সবার জন্য আনসেন্ড"
+          destructive
+          onClick={() => { onUnsend(); close(); }}
+        />
+      )}
+    </>
+  );
+
+  if (isMobile) {
+    return createPortal(
+      <div
+        className="fixed inset-0 z-[100] flex flex-col justify-end bg-black/40 animate-in fade-in-0 duration-150"
+        onClick={close}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="flex flex-col gap-3 px-3 pb-[max(env(safe-area-inset-bottom),12px)] pt-3 animate-in slide-in-from-bottom-4 duration-200"
+        >
+          {reactionsBar && (
+            <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+              {reactionsBar}
+            </div>
+          )}
+          <div className="rounded-2xl border border-border bg-popover text-popover-foreground shadow-2xl overflow-hidden">
+            <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-muted-foreground/30" />
+            <div className="py-2">{menuItems}</div>
+          </div>
+        </div>
+      </div>,
+      document.body,
+    );
+  }
+
   return createPortal(
     <div className="fixed inset-0 z-[100]" onClick={close}>
       <div
-        ref={popupRef}
-        onClick={(e) => e.stopPropagation()}
-        style={pos ? { top: pos.top, left: pos.left, width: POPUP_WIDTH } : { top: -9999, left: -9999, width: POPUP_WIDTH }}
-        className="fixed rounded-2xl border border-border bg-popover text-popover-foreground shadow-xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-100"
+        style={reactionsPos ? { top: reactionsPos.top, left: reactionsPos.left } : { top: -9999, left: -9999 }}
+        className="fixed animate-in fade-in-0 zoom-in-95 duration-100"
       >
-        {/* Quick reactions */}
-        {!isUnsent && (
-          <div className="flex items-center justify-between gap-0.5 px-2 py-2 border-b border-border">
-            {QUICK_EMOJIS.map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => { onReact(emoji); close(); }}
-                className="text-xl leading-none hover:scale-125 transition-transform p-1"
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div className="py-1">
-          {!isUnsent && (
-            <Row icon={<Reply className="h-4 w-4" />} label="রিপ্লাই" onClick={() => { onReply(); close(); }} />
-          )}
-          {message.content && !isUnsent && (
-            <Row
-              icon={<Copy className="h-4 w-4" />}
-              label="কপি করুন"
-              onClick={() => {
-                navigator.clipboard.writeText(message.content!);
-                toast.success("কপি হয়েছে");
-                close();
-              }}
-            />
-          )}
-          {canEdit && (
-            <Row icon={<Pencil className="h-4 w-4" />} label="এডিট" onClick={() => { onEdit(); close(); }} />
-          )}
-          {message.has_edit_history && onShowEditHistory && (
-            <Row icon={<History className="h-4 w-4" />} label="এডিট ইতিহাস" onClick={() => { onShowEditHistory(); close(); }} />
-          )}
-          {canPin && onTogglePin && !isUnsent && (
-            <Row
-              icon={<Pin className="h-4 w-4" />}
-              label={message.is_pinned ? "আনপিন" : "পিন"}
-              onClick={() => { onTogglePin(); close(); }}
-            />
-          )}
-
-          <div className="h-px bg-border my-1" />
-
-          <Row
-            icon={<RotateCcw className="h-4 w-4" />}
-            label="শুধু আমার থেকে সরান"
-            onClick={() => { onRemoveForMe(); close(); }}
-          />
-          {isMine && !isUnsent && (
-            <Row
-              icon={<Trash2 className="h-4 w-4" />}
-              label="সবার জন্য আনসেন্ড"
-              destructive
-              onClick={() => { onUnsend(); close(); }}
-            />
-          )}
-        </div>
+        {reactionsBar}
+      </div>
+      <div
+        ref={menuRef}
+        onClick={(e) => e.stopPropagation()}
+        style={menuPos ? { top: menuPos.top, left: menuPos.left, width: MENU_WIDTH } : { top: -9999, left: -9999, width: MENU_WIDTH }}
+        className="fixed rounded-2xl border border-border bg-popover text-popover-foreground shadow-xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-100 py-1"
+      >
+        {menuItems}
       </div>
     </div>,
     document.body,
@@ -182,7 +249,7 @@ function Row({
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-3 py-2 text-[14px] text-left hover:bg-muted transition-colors ${destructive ? "text-destructive" : ""}`}
+      className={`w-full flex items-center gap-3 px-4 py-2.5 text-[14px] text-left hover:bg-muted transition-colors ${destructive ? "text-destructive" : ""}`}
     >
       {icon}
       <span>{label}</span>
