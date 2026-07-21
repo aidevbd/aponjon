@@ -16,6 +16,7 @@ interface ContactFiltersProps {
   categoryCount: Record<string, number>;
   contacts?: ContactRow[];
   onPickContact?: (contact: ContactRow) => void;
+  totalCount?: number;
 }
 
 type Suggestion = {
