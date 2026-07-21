@@ -1038,10 +1038,11 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
                         onQuickReact={(m, e) => handleReact(m as Message, e)}
                         onStartReply={(m) => handleStartReply(m as Message)}
                         onShowEditHistory={(m) => handleShowEditHistory(m as Message)}
+                        onJumpToReply={jumpToMessage}
                         isDelivered={!!msg.delivered_at || !!msg.is_read}
                         showReceipt={isMine && (!!showTail || msg.id === lastMineId)}
                         highlightQuery={searchQuery}
-
+                        highlight={msg.id === highlightedMsgId}
                       />
                     </div>
                   );
