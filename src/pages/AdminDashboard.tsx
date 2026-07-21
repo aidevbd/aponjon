@@ -360,7 +360,7 @@ const AdminDashboard = () => {
 
 
       {/* Tab-Based Content */}
-      <main className={`container mx-auto max-w-6xl ${immersive ? "px-0 py-0" : chatFullscreen ? "flex-1 min-h-0 flex flex-col px-3 sm:px-4 pt-3 pb-3" : "px-3 sm:px-4 py-6 sm:py-8"}`}>
+      <main className={`container mx-auto max-w-6xl ${immersive ? "px-0 py-0" : chatFullscreen ? "flex-1 min-h-0 flex flex-col px-3 sm:px-4 pt-3 pb-3" : "px-3 sm:px-4 py-4 sm:py-5"}`}>
         <h1 className="sr-only">অ্যাডমিন ড্যাশবোর্ড</h1>
         <Tabs value={activeTab} onValueChange={setActiveTab} className={chatFullscreen ? "flex-1 min-h-0 flex flex-col" : ""}>
 
