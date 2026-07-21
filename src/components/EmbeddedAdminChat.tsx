@@ -391,7 +391,11 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
 
   useEffect(() => {
     onActiveChatChange?.(!!selectedUser);
+    // When a chat opens/closes the dashboard toggles immersive mode.
+    // Reset shellTop so the shell height recalculates against the new layout.
+    if (selectedUser) setShellTop(0);
   }, [selectedUser, onActiveChatChange]);
+
 
   useEffect(() => {
     if (!isMobile || !selectedUser) return;
