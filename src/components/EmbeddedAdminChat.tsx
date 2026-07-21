@@ -11,6 +11,7 @@ import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadChatImage, signMessagesImages } from "@/lib/chatSession";
+import { notifyNewMessage } from "@/lib/notificationPrefs";
 import { toast } from "sonner";
 import { EmojiPicker } from "@/components/EmojiPicker";
 import { logAdminActivity } from "@/lib/adminLog";
@@ -280,6 +281,11 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
       .channel("admin-chat-embedded")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
         const msg = payload.new as Message;
+
+        if (msg.receiver_id === adminContactId && msg.sender_id !== adminContactId) {
+          notifyNewMessage();
+        }
+
 
         const isCurrentThread = !!selectedUser && (
           (msg.sender_id === selectedUser.id && msg.receiver_id === adminContactId) ||
