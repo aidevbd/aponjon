@@ -370,12 +370,11 @@
 
 @layer utilities {
   @keyframes reply-jump-pulse {
-    0%   { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.55); background-color: hsl(var(--primary) / 0.10); }
-    40%  { box-shadow: 0 0 0 10px hsl(var(--primary) / 0);   background-color: hsl(var(--primary) / 0.06); }
-    100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0);      background-color: transparent; }
+    0%   { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.55); }
+    50%  { box-shadow: 0 0 0 8px hsl(var(--primary) / 0); }
+    100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
   }
   .animate-reply-jump {
     animation: reply-jump-pulse 1.6s ease-out 2;
-    border-radius: 1rem;
   }
 }
