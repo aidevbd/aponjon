@@ -370,8 +370,9 @@ const AdminDashboard = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className={chatFullscreen ? "flex-1 min-h-0 flex flex-col" : ""}>
 
         <TabsList
-          className={`w-full grid grid-cols-5 h-auto p-1 gap-0.5 bg-[hsl(var(--heirloom-paper)/0.7)] border border-[hsl(var(--heirloom-line))] rounded-sm transition-all duration-300 ${immersive ? "hidden" : ""} ${chatFullscreen ? "mb-3 shrink-0" : "mb-8 sm:sticky sm:top-14 sm:z-40"} ${tabsHidden ? "sm:-translate-y-[calc(100%+56px)] sm:opacity-0 sm:pointer-events-none sm:mb-0 sm:!h-0 sm:overflow-hidden sm:border-0" : ""}`}
+          className={`w-full grid grid-cols-5 h-auto p-1 gap-0.5 bg-[hsl(var(--heirloom-paper)/0.7)] border border-[hsl(var(--heirloom-line))] rounded-sm transition-transform duration-300 ${immersive ? "hidden" : ""} ${chatFullscreen ? "mb-3 shrink-0" : "mb-8 sm:sticky sm:top-14 sm:z-40"} ${tabsHidden ? "sm:-translate-y-[calc(100%+3.5rem)] sm:opacity-0 sm:pointer-events-none" : ""}`}
         >
+
 
           <TabsTrigger
             value="dashboard"
