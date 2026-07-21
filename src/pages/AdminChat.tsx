@@ -48,6 +48,7 @@ const AdminChat = () => {
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
   const [presenceMap, setPresenceMap] = useState<Record<string, { isOnline: boolean; lastSeen: string }>>({});
