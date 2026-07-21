@@ -46,8 +46,9 @@ export function MobileBottomNav() {
     }
     document.body.style.setProperty(
       "--mobile-bottom-nav-h",
-      "calc(env(safe-area-inset-bottom) + 4.25rem)",
+      "calc(env(safe-area-inset-bottom) + 5rem)",
     );
+
     return () => {
       document.body.style.removeProperty("--mobile-bottom-nav-h");
     };
