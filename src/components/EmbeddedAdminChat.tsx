@@ -805,9 +805,12 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
   const mobileThreadMode = isMobile && !!selectedUser;
   const shellHeight = mobileThreadMode
     ? (viewportHeight ? `${viewportHeight}px` : "100dvh")
-    : viewportHeight
-      ? `${Math.max(320, viewportHeight - shellTop - (shellTop > 0 ? 16 : 0))}px`
-      : "calc(100dvh - 220px)";
+    : fillHeight
+      ? "100%"
+      : viewportHeight
+        ? `${Math.max(320, viewportHeight - shellTop - (shellTop > 0 ? 16 : 0))}px`
+        : "calc(100dvh - 220px)";
+
 
   if (loading) {
     return (
