@@ -922,7 +922,7 @@ const Chat = () => {
                 {selectedContact && (
                   <>
                     <DropdownMenuItem
-                      onClick={() => { scrollToBottom("smooth"); }}
+                      onClick={() => { scrollToBottom(true); }}
                       className="gap-2 text-sm"
                     >
                       <ArrowDownToLine className="h-4 w-4" /> সর্বশেষ মেসেজে যান
