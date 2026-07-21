@@ -73,6 +73,7 @@ export function ContactFilters({
   categoryCount,
   contacts = [],
   onPickContact,
+  totalCount,
 }: ContactFiltersProps) {
   const [open, setOpen] = useState(false);
   const [draftCat, setDraftCat] = useState(filterCategory);
