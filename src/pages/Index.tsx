@@ -8,13 +8,13 @@ const Index = () => {
     <div className="flex min-h-dvh flex-col bg-[hsl(var(--heirloom-bg))]">
       <Header />
 
-      <main className="relative flex flex-1 items-center justify-center px-4 py-8 pb-32 sm:px-6 sm:py-12 sm:pb-12 lg:py-16">
+      <main className="relative flex flex-1 items-center justify-center px-4 py-6 sm:px-6 sm:py-12 lg:py-16">
         <div className="mx-auto w-full max-w-2xl lg:max-w-3xl">
           <motion.article
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="heirloom-page relative overflow-hidden rounded-sm border p-6 sm:p-10 md:p-14 lg:p-16"
+            className="heirloom-page relative overflow-hidden rounded-sm border p-2 sm:p-10 md:p-14 lg:p-16"
           >
             {/* Paper texture */}
             <div aria-hidden className="heirloom-texture pointer-events-none absolute inset-0" />
