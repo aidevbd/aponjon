@@ -1028,7 +1028,7 @@ const Chat = () => {
           ) : (
             <motion.div key="thread" initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 24 }} transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }} className="flex-1 flex flex-col min-h-0 overflow-hidden">
               <div className="relative z-0 flex-1 flex flex-col min-h-0 overflow-hidden">
-                <div ref={messageListRef} className={`chat-scroll flex-1 overflow-y-auto overflow-x-hidden px-4 pb-2 ${searchOpen ? "pt-7" : "pt-4"} space-y-1`}>
+                <div ref={messageListRef} className={`chat-scroll flex-1 overflow-y-auto overflow-x-hidden px-3 sm:px-5 md:px-6 pb-2 ${searchOpen ? "pt-7" : "pt-4"} space-y-1`}>
                   {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
                   {!messagesLoading && filteredMessages.length === 0 && (
                     <div className="text-center py-16 text-muted-foreground">
