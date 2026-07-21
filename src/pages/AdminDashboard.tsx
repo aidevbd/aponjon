@@ -21,6 +21,9 @@ import {
 import { ContactListItem } from "@/components/ContactListItem";
 import { ContactDetailSheet } from "@/components/ContactDetailSheet";
 import { ContactFilters } from "@/components/ContactFilters";
+import { VirtualContactList } from "@/components/VirtualContactList";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+
 import { DashboardHome } from "@/components/DashboardHome";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
@@ -102,8 +105,10 @@ const AdminDashboard = () => {
     finally { setLoading(false); }
   };
 
+  const debouncedSearch = useDebouncedValue(search, 150);
+
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const q = debouncedSearch.trim().toLowerCase();
     return contacts.filter((c) => {
       const matchSearch = !q ||
         c.name.toLowerCase().includes(q) ||
@@ -121,7 +126,9 @@ const AdminDashboard = () => {
       const matchBlood = filterBloodGroup === "all" || c.blood_group === filterBloodGroup;
       return matchSearch && matchCategory && matchBlood;
     });
-  }, [contacts, search, filterCategory, filterBloodGroup]);
+  }, [contacts, debouncedSearch, filterCategory, filterBloodGroup]);
+
+
 
 
   const stats = useMemo(() => {
@@ -448,11 +455,13 @@ const AdminDashboard = () => {
                 </button>
               </div>
             ) : (
-              <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.55)] overflow-hidden">
-                {filtered.map((contact, i) => (
-                  <ContactListItem key={contact.id} contact={contact} index={i} onClick={openContactDetail} query={search} highlighted={contact.id === lastSelectedId} />
-                ))}
-              </div>
+              <VirtualContactList
+                contacts={filtered}
+                query={debouncedSearch}
+                highlightedId={lastSelectedId}
+                onClick={openContactDetail}
+              />
+
             )}
           </div>
 
