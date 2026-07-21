@@ -284,7 +284,7 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-dvh bg-[hsl(var(--heirloom-bg))] relative">
       {/* Header */}
-      <header className={`sticky top-0 z-50 border-b border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.85)] backdrop-blur ${immersive ? "hidden md:block" : ""}`}>
+      <header className={`sticky top-0 z-50 border-b border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.85)] backdrop-blur ${immersive ? "hidden" : ""}`}>
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.5)] bg-[hsl(var(--heirloom-gold)/0.08)]">
@@ -306,11 +306,11 @@ const AdminDashboard = () => {
       </header>
 
       {/* Tab-Based Content */}
-      <main className={`container mx-auto max-w-6xl ${immersive ? "px-0 py-0 md:px-4 md:py-8" : "px-3 sm:px-4 py-6 sm:py-8"}`}>
+      <main className={`container mx-auto max-w-6xl ${immersive ? "px-0 py-0" : "px-3 sm:px-4 py-6 sm:py-8"}`}>
         <h1 className="sr-only">অ্যাডমিন ড্যাশবোর্ড</h1>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
 
-        <TabsList className={`w-full grid grid-cols-5 h-auto mb-8 p-1 gap-0.5 bg-[hsl(var(--heirloom-paper)/0.7)] border border-[hsl(var(--heirloom-line))] rounded-sm ${immersive ? "hidden md:grid" : ""}`}>
+        <TabsList className={`w-full grid grid-cols-5 h-auto mb-8 p-1 gap-0.5 bg-[hsl(var(--heirloom-paper)/0.7)] border border-[hsl(var(--heirloom-line))] rounded-sm ${immersive ? "hidden" : ""}`}>
           <TabsTrigger
             value="dashboard"
             className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-[10px] sm:text-[13px] px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-[hsl(var(--heirloom-cream)/0.8)] data-[state=active]:text-[hsl(var(--heirloom-gold-deep))] data-[state=active]:shadow-none text-[hsl(var(--heirloom-ink-soft))]"
