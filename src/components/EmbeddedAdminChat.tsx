@@ -23,6 +23,7 @@ import { upsertMessage, reconcileMessages } from "@/lib/chatMessageUtils";
 import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
 import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
 type Message = {
@@ -46,16 +47,37 @@ interface EmbeddedAdminChatProps {
 
 export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: EmbeddedAdminChatProps) {
   const isTouch = useIsTouchDevice();
+  const isMobile = useIsMobile();
   const viewportHeight = useVisualViewportHeight();
   const shellRef = useRef<HTMLDivElement>(null);
   const selectedUserRef = useRef<ChatUser | null>(null);
   const isTouchRef = useRef(isTouch);
   useEffect(() => { isTouchRef.current = isTouch; }, [isTouch]);
   const [shellTop, setShellTop] = useState(0);
+  const [visualViewportOffsetTop, setVisualViewportOffsetTop] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const update = () => setVisualViewportOffsetTop(window.visualViewport?.offsetTop ?? 0);
+    update();
+    window.visualViewport?.addEventListener("resize", update);
+    window.visualViewport?.addEventListener("scroll", update);
+    window.addEventListener("resize", update);
+    return () => {
+      window.visualViewport?.removeEventListener("resize", update);
+      window.visualViewport?.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
   useEffect(() => {
     const measure = () => {
       const el = shellRef.current;
       if (!el) return;
+      if (isMobile && selectedUserRef.current) {
+        setShellTop(0);
+        return;
+      }
       const rect = el.getBoundingClientRect();
       // Ignore stale zero-height measurements from hidden TabsContent —
       // otherwise the shell overflows the viewport and hides the input.
@@ -111,7 +133,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
       ro?.disconnect();
       io?.disconnect();
     };
-  }, [viewportHeight]);
+  }, [viewportHeight, isMobile]);
   const [adminContactId, setAdminContactId] = useState<string | null>(null);
   const [needsSetup, setNeedsSetup] = useState(false);
   const [setupName, setSetupName] = useState("");
@@ -341,6 +363,23 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
   useEffect(() => {
     onActiveChatChange?.(!!selectedUser);
   }, [selectedUser, onActiveChatChange]);
+
+  useEffect(() => {
+    if (!isMobile || !selectedUser) return;
+    const body = document.body;
+    const html = document.documentElement;
+    const previousBodyOverflow = body.style.overflow;
+    const previousHtmlOverflow = html.style.overflow;
+    const previousBodyOverscroll = body.style.overscrollBehavior;
+    body.style.overflow = "hidden";
+    html.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+    return () => {
+      body.style.overflow = previousBodyOverflow;
+      html.style.overflow = previousHtmlOverflow;
+      body.style.overscrollBehavior = previousBodyOverscroll;
+    };
+  }, [isMobile, selectedUser]);
 
   const loadChatUsers = async () => {
     try {
@@ -702,6 +741,12 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
   const filteredMessages = searchQuery
     ? messages.filter(m => m.content?.toLowerCase().includes(searchQuery.toLowerCase()))
     : messages;
+  const mobileThreadMode = isMobile && !!selectedUser;
+  const shellHeight = mobileThreadMode
+    ? (viewportHeight ? `${viewportHeight}px` : "100dvh")
+    : viewportHeight
+      ? `${Math.max(320, viewportHeight - shellTop - (shellTop > 0 ? 16 : 0))}px`
+      : "calc(100dvh - 220px)";
 
   if (loading) {
     return (
@@ -734,12 +779,11 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
   return (
     <div
       ref={shellRef}
-      className="flex flex-col"
+      className={`flex flex-col min-h-0 ${mobileThreadMode ? "fixed inset-x-0 z-[70] bg-[hsl(var(--heirloom-bg))]" : ""}`}
       style={{
-        height: viewportHeight
-          ? `${Math.max(320, viewportHeight - shellTop - (shellTop > 0 ? 16 : 0))}px`
-          : "calc(100dvh - 220px)",
-        minHeight: "320px",
+        height: shellHeight,
+        minHeight: mobileThreadMode ? "0px" : "320px",
+        top: mobileThreadMode ? `${visualViewportOffsetTop}px` : undefined,
       }}
     >
 
