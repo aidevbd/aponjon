@@ -8,13 +8,13 @@ const Index = () => {
     <div className="flex min-h-dvh flex-col bg-[hsl(var(--heirloom-bg))]">
       <Header />
 
-      <main className="relative flex flex-1 items-center justify-center px-4 py-6 sm:px-6 sm:py-12 lg:py-16">
+      <main className="relative flex flex-1 items-center justify-center px-4 py-6 sm:px-6 sm:py-12 lg:py-10">
         <div className="mx-auto w-full max-w-2xl lg:max-w-3xl">
           <motion.article
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="heirloom-page relative overflow-hidden rounded-sm border p-2 sm:p-10 md:p-14 lg:p-16"
+            className="heirloom-page relative overflow-hidden rounded-sm border p-2 sm:p-10 md:p-12 lg:p-12"
           >
             {/* Paper texture */}
             <div aria-hidden className="heirloom-texture pointer-events-none absolute inset-0" />
@@ -27,7 +27,7 @@ const Index = () => {
 
             <div className="relative flex flex-col items-center text-center">
               {/* Heading */}
-              <h1 className="mt-10 font-display text-4xl leading-[1.1] tracking-tight text-[hsl(var(--heirloom-ink))] sm:mt-12 sm:text-5xl md:text-6xl">
+              <h1 className="mt-10 font-display text-4xl leading-[1.1] tracking-tight text-[hsl(var(--heirloom-ink))] sm:mt-8 sm:text-5xl">
                 আপনজন
               </h1>
 

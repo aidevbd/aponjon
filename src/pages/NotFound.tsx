@@ -14,13 +14,13 @@ const NotFound = () => {
     <div className="flex min-h-dvh flex-col bg-[hsl(var(--heirloom-bg))]">
       <Header />
 
-      <main className="relative flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
+      <main className="relative flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-10">
         <div className="mx-auto w-full max-w-2xl lg:max-w-3xl">
           <motion.article
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="heirloom-page relative overflow-hidden rounded-sm border p-6 sm:p-10 md:p-14 lg:p-16"
+            className="heirloom-page relative overflow-hidden rounded-sm border p-6 sm:p-10 md:p-12 lg:p-12"
           >
             <div aria-hidden className="heirloom-texture pointer-events-none absolute inset-0" />
 
@@ -46,7 +46,7 @@ const NotFound = () => {
                 </p>
               </div>
 
-              <div className="mx-auto mt-10 w-full max-w-[420px] sm:mt-12">
+              <div className="mx-auto mt-10 w-full max-w-[420px] sm:mt-8">
                 <Link
                   to="/"
                   className="heirloom-btn-primary flex w-full items-center justify-center gap-2 rounded-sm px-5 py-4 text-[15px] font-medium transition-all duration-300 sm:text-base"

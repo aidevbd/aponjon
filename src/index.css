@@ -97,9 +97,16 @@
     overflow-x: clip;
   }
 
-  body {
-    padding-bottom: var(--mobile-bottom-nav-h, 0px);
+  /* Reserve space for the mobile bottom nav — but only on the breakpoints
+     where the nav actually renders (<640px). On sm+ it's `sm:hidden`,
+     so leaving the padding on would push the body 68px past the viewport
+     and trigger a spurious desktop scrollbar. */
+  @media (max-width: 639.98px) {
+    body {
+      padding-bottom: var(--mobile-bottom-nav-h, 0px);
+    }
   }
+
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
