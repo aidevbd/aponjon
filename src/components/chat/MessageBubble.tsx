@@ -44,6 +44,7 @@ interface MessageBubbleProps {
   onShowEditHistory?: (msg: BubbleMessage) => void;
   onShowReceipts?: (msg: BubbleMessage) => void;
   highlight?: boolean;
+  highlightQuery?: string;
   isDelivered?: boolean; // sent but not yet read
   showReceipt?: boolean; // last of mine in conversation
 }
