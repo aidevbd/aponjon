@@ -56,7 +56,7 @@ const SWIPE_THRESHOLD = 60;
 
 export function MessageBubble({
   msg, isMine, myId, otherName, showTail, showAvatar, avatarUrl,
-  onOpenActions, onQuickReact, onStartReply, onShowEditHistory, onShowReceipts,
+  onOpenActions, onQuickReact, onStartReply, onShowEditHistory, onShowReceipts, onJumpToReply,
   highlight, highlightQuery, isDelivered, showReceipt,
 }: MessageBubbleProps) {
   const [dragX, setDragX] = useState(0);
