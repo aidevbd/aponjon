@@ -81,15 +81,53 @@ function ensureAudioUnlockBinding() {
 
 if (typeof window !== "undefined") ensureAudioUnlockBinding();
 
+// --- Vibration unlock -----------------------------------------------------
+// Chrome/Android require a prior user gesture on the page before
+// `navigator.vibrate` will actually vibrate. Register a no-op vibration on
+// the first interaction so later programmatic calls succeed.
+let vibrationUnlockBound = false;
+let vibrationUnlocked = false;
+
+function ensureVibrationUnlockBinding() {
+  if (vibrationUnlockBound || typeof window === "undefined") return;
+  if (typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return;
+  vibrationUnlockBound = true;
+  const unlock = () => {
+    try {
+      navigator.vibrate(1); // imperceptible; counts as activation
+      vibrationUnlocked = true;
+      removeListeners();
+    } catch {}
+  };
+  const opts = { capture: true, passive: true } as AddEventListenerOptions;
+  const events = ["pointerdown", "touchstart", "keydown", "click", "mousedown"];
+  const removeListeners = () => {
+    events.forEach((e) => window.removeEventListener(e, unlock, opts));
+  };
+  events.forEach((e) => window.addEventListener(e, unlock, opts));
+}
+
+if (typeof window !== "undefined") ensureVibrationUnlockBinding();
+
+function doVibrate(pattern: number | number[]): boolean {
+  if (typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return false;
+  if (typeof document !== "undefined" && document.visibilityState === "hidden") return false;
+  try {
+    return navigator.vibrate(pattern) === true;
+  } catch {
+    return false;
+  }
+}
+
 async function playChime() {
   const ctx = createCtx();
   if (!ctx) return;
   try {
     if (ctx.state === "suspended") await ctx.resume();
   } catch {}
-  if (ctx.state !== "running") return; // still blocked by autoplay policy
+  if (ctx.state !== "running") return;
   const now = ctx.currentTime + 0.02;
-  const notes = [880, 1175]; // A5, D6 — short warm ping
+  const notes = [880, 1175];
   notes.forEach((freq, i) => {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -110,8 +148,13 @@ export function notifyNewMessage() {
   if (prefs.sound) {
     void playChime().catch(() => {});
   }
-  if (prefs.vibration && typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
-    try { navigator.vibrate([40, 30, 40]); } catch {}
+  if (prefs.vibration) {
+    const pattern = [60, 40, 90, 40, 60];
+    const ok = doVibrate(pattern);
+    if (!ok && !vibrationUnlocked) {
+      setTimeout(() => doVibrate(pattern), 0);
+    }
   }
 }
+
 
