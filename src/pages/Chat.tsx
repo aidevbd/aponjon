@@ -935,9 +935,9 @@ const Chat = () => {
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden container mx-auto max-w-3xl lg:max-w-4xl w-full px-0">
         {/* Search bar */}
         {searchOpen && (
-          <div className="px-4 pt-2">
+          <div className="sticky top-0 z-30 px-4 pt-2 pb-2 bg-background border-b border-border/50 shadow-[0_4px_12px_-8px_hsl(var(--heirloom-ink)/0.15)]">
             <div className="flex items-center gap-2">
-              <Input placeholder="মেসেজ খুঁজুন..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-card h-8 text-sm" autoFocus />
+              <Input placeholder="মেসেজ খুঁজুন..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-background h-8 text-sm" autoFocus />
               <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="সার্চ বন্ধ করুন" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
                 <X className="h-4 w-4" />
               </Button>
