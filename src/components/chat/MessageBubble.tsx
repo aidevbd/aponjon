@@ -4,6 +4,7 @@ import { Reply, CheckCheck, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImageLightbox } from "./ImageLightbox";
 import { ChatImage } from "./ChatImage";
+import { Highlight } from "@/lib/highlight";
 
 
 
