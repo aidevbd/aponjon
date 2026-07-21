@@ -365,11 +365,14 @@ const AdminDashboard = () => {
 
 
       {/* Tab-Based Content */}
-      <main className={`container mx-auto max-w-6xl ${immersive ? "px-0 py-0" : "px-3 sm:px-4 py-6 sm:py-8"}`}>
+      <main className={`container mx-auto max-w-6xl ${immersive ? "px-0 py-0" : chatFullscreen ? "flex-1 min-h-0 flex flex-col px-3 sm:px-4 pt-3 pb-3" : "px-3 sm:px-4 py-6 sm:py-8"}`}>
         <h1 className="sr-only">অ্যাডমিন ড্যাশবোর্ড</h1>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className={chatFullscreen ? "flex-1 min-h-0 flex flex-col" : ""}>
 
-        <TabsList className={`w-full grid grid-cols-5 h-auto mb-8 p-1 gap-0.5 bg-[hsl(var(--heirloom-paper)/0.7)] border border-[hsl(var(--heirloom-line))] rounded-sm ${immersive ? "hidden" : ""}`}>
+        <TabsList
+          className={`w-full grid grid-cols-5 h-auto p-1 gap-0.5 bg-[hsl(var(--heirloom-paper)/0.7)] border border-[hsl(var(--heirloom-line))] rounded-sm transition-all duration-300 ${immersive ? "hidden" : ""} ${chatFullscreen ? "mb-3 shrink-0" : "mb-8 sm:sticky sm:top-14 sm:z-40"} ${tabsHidden ? "sm:-translate-y-[calc(100%+56px)] sm:opacity-0 sm:pointer-events-none sm:mb-0 sm:!h-0 sm:overflow-hidden sm:border-0" : ""}`}
+        >
+
           <TabsTrigger
             value="dashboard"
             className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-[10px] sm:text-[13px] px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-[hsl(var(--heirloom-cream)/0.8)] data-[state=active]:text-[hsl(var(--heirloom-gold-deep))] data-[state=active]:shadow-none text-[hsl(var(--heirloom-ink-soft))]"
