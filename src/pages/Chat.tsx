@@ -107,6 +107,7 @@ const Chat = () => {
   const [editHistory, setEditHistory] = useState<{ previous_content: string; edited_at: string }[]>([]);
   const [editHistoryLoading, setEditHistoryLoading] = useState(false);
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const lastTypingRef = useRef(0);
