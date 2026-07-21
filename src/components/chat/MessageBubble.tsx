@@ -43,6 +43,7 @@ interface MessageBubbleProps {
   onStartReply: (msg: BubbleMessage) => void;
   onShowEditHistory?: (msg: BubbleMessage) => void;
   onShowReceipts?: (msg: BubbleMessage) => void;
+  onJumpToReply?: (replyToId: string) => void;
   highlight?: boolean;
   highlightQuery?: string;
   isDelivered?: boolean; // sent but not yet read
