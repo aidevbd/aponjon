@@ -25,8 +25,10 @@ type Suggestion = {
   value: string;
 };
 
+import { matchesFuzzy } from "@/lib/banglaSearch";
+
 function buildSuggestions(contacts: ContactRow[], query: string, limit = 6): Suggestion[] {
-  const q = query.trim().toLowerCase();
+  const q = query.trim();
   if (!q) return [];
   const out: Suggestion[] = [];
   const seen = new Set<string>();
@@ -37,10 +39,10 @@ function buildSuggestions(contacts: ContactRow[], query: string, limit = 6): Sug
     out.push({ contact: c, label, value });
   };
 
-  // Pass 1: name matches (highest priority)
+  // Pass 1: name matches (highest priority, incl. fuzzy Bangla↔English)
   for (const c of contacts) {
     if (out.length >= limit) break;
-    if (c.name?.toLowerCase().includes(q)) push(c, "নাম", c.name);
+    if (matchesFuzzy(c.name, q)) push(c, "নাম", c.name);
   }
   // Pass 2: other field matches
   const fields: Array<[keyof ContactRow, string]> = [
@@ -57,7 +59,7 @@ function buildSuggestions(contacts: ContactRow[], query: string, limit = 6): Sug
     if (out.length >= limit) break;
     for (const [key, label] of fields) {
       const v = (c as any)[key] as string | null | undefined;
-      if (v && v.toLowerCase().includes(q)) {
+      if (v && matchesFuzzy(v, q)) {
         push(c, label, v);
         break;
       }
