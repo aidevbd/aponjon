@@ -35,6 +35,7 @@ import { AdminActivityLog } from "@/components/AdminActivityLog";
 import { logAdminActivity } from "@/lib/adminLog";
 import { ChangePasswordForm } from "@/components/ChangePasswordForm";
 import { AdminDashboardSkeleton } from "@/components/skeletons/LoadingSkeletons";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const ADMIN_TABS = ["dashboard", "contacts", "chat", "logs", "settings"] as const;
 
@@ -60,7 +61,10 @@ const AdminDashboard = () => {
     setSearchParams(next, { replace: true });
   };
   const [chatOpen, setChatOpen] = useState(false);
-  const immersive = chatOpen && activeTab === "chat";
+  const isMobile = useIsMobile();
+  const immersive = chatOpen && activeTab === "chat" && isMobile;
+
+
 
   // Signal immersive state to the global bottom nav so it can hide
   useEffect(() => {
@@ -318,6 +322,21 @@ const AdminDashboard = () => {
               অ্যাডমিন
             </span>
           </div>
+          <div className="hidden md:flex items-center gap-2 text-[12px] text-[hsl(var(--heirloom-ink-soft))]">
+            <span>{stats.total} কন্টাক্ট</span>
+            {totalUnread > 0 && (
+              <>
+                <span aria-hidden className="h-3 w-px bg-[hsl(var(--heirloom-line))]" />
+                <span className="text-[hsl(var(--heirloom-gold-deep))]">{totalUnread} অপঠিত</span>
+              </>
+            )}
+            {upcomingBirthdays.length > 0 && (
+              <>
+                <span aria-hidden className="h-3 w-px bg-[hsl(var(--heirloom-line))]" />
+                <span>{upcomingBirthdays.length} আসন্ন জন্মদিন</span>
+              </>
+            )}
+          </div>
           <button
             onClick={handleLogout}
             className="flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-[13px] text-[hsl(var(--heirloom-ink-soft))] transition-colors hover:text-destructive"
@@ -327,6 +346,7 @@ const AdminDashboard = () => {
           </button>
         </div>
       </header>
+
 
       {/* Tab-Based Content */}
       <main className={`container mx-auto max-w-6xl ${immersive ? "px-0 py-0" : "px-3 sm:px-4 py-6 sm:py-8"}`}>

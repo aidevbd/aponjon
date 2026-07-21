@@ -1,41 +1,41 @@
-## `/add` পেজকে Heirloom থিমে রূপান্তর
+# ডেস্কটপ UX অডিট + প্ল্যান
 
-Home-এর sepia/gold/corner-ornament ভাষাটাই `/add`-এ নিয়ে আসব — যাতে primary CTA-তে ক্লিক করে ইউজার একই "চিঠি"-র ভেতরে ঢুকেছে বলে অনুভব করে।
+মোবাইল অপটিমাইজেশন করতে গিয়ে ডেস্কটপে যেসব জায়গায় empty space, narrow content, বা native-mobile-only ইন্টারঅ্যাকশন থেকে যাচ্ছে সেগুলো সব ঠিক করব।
 
-### স্কোপ
+## Priority 1 — বড় সমস্যা (must-fix)
 
-দুই স্তরে কাজ:
+1. **অ্যাডমিন চ্যাট ট্যাব: two-pane split view (lg+)**
+   - বর্তমানে ডেস্কটপে চ্যাট খুললে বাম দিকে ন্যারো কন্টাক্ট লিস্ট, ডান দিকে ~60% ফাঁকা — messenger/WhatsApp-style desktop এ যেমন থাকে তেমন হবে না।
+   - Fix: `lg:grid lg:grid-cols-[320px_1fr]` — বাম কলামে user list সবসময় visible, ডানে thread; কোনো user select না করলে ডানে "চ্যাট বেছে নিন" placeholder।
+   - মোবাইলে current single-pane behavior অপরিবর্তিত।
 
-**১. Page wrapper (`src/pages/AddContact.tsx`)** — সম্পূর্ণ নতুন করে
-- `warm-gradient` → `bg-[hsl(var(--heirloom-bg))]`
-- Heirloom paper container: `heirloom-page` + paper texture + ৪ corner ornaments (Home-এর মতো)
-- ছোট wax seal (আ) + gold divider + heading
-  - Heading: "আপনজন ডাইরেক্টরিতে স্বাগতম" (💕 emoji বাদ — heirloom-এ বেমানান)
-  - Sub: "আপনার তথ্য রেখে যান, আমরা যত্ন করে সংরক্ষণ করব"
-- `glass-card` সরিয়ে ফর্ম সরাসরি heirloom কাগজের ভেতরে বসাবে
+2. **পাবলিক `/chat` পেজ (signed-out state)**
+   - Login card 400px, চারপাশে বিশাল খালি জায়গা — কেন্দ্রে বসিয়ে দুইপাশে soft heirloom decoration/tagline দিয়ে ব্যালান্স করা।
 
-**২. Form's rose accents (`src/components/ContactForm.tsx`)** — targeted বদল, structure অক্ষত
-Home-এর সাথে যেসব জায়গা সবচেয়ে চোখে লাগে সেগুলোই টাচ করব:
+3. **হোম + অ্যাক্সেস পেজ**
+   - ডেস্কটপে vertical center হওয়ায় নিচে অনেক ফাঁকা — `min-height` টাইট করে content-hugging + subtle side decoration যোগ করে ব্যালান্স।
 
-| জায়গা | এখন | পরিবর্তন |
-|---|---|---|
-| Photo upload circle (line 167) | `bg-primary/10 ring-primary/10` | `heirloom-chip` স্টাইল + gold ring |
-| Photo initial fallback (line 194) | `bg-primary/10 text-primary` | Sepia bg + heirloom-ink text |
-| "নেই" toggle button (line 223) | `border-primary/30` | `heirloom-btn-ghost` |
-| Step indicator dots (line 266) | `hero-gradient` active | Heirloom gold-filled active, sepia inactive |
-| Step connector (line 269) | `bg-primary/40` | `bg-[hsl(var(--heirloom-gold))]/50` |
-| যেকোনো "সাবমিট" / "পরের ধাপ" বাটন | rose gradient | `heirloom-btn-primary` |
+## Priority 2 — polish
 
-Form-এর label, input, spacing — অপরিবর্তিত। শুধু accent রঙ ও badge shapes heirloom-এ আসবে।
+4. **অ্যাডমিন কন্টাক্ট লিস্ট (lg+)**: ১৪৪০px-এ single-column list-item lines অনেক wide লাগে — `lg:grid lg:grid-cols-2 xl:grid-cols-2` করে density বাড়ানো (search/filter row full-width থাকবে)।
 
-### যা করব না (এই টাস্কে)
-- Form validation/logic — অটুট
-- ContactForm-এর step flow বা field structure
-- অন্য পেজ (`/access`, `/chat` ইত্যাদি) — পরের step
-- Header লোগোর rose heart — আলাদা siding decision
+5. **অ্যাডমিন Activity Log / Settings**: max-width টাইট করে center-align, empty right column ঠিক করা।
 
-### Verification
-Playwright দিয়ে mobile (390) + desktop (1280) দুটোতেই `/add` screenshot নিয়ে Home-এর সাথে visual continuity confirm করব — sepia bg, corner ornaments, seal badge, gold accent সব ধাপে থাকে।
+6. **অ্যাডমিন হেডার**: `justify-between` এ logo বাম কোণে ও লগআউট ডান কোণে যা বিশাল ফাঁকা মাঝখান তৈরি করে — মাঝখানে subtle breadcrumb/section-label বসানো।
 
-### প্রশ্ন
-- Step indicator-এ active dot — **gold filled circle** (heirloom-এর সাথে সবচেয়ে মিল) নাকি **wax-seal মিনি** (আরও থিম্যাটিক কিন্তু ভারী)? — ডিফল্টে gold filled নেব যদি না বলেন।
+7. **Hover states + keyboard focus rings** সব প্রধান বোতাম/লিংকে verify — ডেস্কটপে mouse users যেন consistent feedback পায়।
+
+## টেকনিক্যাল বিবরণ
+
+- সব ব্রেকপয়েন্ট Tailwind `sm/md/lg/xl` follow করবে; `lg: ≥1024px` থেকে desktop treatment।
+- `EmbeddedAdminChat.tsx` — root wrapper refactor: `AnimatePresence` মোবাইলে থাকবে, lg-এ দুই কলাম parallel render, ডান pane empty-state fallback সহ।
+- Framer motion animations preserved; শুধু layout container বদলাবে।
+- কোনো business logic / RPC / auth ফ্লো ছোঁয়া হবে না — pure presentational।
+
+## Verification
+
+প্রতিটা পেজে Playwright দিয়ে 1440×900 screenshot নিয়ে confirm করব যে empty space নেই এবং সব interactive element accessible।
+
+---
+
+**Approve করলে P1 থেকে সিরিয়ালি শুরু করব** (chat two-pane আগে, তারপর home/access, তারপর P2)।
