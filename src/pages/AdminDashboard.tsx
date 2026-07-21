@@ -48,6 +48,7 @@ const AdminDashboard = () => {
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterBloodGroup, setFilterBloodGroup] = useState("all");
+  const [groupMode, setGroupMode] = useState<"az" | "category" | "none">("az");
   const [editingContact, setEditingContact] = useState<ContactRow | null>(null);
   const [editForm, setEditForm] = useState<Partial<ContactRow>>({});
   const [editPhones, setEditPhones] = useState<PhoneEntry[]>([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]);
