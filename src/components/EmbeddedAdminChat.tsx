@@ -736,8 +736,8 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
       ref={shellRef}
       className="flex flex-col"
       style={{
-        height: viewportHeight && shellTop > 0
-          ? `${Math.max(320, viewportHeight - shellTop - 16)}px`
+        height: viewportHeight
+          ? `${Math.max(320, viewportHeight - shellTop - (shellTop > 0 ? 16 : 0))}px`
           : "calc(100dvh - 220px)",
         minHeight: "320px",
       }}
@@ -795,35 +795,40 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
         ) : (
           <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
             {/* Thread Header */}
-            <div className="flex items-center gap-2 pb-3 border-b border-border/50">
-              <button onClick={() => { setSelectedUser(null); selectedUserRef.current = null; setSearchOpen(false); setSearchQuery(""); }} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors flex-1 min-w-0">
-                <ArrowLeft className="h-4 w-4 shrink-0" />
-                <div className="relative shrink-0">
-                  {selectedUser.photo_url ? (
-                    <img src={selectedUser.photo_url} alt={selectedUser.name} className="h-8 w-8 rounded-full object-cover border border-primary/20" />
-                  ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</div>
-                  )}
-                  {presenceMap[selectedUser.id]?.isOnline && (
-                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <span className="font-semibold text-sm">{selectedUser.name}</span>
-                  <div className="text-[10px] text-muted-foreground">
-                    {(() => {
-                      const p = presenceMap[selectedUser.id];
-                      const txt = formatLastSeen(p);
-                      if (!txt) return selectedUser.phone;
-                      return <span className={p?.isOnline ? "text-green-600" : ""}>{txt}</span>;
-                    })()}
-                  </div>
-                </div>
+            <div className="sticky top-0 z-20 -mx-1 flex items-center gap-2 px-3 py-2.5 border-b border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.92)] backdrop-blur-md pt-[max(0.625rem,env(safe-area-inset-top))]">
+              <button
+                onClick={() => { setSelectedUser(null); selectedUserRef.current = null; setSearchOpen(false); setSearchQuery(""); }}
+                className="flex items-center justify-center h-9 w-9 -ml-1 rounded-full text-foreground hover:bg-primary/10 hover:text-primary transition-colors shrink-0"
+                aria-label="ফিরে যান"
+              >
+                <ArrowLeft className="h-5 w-5" />
               </button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="মেসেজ খুঁজুন" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
+              <div className="relative shrink-0">
+                {selectedUser.photo_url ? (
+                  <img src={selectedUser.photo_url} alt={selectedUser.name} className="h-9 w-9 rounded-full object-cover border border-primary/20" />
+                ) : (
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</div>
+                )}
+                {presenceMap[selectedUser.id]?.isOnline && (
+                  <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-[hsl(var(--heirloom-paper))]" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1 leading-tight">
+                <div className="font-semibold text-sm text-foreground truncate">{selectedUser.name}</div>
+                <div className="text-[11px] text-muted-foreground truncate">
+                  {(() => {
+                    const p = presenceMap[selectedUser.id];
+                    const txt = formatLastSeen(p);
+                    if (!txt) return selectedUser.phone;
+                    return <span className={p?.isOnline ? "text-emerald-600" : ""}>{txt}</span>;
+                  })()}
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-full" aria-label="মেসেজ খুঁজুন" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
                 <Search className="h-4 w-4" />
               </Button>
             </div>
+
 
             {/* Search bar */}
             {searchOpen && (
@@ -953,7 +958,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
             />
 
             {/* Input */}
-            <div className="border-t border-border/50 pt-3 px-1">
+            <div className="border-t border-[hsl(var(--heirloom-line))] pt-2.5 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
               <div className="flex items-end gap-1.5 sm:gap-2 w-full">
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 <EmojiPicker inputRef={inputRef} onSelect={(emoji) => setMsgInput(prev => prev + emoji)} />
