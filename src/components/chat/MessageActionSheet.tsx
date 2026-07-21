@@ -223,9 +223,11 @@ export function MessageActionSheet({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[100]" onClick={close}>
+    <div className="fixed inset-0 z-[100] overflow-hidden" onClick={close}>
       <div
-        style={reactionsPos ? { top: reactionsPos.top, left: reactionsPos.left } : { top: -9999, left: -9999 }}
+        style={reactionsPos
+          ? { top: reactionsPos.top, left: reactionsPos.left, visibility: "visible" }
+          : { top: 0, left: 0, visibility: "hidden" }}
         className="fixed animate-in fade-in-0 zoom-in-95 duration-100"
       >
         {reactionsBar}
@@ -233,7 +235,9 @@ export function MessageActionSheet({
       <div
         ref={menuRef}
         onClick={(e) => e.stopPropagation()}
-        style={menuPos ? { top: menuPos.top, left: menuPos.left, width: MENU_WIDTH } : { top: -9999, left: -9999, width: MENU_WIDTH }}
+        style={menuPos
+          ? { top: menuPos.top, left: menuPos.left, width: MENU_WIDTH, visibility: "visible" }
+          : { top: 0, left: 0, width: MENU_WIDTH, visibility: "hidden" }}
         className="fixed rounded-2xl border border-border bg-popover text-popover-foreground shadow-xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-100 py-1"
       >
         {menuItems}
