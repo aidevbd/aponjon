@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import {
   getNotificationPrefs,
   setNotificationPrefs,
-  notifyNewMessage,
+  playChime,
+  triggerVibration,
   type NotificationPrefs,
 } from "@/lib/notificationPrefs";
 
@@ -75,7 +76,15 @@ export function NotificationPreferencesDialog({ open, onOpenChange }: Props) {
         </div>
 
         <div className="flex items-center justify-between gap-2 pt-1">
-          <Button variant="ghost" size="sm" className="text-xs" onClick={() => notifyNewMessage()}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs"
+            onClick={() => {
+              if (prefs.vibration) triggerVibration();
+              if (prefs.sound) void playChime().catch(() => {});
+            }}
+          >
             টেস্ট করুন
           </Button>
           <Button variant="hero" size="sm" onClick={() => onOpenChange(false)}>
