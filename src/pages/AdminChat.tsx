@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, X, Loader2, Settings, Bell } from "lucide-react";
+import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, X, Loader2, Settings, Bell, Settings2, ArrowDownToLine, RefreshCw } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ChatUserListSkeleton } from "@/components/skeletons/LoadingSkeletons";
 import { ChatMessagesSkeleton } from "@/components/chat/ChatMessagesSkeleton";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ const AdminChat = () => {
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
   const [presenceMap, setPresenceMap] = useState<Record<string, { isOnline: boolean; lastSeen: string }>>({});
@@ -509,9 +511,28 @@ const AdminChat = () => {
             )}
           </div>
           <div className="flex items-center gap-1 shrink-0">
-            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="নোটিফিকেশন সেটিংস" onClick={() => setNotifPrefsOpen(true)}>
-              <Bell className="h-4 w-4" />
-            </Button>
+            <DropdownMenu open={settingsOpen} onOpenChange={setSettingsOpen} modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="সেটিংস ও অপশন">
+                  <Settings2 className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" sideOffset={8} className="z-[70] w-52">
+                <DropdownMenuItem onSelect={() => { setSettingsOpen(false); setNotifPrefsOpen(true); }} className="gap-2 text-sm">
+                  <Bell className="h-4 w-4" /> নোটিফিকেশন সেটিংস
+                </DropdownMenuItem>
+                {selectedUser && (
+                  <>
+                    <DropdownMenuItem onSelect={() => { setSettingsOpen(false); scrollToBottom(true); }} className="gap-2 text-sm">
+                      <ArrowDownToLine className="h-4 w-4" /> সর্বশেষ মেসেজে যান
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => { setSettingsOpen(false); void loadMessages(selectedUser); }} className="gap-2 text-sm">
+                      <RefreshCw className="h-4 w-4" /> রিফ্রেশ
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="ghost" size="sm" onClick={() => navigate("/admin/dashboard")} className="text-xs gap-1">
               <Heart className="h-3.5 w-3.5" /> ড্যাশবোর্ড
             </Button>
