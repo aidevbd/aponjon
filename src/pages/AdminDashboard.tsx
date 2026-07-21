@@ -449,27 +449,17 @@ const AdminDashboard = () => {
                 categoryCount={stats.categoryCount}
                 contacts={contacts}
                 onPickContact={openContactDetail}
+                totalCount={contacts.length}
               />
             </div>
 
-            {/* Results bar */}
-            <div className="flex items-center justify-between gap-3 px-1">
-              <div className="text-[12px] text-[hsl(var(--heirloom-ink-soft))]">
-                {filtered.length === contacts.length
-                  ? <>মোট <span className="text-[hsl(var(--heirloom-gold-deep))]">{contacts.length}</span> জন</>
-                  : <><span className="text-[hsl(var(--heirloom-gold-deep))]">{filtered.length}</span> / {contacts.length} জন</>}
+            {/* Filtered count — only when filtering is active */}
+            {filtered.length !== contacts.length && (
+              <div className="px-1 text-[12px] text-[hsl(var(--heirloom-ink-soft))]">
+                <span className="text-[hsl(var(--heirloom-gold-deep))]">{filtered.length}</span>
+                {" / "}{contacts.length} জন মিলেছে
               </div>
-
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={handleExportCSV}
-                  className="flex items-center gap-1.5 rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.6)] px-3 py-1.5 text-[12px] text-[hsl(var(--heirloom-ink-soft))] transition-colors hover:border-[hsl(var(--heirloom-gold)/0.5)] hover:text-[hsl(var(--heirloom-gold-deep))]"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  CSV
-                </button>
-              </div>
-            </div>
+            )}
 
             {/* Contact List / Empty State */}
             {contacts.length === 0 ? (
