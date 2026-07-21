@@ -241,7 +241,11 @@ const AdminChat = () => {
       const signed = await signMessagesImages((data || []) as unknown as Message[]).catch(() => (data || []) as unknown as Message[]);
       setMessages(reconcileMessages(signed));
       setUnreadMap(prev => { const n = { ...prev }; delete n[user.id]; return n; });
-      void (async () => { try { await supabase.rpc("mark_conversation_delivered_admin", { p_other_id: user.id } as any); } catch {} })();
+      void (async () => {
+        try { await supabase.rpc("mark_conversation_read_admin" as any, { p_other_id: user.id } as any); } catch {}
+        try { await supabase.rpc("mark_conversation_delivered_admin", { p_other_id: user.id } as any); } catch {}
+        loadUnread();
+      })();
     } catch (err) { console.error("[catch]", err); toast.error("মেসেজ লোড করতে সমস্যা"); }
     finally { setMessagesLoading(false); }
   }, []);
