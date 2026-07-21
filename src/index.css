@@ -210,6 +210,21 @@
     height: 0;
   }
 
+  /* Hide the browser scrollbar on mobile for a native app feel */
+  @media (max-width: 640px) {
+    html, body {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+  }
+
+
 
 
 
