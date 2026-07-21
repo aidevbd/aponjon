@@ -147,20 +147,12 @@ const AdminDashboard = () => {
   const debouncedSearch = useDebouncedValue(search, 150);
 
   const filtered = useMemo(() => {
-    const q = debouncedSearch.trim().toLowerCase();
+    const q = debouncedSearch.trim();
     return contacts.filter((c) => {
-      const matchSearch = !q ||
-        c.name.toLowerCase().includes(q) ||
-        c.phone.toLowerCase().includes(q) ||
-        (c.blood_group && c.blood_group.toLowerCase().includes(q)) ||
-        (c.note && c.note.toLowerCase().includes(q)) ||
-        (c.address && c.address.toLowerCase().includes(q)) ||
-        (c.email && c.email.toLowerCase().includes(q)) ||
-        (c.whatsapp && c.whatsapp.toLowerCase().includes(q)) ||
-        (c.imo && c.imo.toLowerCase().includes(q)) ||
-        (c.telegram && c.telegram.toLowerCase().includes(q)) ||
-        (c.facebook && c.facebook.toLowerCase().includes(q)) ||
-        (c.custom_category && c.custom_category.toLowerCase().includes(q));
+      const matchSearch = !q || [
+        c.name, c.phone, c.blood_group, c.note, c.address, c.email,
+        c.whatsapp, c.imo, c.telegram, c.facebook, c.custom_category,
+      ].some((v) => matchesFuzzy(v, q));
       const matchCategory = filterCategory === "all" || c.category === filterCategory;
       const matchBlood = filterBloodGroup === "all" || c.blood_group === filterBloodGroup;
       return matchSearch && matchCategory && matchBlood;
