@@ -557,7 +557,8 @@ const AdminDashboard = () => {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowAddModal(true)}
-          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.5)] bg-[hsl(var(--heirloom-paper))] text-[hsl(var(--heirloom-gold-deep))] shadow-[0_10px_30px_-10px_hsl(var(--heirloom-gold-deep)/0.4)] hover:bg-[hsl(var(--heirloom-cream)/0.9)] transition-colors"
+          style={{ bottom: "calc(var(--mobile-bottom-nav-h, 0px) + 1rem)", right: "max(1rem, env(safe-area-inset-right))" }}
+          className="fixed z-40 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.5)] bg-[hsl(var(--heirloom-paper))] text-[hsl(var(--heirloom-gold-deep))] shadow-[0_10px_30px_-10px_hsl(var(--heirloom-gold-deep)/0.4)] hover:bg-[hsl(var(--heirloom-cream)/0.9)] transition-colors sm:!bottom-6 sm:!right-6"
         >
           <Plus className="h-6 w-6" />
         </motion.button>
