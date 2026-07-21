@@ -21,6 +21,9 @@ import {
 import { ContactListItem } from "@/components/ContactListItem";
 import { ContactDetailSheet } from "@/components/ContactDetailSheet";
 import { ContactFilters } from "@/components/ContactFilters";
+import { VirtualContactList } from "@/components/VirtualContactList";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+
 import { DashboardHome } from "@/components/DashboardHome";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
