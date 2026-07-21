@@ -39,6 +39,31 @@ export function subscribeNotificationPrefs(handler: (prefs: NotificationPrefs) =
 }
 
 let audioCtx: AudioContext | null = null;
+let audioUnlockBound = false;
+
+function ensureAudioUnlockBinding() {
+  if (audioUnlockBound || typeof window === "undefined") return;
+  audioUnlockBound = true;
+  const unlock = () => {
+    try {
+      const Ctx = (window.AudioContext || (window as any).webkitAudioContext);
+      if (!Ctx) return;
+      if (!audioCtx) audioCtx = new Ctx();
+      if (audioCtx.state === "suspended") void audioCtx.resume().catch(() => {});
+      // Play a silent buffer to fully unlock on iOS Safari
+      const buf = audioCtx.createBuffer(1, 1, 22050);
+      const src = audioCtx.createBufferSource();
+      src.buffer = buf;
+      src.connect(audioCtx.destination);
+      src.start(0);
+    } catch {}
+  };
+  const opts = { once: true, capture: true, passive: true } as AddEventListenerOptions;
+  window.addEventListener("pointerdown", unlock, opts);
+  window.addEventListener("touchstart", unlock, opts);
+  window.addEventListener("keydown", unlock, opts);
+  window.addEventListener("click", unlock, opts);
+}
 
 function getAudioCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
@@ -54,6 +79,9 @@ function getAudioCtx(): AudioContext | null {
     return null;
   }
 }
+
+// Bind unlock listeners as soon as the module loads on the client.
+ensureAudioUnlockBinding();
 
 function playChime() {
   const ctx = getAudioCtx();
