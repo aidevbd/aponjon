@@ -953,9 +953,6 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
                           <span className="text-[10px] text-muted-foreground bg-muted/60 px-3 py-0.5 rounded-full">{getDateLabel(msg.created_at)}</span>
                         </div>
                       )}
-                      {!sameAsPrev && !isMine && (
-                        <div className="text-[10px] text-muted-foreground ml-10 mb-0.5">{selectedUser?.name}</div>
-                      )}
                       <MessageBubble
                         msg={msg as any}
                         isMine={isMine}
