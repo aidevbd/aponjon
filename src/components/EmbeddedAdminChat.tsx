@@ -1026,7 +1026,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
             />
 
             {/* Input */}
-            <div className="border-t border-[hsl(var(--heirloom-line))] pt-2.5 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+            <div className="pt-2 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
               <div className="flex items-end gap-1.5 sm:gap-2 w-full">
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 <EmojiPicker inputRef={inputRef} onSelect={(emoji) => setMsgInput(prev => prev + emoji)} />
