@@ -910,36 +910,36 @@ const Chat = () => {
                 <Search className="h-4 w-4" />
               </Button>
             )}
-            <DropdownMenu>
+            <DropdownMenu open={settingsOpen} onOpenChange={setSettingsOpen} modal={false}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="সেটিংস ও অপশন">
                   <Settings2 className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuItem onClick={() => setNotifPrefsOpen(true)} className="gap-2 text-sm">
+              <DropdownMenuContent align="end" sideOffset={8} className="z-[70] w-52">
+                <DropdownMenuItem onSelect={() => { setSettingsOpen(false); setNotifPrefsOpen(true); }} className="gap-2 text-sm">
                   <Bell className="h-4 w-4" /> নোটিফিকেশন সেটিংস
                 </DropdownMenuItem>
                 {selectedContact && (
                   <>
                     <DropdownMenuItem
-                      onClick={() => { scrollToBottom(true); }}
+                      onSelect={() => { setSettingsOpen(false); scrollToBottom(true); }}
                       className="gap-2 text-sm"
                     >
                       <ArrowDownToLine className="h-4 w-4" /> সর্বশেষ মেসেজে যান
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => { if (selectedContact) void loadMessages(selectedContact); }}
+                      onSelect={() => { setSettingsOpen(false); if (selectedContact) void loadMessages(selectedContact); }}
                       className="gap-2 text-sm"
                     >
                       <RefreshCw className="h-4 w-4" /> রিফ্রেশ
                     </DropdownMenuItem>
                   </>
                 )}
-                <DropdownMenuItem onClick={() => navigate("/")} className="gap-2 text-sm">
+                <DropdownMenuItem onSelect={() => { setSettingsOpen(false); navigate("/"); }} className="gap-2 text-sm">
                   <Home className="h-4 w-4" /> হোম
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout} className="gap-2 text-sm text-destructive focus:text-destructive">
+                <DropdownMenuItem onSelect={() => { setSettingsOpen(false); handleLogout(); }} className="gap-2 text-sm text-destructive focus:text-destructive">
                   <LogOut className="h-4 w-4" /> লগআউট
                 </DropdownMenuItem>
               </DropdownMenuContent>
