@@ -867,7 +867,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
         ) : (
           <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
             {/* Thread Header */}
-            <div className="sticky top-0 z-20 -mx-1 flex items-center gap-2 px-3 py-2.5 border-b border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.92)] backdrop-blur-md pt-[max(0.625rem,env(safe-area-inset-top))]">
+            <div className="sticky top-0 z-50 -mx-1 flex items-center gap-2 px-3 py-2.5 border-b border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-bg))] pt-[max(0.625rem,env(safe-area-inset-top))] shadow-[0_8px_18px_-18px_hsl(var(--heirloom-ink)/0.35)]">
               <button
                 onClick={() => { setSelectedUser(null); selectedUserRef.current = null; setSearchOpen(false); setSearchQuery(""); }}
                 className="flex items-center justify-center h-9 w-9 -ml-1 rounded-full text-foreground hover:bg-primary/10 hover:text-primary transition-colors shrink-0"
@@ -904,15 +904,15 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
 
             {/* Search bar */}
             {searchOpen && (
-              <div className="pt-2 px-1">
-                <div className="group relative flex items-center">
+              <div className="relative z-40 isolate shrink-0 -mx-1 bg-[hsl(var(--heirloom-bg))] px-2 pt-2 pb-3 shadow-[0_10px_22px_-20px_hsl(var(--heirloom-ink)/0.38)] before:pointer-events-none before:absolute before:inset-x-0 before:-bottom-3 before:h-3 before:bg-gradient-to-b before:from-[hsl(var(--heirloom-bg))] before:to-transparent">
+                <div className="group relative z-10 flex items-center">
                   <Search className="pointer-events-none absolute left-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="মেসেজ খুঁজুন..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     autoFocus
-                    className="h-10 rounded-full border-border/60 bg-background pl-10 pr-10 text-sm shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-primary/40"
+                    className="h-10 rounded-full border-border/60 bg-[hsl(var(--heirloom-paper))] pl-10 pr-10 text-sm shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-primary/40"
                   />
                   <button
                     type="button"
@@ -939,8 +939,8 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
             )}
 
             {/* Messages */}
-            <div className="relative flex-1 flex flex-col min-h-0">
-            <div ref={messageListRef} className="chat-scroll flex-1 overflow-y-auto overflow-x-hidden py-3 space-y-1">
+            <div className="relative z-0 flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div ref={messageListRef} className={`chat-scroll flex-1 overflow-y-auto overflow-x-hidden pb-3 ${searchOpen ? "pt-5" : "pt-3"} space-y-1`}>
               {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
               {!messagesLoading && filteredMessages.length === 0 && (
                 <div className="text-center py-12 text-muted-foreground">
