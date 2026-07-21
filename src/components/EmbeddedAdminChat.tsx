@@ -834,65 +834,92 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
     );
   }
 
+  const renderUsersListContent = () => (
+    chatUsers.length === 0 ? (
+      <div className="text-center py-16 text-muted-foreground">
+        <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
+        <p className="text-sm">এখনো কেউ মেসেজ করেনি</p>
+        <p className="text-xs mt-1">ইউজাররা চ্যাট পেজ থেকে আপনাকে মেসেজ করতে পারবে</p>
+      </div>
+    ) : (
+      <div className="space-y-1 p-1">
+        {chatUsers.map((u) => {
+          const presence = presenceMap[u.id];
+          const lastSeenText = formatLastSeen(presence);
+          const isActive = selectedUser?.id === u.id;
+          return (
+            <button
+              key={u.id}
+              onClick={() => handleSelectUser(u)}
+              className={`w-full flex items-center gap-3 rounded-xl p-3 text-left border transition-colors ${
+                isActive
+                  ? "bg-[hsl(var(--heirloom-cream)/0.6)] border-[hsl(var(--heirloom-gold)/0.5)]"
+                  : "border-transparent hover:bg-card/80 hover:border-border/50"
+              }`}
+            >
+              <div className="relative shrink-0">
+                {u.photo_url ? (
+                  <img src={u.photo_url} alt={u.name} className="h-10 w-10 rounded-full object-cover border border-primary/20" />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{u.name.charAt(0)}</div>
+                )}
+                {presence?.isOnline && (
+                  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-foreground text-sm truncate">{u.name}</div>
+                <div className="text-xs text-muted-foreground truncate">
+                  {lastSeenText ? (
+                    <span className={presence?.isOnline ? "text-green-600" : ""}>{lastSeenText}</span>
+                  ) : u.phone}
+                </div>
+              </div>
+              {unreadMap[u.id] && (
+                <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[10px] font-bold px-1.5">
+                  {unreadMap[u.id]}
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    )
+  );
+
   return (
     <div
       ref={shellRef}
-      className={`flex flex-col min-h-0 ${mobileThreadMode ? "fixed inset-x-0 z-[70] bg-[hsl(var(--heirloom-bg))]" : ""}`}
+      className={`flex flex-col min-h-0 lg:grid lg:grid-cols-[320px_1fr] lg:gap-4 ${mobileThreadMode ? "fixed inset-x-0 z-[70] bg-[hsl(var(--heirloom-bg))]" : ""}`}
       style={{
         height: shellHeight,
         minHeight: mobileThreadMode ? "0px" : "320px",
         top: mobileThreadMode ? `${visualViewportOffsetTop}px` : undefined,
       }}
     >
+      {/* Desktop-only persistent sidebar */}
+      <aside className="hidden lg:flex lg:flex-col lg:min-h-0 lg:border-r lg:border-[hsl(var(--heirloom-line))] lg:pr-3 lg:overflow-y-auto no-scrollbar">
+        <div className="sticky top-0 z-10 bg-[hsl(var(--heirloom-bg))] px-2 pt-2 pb-3 border-b border-[hsl(var(--heirloom-line))]">
+          <div className="text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--heirloom-ink-soft))]">চ্যাট</div>
+          <div className="text-[13px] text-[hsl(var(--heirloom-ink))] mt-0.5">{chatUsers.length} জন কথোপকথন</div>
+        </div>
+        {renderUsersListContent()}
+      </aside>
 
+      <div className="flex flex-col min-h-0 flex-1 lg:min-h-0">
       <AnimatePresence mode="wait">
         {!selectedUser ? (
-          <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 overflow-y-auto no-scrollbar">
-            {chatUsers.length === 0 ? (
-              <div className="text-center py-16 text-muted-foreground">
-                <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">এখনো কেউ মেসেজ করেনি</p>
-                <p className="text-xs mt-1">ইউজাররা চ্যাট পেজ থেকে আপনাকে মেসেজ করতে পারবে</p>
+          <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 overflow-y-auto no-scrollbar lg:flex lg:items-center lg:justify-center">
+            <div className="lg:hidden">{renderUsersListContent()}</div>
+            <div className="hidden lg:flex lg:flex-col lg:items-center lg:text-center lg:gap-3 lg:max-w-sm lg:px-6">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.4)] bg-[hsl(var(--heirloom-gold)/0.06)]">
+                <MessageCircle className="h-7 w-7 text-[hsl(var(--heirloom-gold-deep))]" />
               </div>
-            ) : (
-              <div className="space-y-1">
-                {chatUsers.map((u) => {
-                  const presence = presenceMap[u.id];
-                  const lastSeenText = formatLastSeen(presence);
-                  return (
-                    <button
-                      key={u.id}
-                      onClick={() => handleSelectUser(u)}
-                      className="w-full flex items-center gap-3 rounded-xl p-3 hover:bg-card/80 transition-colors text-left border border-transparent hover:border-border/50"
-                    >
-                      <div className="relative shrink-0">
-                        {u.photo_url ? (
-                          <img src={u.photo_url} alt={u.name} className="h-10 w-10 rounded-full object-cover border border-primary/20" />
-                        ) : (
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{u.name.charAt(0)}</div>
-                        )}
-                        {presence?.isOnline && (
-                          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-foreground text-sm">{u.name}</div>
-                        <div className="text-xs text-muted-foreground truncate">
-                          {lastSeenText ? (
-                            <span className={presence?.isOnline ? "text-green-600" : ""}>{lastSeenText}</span>
-                          ) : u.phone}
-                        </div>
-                      </div>
-                      {unreadMap[u.id] && (
-                        <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[10px] font-bold px-1.5">
-                          {unreadMap[u.id]}
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+              <div className="font-display text-xl text-[hsl(var(--heirloom-ink))]">কথোপকথন বেছে নিন</div>
+              <p className="text-sm text-[hsl(var(--heirloom-ink-soft))] leading-relaxed">
+                বাম পাশ থেকে যেকোনো ইউজার সিলেক্ট করে চ্যাট শুরু করুন। রিয়েল-টাইম মেসেজ, অনলাইন স্ট্যাটাস ও আনরিড কাউন্ট এখানেই দেখা যাবে।
+              </p>
+            </div>
           </motion.div>
         ) : (
           <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
