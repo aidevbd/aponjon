@@ -37,8 +37,8 @@ const Index = () => {
                 বন্ধু, বেস্ট ফ্রেন্ড কিংবা ভালোবাসার মানুষ — আপনারা আমার জীবনের সবচেয়ে দামী অংশ। মোবাইল হারালে যেন আপনাদের হারিয়ে না ফেলি, তাই একটু কষ্ট করে নাম-নম্বরটা এখানে রেখে দেবেন? 🤍
               </p>
 
-              {/* CTAs — hidden on mobile (sticky bar takes over) */}
-              <div className="mx-auto mt-9 hidden w-full max-w-sm flex-col gap-3 sm:flex md:max-w-[420px]">
+              {/* CTAs */}
+              <div className="mx-auto mt-8 flex w-full max-w-sm flex-col gap-3 sm:mt-9 md:max-w-[420px]">
                 <Link
                   to="/add"
                   className="heirloom-btn-primary group relative flex w-full items-center justify-center gap-2 rounded-sm px-5 py-4 text-[15px] font-medium transition-all duration-300 sm:text-base"
