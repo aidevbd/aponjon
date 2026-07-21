@@ -168,9 +168,11 @@ export function MessageBubble({
   return (
     <div
       ref={wrapperRef}
+      data-msg-id={msg.id}
       className={cn(
-        "group/msg relative flex w-full mb-0.5 select-none",
+        "group/msg relative flex w-full mb-0.5 select-none scroll-mt-24 transition-shadow duration-300",
         isMine ? "justify-end pl-10" : "justify-start pr-10",
+        highlight && "rounded-xl ring-2 ring-primary/60 ring-offset-2 ring-offset-background",
       )}
       onMouseEnter={() => setShowQuickBar(true)}
       onMouseLeave={() => setShowQuickBar(false)}
