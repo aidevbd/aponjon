@@ -905,15 +905,27 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange }: Embedd
             {/* Search bar */}
             {searchOpen && (
               <div className="pt-2 px-1">
-                <div className="flex items-center gap-2">
-                  <Input placeholder="মেসেজ খুঁজুন..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-card h-8 text-sm" autoFocus />
-                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="সার্চ বন্ধ করুন" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
+                <div className="group relative flex items-center">
+                  <Search className="pointer-events-none absolute left-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="মেসেজ খুঁজুন..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    autoFocus
+                    className="h-10 rounded-full border-border/60 bg-card/80 pl-10 pr-10 text-sm shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-primary/40"
+                  />
+                  <button
+                    type="button"
+                    aria-label="সার্চ বন্ধ করুন"
+                    onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                    className="absolute right-2 inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                  >
                     <X className="h-4 w-4" />
-                  </Button>
+                  </button>
                 </div>
-                
               </div>
             )}
+
 
             {/* Pinned messages */}
             {pinnedMessages.length > 0 && !searchOpen && (
