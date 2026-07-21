@@ -9,7 +9,6 @@ import AccessData from "./pages/AccessData";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import Chat from "./pages/Chat";
-import AdminChat from "./pages/AdminChat";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import OAuthConsent from "./pages/OAuthConsent";
@@ -27,13 +26,11 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/index" element={<Index />} />
           <Route path="/add" element={<AddContact />} />
           <Route path="/access" element={<AccessData />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
           <Route path="/chat" element={<Chat />} />
-          <Route path="/admin/chat" element={<AdminProtectedRoute><AdminChat /></AdminProtectedRoute>} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
