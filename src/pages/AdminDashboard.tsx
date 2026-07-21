@@ -360,12 +360,12 @@ const AdminDashboard = () => {
 
 
       {/* Tab-Based Content */}
-      <main className={`container mx-auto max-w-6xl ${immersive ? "px-0 py-0" : chatFullscreen ? "flex-1 min-h-0 flex flex-col px-3 sm:px-4 pt-3 pb-3" : "px-3 sm:px-4 py-6 sm:py-8"}`}>
+      <main className={`container mx-auto max-w-6xl ${immersive ? "px-0 py-0" : chatFullscreen ? "flex-1 min-h-0 flex flex-col px-3 sm:px-4 pt-3 pb-3" : "px-3 sm:px-4 py-4 sm:py-5"}`}>
         <h1 className="sr-only">অ্যাডমিন ড্যাশবোর্ড</h1>
         <Tabs value={activeTab} onValueChange={setActiveTab} className={chatFullscreen ? "flex-1 min-h-0 flex flex-col" : ""}>
 
         <TabsList
-          className={`w-full hidden sm:grid grid-cols-5 h-auto p-1 gap-0.5 bg-[hsl(var(--heirloom-paper)/0.7)] border border-[hsl(var(--heirloom-line))] rounded-sm transition-transform duration-300 ${immersive ? "sm:hidden" : ""} ${chatFullscreen ? "mb-3 shrink-0" : "mb-8 sm:sticky sm:top-14 sm:z-40"} ${tabsHidden ? "sm:-translate-y-[calc(100%+3.5rem)] sm:opacity-0 sm:pointer-events-none" : ""}`}
+          className={`w-full hidden sm:grid grid-cols-5 h-auto p-1 gap-0.5 bg-[hsl(var(--heirloom-paper)/0.7)] border border-[hsl(var(--heirloom-line))] rounded-sm transition-transform duration-300 ${immersive ? "sm:hidden" : ""} ${chatFullscreen ? "mb-3 shrink-0" : "mb-5 sm:sticky sm:top-14 sm:z-40"} ${tabsHidden ? "sm:-translate-y-[calc(100%+3.5rem)] sm:opacity-0 sm:pointer-events-none" : ""}`}
         >
 
 
@@ -431,7 +431,8 @@ const AdminDashboard = () => {
 
         {/* ===== কন্টাক্ট ট্যাব ===== */}
         <TabsContent value="contacts" className="mt-0">
-          <div className="mx-auto w-full max-w-4xl space-y-6">
+          <div className="mx-auto w-full max-w-2xl space-y-3 sm:space-y-4">
+
             {/* Filters */}
             <div className="sticky top-0 z-40 -mx-3 sm:mx-0 rounded-none sm:rounded-sm border-y sm:border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper))] px-3 py-2.5 shadow-[0_4px_12px_-8px_hsl(var(--heirloom-ink)/0.15)]">
               <ContactFilters
