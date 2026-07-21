@@ -105,8 +105,10 @@ const AdminDashboard = () => {
     finally { setLoading(false); }
   };
 
+  const debouncedSearch = useDebouncedValue(search, 150);
+
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const q = debouncedSearch.trim().toLowerCase();
     return contacts.filter((c) => {
       const matchSearch = !q ||
         c.name.toLowerCase().includes(q) ||
@@ -124,7 +126,9 @@ const AdminDashboard = () => {
       const matchBlood = filterBloodGroup === "all" || c.blood_group === filterBloodGroup;
       return matchSearch && matchCategory && matchBlood;
     });
-  }, [contacts, search, filterCategory, filterBloodGroup]);
+  }, [contacts, debouncedSearch, filterCategory, filterBloodGroup]);
+
+
 
 
   const stats = useMemo(() => {
