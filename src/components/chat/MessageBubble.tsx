@@ -161,7 +161,7 @@ export function MessageBubble({
       : showTail
         ? "rounded-2xl rounded-bl-md"
         : "rounded-2xl rounded-bl-2xl",
-    highlight && "ring-2 ring-primary/50",
+    highlight && "ring-2 ring-primary/60 ring-offset-2 ring-offset-background animate-reply-jump",
     msg.is_pinned && "ring-1 ring-primary/30",
     isUnsent && "italic opacity-60",
   );
@@ -171,9 +171,8 @@ export function MessageBubble({
       ref={wrapperRef}
       data-msg-id={msg.id}
       className={cn(
-        "group/msg relative flex w-full mb-0.5 select-none scroll-mt-24 transition-shadow duration-300",
+        "group/msg relative flex w-full mb-0.5 select-none scroll-mt-24",
         isMine ? "justify-end pl-10" : "justify-start pr-10",
-        highlight && "rounded-xl ring-2 ring-primary/60 ring-offset-2 ring-offset-background animate-reply-jump",
       )}
       onMouseEnter={() => setShowQuickBar(true)}
       onMouseLeave={() => setShowQuickBar(false)}
