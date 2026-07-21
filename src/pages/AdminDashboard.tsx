@@ -531,9 +531,10 @@ const AdminDashboard = () => {
         </TabsContent>
 
         {/* ===== চ্যাট ট্যাব ===== */}
-        <TabsContent value="chat" className="mt-0">
-          <EmbeddedAdminChat onUnreadChange={(count) => setTotalUnread(count)} onActiveChatChange={setChatOpen} />
+        <TabsContent value="chat" className={`mt-0 ${chatFullscreen ? "flex-1 min-h-0 data-[state=active]:flex flex-col" : ""}`}>
+          <EmbeddedAdminChat onUnreadChange={(count) => setTotalUnread(count)} onActiveChatChange={setChatOpen} fillHeight={chatFullscreen} />
         </TabsContent>
+
 
         {/* ===== লগ ট্যাব ===== */}
         <TabsContent value="logs" className="mt-0">
