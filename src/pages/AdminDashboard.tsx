@@ -431,7 +431,8 @@ const AdminDashboard = () => {
 
         {/* ===== কন্টাক্ট ট্যাব ===== */}
         <TabsContent value="contacts" className="mt-0">
-          <div className="mx-auto w-full max-w-4xl space-y-6">
+          <div className="mx-auto w-full max-w-2xl space-y-3 sm:space-y-4">
+
             {/* Filters */}
             <div className="sticky top-0 z-40 -mx-3 sm:mx-0 rounded-none sm:rounded-sm border-y sm:border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper))] px-3 py-2.5 shadow-[0_4px_12px_-8px_hsl(var(--heirloom-ink)/0.15)]">
               <ContactFilters
