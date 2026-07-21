@@ -61,7 +61,10 @@ const AdminDashboard = () => {
     setSearchParams(next, { replace: true });
   };
   const [chatOpen, setChatOpen] = useState(false);
-  const immersive = chatOpen && activeTab === "chat";
+  const isMobile = useIsMobile();
+  const immersive = chatOpen && activeTab === "chat" && isMobile;
+
+
 
   // Signal immersive state to the global bottom nav so it can hide
   useEffect(() => {
