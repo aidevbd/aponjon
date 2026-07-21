@@ -847,7 +847,7 @@ const Chat = () => {
   // ============ CHAT INTERFACE ============
   return (
     <div className="warm-gradient flex flex-col overflow-hidden fixed inset-0" style={{ height: viewportHeight ? `${viewportHeight}px` : "100dvh" }}>
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-md shrink-0 pt-[env(safe-area-inset-top)]">
+      <header className="sticky top-0 z-50 border-b border-border/50 bg-background shrink-0 pt-[env(safe-area-inset-top)] shadow-[0_8px_18px_-18px_hsl(var(--heirloom-ink)/0.35)]">
         <div className="container mx-auto max-w-3xl lg:max-w-4xl flex h-14 items-center justify-between px-4 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
           <div className="flex items-center gap-2 min-w-0 flex-1 relative">
             <AnimatePresence mode="wait" initial={false}>
@@ -935,9 +935,9 @@ const Chat = () => {
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden container mx-auto max-w-3xl lg:max-w-4xl w-full px-0">
         {/* Search bar */}
         {searchOpen && (
-          <div className="sticky top-0 z-30 px-4 pt-2 pb-2 bg-background border-b border-border/50 shadow-[0_4px_12px_-8px_hsl(var(--heirloom-ink)/0.15)]">
+          <div className="relative z-40 isolate shrink-0 px-4 pt-2 pb-3 bg-background border-b border-border/50 shadow-[0_10px_22px_-20px_hsl(var(--heirloom-ink)/0.38)] before:pointer-events-none before:absolute before:inset-x-0 before:-bottom-3 before:h-3 before:bg-gradient-to-b before:from-background before:to-transparent">
             <div className="flex items-center gap-2">
-              <Input placeholder="মেসেজ খুঁজুন..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-background h-8 text-sm" autoFocus />
+              <Input placeholder="মেসেজ খুঁজুন..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-card h-8 text-sm" autoFocus />
               <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="সার্চ বন্ধ করুন" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
                 <X className="h-4 w-4" />
               </Button>
@@ -1010,8 +1010,8 @@ const Chat = () => {
             </motion.div>
           ) : (
             <motion.div key="thread" initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 24 }} transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }} className="flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div className="relative flex-1 flex flex-col min-h-0">
-                <div ref={messageListRef} className="chat-scroll flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 pb-2 space-y-1">
+              <div className="relative z-0 flex-1 flex flex-col min-h-0 overflow-hidden">
+                <div ref={messageListRef} className={`chat-scroll flex-1 overflow-y-auto overflow-x-hidden px-4 pb-2 ${searchOpen ? "pt-7" : "pt-4"} space-y-1`}>
                   {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
                   {!messagesLoading && filteredMessages.length === 0 && (
                     <div className="text-center py-16 text-muted-foreground">
