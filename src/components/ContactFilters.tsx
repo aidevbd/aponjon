@@ -156,7 +156,7 @@ export function ContactFilters({
           <input
             ref={inputRef}
             type="text"
-            placeholder="নাম, নম্বর, কি-ওয়ার্ড..."
+            placeholder={totalCount && totalCount > 0 ? `${totalCount} জনের মধ্যে সার্চ করুন...` : "নাম, নম্বর, কি-ওয়ার্ড..."}
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             onFocus={() => setFocused(true)}
