@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Search, SlidersHorizontal, X, ChevronDown } from "lucide-react";
+import { Search, SlidersHorizontal, X, ChevronDown, CornerDownLeft } from "lucide-react";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
+import { Highlight } from "@/lib/highlight";
+import { getCategoryIcon } from "@/lib/categoryIcons";
+import type { ContactRow } from "@/lib/store";
 
 interface ContactFiltersProps {
   search: string;
@@ -11,6 +14,55 @@ interface ContactFiltersProps {
   filterBloodGroup: string;
   onBloodGroupChange: (val: string) => void;
   categoryCount: Record<string, number>;
+  contacts?: ContactRow[];
+  onPickContact?: (contact: ContactRow) => void;
+}
+
+type Suggestion = {
+  contact: ContactRow;
+  label: string;
+  value: string;
+};
+
+function buildSuggestions(contacts: ContactRow[], query: string, limit = 6): Suggestion[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const out: Suggestion[] = [];
+  const seen = new Set<string>();
+
+  const push = (c: ContactRow, label: string, value: string) => {
+    if (seen.has(c.id)) return;
+    seen.add(c.id);
+    out.push({ contact: c, label, value });
+  };
+
+  // Pass 1: name matches (highest priority)
+  for (const c of contacts) {
+    if (out.length >= limit) break;
+    if (c.name?.toLowerCase().includes(q)) push(c, "নাম", c.name);
+  }
+  // Pass 2: other field matches
+  const fields: Array<[keyof ContactRow, string]> = [
+    ["phone", "ফোন"],
+    ["email", "ইমেইল"],
+    ["whatsapp", "WhatsApp"],
+    ["imo", "IMO"],
+    ["telegram", "Telegram"],
+    ["facebook", "Facebook"],
+    ["note", "নোট"],
+    ["address", "ঠিকানা"],
+  ];
+  for (const c of contacts) {
+    if (out.length >= limit) break;
+    for (const [key, label] of fields) {
+      const v = (c as any)[key] as string | null | undefined;
+      if (v && v.toLowerCase().includes(q)) {
+        push(c, label, v);
+        break;
+      }
+    }
+  }
+  return out;
 }
 
 export function ContactFilters({
@@ -18,13 +70,27 @@ export function ContactFilters({
   filterCategory, onCategoryChange,
   filterBloodGroup, onBloodGroupChange,
   categoryCount,
+  contacts = [],
+  onPickContact,
 }: ContactFiltersProps) {
   const [open, setOpen] = useState(false);
   const [draftCat, setDraftCat] = useState(filterCategory);
   const [draftBg, setDraftBg] = useState(filterBloodGroup);
+  const [focused, setFocused] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
 
   const activeCount =
     (filterCategory !== "all" ? 1 : 0) + (filterBloodGroup !== "all" ? 1 : 0);
+
+  const suggestions = useMemo(
+    () => (onPickContact ? buildSuggestions(contacts, search) : []),
+    [contacts, search, onPickContact]
+  );
+  const showSuggest = focused && search.trim().length > 0 && suggestions.length > 0;
+
+  useEffect(() => { setActiveIdx(0); }, [search]);
 
   useEffect(() => {
     if (open) {
@@ -37,6 +103,16 @@ export function ContactFilters({
     return () => { document.body.style.overflow = ""; };
   }, [open, filterCategory, filterBloodGroup]);
 
+  // Click-outside to close suggestions
+  useEffect(() => {
+    if (!focused) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setFocused(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [focused]);
+
   const apply = () => {
     onCategoryChange(draftCat);
     onBloodGroupChange(draftBg);
@@ -48,26 +124,113 @@ export function ContactFilters({
     setDraftBg("all");
   };
 
+  const pick = (s: Suggestion) => {
+    onPickContact?.(s.contact);
+    setFocused(false);
+    inputRef.current?.blur();
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggest) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIdx((i) => (i + 1) % suggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIdx((i) => (i - 1 + suggestions.length) % suggestions.length);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      pick(suggestions[activeIdx]);
+    } else if (e.key === "Escape") {
+      setFocused(false);
+    }
+  };
+
   return (
     <>
       <div className="flex items-center gap-2">
-        <div className="relative flex-1">
+        <div ref={wrapRef} className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[hsl(var(--heirloom-ink-mute))]" />
           <input
+            ref={inputRef}
             type="text"
             placeholder="নাম, নম্বর, কি-ওয়ার্ড..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onKeyDown={onKeyDown}
+            aria-autocomplete="list"
+            aria-expanded={showSuggest}
             className="heirloom-input w-full rounded-sm border pl-9 pr-8 py-2 text-[13px] outline-none"
           />
           {search && (
             <button
-              onClick={() => onSearchChange("")}
+              onClick={() => { onSearchChange(""); inputRef.current?.focus(); }}
               aria-label="সার্চ ক্লিয়ার"
               className="absolute right-2 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full text-[hsl(var(--heirloom-ink-mute))] hover:text-[hsl(var(--heirloom-ink))]"
             >
               <X className="h-3 w-3" />
             </button>
+          )}
+
+          {showSuggest && (
+            <div
+              role="listbox"
+              className="absolute left-0 right-0 top-full z-40 mt-1.5 overflow-hidden rounded-md border border-[hsl(var(--heirloom-gold)/0.35)] bg-[hsl(var(--heirloom-paper))] shadow-[0_12px_30px_-12px_hsl(var(--heirloom-ink)/0.3)] animate-in fade-in slide-in-from-top-1 duration-150"
+            >
+              <ul className="max-h-[320px] overflow-y-auto no-scrollbar py-1">
+                {suggestions.map((s, i) => {
+                  const cat = CATEGORIES.find((c) => c.value === s.contact.category);
+                  const Icon = cat ? getCategoryIcon(cat.value) : null;
+                  const active = i === activeIdx;
+                  return (
+                    <li key={s.contact.id}>
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={active}
+                        onMouseEnter={() => setActiveIdx(i)}
+                        onMouseDown={(e) => { e.preventDefault(); pick(s); }}
+                        className={`flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors ${
+                          active ? "bg-[hsl(var(--heirloom-gold)/0.12)]" : "hover:bg-[hsl(var(--heirloom-cream)/0.5)]"
+                        }`}
+                      >
+                        {s.contact.photo_url ? (
+                          <img src={s.contact.photo_url} alt="" className="h-7 w-7 shrink-0 rounded-full object-cover border border-[hsl(var(--heirloom-gold)/0.3)]" />
+                        ) : (
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.4)] bg-[hsl(var(--heirloom-gold)/0.08)] text-[11px] text-[hsl(var(--heirloom-gold-deep))]">
+                            {s.contact.name.charAt(0)}
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-[13px] text-[hsl(var(--heirloom-ink))]">
+                            <Highlight text={s.contact.name} query={search} />
+                          </div>
+                          {s.label !== "নাম" && (
+                            <div className="truncate text-[11px] text-[hsl(var(--heirloom-ink-soft))]">
+                              <span className="text-[hsl(var(--heirloom-ink-mute))]">{s.label}: </span>
+                              <Highlight text={s.value} query={search} />
+                            </div>
+                          )}
+                        </div>
+                        {Icon && (
+                          <span className="hidden sm:inline-flex shrink-0 items-center gap-1 rounded-full border border-[hsl(var(--heirloom-gold)/0.3)] bg-[hsl(var(--heirloom-gold)/0.06)] px-1.5 py-0.5 text-[10px] text-[hsl(var(--heirloom-gold-deep))]">
+                            <Icon className="h-2.5 w-2.5" strokeWidth={1.75} />
+                            {cat?.value}
+                          </span>
+                        )}
+                        {active && (
+                          <CornerDownLeft className="h-3 w-3 shrink-0 text-[hsl(var(--heirloom-ink-mute))]" />
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+              <div className="border-t border-[hsl(var(--heirloom-line))] px-3 py-1.5 text-[10px] tracking-wide text-[hsl(var(--heirloom-ink-mute))]">
+                ↑↓ নেভিগেট · ↵ ওপেন · esc ক্লোজ
+              </div>
+            </div>
           )}
         </div>
 
@@ -105,6 +268,7 @@ export function ContactFilters({
     </>
   );
 }
+
 
 function FilterModal({
   onClose,

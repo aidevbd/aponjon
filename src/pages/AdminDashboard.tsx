@@ -384,7 +384,10 @@ const AdminDashboard = () => {
                 filterBloodGroup={filterBloodGroup}
                 onBloodGroupChange={setFilterBloodGroup}
                 categoryCount={stats.categoryCount}
+                contacts={contacts}
+                onPickContact={openContactDetail}
               />
+
             </div>
 
             {/* Results bar */}
