@@ -63,8 +63,23 @@ const AdminDashboard = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const isMobile = useIsMobile();
   const immersive = chatOpen && activeTab === "chat" && isMobile;
+  const chatFullscreen = activeTab === "chat" && !isMobile;
 
-
+  // Auto-hide the tabs bar on desktop when the user scrolls down; reveal at top.
+  const [tabsHidden, setTabsHidden] = useState(false);
+  useEffect(() => {
+    if (isMobile || chatFullscreen) { setTabsHidden(false); return; }
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y <= 8) setTabsHidden(false);
+      else if (y > lastY + 4) setTabsHidden(true);
+      else if (y < lastY - 4) setTabsHidden(false);
+      lastY = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isMobile, chatFullscreen, activeTab]);
 
   // Signal immersive state to the global bottom nav so it can hide
   useEffect(() => {
@@ -72,6 +87,7 @@ const AdminDashboard = () => {
     else document.body.removeAttribute("data-immersive");
     return () => { document.body.removeAttribute("data-immersive"); };
   }, [immersive]);
+
   
   const [selectedContact, setSelectedContact] = useState<ContactRow | null>(null);
   const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
