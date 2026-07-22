@@ -47,7 +47,7 @@ export function Header() {
     >
       <div className="container mx-auto flex h-14 items-center justify-between gap-2 px-3 sm:h-16 sm:px-4">
         {/* Mobile: back button on sub-pages */}
-        {!isRoot && (
+        {backAllowed && (
           <button
             type="button"
             onClick={handleBack}
