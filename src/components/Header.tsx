@@ -9,11 +9,15 @@ export function Header() {
   const navigate = useNavigate();
   const isAdmin = location.pathname.startsWith("/admin");
   const isRoot = location.pathname === "/";
+  const isChat = location.pathname.startsWith("/chat");
+  const { totalUnread, hasSession } = useGlobalChatNotifier();
+  const showChatIcon = !isAdmin && !isChat && hasSession;
 
   const handleBack = () => {
     if (window.history.length > 1) navigate(-1);
     else navigate("/");
   };
+
 
   return (
     <motion.header
