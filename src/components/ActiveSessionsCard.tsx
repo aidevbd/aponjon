@@ -215,15 +215,30 @@ export function ActiveSessionsCard() {
                   </div>
                 </div>
                 {!r.is_current && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={busyId === r.id}
-                    onClick={() => handleRevoke(r.id)}
-                    className="h-8 shrink-0 text-xs text-destructive hover:text-destructive"
-                  >
-                    {busyId === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "সাইন-আউট"}
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={busyId === r.id}
+                        className="h-8 shrink-0 text-xs text-destructive hover:text-destructive"
+                      >
+                        {busyId === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "সাইন-আউট"}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>এই ডিভাইস সাইন-আউট করবেন?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          "{r.device_label || "অজানা ডিভাইস"}" থেকে তৎক্ষণাৎ সাইন-আউট হবে। আবার ঢুকতে সিক্রেট কোড দিতে হবে।
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>বাতিল</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleRevoke(r.id)}>সাইন-আউট</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 )}
               </li>
             );
