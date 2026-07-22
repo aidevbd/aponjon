@@ -284,6 +284,9 @@ const MyInfo = () => {
             )}
 
 
+            {/* Active chat device sessions */}
+            <ActiveSessionsCard />
+
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <button
