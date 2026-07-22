@@ -711,38 +711,38 @@ const AdminDashboard = () => {
                 <div className="flex justify-center">
                   <PhotoUpload value={addForm.photoUrl || undefined} onChange={(url) => setAddForm({ ...addForm, photoUrl: url || "" })} />
                 </div>
-                <div className="space-y-1.5"><Label className="text-xs">নাম *</Label><Input value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} placeholder="পূর্ণ নাম" className="bg-card h-9" /></div>
+                <div className="space-y-1.5"><Label htmlFor={aid("name")} className="text-xs">নাম *</Label><Input id={aid("name")} value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} placeholder="পূর্ণ নাম" className="bg-card h-9" /></div>
                 <PhoneWithMessengers phones={addPhones} onChange={setAddPhones} />
                 <div className="space-y-1.5">
-                  <Label className="text-xs flex items-center gap-1.5"><Facebook className="h-3 w-3 text-blue-600" /> ফেসবুক</Label>
-                  <Input value={addForm.facebook || ""} onChange={(e) => setAddForm({ ...addForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card h-9" />
+                  <Label htmlFor={aid("facebook")} className="text-xs flex items-center gap-1.5"><Facebook className="h-3 w-3 text-blue-600" /> ফেসবুক</Label>
+                  <Input id={aid("facebook")} value={addForm.facebook || ""} onChange={(e) => setAddForm({ ...addForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card h-9" />
                 </div>
-                <div className="space-y-1.5"><Label className="text-xs flex items-center gap-1.5"><Mail className="h-3 w-3" /> ইমেইল</Label><Input value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} type="email" className="bg-card h-9" /></div>
+                <div className="space-y-1.5"><Label htmlFor={aid("email")} className="text-xs flex items-center gap-1.5"><Mail className="h-3 w-3" /> ইমেইল</Label><Input id={aid("email")} value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} type="email" className="bg-card h-9" /></div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs">ক্যাটাগরি</Label>
+                  <Label htmlFor={aid("category")} className="text-xs">ক্যাটাগরি</Label>
                   <Select value={addForm.category} onValueChange={(v) => setAddForm({ ...addForm, category: v })}>
-                    <SelectTrigger className="bg-card h-9"><SelectValue /></SelectTrigger>
+                    <SelectTrigger id={aid("category")} className="bg-card h-9"><SelectValue /></SelectTrigger>
                     <SelectContent>{CATEGORIES.map((cat) => (<SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>))}</SelectContent>
                   </Select>
                 </div>
                 {addForm.category === "অন্যান্য" && (
-                  <div className="space-y-1.5"><Label className="text-xs">কাস্টম ক্যাটাগরি</Label><Input value={addForm.customCategory} onChange={(e) => setAddForm({ ...addForm, customCategory: e.target.value })} className="bg-card h-9" /></div>
+                  <div className="space-y-1.5"><Label htmlFor={aid("customCategory")} className="text-xs">কাস্টম ক্যাটাগরি</Label><Input id={aid("customCategory")} value={addForm.customCategory} onChange={(e) => setAddForm({ ...addForm, customCategory: e.target.value })} className="bg-card h-9" /></div>
                 )}
-                <div className="space-y-1.5"><Label className="text-xs">ঠিকানা</Label><Input value={addForm.address} onChange={(e) => setAddForm({ ...addForm, address: e.target.value })} className="bg-card h-9" /></div>
+                <div className="space-y-1.5"><Label htmlFor={aid("address")} className="text-xs">ঠিকানা</Label><Input id={aid("address")} value={addForm.address} onChange={(e) => setAddForm({ ...addForm, address: e.target.value })} className="bg-card h-9" /></div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1.5">
-                    <Label className="text-xs">রক্তের গ্রুপ</Label>
+                    <Label htmlFor={aid("blood")} className="text-xs">রক্তের গ্রুপ</Label>
                     <Select value={addForm.bloodGroup} onValueChange={(v) => setAddForm({ ...addForm, bloodGroup: v })}>
-                      <SelectTrigger className="bg-card h-9"><SelectValue placeholder="রক্তের গ্রুপ" /></SelectTrigger>
+                      <SelectTrigger id={aid("blood")} className="bg-card h-9"><SelectValue placeholder="রক্তের গ্রুপ" /></SelectTrigger>
                       <SelectContent>{BLOOD_GROUPS.map((bg) => (<SelectItem key={bg} value={bg}>{bg}</SelectItem>))}</SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-1.5"><Label className="text-xs">জন্মদিন</Label><Input type="date" value={addForm.birthday} onChange={(e) => setAddForm({ ...addForm, birthday: e.target.value })} className="bg-card h-9" /></div>
+                  <div className="space-y-1.5"><Label htmlFor={aid("birthday")} className="text-xs">জন্মদিন</Label><Input id={aid("birthday")} type="date" value={addForm.birthday} onChange={(e) => setAddForm({ ...addForm, birthday: e.target.value })} className="bg-card h-9" /></div>
                 </div>
-                <div className="space-y-1.5"><Label className="text-xs">নোট</Label><Textarea value={addForm.note} onChange={(e) => setAddForm({ ...addForm, note: e.target.value })} className="bg-card min-h-[60px]" /></div>
+                <div className="space-y-1.5"><Label htmlFor={aid("note")} className="text-xs">নোট</Label><Textarea id={aid("note")} value={addForm.note} onChange={(e) => setAddForm({ ...addForm, note: e.target.value })} className="bg-card min-h-[60px]" /></div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs flex items-center gap-1.5"><Lock className="h-3 w-3 text-primary" /> সিক্রেট কোড (ঐচ্ছিক)</Label>
-                  <Input value={addForm.secretCode} onChange={(e) => setAddForm({ ...addForm, secretCode: e.target.value })} placeholder="গোপন কোড" className="bg-card h-9" />
+                  <Label htmlFor={aid("secretCode")} className="text-xs flex items-center gap-1.5"><Lock className="h-3 w-3 text-primary" /> সিক্রেট কোড (ঐচ্ছিক)</Label>
+                  <Input id={aid("secretCode")} value={addForm.secretCode} onChange={(e) => setAddForm({ ...addForm, secretCode: e.target.value })} placeholder="গোপন কোড" className="bg-card h-9" />
                 </div>
               </div>
               <Button onClick={() => handleAddContact()} disabled={isAddingContact} variant="hero" className="w-full mt-4 h-9">
