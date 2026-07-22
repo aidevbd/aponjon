@@ -184,14 +184,17 @@ const MyInfo = () => {
               </Button>
               {hasChat ? (
                 <Link to="/chat">
-                  <Button variant="outline" className="w-full h-12 gap-2 rounded-xl">
-                    <PenLine className="h-4 w-4" /> মনের কথা লিখি
+                  <Button variant="outline" className="w-full h-12 gap-2 rounded-xl flex-col !py-1 leading-tight">
+                    <span className="inline-flex items-center gap-2 text-sm">
+                      <MessageCircleHeart className="h-4 w-4" /> আমাকে লিখুন
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">মনের কথা লিখি</span>
                   </Button>
                 </Link>
               ) : canBootstrapChat ? (
                 <Button
                   variant="outline"
-                  className="w-full h-12 gap-2 rounded-xl"
+                  className="w-full h-12 gap-2 rounded-xl flex-col !py-1 leading-tight"
                   disabled={openingChat}
                   onClick={async () => {
                     if (session.auth.type !== "secret") return;
@@ -212,12 +215,18 @@ const MyInfo = () => {
                     }
                   }}
                 >
-                  <PenLine className="h-4 w-4" /> {openingChat ? "চালু হচ্ছে..." : "মনের কথা লিখি"}
+                  <span className="inline-flex items-center gap-2 text-sm">
+                    <MessageCircleHeart className="h-4 w-4" /> {openingChat ? "চালু হচ্ছে..." : "আমাকে লিখুন"}
+                  </span>
+                  {!openingChat && <span className="text-[10px] text-muted-foreground">মনের কথা লিখি</span>}
                 </Button>
               ) : (
                 <Link to="/verify?next=chat">
-                  <Button variant="outline" className="w-full h-12 gap-2 rounded-xl">
-                    <PenLine className="h-4 w-4" /> মনের কথা লিখি
+                  <Button variant="outline" className="w-full h-12 gap-2 rounded-xl flex-col !py-1 leading-tight">
+                    <span className="inline-flex items-center gap-2 text-sm">
+                      <MessageCircleHeart className="h-4 w-4" /> আমাকে লিখুন
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">মনের কথা লিখি</span>
                   </Button>
                 </Link>
               )}
