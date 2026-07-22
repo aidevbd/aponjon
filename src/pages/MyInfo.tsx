@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Pencil, MessageCircle, LogOut, Phone, Mail, MapPin, Droplets, Calendar,
+ Pencil, MessageCircle, LogOut, Phone, Mail, MapPin, Droplets, Calendar,
   Facebook, Save, X, ShieldAlert, Copy, Video, Send, ExternalLink, FileText,
 } from "lucide-react";
+
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -184,7 +185,7 @@ const MyInfo = () => {
               {hasChat ? (
                 <Link to="/chat">
                   <Button variant="outline" className="w-full h-12 gap-2 rounded-xl">
-                    <MessageCircle className="h-4 w-4" /> এডমিনকে মেসেজ
+                    <Send className="h-4 w-4" /> মনের কথা লিখি
                   </Button>
                 </Link>
               ) : canBootstrapChat ? (
@@ -211,15 +212,16 @@ const MyInfo = () => {
                     }
                   }}
                 >
-                  <MessageCircle className="h-4 w-4" /> {openingChat ? "চালু হচ্ছে..." : "এডমিনকে মেসেজ"}
+                  <Send className="h-4 w-4" /> {openingChat ? "চালু হচ্ছে..." : "মনের কথা লিখি"}
                 </Button>
               ) : (
                 <Link to="/verify?next=chat">
                   <Button variant="outline" className="w-full h-12 gap-2 rounded-xl">
-                    <MessageCircle className="h-4 w-4" /> চ্যাট চালু করুন
+                    <Send className="h-4 w-4" /> মনের কথা লিখি
                   </Button>
                 </Link>
               )}
+
             </div>
 
 
