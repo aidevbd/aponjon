@@ -185,7 +185,7 @@ const MyInfo = () => {
               {hasChat ? (
                 <Link to="/chat">
                   <Button variant="outline" className="w-full h-12 gap-2 rounded-xl">
-                    <MessageCircle className="h-4 w-4" /> এডমিনকে মেসেজ
+                    <Send className="h-4 w-4" /> মনের কথা লিখি
                   </Button>
                 </Link>
               ) : canBootstrapChat ? (
@@ -212,15 +212,16 @@ const MyInfo = () => {
                     }
                   }}
                 >
-                  <MessageCircle className="h-4 w-4" /> {openingChat ? "চালু হচ্ছে..." : "এডমিনকে মেসেজ"}
+                  <Send className="h-4 w-4" /> {openingChat ? "চালু হচ্ছে..." : "মনের কথা লিখি"}
                 </Button>
               ) : (
                 <Link to="/verify?next=chat">
                   <Button variant="outline" className="w-full h-12 gap-2 rounded-xl">
-                    <MessageCircle className="h-4 w-4" /> চ্যাট চালু করুন
+                    <Send className="h-4 w-4" /> মনের কথা লিখি
                   </Button>
                 </Link>
               )}
+
             </div>
 
 
