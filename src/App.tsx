@@ -23,23 +23,9 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const queryClient = new QueryClient();
+import { HeirloomPageSkeleton } from "./components/skeletons/LoadingSkeletons";
 
-/** Minimal heirloom-toned fallback while a route chunk is downloading. */
-function RouteFallback() {
-  return (
-    <div
-      className="flex min-h-dvh items-center justify-center bg-[hsl(var(--heirloom-bg))]"
-      aria-busy="true"
-      aria-live="polite"
-    >
-      <div className="flex flex-col items-center gap-3">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[hsl(var(--heirloom-gold)/0.25)] border-t-[hsl(var(--heirloom-gold-deep))]" />
-        <p className="text-[13px] text-[hsl(var(--heirloom-ink-soft))]">অপেক্ষা করুন…</p>
-      </div>
-    </div>
-  );
-}
+const queryClient = new QueryClient();
 
 const App = () => (
   <ErrorBoundary>
@@ -55,7 +41,7 @@ const App = () => (
             মূল কন্টেন্টে যান
           </a>
           <ErrorBoundary>
-            <Suspense fallback={<RouteFallback />}>
+            <Suspense fallback={<HeirloomPageSkeleton />}>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/add" element={<AddContact />} />

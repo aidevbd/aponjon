@@ -50,6 +50,66 @@ export function ContactListSkeleton({ rows = 6 }: { rows?: number }) {
   );
 }
 
+/** Row skeleton for the active-sessions list (device icon + label + meta + button). */
+export function SessionRowSkeleton() {
+  return (
+    <li className="flex items-start gap-3 rounded-lg border border-border/60 bg-background/60 p-3">
+      <Skeleton className="h-6 w-6 rounded-md shrink-0 mt-0.5" />
+      <div className="flex-1 min-w-0 space-y-2">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Skeleton className="h-3.5 w-32" />
+          <Skeleton className="h-3 w-14 rounded-full" />
+        </div>
+        <Skeleton className="h-3 w-40" />
+        <Skeleton className="h-3 w-24" />
+      </div>
+      <Skeleton className="h-7 w-16 rounded-md shrink-0" />
+    </li>
+  );
+}
+
+export function SessionsListSkeleton({ rows = 2 }: { rows?: number }) {
+  return (
+    <ul className="space-y-2" aria-busy="true" aria-label="সেশন তালিকা লোড হচ্ছে">
+      {Array.from({ length: rows }).map((_, i) => (
+        <SessionRowSkeleton key={i} />
+      ))}
+    </ul>
+  );
+}
+
+/** Heirloom page-shell skeleton — mimics the framed card used on Verify/Consent/etc. */
+export function HeirloomPageSkeleton() {
+  return (
+    <div
+      className="flex min-h-dvh flex-col bg-[hsl(var(--heirloom-bg))]"
+      aria-busy="true"
+      aria-label="পাতাটি লোড হচ্ছে"
+    >
+      <main className="flex flex-1 items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
+        <div className="w-full max-w-xl">
+          <div className="heirloom-page relative overflow-hidden rounded-sm border p-6 sm:p-10">
+            <div className="relative flex flex-col items-center space-y-5">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <Skeleton className="h-6 w-56" />
+              <Skeleton className="h-px w-24" />
+              <div className="w-full space-y-3">
+                <Skeleton className="h-3.5 w-full" />
+                <Skeleton className="h-3.5 w-5/6" />
+                <Skeleton className="h-3.5 w-2/3" />
+              </div>
+              <div className="w-full max-w-[420px] space-y-3 pt-4">
+                <Skeleton className="h-11 w-full rounded-sm" />
+                <Skeleton className="h-11 w-full rounded-sm" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
 /** Full admin dashboard skeleton — mimics header + hero card + pills + quick actions + list. */
 export function AdminDashboardSkeleton() {
   return (

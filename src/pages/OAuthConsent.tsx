@@ -125,9 +125,12 @@ export default function OAuthConsent() {
   if (!details) {
     return (
       <Shell>
-        <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-[hsl(var(--heirloom-gold-deep))]" />
-          <p className="mt-4 text-sm text-[hsl(var(--heirloom-ink-soft))]">অনুরোধ পড়া হচ্ছে…</p>
+        <div className="space-y-3 py-6" aria-busy="true" aria-label="অনুরোধ পড়া হচ্ছে">
+          <div className="h-4 w-2/3 mx-auto rounded bg-[hsl(var(--heirloom-line))] animate-pulse" />
+          <div className="h-3 w-1/2 mx-auto rounded bg-[hsl(var(--heirloom-line))] animate-pulse" />
+          <div className="h-3 w-5/6 mx-auto rounded bg-[hsl(var(--heirloom-line))] animate-pulse" />
+          <div className="h-11 w-full max-w-[380px] mx-auto rounded-sm bg-[hsl(var(--heirloom-line))] animate-pulse mt-6" />
+          <div className="h-11 w-full max-w-[380px] mx-auto rounded-sm bg-[hsl(var(--heirloom-line))] animate-pulse" />
         </div>
       </Shell>
     );
