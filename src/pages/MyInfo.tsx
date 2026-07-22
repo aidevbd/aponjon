@@ -273,7 +273,7 @@ const MyInfo = () => {
             {/* Additional details */}
             {(contact.address || contact.birthday) && (
               <div className="rounded-xl border border-border bg-card p-4 mb-4">
-                <h3 className="text-sm font-medium text-muted-foreground mb-3">অতিরিক্ত তথ্য</h3>
+                <h2 className="text-sm font-medium text-muted-foreground mb-3">অতিরিক্ত তথ্য</h2>
                 <div className="space-y-3">
                   {contact.address && (
                     <ReadRow icon={<MapPin className="h-5 w-5 text-primary" />} label="ঠিকানা" value={contact.address} />
