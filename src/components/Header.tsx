@@ -51,25 +51,52 @@ export function Header() {
           </span>
         </Link>
 
-        {!isAdmin && (
-          <nav className="hidden sm:flex items-center gap-1 sm:gap-2">
-            <Link
-              to="/add"
-              className="rounded-lg px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-foreground hover:bg-accent transition-colors whitespace-nowrap"
-            >
-              তথ্য যোগ
-            </Link>
-            <Link
-              to="/access"
-              className="rounded-lg px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-foreground hover:bg-accent transition-colors whitespace-nowrap"
-            >
-              আমার তথ্য
-            </Link>
-          </nav>
-        )}
+        <div className="flex items-center gap-1">
+          {!isAdmin && (
+            <nav className="hidden sm:flex items-center gap-1 sm:gap-2">
+              <Link
+                to="/add"
+                className="rounded-lg px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-foreground hover:bg-accent transition-colors whitespace-nowrap"
+              >
+                তথ্য যোগ
+              </Link>
+              <Link
+                to="/access"
+                className="rounded-lg px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-foreground hover:bg-accent transition-colors whitespace-nowrap"
+              >
+                আমার তথ্য
+              </Link>
+            </nav>
+          )}
 
-        {/* Spacer to balance flex when only back button is on left */}
-        {!isRoot && <span className="w-10 sm:hidden" aria-hidden />}
+          {showChatIcon && (
+            <Link
+              to="/chat"
+              aria-label={totalUnread > 0 ? `চ্যাটে ${totalUnread}টি নতুন মেসেজ` : "চ্যাট খুলুন"}
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-foreground hover:bg-accent active:scale-95 transition"
+            >
+              <MessageCircle className="h-5 w-5" />
+              <AnimatePresence>
+                {totalUnread > 0 && (
+                  <motion.span
+                    key={totalUnread}
+                    initial={{ scale: 0.4, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.4, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 380, damping: 18 }}
+                    className="absolute top-1 right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[hsl(var(--heirloom-gold))] px-1 text-[10px] font-semibold text-[hsl(var(--heirloom-ink))] shadow"
+                  >
+                    {totalUnread > 99 ? "99+" : totalUnread}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+          )}
+
+          {/* Spacer to balance flex when only back button is on left */}
+          {!isRoot && !showChatIcon && <span className="w-10 sm:hidden" aria-hidden />}
+        </div>
+
       </div>
     </motion.header>
   );
