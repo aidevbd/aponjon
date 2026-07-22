@@ -522,14 +522,6 @@ const AdminDashboard = () => {
 
           </div>
 
-          {/* Contact Detail Sheet */}
-          <ContactDetailSheet
-            contact={selectedContact}
-            open={!!selectedContact}
-            onClose={() => setSelectedContact(null)}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
         </TabsContent>
 
         {/* ===== চ্যাট ট্যাব ===== */}
@@ -626,6 +618,16 @@ const AdminDashboard = () => {
         </TabsContent>
      </Tabs>
       </main>
+
+      {/* Contact Detail Sheet (globally mounted so it works from any tab, e.g. chat header) */}
+      <ContactDetailSheet
+        contact={selectedContact}
+        open={!!selectedContact}
+        onClose={() => setSelectedContact(null)}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+
 
 
       {/* ===== Floating Add Button (FAB) ===== */}
