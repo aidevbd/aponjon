@@ -25,8 +25,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  enqueueOfflineMessage, flushOfflineQueue, getOfflineQueueCountForContact,
-  type QueuedChatMessage,
+  enqueueOfflineMessage, getOfflineQueueCountForContact,
 } from "@/lib/offlineChatQueue";
 import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
 import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
@@ -34,12 +33,16 @@ import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
 import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
 import { reconcileMessages } from "@/lib/chatMessageUtils";
-import { notifyNewMessage } from "@/lib/notificationPrefs";
 import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
 import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
 import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
 import { useChatSessionKeepalive } from "@/hooks/useChatSessionKeepalive";
+import { useChatConnectivity } from "@/hooks/useChatConnectivity";
+import { useChatPresence } from "@/hooks/useChatPresence";
+import { useChatTyping } from "@/hooks/useChatTyping";
+import { useChatRealtime } from "@/hooks/useChatRealtime";
+import { useOfflineQueueFlusher } from "@/hooks/useOfflineQueueFlusher";
 import { ChatContactList } from "@/components/chat/ChatContactList";
 import { ChatMessageList } from "@/components/chat/ChatMessageList";
 import { ChatComposer } from "@/components/chat/ChatComposer";
