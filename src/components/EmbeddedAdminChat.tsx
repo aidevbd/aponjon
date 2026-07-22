@@ -48,9 +48,11 @@ interface EmbeddedAdminChatProps {
   onActiveChatChange?: (open: boolean) => void;
   /** When true, the shell fills its parent height (parent must be flex/grid with a definite height). */
   fillHeight?: boolean;
+  /** Called when admin taps the thread header (avatar/name) to view the contact's profile. */
+  onOpenProfile?: (userId: string) => void;
 }
 
-export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeight }: EmbeddedAdminChatProps) {
+export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeight, onOpenProfile }: EmbeddedAdminChatProps) {
 
   const isTouch = useIsTouchDevice();
   const isMobile = useIsMobile();
