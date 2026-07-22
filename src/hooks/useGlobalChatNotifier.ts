@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getChatSession, getUnreadCounts } from "@/lib/chatSession";
+import { CHAT_SESSION_CHANGED_EVENT, getChatSession, getUnreadCounts } from "@/lib/chatSession";
 import { notifyNewMessage } from "@/lib/notificationPrefs";
 import { toast } from "sonner";
 
@@ -37,9 +37,11 @@ export function useGlobalChatNotifier() {
     const refreshSession = () => setHasSession(!!getChatSession());
     window.addEventListener("focus", refreshSession);
     window.addEventListener("storage", refreshSession);
+    window.addEventListener(CHAT_SESSION_CHANGED_EVENT, refreshSession);
     return () => {
       window.removeEventListener("focus", refreshSession);
       window.removeEventListener("storage", refreshSession);
+      window.removeEventListener(CHAT_SESSION_CHANGED_EVENT, refreshSession);
     };
   }, []);
 

@@ -317,6 +317,14 @@
     box-shadow: 20px 20px 60px -15px hsl(26 40% 30% / 0.12),
                 0 1px 0 hsl(42 60% 100% / 0.6) inset;
   }
+  .heirloom-dialog {
+    background-color: hsl(var(--heirloom-paper));
+    border-color: hsl(var(--heirloom-line));
+    box-shadow: 0 24px 60px -28px hsl(var(--heirloom-ink) / 0.42),
+                0 1px 0 hsl(42 60% 100% / 0.72) inset;
+    color: hsl(var(--heirloom-ink));
+    isolation: isolate;
+  }
   /* Mobile: strip the framed-card look for a native, edge-to-edge feel */
   @media (max-width: 639px) {
     .heirloom-page {
@@ -327,6 +335,11 @@
     .heirloom-corner,
     .heirloom-texture {
       display: none !important;
+    }
+    .heirloom-dialog {
+      background-color: hsl(var(--heirloom-paper));
+      border-color: hsl(var(--heirloom-line));
+      box-shadow: 0 18px 42px -24px hsl(var(--heirloom-ink) / 0.48);
     }
   }
   .heirloom-texture {

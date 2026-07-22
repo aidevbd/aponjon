@@ -41,15 +41,14 @@ export function ChatGateDialog({ open, onClose }: ChatGateDialogProps) {
           aria-labelledby="chat-gate-title"
         >
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.96 }}
+            initial={{ y: 20, scale: 0.96 }}
+            animate={{ y: 0, scale: 1 }}
+            exit={{ y: 20, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 260, damping: 24 }}
             onClick={(e) => e.stopPropagation()}
-            className="heirloom-page relative w-full max-w-md rounded-sm border p-6 sm:p-8 shadow-xl"
+            className="heirloom-dialog relative w-full max-w-[22.5rem] rounded-sm border p-5 shadow-xl sm:max-w-md sm:p-8"
           >
-            {/* Paper texture */}
-            <div aria-hidden className="heirloom-texture pointer-events-none absolute inset-0" />
+            <div aria-hidden className="absolute inset-0 rounded-sm bg-[hsl(var(--heirloom-paper))]" />
 
             {/* Corner ornaments */}
             <div aria-hidden className="heirloom-corner absolute left-0 top-0 h-8 w-8 border-l-2 border-t-2 rounded-tl-sm" />
@@ -66,23 +65,23 @@ export function ChatGateDialog({ open, onClose }: ChatGateDialogProps) {
               <X className="h-4 w-4" />
             </button>
 
-            <div className="relative flex flex-col items-center text-center">
+            <div className="relative z-10 flex flex-col items-center text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[hsl(var(--heirloom-gold))]/15 text-[hsl(var(--heirloom-gold))]">
                 <MessageCircle className="h-6 w-6" />
               </div>
 
               <h2
                 id="chat-gate-title"
-                className="mt-4 font-display text-2xl leading-tight text-[hsl(var(--heirloom-ink))] sm:text-[26px]"
+                className="mt-4 font-display text-[1.45rem] leading-tight text-[hsl(var(--heirloom-ink))] sm:text-[26px]"
               >
-                একটু কথা বলবেন? 💌
+                একটু কথা বলবেন?
               </h2>
 
               <div aria-hidden className="mt-4 h-px w-20 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
 
               <p className="mt-4 max-w-sm text-[14.5px] leading-[1.75] text-[hsl(var(--heirloom-ink-soft))] sm:text-[15px]">
                 আপনজনদের সাথে সরাসরি মন খুলে কথা বলতে চাইলে আগে একটু পরিচয় দিতে হবে —
-                আপনার নাম-নম্বরটা আমাদের খাতায় তোলা আছে কি না দেখে নিই। তারপরই আমরা গল্প শুরু করতে পারব 🤍
+                আপনার নাম-নম্বরটা আমাদের খাতায় আছে কি না দেখে নিই। তারপরই আমরা গল্প শুরু করতে পারব।
               </p>
 
               <div className="mx-auto mt-6 flex w-full max-w-[360px] flex-col gap-3">
