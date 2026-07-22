@@ -975,8 +975,8 @@ const Chat = () => {
               {contacts.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground">
                   <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                  <p className="text-sm">এখনো কোনো চ্যাট প্রস্তুত নেই</p>
-                  <p className="text-xs mt-1">অ্যাডমিন সেটআপ করলেই এখান থেকে সরাসরি মেসেজ করতে পারবেন</p>
+                  <p className="text-sm">এখনো কথা শুরু হয়নি</p>
+                  <p className="text-xs mt-1">শীঘ্রই এখান থেকে আপনজনের সাথে মনের কথা ভাগ করা যাবে</p>
                 </div>
               ) : (
                 <div className="space-y-2">
