@@ -87,7 +87,7 @@ export function ChatGateDialog({ open, onClose }: ChatGateDialogProps) {
 
               <div className="mx-auto mt-6 flex w-full max-w-[360px] flex-col gap-3">
                 <Link
-                  to="/access"
+                  to="/verify?next=chat"
                   onClick={onClose}
                   className="heirloom-btn-primary group flex w-full items-center justify-center gap-2 rounded-sm px-5 py-3.5 text-[14.5px] font-medium transition-all duration-300"
                 >
