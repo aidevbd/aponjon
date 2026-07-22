@@ -728,11 +728,19 @@ const Chat = () => {
                   transition={{ duration: 0.18, ease: "easeOut" }}
                   className="flex items-center gap-2 min-w-0"
                 >
-                  {showBackButton && (
+                  {showBackButton ? (
                     <button
                       onClick={() => { setSelectedContact(null); setSearchOpen(false); setSearchQuery(""); }}
                       className="text-foreground hover:text-primary transition-colors shrink-0 md:hidden"
                       aria-label="ফিরে যান"
+                    >
+                      <ArrowLeft className="h-5 w-5" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => { if (window.history.length > 1) navigate(-1); else navigate("/"); }}
+                      className="text-foreground hover:text-primary transition-colors shrink-0 md:hidden"
+                      aria-label="পিছনে যান"
                     >
                       <ArrowLeft className="h-5 w-5" />
                     </button>
