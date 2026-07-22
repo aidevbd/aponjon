@@ -74,9 +74,43 @@ const Index = () => {
                       </Link>
                       <Link
                         to="/chat"
-                        className="heirloom-btn-ghost group flex w-full items-center justify-center gap-2 rounded-sm border px-4 py-3 text-[13px] font-medium transition-all duration-300 sm:text-[14px]"
+                        className="heirloom-btn-ghost group relative flex w-full items-center justify-center gap-2 rounded-sm border px-4 py-3 text-[13px] font-medium transition-all duration-300 sm:text-[14px]"
                       >
-                        <MessageCircle className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden />
+                        <span className="relative flex h-5 w-5 items-center justify-center">
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            className="h-[18px] w-[18px] text-[hsl(var(--heirloom-gold))] transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110"
+                            aria-hidden
+                          >
+                            <defs>
+                              <linearGradient id="chatHeartGrad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stopColor="hsl(var(--heirloom-gold))" />
+                                <stop offset="100%" stopColor="hsl(var(--primary))" />
+                              </linearGradient>
+                            </defs>
+                            <path
+                              d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v9a2.5 2.5 0 0 1-2.5 2.5H9.8l-3.5 3.2c-.5.46-1.3.11-1.3-.57V17H4.5A.5.5 0 0 1 4 16.5v-11Z"
+                              fill="url(#chatHeartGrad)"
+                              fillOpacity="0.14"
+                              stroke="url(#chatHeartGrad)"
+                              strokeWidth="1.6"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M12 13.6s-2.7-1.6-2.7-3.4a1.6 1.6 0 0 1 2.7-1.15A1.6 1.6 0 0 1 14.7 10.2c0 1.8-2.7 3.4-2.7 3.4Z"
+                              fill="url(#chatHeartGrad)"
+                            />
+                          </svg>
+                          <span
+                            aria-hidden
+                            className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-[hsl(var(--heirloom-gold))] shadow-[0_0_0_2px_hsl(var(--heirloom-bg))]"
+                          />
+                          <span
+                            aria-hidden
+                            className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-[hsl(var(--heirloom-gold))] animate-ping"
+                          />
+                        </span>
                         <span>মেসেজ</span>
                       </Link>
                     </div>
