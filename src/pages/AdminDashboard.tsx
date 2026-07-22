@@ -781,14 +781,22 @@ const AdminDashboard = () => {
       <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>লগআউট করবেন?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <div className="mx-auto mb-1 flex h-11 w-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+              <LogOut className="h-5 w-5" />
+            </div>
+            <AlertDialogTitle className="text-center">লগআউট করবেন?</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
               আপনি এই ডিভাইস থেকে সাইন-আউট হয়ে যাবেন। ফিরে আসতে আবার লগইন করতে হবে।
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>বাতিল</AlertDialogCancel>
             <AlertDialogAction onClick={handleLogout} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              লগআউট
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
               হ্যাঁ, লগআউট
             </AlertDialogAction>
           </AlertDialogFooter>
