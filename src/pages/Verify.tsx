@@ -127,13 +127,13 @@ const Verify = () => {
       // For chat intent, wait until the chat session is actually saved before redirecting.
       // Otherwise /chat can mount too early, see no session, and send the user back here.
       if (next === "chat") {
-        const chatSession = await createChatSession(phone.trim(), secret.trim());
+        const chatSession = await createChatSession(phone.trim(), secret.trim(), trustDevice);
         if (!chatSession) {
           toast.error("চ্যাট চালু করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
           return;
         }
       } else {
-        createChatSession(phone.trim(), secret.trim()).catch(() => { /* non-fatal */ });
+        createChatSession(phone.trim(), secret.trim(), trustDevice).catch(() => { /* non-fatal */ });
       }
       toast.success("ভেরিফিকেশন সফল! 🎉");
       redirectAfterAuth();
