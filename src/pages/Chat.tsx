@@ -1124,7 +1124,7 @@ const Chat = () => {
                     </div>
                     {queuedCount > 0 && (
                       <span className="rounded-full bg-card px-2 py-0.5 text-foreground shrink-0">
-                        {queuedCount}টি pending
+                        {queuedCount}টি অপেক্ষায়
                       </span>
                     )}
                   </div>
