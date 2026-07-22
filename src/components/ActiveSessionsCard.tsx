@@ -162,10 +162,10 @@ export function ActiveSessionsCard() {
             size="sm"
             variant="outline"
             disabled={trusting}
-            onClick={handleTrust}
+            onClick={openTrustDialog}
             className="shrink-0 text-xs"
           >
-            {trusting ? <Loader2 className="h-3 w-3 animate-spin" /> : "৩০ দিন মনে রাখুন"}
+            ৩০ দিন মনে রাখুন
           </Button>
         </div>
       )}
