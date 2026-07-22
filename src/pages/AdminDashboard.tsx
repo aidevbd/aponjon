@@ -97,6 +97,8 @@ const AdminDashboard = () => {
   const openContactDetail = (c: ContactRow) => { setSelectedContact(c); setLastSelectedId(c.id); };
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [pendingDuplicate, setPendingDuplicate] = useState<{ existingName: string; phone: string } | null>(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [adminEmail, setAdminEmail] = useState<string>("");
   const birthdayNotified = useRef(false);
   const [addForm, setAddForm] = useState({
     name: "", facebook: "", email: "",
