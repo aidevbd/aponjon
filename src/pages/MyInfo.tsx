@@ -171,7 +171,7 @@ const MyInfo = () => {
               </div>
             </div>
 
-            {/* Primary actions — this is user's OWN profile, so main actions are: edit self, message admin, share card */}
+            {/* Primary actions */}
             <div className="grid grid-cols-2 gap-3 mb-6">
               <Button onClick={startEdit} className="h-12 gap-2 rounded-xl">
                 <Pencil className="h-4 w-4" /> তথ্য এডিট
@@ -182,6 +182,32 @@ const MyInfo = () => {
                     <MessageCircle className="h-4 w-4" /> এডমিনকে মেসেজ
                   </Button>
                 </Link>
+              ) : canBootstrapChat ? (
+                <Button
+                  variant="outline"
+                  className="w-full h-12 gap-2 rounded-xl"
+                  disabled={openingChat}
+                  onClick={async () => {
+                    if (session.auth.type !== "secret") return;
+                    setOpeningChat(true);
+                    try {
+                      const cs = await createChatSession(session.auth.phone, session.auth.secretCode);
+                      if (cs) {
+                        setChatSession(cs);
+                        navigate("/chat");
+                      } else {
+                        toast.error("চ্যাট চালু করা যায়নি। আবার চেষ্টা করুন।");
+                      }
+                    } catch (e: any) {
+                      if (e?.message === "RATE_LIMITED") toast.error("অনেকবার চেষ্টা হয়েছে — কিছুক্ষণ পর আবার চেষ্টা করুন।");
+                      else toast.error("চ্যাট চালু করা যায়নি।");
+                    } finally {
+                      setOpeningChat(false);
+                    }
+                  }}
+                >
+                  <MessageCircle className="h-4 w-4" /> {openingChat ? "চালু হচ্ছে..." : "এডমিনকে মেসেজ"}
+                </Button>
               ) : (
                 <Link to="/verify?next=chat">
                   <Button variant="outline" className="w-full h-12 gap-2 rounded-xl">
@@ -190,6 +216,7 @@ const MyInfo = () => {
                 </Link>
               )}
             </div>
+
 
             {/* OTP-auth banner — set secret code prompt */}
             {isOtpAuth && (
