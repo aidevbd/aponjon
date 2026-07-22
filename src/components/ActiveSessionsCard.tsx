@@ -133,6 +133,27 @@ export function ActiveSessionsCard() {
         </button>
       </div>
 
+      {session && !session.trusted && (
+        <div className="mb-3 flex flex-col gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-2">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <p className="text-xs leading-relaxed text-foreground/80">
+              এই ডিভাইসে সাইন-ইন থাকা শেষ হবে ২৪ ঘণ্টায়। চাইলে ৩০ দিনের জন্য মনে রাখতে পারেন।
+            </p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={trusting}
+            onClick={handleTrust}
+            className="shrink-0 text-xs"
+          >
+            {trusting ? <Loader2 className="h-3 w-3 animate-spin" /> : "৩০ দিন মনে রাখুন"}
+          </Button>
+        </div>
+      )}
+
+
       {loading && !rows ? (
         <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
           <Loader2 className="h-3.5 w-3.5 animate-spin" /> লোড হচ্ছে…
