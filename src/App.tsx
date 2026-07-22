@@ -29,7 +29,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/add" element={<AddContact />} />
-          <Route path="/access" element={<AccessData />} />
+          <Route path="/access" element={<Navigate to="/verify?next=view" replace />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/me" element={<MyInfo />} />
           <Route path="/admin" element={<AdminLogin />} />
