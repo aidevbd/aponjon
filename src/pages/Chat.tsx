@@ -295,19 +295,12 @@ const Chat = () => {
     }
   }, [contacts, selectedContact, handleSelectContact]);
 
-  useEffect(() => {
-    if (!session) return;
-    const deliverQueued = async () => {
-      const result = await flushOfflineQueue((item: QueuedChatMessage) => {
-        if (selectedContact?.id === item.receiverId) void loadMessages(selectedContact);
-      });
-      if (result.sent > 0) toast.success(`${result.sent}টি pending মেসেজ পাঠানো হয়েছে`);
-      if (selectedContact) setQueuedCount(getOfflineQueueCountForContact(selectedContact.id));
-    };
-    if (navigator.onLine) void deliverQueued();
-    window.addEventListener("online", deliverQueued);
-    return () => window.removeEventListener("online", deliverQueued);
-  }, [session, selectedContact, loadMessages]);
+  useOfflineQueueFlusher({
+    enabled: !!session,
+    selectedContactId: selectedContact?.id,
+    onDeliveredForSelected: () => { if (selectedContact) void loadMessages(selectedContact); },
+    onQueueCountChanged: setQueuedCount,
+  });
 
   useEffect(() => {
     if (failedMessages.length === 0) return;
