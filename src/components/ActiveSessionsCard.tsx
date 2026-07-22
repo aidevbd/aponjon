@@ -234,27 +234,40 @@ export function ActiveSessionsCard() {
       )}
 
       {rows && rows.length > 1 && (
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="flex-1 text-xs">
-                অন্য সব ডিভাইস সাইন-আউট
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>অন্য সব ডিভাইস থেকে সাইন-আউট?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  এই ডিভাইস ছাড়া বাকি সব ডিভাইস তৎক্ষণাৎ সাইন-আউট হবে। আবার ঢুকতে সিক্রেট কোড দিতে হবে।
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>বাতিল</AlertDialogCancel>
-                <AlertDialogAction onClick={handleRevokeOthers}>করুন</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button
+              className="group mt-4 flex w-full items-center justify-between gap-3 rounded-xl border border-border/70 bg-background/60 px-3.5 py-2.5 text-left transition hover:border-destructive/40 hover:bg-destructive/5"
+            >
+              <span className="flex items-center gap-2.5 min-w-0">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive transition group-hover:bg-destructive/15">
+                  <LogOut className="h-3.5 w-3.5" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-xs font-medium text-foreground">
+                    অন্য সব ডিভাইস সাইন-আউট
+                  </span>
+                  <span className="block text-[11px] text-muted-foreground">
+                    এই ডিভাইস ছাড়া বাকি {rows.length - 1}টি সেশন বাতিল হবে
+                  </span>
+                </span>
+              </span>
+              <span className="text-[11px] font-medium text-muted-foreground group-hover:text-destructive">›</span>
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>অন্য সব ডিভাইস থেকে সাইন-আউট?</AlertDialogTitle>
+              <AlertDialogDescription>
+                এই ডিভাইস ছাড়া বাকি সব ডিভাইস তৎক্ষণাৎ সাইন-আউট হবে। আবার ঢুকতে সিক্রেট কোড দিতে হবে।
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>বাতিল</AlertDialogCancel>
+              <AlertDialogAction onClick={handleRevokeOthers}>করুন</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
 
       {/* "সব ডিভাইস থেকে সাইন-আউট" সরানো হয়েছে — /me পেজের নিচের সাইন-আউট বাটনই এই ডিভাইস সামলায়,
