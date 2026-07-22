@@ -127,7 +127,7 @@ export function Header() {
           )}
 
           {/* Spacer to balance flex when only back button is on left */}
-          {!isRoot && !showChatIcon && <span className="w-10 sm:hidden" aria-hidden />}
+          {!isRoot && !showChatIcon && !backAllowed && <span className="w-10 sm:hidden" aria-hidden />}
         </div>
 
       </div>
