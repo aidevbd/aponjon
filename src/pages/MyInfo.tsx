@@ -355,44 +355,46 @@ const MyInfo = () => {
             <PhotoUpload value={form.photo_url || undefined} onChange={(url) => setForm({ ...form, photo_url: url })} />
             <div className="space-y-2">
               <Label>নাম</Label>
-              <Input value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-background" />
+            <div className="space-y-2">
+              <Label htmlFor={fid("name")}>নাম</Label>
+              <Input id={fid("name")} value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-background" />
             </div>
             <PhoneWithMessengers phones={phones} onChange={setPhones} firstPhoneReadOnly />
             <div className="space-y-2">
-              <Label className="flex items-center gap-2"><Facebook className="h-3.5 w-3.5 text-blue-600" /> ফেসবুক</Label>
-              <Input value={form.facebook || ""} onChange={(e) => setForm({ ...form, facebook: e.target.value })} className="bg-background" placeholder="প্রোফাইল লিংক বা ইউজারনেম" />
+              <Label htmlFor={fid("facebook")} className="flex items-center gap-2"><Facebook className="h-3.5 w-3.5 text-blue-600" /> ফেসবুক</Label>
+              <Input id={fid("facebook")} value={form.facebook || ""} onChange={(e) => setForm({ ...form, facebook: e.target.value })} className="bg-background" placeholder="প্রোফাইল লিংক বা ইউজারনেম" />
             </div>
             <div className="space-y-2">
-              <Label>ইমেইল</Label>
-              <Input value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })} className="bg-background" />
+              <Label htmlFor={fid("email")}>ইমেইল</Label>
+              <Input id={fid("email")} type="email" value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })} className="bg-background" />
             </div>
             <div className="space-y-2">
-              <Label>ক্যাটাগরি</Label>
+              <Label htmlFor={fid("category")}>ক্যাটাগরি</Label>
               <Select value={form.category || ""} onValueChange={(v) => setForm({ ...form, category: v })}>
-                <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
+                <SelectTrigger id={fid("category")} className="bg-background"><SelectValue /></SelectTrigger>
                 <SelectContent>{CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>ঠিকানা</Label>
-              <Input value={form.address || ""} onChange={(e) => setForm({ ...form, address: e.target.value })} className="bg-background" />
+              <Label htmlFor={fid("address")}>ঠিকানা</Label>
+              <Input id={fid("address")} value={form.address || ""} onChange={(e) => setForm({ ...form, address: e.target.value })} className="bg-background" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>রক্তের গ্রুপ</Label>
+                <Label htmlFor={fid("blood")}>রক্তের গ্রুপ</Label>
                 <Select value={form.blood_group || ""} onValueChange={(v) => setForm({ ...form, blood_group: v })}>
-                  <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
+                  <SelectTrigger id={fid("blood")} className="bg-background"><SelectValue /></SelectTrigger>
                   <SelectContent>{BLOOD_GROUPS.map((bg) => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>জন্মদিন</Label>
-                <Input type="date" value={form.birthday || ""} onChange={(e) => setForm({ ...form, birthday: e.target.value })} className="bg-background" />
+                <Label htmlFor={fid("birthday")}>জন্মদিন</Label>
+                <Input id={fid("birthday")} type="date" value={form.birthday || ""} onChange={(e) => setForm({ ...form, birthday: e.target.value })} className="bg-background" />
               </div>
             </div>
             <div className="space-y-2">
-              <Label>নোট</Label>
-              <Textarea value={form.note || ""} onChange={(e) => setForm({ ...form, note: e.target.value })} className="bg-background min-h-[80px]" />
+              <Label htmlFor={fid("note")}>নোট</Label>
+              <Textarea id={fid("note")} value={form.note || ""} onChange={(e) => setForm({ ...form, note: e.target.value })} className="bg-background min-h-[80px]" />
             </div>
           </div>
 
