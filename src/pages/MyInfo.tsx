@@ -354,8 +354,6 @@ const MyInfo = () => {
           <div className="rounded-xl border border-border bg-card p-4 sm:p-5 space-y-4">
             <PhotoUpload value={form.photo_url || undefined} onChange={(url) => setForm({ ...form, photo_url: url })} />
             <div className="space-y-2">
-              <Label>নাম</Label>
-            <div className="space-y-2">
               <Label htmlFor={fid("name")}>নাম</Label>
               <Input id={fid("name")} value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-background" />
             </div>
