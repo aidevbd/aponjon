@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Monitor, Smartphone, ShieldCheck, LogOut, Loader2, RefreshCw } from "lucide-react";
+import { Monitor, Smartphone, Tablet, ShieldCheck, LogOut, Loader2, RefreshCw, Chrome, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,9 +30,19 @@ function timeAgo(iso: string): string {
   return `${d} দিন আগে`;
 }
 
-function isMobileLabel(label: string | null) {
-  if (!label) return false;
-  return /Android|iOS/i.test(label);
+/** Parse a device label (either "Chrome · Android মোবাইল" or free-form) into a device icon. */
+function pickDeviceIcon(label: string | null) {
+  const l = (label || "").toLowerCase();
+  if (/ট্যাবলেট|tablet|ipad/.test(l)) return Tablet;
+  if (/মোবাইল|mobile|phone|android|iphone|ios/.test(l)) return Smartphone;
+  return Monitor;
+}
+
+/** Pick a browser glyph; Chrome gets its own icon, everything else uses a globe. */
+function pickBrowserIcon(label: string | null) {
+  const l = (label || "").toLowerCase();
+  if (/chrome/.test(l) && !/chromeos/.test(l)) return Chrome;
+  return Globe;
 }
 
 /**
@@ -178,10 +188,14 @@ export function ActiveSessionsCard() {
       ) : rows && rows.length > 0 ? (
         <ul className="space-y-2">
           {rows.map((r) => {
-            const Icon = isMobileLabel(r.device_label) ? Smartphone : Monitor;
+            const DeviceIcon = pickDeviceIcon(r.device_label);
+            const BrowserIcon = pickBrowserIcon(r.device_label);
             return (
               <li key={r.id} className="flex items-start gap-3 rounded-lg border border-border/60 bg-background/60 p-3">
-                <Icon className="h-5 w-5 mt-0.5 text-primary shrink-0" />
+                <div className="relative mt-0.5 shrink-0">
+                  <DeviceIcon className="h-6 w-6 text-primary" />
+                  <BrowserIcon className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-card p-[1px] text-muted-foreground ring-1 ring-border" />
+                </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="text-sm font-medium truncate">{r.device_label || "অজানা ডিভাইস"}</span>

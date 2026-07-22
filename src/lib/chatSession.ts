@@ -68,24 +68,62 @@ export function clearChatSession() {
 
 export { SESSION_EVENT as CHAT_SESSION_CHANGED_EVENT };
 
-/** Short device label from UA (e.g. "Chrome on Android"). */
-export function getDeviceLabel(): string {
-  if (typeof navigator === "undefined") return "Unknown";
+export type DeviceKind = "mobile" | "tablet" | "desktop";
+
+export interface DeviceInfo {
+  kind: DeviceKind;
+  os: string;   // "Android", "iOS", "iPadOS", "Windows", "macOS", "Linux", "ChromeOS", ""
+  browser: string; // "Chrome", "Edge", "Opera", "Firefox", "Safari", "Samsung Internet", "Browser"
+  label: string;   // e.g. "Chrome · Android মোবাইল"
+}
+
+/** Detects device kind, OS, and browser from the UA string. */
+export function getDeviceInfo(): DeviceInfo {
+  if (typeof navigator === "undefined") {
+    return { kind: "desktop", os: "", browser: "Browser", label: "Unknown" };
+  }
   const ua = navigator.userAgent;
+  const uaData = (navigator as any).userAgentData;
+
+  // Browser (order matters — Edg/OPR/Samsung must come before Chrome; Chrome before Safari)
   const browser =
     /Edg\//.test(ua) ? "Edge" :
-    /OPR\//.test(ua) ? "Opera" :
+    /OPR\/|Opera\//.test(ua) ? "Opera" :
+    /SamsungBrowser\//.test(ua) ? "Samsung Internet" :
+    /FxiOS\//.test(ua) ? "Firefox" :
+    /CriOS\//.test(ua) ? "Chrome" :
     /Chrome\//.test(ua) ? "Chrome" :
     /Firefox\//.test(ua) ? "Firefox" :
     /Safari\//.test(ua) ? "Safari" : "Browser";
+
+  // OS — iPadOS 13+ reports as Mac; disambiguate via touch points
+  const isIpadOS =
+    /Macintosh/.test(ua) && typeof navigator.maxTouchPoints === "number" && navigator.maxTouchPoints > 1;
   const os =
     /Android/.test(ua) ? "Android" :
-    /iPhone|iPad|iPod/.test(ua) ? "iOS" :
+    /iPad/.test(ua) || isIpadOS ? "iPadOS" :
+    /iPhone|iPod/.test(ua) ? "iOS" :
+    /CrOS/.test(ua) ? "ChromeOS" :
     /Windows/.test(ua) ? "Windows" :
     /Mac OS X/.test(ua) ? "macOS" :
     /Linux/.test(ua) ? "Linux" : "";
-  return os ? `${browser} on ${os}` : browser;
+
+  // Device kind — trust UA-Client-Hints when present, else fall back to UA heuristics
+  let kind: DeviceKind = "desktop";
+  if (uaData?.mobile === true) kind = "mobile";
+  else if (os === "iPadOS" || /Tablet/i.test(ua) || (/Android/.test(ua) && !/Mobile/.test(ua))) kind = "tablet";
+  else if (os === "Android" || os === "iOS" || /Mobi|Mobile|Phone/i.test(ua)) kind = "mobile";
+
+  const kindBn = kind === "mobile" ? "মোবাইল" : kind === "tablet" ? "ট্যাবলেট" : "ডেস্কটপ";
+  const label = os ? `${browser} · ${os} ${kindBn}` : `${browser} · ${kindBn}`;
+  return { kind, os, browser, label };
 }
+
+/** Backwards-compat short label used when creating a session. */
+export function getDeviceLabel(): string {
+  return getDeviceInfo().label;
+}
+
 
 export async function createChatSession(
   phone: string,
