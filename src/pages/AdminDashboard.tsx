@@ -664,32 +664,32 @@ const AdminDashboard = () => {
                 <div className="flex justify-center">
                   <PhotoUpload value={editForm.photo_url || undefined} onChange={(url) => setEditForm({ ...editForm, photo_url: url || null })} />
                 </div>
-                <div className="space-y-1.5"><Label className="text-xs">নাম</Label><Input value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="bg-card h-9" /></div>
+                <div className="space-y-1.5"><Label htmlFor={eid("name")} className="text-xs">নাম</Label><Input id={eid("name")} value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="bg-card h-9" /></div>
                 <PhoneWithMessengers phones={editPhones} onChange={setEditPhones} firstPhoneReadOnly={false} />
                 <div className="space-y-1.5">
-                  <Label className="text-xs flex items-center gap-1.5"><Facebook className="h-3 w-3 text-blue-600" /> ফেসবুক</Label>
-                  <Input value={editForm.facebook || ""} onChange={(e) => setEditForm({ ...editForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card h-9" />
+                  <Label htmlFor={eid("facebook")} className="text-xs flex items-center gap-1.5"><Facebook className="h-3 w-3 text-blue-600" /> ফেসবুক</Label>
+                  <Input id={eid("facebook")} value={editForm.facebook || ""} onChange={(e) => setEditForm({ ...editForm, facebook: e.target.value })} placeholder="লিংক বা ইউজারনেম" className="bg-card h-9" />
                 </div>
-                <div className="space-y-1.5"><Label className="text-xs flex items-center gap-1.5"><Mail className="h-3 w-3" /> ইমেইল</Label><Input value={editForm.email || ""} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="bg-card h-9" /></div>
+                <div className="space-y-1.5"><Label htmlFor={eid("email")} className="text-xs flex items-center gap-1.5"><Mail className="h-3 w-3" /> ইমেইল</Label><Input id={eid("email")} type="email" value={editForm.email || ""} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="bg-card h-9" /></div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs">ক্যাটাগরি</Label>
+                  <Label htmlFor={eid("category")} className="text-xs">ক্যাটাগরি</Label>
                   <Select value={editForm.category || ""} onValueChange={(v) => setEditForm({ ...editForm, category: v })}>
-                    <SelectTrigger className="bg-card h-9"><SelectValue /></SelectTrigger>
+                    <SelectTrigger id={eid("category")} className="bg-card h-9"><SelectValue /></SelectTrigger>
                     <SelectContent>{CATEGORIES.map((cat) => (<SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>))}</SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-1.5"><Label className="text-xs">ঠিকানা</Label><Input value={editForm.address || ""} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} className="bg-card h-9" /></div>
+                <div className="space-y-1.5"><Label htmlFor={eid("address")} className="text-xs">ঠিকানা</Label><Input id={eid("address")} value={editForm.address || ""} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} className="bg-card h-9" /></div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1.5">
-                    <Label className="text-xs">রক্তের গ্রুপ</Label>
+                    <Label htmlFor={eid("blood")} className="text-xs">রক্তের গ্রুপ</Label>
                     <Select value={editForm.blood_group || ""} onValueChange={(v) => setEditForm({ ...editForm, blood_group: v })}>
-                      <SelectTrigger className="bg-card h-9"><SelectValue /></SelectTrigger>
+                      <SelectTrigger id={eid("blood")} className="bg-card h-9"><SelectValue /></SelectTrigger>
                       <SelectContent>{BLOOD_GROUPS.map((bg) => (<SelectItem key={bg} value={bg}>{bg}</SelectItem>))}</SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-1.5"><Label className="text-xs">জন্মদিন</Label><Input type="date" value={editForm.birthday || ""} onChange={(e) => setEditForm({ ...editForm, birthday: e.target.value })} className="bg-card h-9" /></div>
+                  <div className="space-y-1.5"><Label htmlFor={eid("birthday")} className="text-xs">জন্মদিন</Label><Input id={eid("birthday")} type="date" value={editForm.birthday || ""} onChange={(e) => setEditForm({ ...editForm, birthday: e.target.value })} className="bg-card h-9" /></div>
                 </div>
-                <div className="space-y-1.5"><Label className="text-xs">নোট</Label><Textarea value={editForm.note || ""} onChange={(e) => setEditForm({ ...editForm, note: e.target.value })} className="bg-card min-h-[60px]" /></div>
+                <div className="space-y-1.5"><Label htmlFor={eid("note")} className="text-xs">নোট</Label><Textarea id={eid("note")} value={editForm.note || ""} onChange={(e) => setEditForm({ ...editForm, note: e.target.value })} className="bg-card min-h-[60px]" /></div>
               </div>
               <Button onClick={handleSaveEdit} variant="hero" className="w-full mt-4 h-9">
                 <Heart className="h-4 w-4 mr-1" /> সেভ করুন
