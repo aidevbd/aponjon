@@ -15,23 +15,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
-  getChatSession, createChatSession, getChatContacts,
-  sendMessage, getMessages, getUnreadCounts, uploadChatImage,
-  clearChatSession, editMessage,
-  reactToMessage, unsendMessage, removeMessageForMe, getMessageEditHistory,
-  signMessagesImages,
+  getChatSession, getChatContacts,
+  getMessages, getUnreadCounts,
+  clearChatSession, signMessagesImages,
   type ChatSession,
 } from "@/lib/chatSession";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import {
-  enqueueOfflineMessage, getOfflineQueueCountForContact,
-} from "@/lib/offlineChatQueue";
+import { getOfflineQueueCountForContact } from "@/lib/offlineChatQueue";
 import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
 import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
-import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
+import { FailedMessagesList } from "@/components/chat/FailedMessagesList";
 import { reconcileMessages } from "@/lib/chatMessageUtils";
 import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
@@ -43,26 +39,14 @@ import { useChatPresence } from "@/hooks/useChatPresence";
 import { useChatTyping } from "@/hooks/useChatTyping";
 import { useChatRealtime } from "@/hooks/useChatRealtime";
 import { useOfflineQueueFlusher } from "@/hooks/useOfflineQueueFlusher";
+import { useChatActions, type ChatMessage } from "@/hooks/useChatActions";
+import { useJumpToMessage } from "@/hooks/useJumpToMessage";
 import { ChatContactList } from "@/components/chat/ChatContactList";
 import { ChatMessageList } from "@/components/chat/ChatMessageList";
 import { ChatComposer } from "@/components/chat/ChatComposer";
 import { formatLastSeen } from "@/lib/chatFormatters";
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
-type Message = {
-  id: string; sender_id: string; receiver_id: string; content: string | null;
-  image_url: string | null; is_read: boolean; created_at: string;
-  delivered_at?: string | null;
-  read_at?: string | null;
-  edited_at?: string | null; original_content?: string | null;
-  reply_to_id?: string | null; reply_content?: string | null; reply_sender_id?: string | null;
-  is_pinned?: boolean;
-  unsent_at?: string | null;
-  has_edit_history?: boolean;
-  reactions?: { emoji: string; reactor_id: string }[];
-  pending?: boolean;
-};
-
 type ContactPreview = { preview: string; time: string | null };
 
 const Chat = () => {
@@ -86,27 +70,13 @@ const Chat = () => {
   const [contacts, setContacts] = useState<ChatContact[]>([]);
   const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
   const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
-  const [msgInput, setMsgInput] = useState("");
-  const [sending, setSending] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [editingMsg, setEditingMsg] = useState<Message | null>(null);
-  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
   const [contactPreviews, setContactPreviews] = useState<Record<string, ContactPreview>>({});
-  const [actionMessage, setActionMessage] = useState<Message | null>(null);
-  const [actionAnchor, setActionAnchor] = useState<DOMRect | null>(null);
-  const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
-  const [unsendTargetId, setUnsendTargetId] = useState<string | null>(null);
-  const [editHistoryFor, setEditHistoryFor] = useState<Message | null>(null);
-  const [editHistory, setEditHistory] = useState<{ previous_content: string; edited_at: string }[]>([]);
-  const [editHistoryLoading, setEditHistoryLoading] = useState(false);
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const recentSendAtRef = useRef(0);
   const messageListRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const autoSelectedRef = useRef(false);
@@ -138,6 +108,52 @@ const Chat = () => {
     }
   }, [selectedContact]);
 
+  const loadMessages = useCallback(async (contact: ChatContact, opts?: { silent?: boolean }) => {
+    if (!session) return;
+    if (!opts?.silent) setMessagesLoading(true);
+    try {
+      const raw = await getMessages(session.token, contact.id);
+      const data = await signMessagesImages(raw, session.token).catch(() => raw);
+      setMessages(prev => {
+        const pendings = prev.filter(m => m.pending);
+        const survivors = pendings.filter(p => !data.some(d =>
+          d.sender_id === p.sender_id &&
+          (d.content ?? null) === (p.content ?? null) &&
+          (d.image_url ?? null) === (p.image_url ?? null)
+        ));
+        return reconcileMessages([...(data as ChatMessage[]), ...survivors]);
+      });
+      const lastMessage = data[data.length - 1];
+      setContactPreviews((prev) => ({
+        ...prev,
+        [contact.id]: {
+          preview: lastMessage?.content || (lastMessage?.image_url ? "ছবি পাঠানো হয়েছে" : "এখনো কোনো মেসেজ নেই"),
+          time: lastMessage?.created_at || null,
+        },
+      }));
+      setUnreadMap((prev) => { const n = { ...prev }; delete n[contact.id]; return n; });
+      void (async () => { try { await supabase.rpc("mark_conversation_delivered", { p_token: session.token, p_other_id: contact.id } as any); } catch {} })();
+    } catch (err) {
+      console.error("[catch]", err);
+      toast.error("মেসেজ লোড করতে সমস্যা");
+    } finally {
+      if (!opts?.silent) setMessagesLoading(false);
+    }
+  }, [session]);
+
+  const actions = useChatActions({
+    session,
+    selectedContact,
+    setMessages,
+    loadMessages,
+    restoreInputFocus,
+    setQueuedCount,
+    onSessionExpired: () => setSession(null),
+    inputRef,
+  });
+
+  const { highlightedMsgId, jumpToMessage } = useJumpToMessage(messageListRef);
+
   useEffect(() => {
     if (!session) return;
     loadContacts();
@@ -148,6 +164,7 @@ const Chat = () => {
     sendHeartbeat();
     const heartbeat = setInterval(sendHeartbeat, 30000);
     return () => clearInterval(heartbeat);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
   useChatRealtime({
@@ -155,7 +172,7 @@ const Chat = () => {
     otherContactId: selectedContact?.id,
     onThreadEvent: useCallback(() => {
       if (selectedContact) void loadMessages(selectedContact);
-    }, [selectedContact]),
+    }, [selectedContact, loadMessages]),
     onIncomingFromOther: useCallback((senderId: string) => {
       setUnreadMap((prev) => ({ ...prev, [senderId]: (prev[senderId] || 0) + 1 }));
     }, []),
@@ -166,19 +183,6 @@ const Chat = () => {
     messages,
     session?.contactId,
   );
-
-  const [highlightedMsgId, setHighlightedMsgId] = useState<string | null>(null);
-  const highlightTimerRef = useRef<number | null>(null);
-  const jumpToMessage = (id: string) => {
-    const container = messageListRef.current;
-    if (!container) return;
-    const el = container.querySelector<HTMLElement>(`[data-msg-id="${id}"]`);
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-    setHighlightedMsgId(id);
-    if (highlightTimerRef.current) window.clearTimeout(highlightTimerRef.current);
-    highlightTimerRef.current = window.setTimeout(() => setHighlightedMsgId(null), 1800);
-  };
 
   const prevViewportRef = useRef<number>(viewportHeight);
   useEffect(() => {
@@ -196,8 +200,8 @@ const Chat = () => {
   }, [viewportHeight]);
 
   useEffect(() => {
-    if (Date.now() - recentSendAtRef.current < 1500) restoreInputFocus(true);
-  }, [messages, restoreInputFocus]);
+    if (Date.now() - actions.recentSendAtRef.current < 1500) restoreInputFocus(true);
+  }, [messages, restoreInputFocus, actions.recentSendAtRef]);
 
   const loadContacts = async () => {
     if (!session) return;
@@ -244,49 +248,15 @@ const Chat = () => {
     } catch {}
   };
 
-  const loadMessages = useCallback(async (contact: ChatContact, opts?: { silent?: boolean }) => {
-    if (!session) return;
-    if (!opts?.silent) setMessagesLoading(true);
-    try {
-      const raw = await getMessages(session.token, contact.id);
-      const data = await signMessagesImages(raw, session.token).catch(() => raw);
-      setMessages(prev => {
-        const pendings = prev.filter(m => m.pending);
-        const survivors = pendings.filter(p => !data.some(d =>
-          d.sender_id === p.sender_id &&
-          (d.content ?? null) === (p.content ?? null) &&
-          (d.image_url ?? null) === (p.image_url ?? null)
-        ));
-        return reconcileMessages([...(data as Message[]), ...survivors]);
-      });
-      const lastMessage = data[data.length - 1];
-      setContactPreviews((prev) => ({
-        ...prev,
-        [contact.id]: {
-          preview: lastMessage?.content || (lastMessage?.image_url ? "ছবি পাঠানো হয়েছে" : "এখনো কোনো মেসেজ নেই"),
-          time: lastMessage?.created_at || null,
-        },
-      }));
-      setUnreadMap((prev) => { const n = { ...prev }; delete n[contact.id]; return n; });
-      void (async () => { try { await supabase.rpc("mark_conversation_delivered", { p_token: session.token, p_other_id: contact.id } as any); } catch {} })();
-    } catch (err) {
-      console.error("[catch]", err);
-      toast.error("মেসেজ লোড করতে সমস্যা");
-    } finally {
-      if (!opts?.silent) setMessagesLoading(false);
-    }
-  }, [session]);
-
   const handleSelectContact = useCallback((contact: ChatContact) => {
     setSelectedContact(contact);
     setQueuedCount(getOfflineQueueCountForContact(contact.id));
-    setFailedMessages([]);
+    actions.setFailedMessages([]);
     setMessages([]);
     resetForNewThread();
     loadMessages(contact);
-  }, [loadMessages, resetForNewThread]);
+  }, [loadMessages, resetForNewThread, setQueuedCount, actions]);
 
-  // P3: auto-select if there is exactly one contact (typical heirloom case)
   useEffect(() => {
     if (autoSelectedRef.current) return;
     if (contacts.length === 1 && !selectedContact) {
@@ -303,15 +273,14 @@ const Chat = () => {
   });
 
   useEffect(() => {
-    if (failedMessages.length === 0) return;
+    if (actions.failedMessages.length === 0) return;
     const retryAll = () => {
       if (!navigator.onLine) return;
-      failedMessages.forEach(f => { if (!f.retrying) void handleResendFailed(f.id); });
+      actions.failedMessages.forEach(f => { if (!f.retrying) void actions.handleResendFailed(f.id); });
     };
     window.addEventListener("online", retryAll);
     return () => window.removeEventListener("online", retryAll);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [failedMessages]);
+  }, [actions.failedMessages, actions]);
 
   useEffect(() => {
     if (!session || !selectedContact) return;
@@ -326,253 +295,6 @@ const Chat = () => {
     };
   }, [session, selectedContact, loadMessages]);
 
-  const sendWithRetry = async <T,>(fn: () => Promise<T>, tries = 3): Promise<T> => {
-    let lastErr: any;
-    for (let i = 0; i < tries; i++) {
-      try { return await fn(); }
-      catch (err: any) {
-        lastErr = err;
-        if (err?.message?.includes("Invalid session")) throw err;
-        if (typeof navigator !== "undefined" && !navigator.onLine) throw err;
-        if (i < tries - 1) await new Promise(r => setTimeout(r, 500 * Math.pow(2, i)));
-      }
-    }
-    throw lastErr;
-  };
-
-  const handleSend = async () => {
-    if (sending || !session || !selectedContact) return;
-    const text = msgInput.trim();
-    if (!text) { restoreInputFocus(true); return; }
-
-    if (editingMsg) {
-      recentSendAtRef.current = Date.now();
-      setSending(true);
-      setMsgInput("");
-      try {
-        await editMessage(session.token, editingMsg.id, text);
-        setMessages(prev => prev.map(m => m.id === editingMsg.id
-          ? { ...m, content: text, edited_at: new Date().toISOString(), original_content: m.original_content || m.content }
-          : m));
-        toast.success("মেসেজ এডিট হয়েছে");
-      } catch (err) {
-        console.error("[catch]", err);
-        toast.error("এডিট করতে সমস্যা");
-        setMsgInput(text);
-      } finally {
-        setSending(false);
-        setEditingMsg(null);
-        restoreInputFocus(true);
-      }
-      return;
-    }
-
-    recentSendAtRef.current = Date.now();
-    setSending(true);
-    setMsgInput("");
-
-    if (!navigator.onLine) {
-      enqueueOfflineMessage({
-        token: session.token,
-        receiverId: selectedContact.id,
-        content: text,
-        imageUrl: null,
-        replyToId: replyingTo?.id || null,
-      });
-      setQueuedCount(getOfflineQueueCountForContact(selectedContact.id));
-      setReplyingTo(null);
-      setSending(false);
-      restoreInputFocus(true);
-      toast.success("ইন্টারনেট এলে মেসেজ অটো পাঠানো হবে");
-      return;
-    }
-
-    const tempId = `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const nowIso = new Date().toISOString();
-    const optimistic: Message = {
-      id: tempId,
-      sender_id: session.contactId,
-      receiver_id: selectedContact.id,
-      content: text,
-      image_url: null,
-      is_read: false,
-      created_at: nowIso,
-      delivered_at: null,
-      read_at: null,
-      reply_to_id: replyingTo?.id || null,
-      reply_content: replyingTo?.content || null,
-      reply_sender_id: replyingTo?.sender_id || null,
-      reactions: [],
-      pending: true,
-    };
-    setMessages(prev => [...prev, optimistic]);
-    const replyIdSnapshot = replyingTo?.id || undefined;
-    setReplyingTo(null);
-
-    try {
-      const realId = await sendWithRetry(() =>
-        sendMessage(session.token, selectedContact.id, text, undefined, replyIdSnapshot)
-      );
-      setMessages(prev => prev.map(m =>
-        m.id === tempId ? { ...m, id: (realId as string) || m.id, pending: false } : m
-      ));
-    } catch (err: any) {
-      if (err?.message?.includes("Invalid session")) {
-        clearChatSession();
-        setSession(null);
-        toast.error("সেশন শেষ হয়ে গেছে। আবার লগইন করুন।");
-      } else {
-        setMessages(prev => prev.filter(m => m.id !== tempId));
-        const failed: FailedChatMessage = {
-          id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-          content: text,
-          imageUrl: null,
-          replyToId: replyIdSnapshot || null,
-          replyContent: optimistic.reply_content || null,
-          createdAt: nowIso,
-        };
-        setFailedMessages(prev => [...prev, failed]);
-        toast.error("মেসেজ পাঠাতে সমস্যা — নিচে 'আবার পাঠান' চাপুন");
-      }
-    } finally {
-      setSending(false);
-      restoreInputFocus(true);
-    }
-  };
-
-  const handleResendFailed = async (failedId: string) => {
-    if (!session || !selectedContact) return;
-    const item = failedMessages.find(f => f.id === failedId);
-    if (!item) return;
-    setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: true } : f));
-    try {
-      await sendWithRetry(() => sendMessage(
-        session.token, selectedContact.id,
-        item.content || undefined, item.imageUrl || undefined, item.replyToId || undefined,
-      ));
-      setFailedMessages(prev => prev.filter(f => f.id !== failedId));
-      toast.success("মেসেজ পাঠানো হয়েছে");
-    } catch (err: any) {
-      setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: false } : f));
-      if (err?.message?.includes("Invalid session")) {
-        clearChatSession();
-        setSession(null);
-        toast.error("সেশন শেষ হয়ে গেছে। আবার লগইন করুন।");
-      } else {
-        toast.error("এখনো পাঠানো যাচ্ছে না");
-      }
-    }
-  };
-
-  const handleDeleteFailed = (failedId: string) => {
-    setFailedMessages(prev => prev.filter(f => f.id !== failedId));
-  };
-
-  const handleUnsendMessage = async () => {
-    if (!session || !unsendTargetId) return;
-    try {
-      await unsendMessage(session.token, unsendTargetId);
-      setMessages(prev => prev.map(m => m.id === unsendTargetId
-        ? { ...m, content: null, image_url: null, unsent_at: new Date().toISOString() } : m));
-      toast.success("মেসেজ আনসেন্ড করা হয়েছে");
-    } catch (err) {
-      console.error("[catch]", err);
-      toast.error("আনসেন্ড করতে সমস্যা");
-    } finally {
-      setUnsendTargetId(null);
-    }
-  };
-
-  const handleRemoveForMe = async (msg: Message) => {
-    if (!session) return;
-    try {
-      await removeMessageForMe(session.token, msg.id);
-      setMessages(prev => prev.filter(m => m.id !== msg.id));
-      toast.success("আপনার চ্যাট থেকে সরানো হয়েছে");
-    } catch (err) {
-      console.error("[catch]", err);
-      toast.error("সরাতে সমস্যা");
-    }
-  };
-
-  const handleReact = async (msg: Message, emoji: string) => {
-    if (!session) return;
-    setMessages(prev => prev.map(m => {
-      if (m.id !== msg.id) return m;
-      const reactions = m.reactions || [];
-      const mine = reactions.find(r => r.reactor_id === session.contactId);
-      let next = reactions.filter(r => r.reactor_id !== session.contactId);
-      if (!mine || mine.emoji !== emoji) next = [...next, { emoji, reactor_id: session.contactId }];
-      return { ...m, reactions: next };
-    }));
-    try {
-      await reactToMessage(session.token, msg.id, emoji);
-    } catch (err) {
-      console.error("[catch]", err);
-      toast.error("রিয়্যাকশনে সমস্যা");
-      if (selectedContact) void loadMessages(selectedContact);
-    }
-  };
-
-  const handleShowEditHistory = async (msg: Message) => {
-    if (!session) return;
-    setEditHistoryFor(msg);
-    setEditHistoryLoading(true);
-    setEditHistory([]);
-    try {
-      const data = await getMessageEditHistory(session.token, msg.id);
-      setEditHistory(data);
-    } catch (err) {
-      console.error("[catch]", err);
-      toast.error("ইতিহাস লোড করতে সমস্যা");
-    } finally {
-      setEditHistoryLoading(false);
-    }
-  };
-
-  const handleStartEdit = (msg: Message) => {
-    setEditingMsg(msg);
-    setMsgInput(msg.content || "");
-    setReplyingTo(null);
-    inputRef.current?.focus();
-  };
-
-  const handleStartReply = (msg: Message) => {
-    setReplyingTo(msg);
-    setEditingMsg(null);
-    setMsgInput("");
-    inputRef.current?.focus();
-  };
-
-  const handleImagePick = async (file: File) => {
-    if (!session || !selectedContact) return;
-    if (!file.type.startsWith("image/")) { toast.error("শুধুমাত্র ছবি পাঠানো যাবে"); return; }
-    setUploading(true);
-    try {
-      const url = await uploadChatImage(file, session.token);
-      try {
-        await sendMessage(session.token, selectedContact.id, undefined, url, replyingTo?.id);
-        setReplyingTo(null);
-      } catch {
-        const failed: FailedChatMessage = {
-          id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-          content: null, imageUrl: url,
-          replyToId: replyingTo?.id || null,
-          replyContent: replyingTo?.content || null,
-          createdAt: new Date().toISOString(),
-        };
-        setFailedMessages(prev => [...prev, failed]);
-        setReplyingTo(null);
-        toast.error("ছবি পাঠাতে সমস্যা — 'আবার পাঠান' চাপুন");
-      }
-    } catch (err) {
-      console.error("[catch]", err);
-      toast.error("ছবি পাঠাতে সমস্যা");
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const handleLogout = () => {
     clearChatSession();
     setSession(null);
@@ -586,8 +308,8 @@ const Chat = () => {
   const filteredMessages = searchQuery
     ? messages.filter(m => m.content?.toLowerCase().includes(searchQuery.toLowerCase()))
     : messages;
-  const statusTone = sending ? "text-primary" : isOffline ? "text-destructive" : queuedCount > 0 ? "text-foreground" : "text-muted-foreground";
-  const statusLabel = sending
+  const statusTone = actions.sending ? "text-primary" : isOffline ? "text-destructive" : queuedCount > 0 ? "text-foreground" : "text-muted-foreground";
+  const statusLabel = actions.sending
     ? "মেসেজ পাঠানো হচ্ছে..."
     : isOffline
       ? "নেটওয়ার্ক নেই — মেসেজটা অপেক্ষায় থাকবে"
@@ -599,7 +321,6 @@ const Chat = () => {
 
   const singleContact = contacts.length === 1;
   const showBackButton = !!selectedContact && !singleContact;
-  const showListPane = !selectedContact || !singleContact; // desktop shows both
 
   return (
     <div className="warm-gradient flex flex-col overflow-hidden fixed inset-0" style={{ height: viewportHeight ? `${viewportHeight}px` : "100dvh" }}>
@@ -665,7 +386,7 @@ const Chat = () => {
                   className="flex items-center gap-2"
                 >
                   <div className="flex h-8 w-8 items-center justify-center rounded-full hero-gradient shadow-rose">
-                    <MessageCircle className="h-4 w-4 text-primary-foreground" />
+                    <MessageCircle className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
                   </div>
                   <div>
                     <span className="font-display font-semibold text-foreground text-sm">মেসেজ</span>
@@ -713,15 +434,15 @@ const Chat = () => {
         </div>
       </header>
 
-      {/* ============ BODY (mobile: single pane | desktop: split) ============ */}
-      <div className="flex-1 min-h-0 overflow-hidden container mx-auto max-w-5xl w-full px-0">
+      {/* ============ BODY ============ */}
+      <main id="main-content" className="flex-1 min-h-0 overflow-hidden container mx-auto max-w-5xl w-full px-0">
         <div className={`h-full ${singleContact ? "" : "md:grid md:grid-cols-[300px_1fr] md:gap-0"}`}>
 
-          {/* Contact list pane */}
           <aside
             className={`h-full min-h-0 overflow-hidden border-r border-border/50 bg-background/50 ${
               selectedContact ? "hidden md:flex md:flex-col" : "flex flex-col"
             } ${singleContact ? "md:hidden" : ""}`}
+            aria-label="চ্যাট কন্টাক্ট তালিকা"
           >
             <div className="flex-1 overflow-y-auto chat-scroll">
               <ChatContactList
@@ -735,12 +456,14 @@ const Chat = () => {
             </div>
           </aside>
 
-          {/* Thread pane */}
-          <section className={`h-full min-h-0 flex flex-col overflow-hidden ${!selectedContact ? "hidden md:flex" : "flex"}`}>
+          <section
+            className={`h-full min-h-0 flex flex-col overflow-hidden ${!selectedContact ? "hidden md:flex" : "flex"}`}
+            aria-label="চ্যাট থ্রেড"
+          >
             {!selectedContact ? (
               <div className="flex-1 flex items-center justify-center text-center px-6 text-muted-foreground">
                 <div>
-                  <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                  <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-30" aria-hidden="true" />
                   <p className="text-sm">বাম দিকের তালিকা থেকে একজনকে বাছুন</p>
                   <p className="text-xs mt-1">তারপর এখানে মনের কথা লেখা যাবে</p>
                 </div>
@@ -750,12 +473,12 @@ const Chat = () => {
                 {searchOpen && (
                   <div className="relative z-40 isolate shrink-0 px-4 pt-2 pb-2 bg-background">
                     <div className="flex items-center gap-2">
-                      <Input placeholder="মেসেজ খুঁজুন..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-card h-8 text-sm" autoFocus />
+                      <Input placeholder="মেসেজ খুঁজুন..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-card h-8 text-sm" autoFocus aria-label="মেসেজে খুঁজুন" />
                       <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="সার্চ বন্ধ করুন" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
-                    {searchQuery && <p className="text-xs text-muted-foreground mt-1">{filteredMessages.length} টি মেসেজ পাওয়া গেছে</p>}
+                    {searchQuery && <p className="text-xs text-muted-foreground mt-1" aria-live="polite">{filteredMessages.length} টি মেসেজ পাওয়া গেছে</p>}
                   </div>
                 )}
 
@@ -763,7 +486,7 @@ const Chat = () => {
                   <div className="px-4 pt-2 shrink-0">
                     <div className="bg-accent/50 rounded-lg p-2 border border-border/50">
                       <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
-                        <Pin className="h-3 w-3" /> পিন করা মেসেজ
+                        <Pin className="h-3 w-3" aria-hidden="true" /> পিন করা মেসেজ
                       </div>
                       {pinnedMessages.slice(0, 2).map(pm => (
                         <p key={pm.id} className="text-xs text-foreground truncate">📌 {pm.content || "ছবি"}</p>
@@ -783,10 +506,10 @@ const Chat = () => {
                     searchQuery={searchQuery}
                     highlightedMsgId={highlightedMsgId}
                     searchOpen={searchOpen}
-                    onOpenActions={(m, rect, el) => { setActionMessage(m); setActionAnchor(rect); setActionAnchorEl(el ?? null); }}
-                    onQuickReact={handleReact}
-                    onStartReply={handleStartReply}
-                    onShowEditHistory={handleShowEditHistory}
+                    onOpenActions={actions.openMessageActions}
+                    onQuickReact={actions.handleReact}
+                    onStartReply={actions.handleStartReply}
+                    onShowEditHistory={actions.handleShowEditHistory}
                     onJumpToReply={jumpToMessage}
                   />
                   <JumpToLatest
@@ -801,11 +524,11 @@ const Chat = () => {
                   <div className="px-4 pb-1"><TypingIndicator /></div>
                 )}
 
-                {(sending || isOffline || queuedCount > 0) && (
+                {(actions.sending || isOffline || queuedCount > 0) && (
                   <div className="px-4 pt-1.5">
-                    <div className={`flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-muted/60 px-3 py-1.5 text-xs ${statusTone}`}>
+                    <div className={`flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-muted/60 px-3 py-1.5 text-xs ${statusTone}`} role="status" aria-live="polite">
                       <div className="flex items-center gap-2 min-w-0">
-                        {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : isOffline ? <WifiOff className="h-3.5 w-3.5 shrink-0" /> : <Clock3 className="h-3.5 w-3.5 shrink-0" />}
+                        {actions.sending ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" aria-hidden="true" /> : isOffline ? <WifiOff className="h-3.5 w-3.5 shrink-0" aria-hidden="true" /> : <Clock3 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
                         <span className="truncate">{statusLabel}</span>
                       </div>
                       {queuedCount > 0 && (
@@ -815,30 +538,30 @@ const Chat = () => {
                   </div>
                 )}
 
-                <FailedMessagesList items={failedMessages} onResend={handleResendFailed} onDelete={handleDeleteFailed} />
+                <FailedMessagesList items={actions.failedMessages} onResend={actions.handleResendFailed} onDelete={actions.handleDeleteFailed} />
 
                 <ChatComposer
                   ref={inputRef}
-                  value={msgInput}
-                  onChange={setMsgInput}
-                  onSend={handleSend}
-                  onImagePick={handleImagePick}
-                  onCancelEditReply={() => { setEditingMsg(null); setReplyingTo(null); setMsgInput(""); }}
+                  value={actions.msgInput}
+                  onChange={actions.setMsgInput}
+                  onSend={actions.handleSend}
+                  onImagePick={actions.handleImagePick}
+                  onCancelEditReply={actions.cancelEditReply}
                   onFocusInput={restoreInputFocus}
                   emitTyping={emitTyping}
-                  sending={sending}
-                  uploading={uploading}
-                  editingMsg={editingMsg}
-                  replyingTo={replyingTo}
+                  sending={actions.sending}
+                  uploading={actions.uploading}
+                  editingMsg={actions.editingMsg}
+                  replyingTo={actions.replyingTo}
                   isTouch={isTouch}
                 />
               </>
             )}
           </section>
         </div>
-      </div>
+      </main>
 
-      <AlertDialog open={!!unsendTargetId} onOpenChange={(open) => !open && setUnsendTargetId(null)}>
+      <AlertDialog open={!!actions.unsendTargetId} onOpenChange={(open) => !open && actions.setUnsendTargetId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>সবার জন্য আনসেন্ড?</AlertDialogTitle>
@@ -846,32 +569,32 @@ const Chat = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>বাতিল</AlertDialogCancel>
-            <AlertDialogAction onClick={handleUnsendMessage} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">আনসেন্ড করুন</AlertDialogAction>
+            <AlertDialogAction onClick={actions.handleUnsendMessage} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">আনসেন্ড করুন</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       <MessageActionSheet
-        open={!!actionMessage}
-        message={actionMessage}
-        isMine={actionMessage?.sender_id === session.contactId}
-        anchorRect={actionAnchor}
-        anchorEl={actionAnchorEl}
-        onOpenChange={(open) => { if (!open) { setActionMessage(null); setActionAnchor(null); setActionAnchorEl(null); } }}
-        onReact={(emoji) => actionMessage && handleReact(actionMessage, emoji)}
-        onReply={() => actionMessage && handleStartReply(actionMessage)}
-        onEdit={() => actionMessage && handleStartEdit(actionMessage)}
-        onUnsend={() => actionMessage && setUnsendTargetId(actionMessage.id)}
-        onRemoveForMe={() => actionMessage && handleRemoveForMe(actionMessage)}
-        onShowEditHistory={() => actionMessage && handleShowEditHistory(actionMessage)}
+        open={!!actions.actionMessage}
+        message={actions.actionMessage}
+        isMine={actions.actionMessage?.sender_id === session.contactId}
+        anchorRect={actions.actionAnchor}
+        anchorEl={actions.actionAnchorEl}
+        onOpenChange={(open) => { if (!open) actions.closeMessageActions(); }}
+        onReact={(emoji) => actions.actionMessage && actions.handleReact(actions.actionMessage, emoji)}
+        onReply={() => actions.actionMessage && actions.handleStartReply(actions.actionMessage)}
+        onEdit={() => actions.actionMessage && actions.handleStartEdit(actions.actionMessage)}
+        onUnsend={() => actions.actionMessage && actions.setUnsendTargetId(actions.actionMessage.id)}
+        onRemoveForMe={() => actions.actionMessage && actions.handleRemoveForMe(actions.actionMessage)}
+        onShowEditHistory={() => actions.actionMessage && actions.handleShowEditHistory(actions.actionMessage)}
       />
 
       <EditHistoryDialog
-        open={!!editHistoryFor}
-        onOpenChange={(open) => !open && setEditHistoryFor(null)}
-        history={editHistory}
-        currentContent={editHistoryFor?.content || null}
-        loading={editHistoryLoading}
+        open={!!actions.editHistoryFor}
+        onOpenChange={(open) => !open && actions.setEditHistoryFor(null)}
+        history={actions.editHistory}
+        currentContent={actions.editHistoryFor?.content || null}
+        loading={actions.editHistoryLoading}
       />
 
       <NotificationPreferencesDialog open={notifPrefsOpen} onOpenChange={setNotifPrefsOpen} />
