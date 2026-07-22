@@ -2,14 +2,20 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Monitor, Smartphone, ShieldCheck, LogOut, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   getChatSession, clearChatSession, listChatSessions, revokeChatSession,
   revokeAllOtherChatSessions, revokeAllChatSessions, trustCurrentChatSession,
+  getDeviceLabel,
   type ActiveChatSession,
 } from "@/lib/chatSession";
 
@@ -41,6 +47,8 @@ export function ActiveSessionsCard() {
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [trusting, setTrusting] = useState(false);
+  const [trustOpen, setTrustOpen] = useState(false);
+  const [labelInput, setLabelInput] = useState("");
 
   const load = async () => {
     if (!session) return;
@@ -57,14 +65,21 @@ export function ActiveSessionsCard() {
 
   useEffect(() => { void load(); /* eslint-disable-next-line */ }, []);
 
+  const openTrustDialog = () => {
+    const current = rows?.find((r) => r.is_current);
+    setLabelInput(current?.device_label || getDeviceLabel());
+    setTrustOpen(true);
+  };
+
   const handleTrust = async () => {
     if (!session) return;
     setTrusting(true);
     try {
-      const exp = await trustCurrentChatSession(session.token);
+      const exp = await trustCurrentChatSession(session.token, labelInput.trim() || undefined);
       if (exp) {
         toast.success("এই ডিভাইস ৩০ দিনের জন্য মনে রাখা হলো");
         setSession(getChatSession());
+        setTrustOpen(false);
         await load();
       } else {
         toast.error("সম্ভব হয়নি, আবার চেষ্টা করুন");
@@ -73,6 +88,8 @@ export function ActiveSessionsCard() {
       setTrusting(false);
     }
   };
+
+
 
 
   if (!session) {
@@ -145,10 +162,10 @@ export function ActiveSessionsCard() {
             size="sm"
             variant="outline"
             disabled={trusting}
-            onClick={handleTrust}
+            onClick={openTrustDialog}
             className="shrink-0 text-xs"
           >
-            {trusting ? <Loader2 className="h-3 w-3 animate-spin" /> : "৩০ দিন মনে রাখুন"}
+            ৩০ দিন মনে রাখুন
           </Button>
         </div>
       )}
@@ -249,6 +266,48 @@ export function ActiveSessionsCard() {
           </AlertDialogContent>
         </AlertDialog>
       )}
+
+      <Dialog open={trustOpen} onOpenChange={(o) => !trusting && setTrustOpen(o)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>এই ডিভাইসকে ৩০ দিনের জন্য মনে রাখুন</DialogTitle>
+            <DialogDescription>
+              সক্রিয় ডিভাইসের তালিকায় সহজে চেনার জন্য একটি নাম দিন।
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="device-label" className="text-xs">
+              ডিভাইসের নাম
+            </Label>
+            <Input
+              id="device-label"
+              value={labelInput}
+              onChange={(e) => setLabelInput(e.target.value.slice(0, 40))}
+              placeholder="যেমন: আমার ফোন, অফিস ল্যাপটপ"
+              maxLength={40}
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !trusting) {
+                  e.preventDefault();
+                  void handleTrust();
+                }
+              }}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              খালি রাখলে স্বয়ংক্রিয় নাম ব্যবহার হবে ({getDeviceLabel()})।
+            </p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setTrustOpen(false)} disabled={trusting}>
+              বাতিল
+            </Button>
+            <Button onClick={handleTrust} disabled={trusting}>
+              {trusting ? <Loader2 className="h-4 w-4 animate-spin" /> : "নিশ্চিত করুন"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
