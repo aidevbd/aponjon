@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Lock, Phone, X, Loader2, Pencil, Reply, Search, Pin, Settings2, Home, LogOut, WifiOff, Clock3, CheckCircle2, Bell, ArrowDownToLine, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
