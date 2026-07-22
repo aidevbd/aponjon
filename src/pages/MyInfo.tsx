@@ -283,12 +283,28 @@ const MyInfo = () => {
             )}
 
 
-            <button
-              onClick={handleLogout}
-              className="mx-auto mt-8 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-            >
-              <LogOut className="h-3.5 w-3.5" /> সাইন-আউট
-            </button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button
+                  className="mx-auto mt-8 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  <LogOut className="h-3.5 w-3.5" /> সাইন-আউট
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>সাইন-আউট করবেন?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    সাইন-আউট করলে আবার তথ্য দেখতে বা এডিট করতে ভেরিফাই করতে হবে।
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>বাতিল</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleLogout}>সাইন-আউট</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
           </motion.div>
         </main>
       </div>
