@@ -41,7 +41,7 @@ const App = () => (
             মূল কন্টেন্টে যান
           </a>
           <ErrorBoundary>
-            <Suspense fallback={<RouteFallback />}>
+            <Suspense fallback={<HeirloomPageSkeleton />}>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/add" element={<AddContact />} />
