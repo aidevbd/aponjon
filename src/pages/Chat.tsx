@@ -91,14 +91,10 @@ const Chat = () => {
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [presenceMap, setPresenceMap] = useState<Record<string, { is_online: boolean; last_seen_at: string }>>({});
-  const [isOtherTyping, setIsOtherTyping] = useState(false);
   const [editingMsg, setEditingMsg] = useState<Message | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isOffline, setIsOffline] = useState(typeof navigator !== "undefined" ? !navigator.onLine : false);
-  const [queuedCount, setQueuedCount] = useState(0);
   const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
   const [contactPreviews, setContactPreviews] = useState<Record<string, ContactPreview>>({});
   const [actionMessage, setActionMessage] = useState<Message | null>(null);
@@ -110,14 +106,14 @@ const Chat = () => {
   const [editHistoryLoading, setEditHistoryLoading] = useState(false);
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastTypingRef = useRef(0);
   const recentSendAtRef = useRef(0);
   const messageListRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-  const msgUpdateTimerRef = useRef<number | null>(null);
   const autoSelectedRef = useRef(false);
+
+  const { isOffline, queuedCount, setQueuedCount } = useChatConnectivity(selectedContact?.id);
+  const presenceMap = useChatPresence(!!session, contacts.map(c => c.id));
+  const { isOtherTyping, emitTyping } = useChatTyping(session?.contactId, selectedContact?.id);
 
   const restoreInputFocus = useCallback((force = false) => {
     const focusInput = () => {
