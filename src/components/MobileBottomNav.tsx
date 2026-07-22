@@ -30,14 +30,14 @@ export function MobileBottomNav() {
   }, []);
 
   const isAdminDashboard = pathname.startsWith("/admin/dashboard");
-  const isPublicChat = pathname.startsWith("/chat"); // has own bottom input
   const isAuthFlow =
     pathname.startsWith("/forgot-password") ||
     pathname.startsWith("/reset-password") ||
     pathname.startsWith("/.lovable/oauth") ||
     pathname === "/admin/login";
 
-  const hidden = immersive || isPublicChat || isAuthFlow;
+  const hidden = immersive || isAuthFlow;
+
 
   // Reserve space at the bottom of the viewport
   useEffect(() => {

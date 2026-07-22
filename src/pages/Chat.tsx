@@ -75,6 +75,7 @@ const Chat = () => {
       document.body.style.overflow = prevBody;
     };
   }, []);
+
   const [session, setSession] = useState<ChatSession | null>(() => getChatSession());
   const [loginPhone, setLoginPhone] = useState("");
   const [loginSecret, setLoginSecret] = useState("");
@@ -153,6 +154,16 @@ const Chat = () => {
       window.removeEventListener("offline-chat-queue-changed", syncQueueCount as EventListener);
     };
   }, [selectedContact]);
+
+  // Mark chat as immersive (hides mobile bottom nav) only while a conversation is open
+  useEffect(() => {
+    if (selectedContact) {
+      document.body.setAttribute("data-immersive", "true");
+      return () => document.body.removeAttribute("data-immersive");
+    }
+  }, [selectedContact]);
+
+
 
   useEffect(() => {
     if (!session) return;
