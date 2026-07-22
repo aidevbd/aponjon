@@ -936,7 +936,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
                 className="lg:hidden flex items-center justify-center h-9 w-9 -ml-1 rounded-full text-foreground hover:bg-primary/10 hover:text-primary transition-colors shrink-0"
                 aria-label="ফিরে যান"
               >
-                <ArrowLeft className="h-5 w-5" />
+                <ChevronLeft className="h-5 w-5" />
               </button>
               <div className="relative shrink-0">
                 {selectedUser.photo_url ? (
