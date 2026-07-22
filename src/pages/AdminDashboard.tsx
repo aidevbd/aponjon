@@ -351,15 +351,9 @@ const AdminDashboard = () => {
               </>
             )}
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-[13px] text-[hsl(var(--heirloom-ink-soft))] transition-colors hover:text-destructive"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">লগআউট</span>
-          </button>
         </div>
       </header>
+
 
 
       {/* Tab-Based Content */}
