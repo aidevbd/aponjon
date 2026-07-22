@@ -17,7 +17,7 @@ import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
 import { CategoryIcon } from "@/lib/categoryIcons";
 import { updateVerifiedContact, updateContactViaOtpSession } from "@/lib/store";
 import { getMeSession, clearMeSession, updateMeContactSnapshot } from "@/lib/userSession";
-import { getChatSession, clearChatSession } from "@/lib/chatSession";
+import { getChatSession, clearChatSession, createChatSession } from "@/lib/chatSession";
 import { toast } from "sonner";
 
 /**
