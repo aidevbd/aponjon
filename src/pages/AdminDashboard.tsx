@@ -314,6 +314,7 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = async () => {
+    setShowLogoutConfirm(false);
     await logAdminActivity("logout", "এডমিন লগআউট করেছেন");
     await adminLogout(); navigate("/admin"); toast.info("লগআউট সফল");
   };
