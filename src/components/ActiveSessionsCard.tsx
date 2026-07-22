@@ -9,7 +9,7 @@ import {
 import { toast } from "sonner";
 import {
   getChatSession, clearChatSession, listChatSessions, revokeChatSession,
-  revokeAllOtherChatSessions, revokeAllChatSessions,
+  revokeAllOtherChatSessions, revokeAllChatSessions, trustCurrentChatSession,
   type ActiveChatSession,
 } from "@/lib/chatSession";
 
