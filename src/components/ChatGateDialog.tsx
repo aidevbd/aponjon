@@ -48,13 +48,13 @@ export function ChatGateDialog({ open, onClose }: ChatGateDialogProps) {
             onClick={(e) => e.stopPropagation()}
             className="heirloom-dialog relative w-full max-w-[22.5rem] rounded-sm border p-5 shadow-xl sm:max-w-md sm:p-8"
           >
-            <div aria-hidden className="absolute inset-0 rounded-sm bg-[hsl(var(--heirloom-paper))]" />
+            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-sm bg-[hsl(var(--heirloom-paper))]" />
 
             {/* Corner ornaments */}
-            <div aria-hidden className="heirloom-corner absolute left-0 top-0 h-8 w-8 border-l-2 border-t-2 rounded-tl-sm" />
-            <div aria-hidden className="heirloom-corner absolute right-0 top-0 h-8 w-8 border-r-2 border-t-2 rounded-tr-sm" />
-            <div aria-hidden className="heirloom-corner absolute bottom-0 left-0 h-8 w-8 border-b-2 border-l-2 rounded-bl-sm" />
-            <div aria-hidden className="heirloom-corner absolute bottom-0 right-0 h-8 w-8 border-b-2 border-r-2 rounded-br-sm" />
+            <div aria-hidden className="heirloom-corner pointer-events-none absolute left-0 top-0 h-8 w-8 border-l-2 border-t-2 rounded-tl-sm" />
+            <div aria-hidden className="heirloom-corner pointer-events-none absolute right-0 top-0 h-8 w-8 border-r-2 border-t-2 rounded-tr-sm" />
+            <div aria-hidden className="heirloom-corner pointer-events-none absolute bottom-0 left-0 h-8 w-8 border-b-2 border-l-2 rounded-bl-sm" />
+            <div aria-hidden className="heirloom-corner pointer-events-none absolute bottom-0 right-0 h-8 w-8 border-b-2 border-r-2 rounded-br-sm" />
 
             <button
               type="button"
