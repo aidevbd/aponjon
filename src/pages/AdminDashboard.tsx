@@ -49,6 +49,10 @@ const AdminDashboard = () => {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterBloodGroup, setFilterBloodGroup] = useState("all");
   
+  const editUid = useId();
+  const addUid = useId();
+  const eid = (k: string) => `${editUid}-${k}`;
+  const aid = (k: string) => `${addUid}-${k}`;
   const [editingContact, setEditingContact] = useState<ContactRow | null>(null);
   const [editForm, setEditForm] = useState<Partial<ContactRow>>({});
   const [editPhones, setEditPhones] = useState<PhoneEntry[]>([{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }]);
