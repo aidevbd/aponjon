@@ -44,6 +44,8 @@ const MyInfo = () => {
 
   const [chatSession, setChatSession] = useState(getChatSession);
   const [openingChat, setOpeningChat] = useState(false);
+  const uid = useId();
+  const fid = (k: string) => `${uid}-${k}`;
   const hasChat = !!chatSession;
   const isOtpAuth = session?.auth.type === "otp";
   const canBootstrapChat = session?.auth.type === "secret";
