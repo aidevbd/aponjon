@@ -47,6 +47,8 @@ export function ActiveSessionsCard() {
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [trusting, setTrusting] = useState(false);
+  const [trustOpen, setTrustOpen] = useState(false);
+  const [labelInput, setLabelInput] = useState("");
 
   const load = async () => {
     if (!session) return;
@@ -63,14 +65,21 @@ export function ActiveSessionsCard() {
 
   useEffect(() => { void load(); /* eslint-disable-next-line */ }, []);
 
+  const openTrustDialog = () => {
+    const current = rows?.find((r) => r.is_current);
+    setLabelInput(current?.device_label || getDeviceLabel());
+    setTrustOpen(true);
+  };
+
   const handleTrust = async () => {
     if (!session) return;
     setTrusting(true);
     try {
-      const exp = await trustCurrentChatSession(session.token);
+      const exp = await trustCurrentChatSession(session.token, labelInput.trim() || undefined);
       if (exp) {
         toast.success("এই ডিভাইস ৩০ দিনের জন্য মনে রাখা হলো");
         setSession(getChatSession());
+        setTrustOpen(false);
         await load();
       } else {
         toast.error("সম্ভব হয়নি, আবার চেষ্টা করুন");
@@ -79,6 +88,8 @@ export function ActiveSessionsCard() {
       setTrusting(false);
     }
   };
+
+
 
 
   if (!session) {
