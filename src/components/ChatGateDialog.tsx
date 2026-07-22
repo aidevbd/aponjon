@@ -41,9 +41,9 @@ export function ChatGateDialog({ open, onClose }: ChatGateDialogProps) {
           aria-labelledby="chat-gate-title"
         >
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.96 }}
+            initial={{ y: 20, scale: 0.96 }}
+            animate={{ y: 0, scale: 1 }}
+            exit={{ y: 20, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 260, damping: 24 }}
             onClick={(e) => e.stopPropagation()}
             className="heirloom-dialog relative w-full max-w-[22.5rem] rounded-sm border p-5 shadow-xl sm:max-w-md sm:p-8"
