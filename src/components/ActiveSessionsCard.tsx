@@ -228,14 +228,22 @@ export function ActiveSessionsCard() {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>এই ডিভাইস সাইন-আউট করবেন?</AlertDialogTitle>
-                        <AlertDialogDescription>
+                        <div className="mx-auto mb-1 flex h-11 w-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                          <LogOut className="h-5 w-5" />
+                        </div>
+                        <AlertDialogTitle className="text-center">এই ডিভাইস সাইন-আউট করবেন?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-center">
                           "{r.device_label || "অজানা ডিভাইস"}" থেকে তৎক্ষণাৎ সাইন-আউট হবে। আবার ঢুকতে সিক্রেট কোড দিতে হবে।
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>বাতিল</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleRevoke(r.id)}>সাইন-আউট</AlertDialogAction>
+                        <AlertDialogAction
+                          onClick={() => handleRevoke(r.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          সাইন-আউট
+                        </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
