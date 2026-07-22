@@ -83,7 +83,7 @@ export default function OAuthConsent() {
   // Shared heirloom paper shell
   const Shell = ({ children }: { children: React.ReactNode }) => (
     <div className="flex min-h-app flex-col bg-[hsl(var(--heirloom-bg))]">
-      <main className="relative flex flex-1 items-center justify-center px-4 py-6 sm:px-6 sm:py-12">
+      <main id="main-content" className="relative flex flex-1 items-center justify-center px-4 py-6 sm:px-6 sm:py-12">
         <div className="mx-auto w-full max-w-lg">
           <motion.article
             initial={{ opacity: 0, y: 20 }}

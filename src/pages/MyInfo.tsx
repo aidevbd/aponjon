@@ -144,7 +144,7 @@ const MyInfo = () => {
     return (
       <div className="flex min-h-app flex-col bg-background">
         <Header />
-        <main className="relative flex-1 px-4 py-6 sm:px-6 sm:py-8">
+        <main id="main-content" className="relative flex-1 px-4 py-6 sm:px-6 sm:py-8">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -327,7 +327,7 @@ const MyInfo = () => {
   return (
     <div className="flex min-h-app flex-col bg-background">
       <Header />
-      <main className="relative flex-1 px-4 py-6 sm:px-6 sm:py-8">
+      <main id="main-content" className="relative flex-1 px-4 py-6 sm:px-6 sm:py-8">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}

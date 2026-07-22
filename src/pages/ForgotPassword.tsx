@@ -35,7 +35,7 @@ const ForgotPassword = () => {
     <div className="flex min-h-app flex-col bg-[hsl(var(--heirloom-bg))]">
       <Header />
 
-      <main className="relative flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-10">
+      <main id="main-content" className="relative flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-10">
         <div className="mx-auto w-full max-w-2xl lg:max-w-3xl">
           <motion.article
             initial={{ opacity: 0, y: 20 }}
