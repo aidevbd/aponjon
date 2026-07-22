@@ -1,5 +1,5 @@
 import { Heart, ChevronLeft, MessageCircle } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGlobalChatNotifier } from "@/hooks/useGlobalChatNotifier";
 
@@ -7,11 +7,22 @@ import { useGlobalChatNotifier } from "@/hooks/useGlobalChatNotifier";
 export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isAdmin = location.pathname.startsWith("/admin");
+  const isAdminLogin = location.pathname === "/admin" || location.pathname.startsWith("/admin/login");
+  const isAdminDashboard = location.pathname.startsWith("/admin/dashboard");
   const isRoot = location.pathname === "/";
   const isChat = location.pathname.startsWith("/chat");
   const { totalUnread, hasSession } = useGlobalChatNotifier();
-  const showChatIcon = !isAdmin && !isChat && hasSession;
+
+  // Where should the messenger icon take us?
+  const adminOnChatTab = isAdminDashboard && searchParams.get("tab") === "chat";
+  const chatHref = isAdmin ? "/admin/dashboard?tab=chat" : "/chat";
+  const showChatIcon =
+    !isChat &&
+    !adminOnChatTab &&
+    !isAdminLogin &&
+    (isAdmin ? isAdminDashboard : hasSession);
 
   const handleBack = () => {
     if (window.history.length > 1) navigate(-1);
