@@ -75,7 +75,7 @@ const Chat = () => {
       document.body.style.overflow = prevBody;
     };
   }, []);
-  const [session, setSession] = useState<ChatSession | null>(null);
+  const [session, setSession] = useState<ChatSession | null>(() => getChatSession());
   const [loginPhone, setLoginPhone] = useState("");
   const [loginSecret, setLoginSecret] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
@@ -134,11 +134,6 @@ const Chat = () => {
       focusInput();
       window.setTimeout(focusInput, 40);
     });
-  }, []);
-
-  useEffect(() => {
-    const existing = getChatSession();
-    if (existing) setSession(existing);
   }, []);
 
   useEffect(() => {
