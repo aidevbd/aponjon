@@ -82,13 +82,13 @@ export function Header() {
 
           {showChatIcon && (
             <Link
-              to="/chat"
+              to={chatHref}
               aria-label={totalUnread > 0 ? `চ্যাটে ${totalUnread}টি নতুন মেসেজ` : "চ্যাট খুলুন"}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full text-foreground hover:bg-accent active:scale-95 transition"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-foreground hover:bg-accent active:scale-95 transition touch-manipulation"
             >
               <MessageCircle className="h-5 w-5" />
               <AnimatePresence>
-                {totalUnread > 0 && (
+                {!isAdmin && totalUnread > 0 && (
                   <motion.span
                     key={totalUnread}
                     initial={{ scale: 0.4, opacity: 0 }}
