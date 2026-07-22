@@ -25,8 +25,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  enqueueOfflineMessage, flushOfflineQueue, getOfflineQueueCountForContact,
-  type QueuedChatMessage,
+  enqueueOfflineMessage, getOfflineQueueCountForContact,
 } from "@/lib/offlineChatQueue";
 import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
 import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
@@ -34,12 +33,16 @@ import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
 import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
 import { reconcileMessages } from "@/lib/chatMessageUtils";
-import { notifyNewMessage } from "@/lib/notificationPrefs";
 import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
 import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
 import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
 import { useChatSessionKeepalive } from "@/hooks/useChatSessionKeepalive";
+import { useChatConnectivity } from "@/hooks/useChatConnectivity";
+import { useChatPresence } from "@/hooks/useChatPresence";
+import { useChatTyping } from "@/hooks/useChatTyping";
+import { useChatRealtime } from "@/hooks/useChatRealtime";
+import { useOfflineQueueFlusher } from "@/hooks/useOfflineQueueFlusher";
 import { ChatContactList } from "@/components/chat/ChatContactList";
 import { ChatMessageList } from "@/components/chat/ChatMessageList";
 import { ChatComposer } from "@/components/chat/ChatComposer";
@@ -88,14 +91,10 @@ const Chat = () => {
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [presenceMap, setPresenceMap] = useState<Record<string, { is_online: boolean; last_seen_at: string }>>({});
-  const [isOtherTyping, setIsOtherTyping] = useState(false);
   const [editingMsg, setEditingMsg] = useState<Message | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isOffline, setIsOffline] = useState(typeof navigator !== "undefined" ? !navigator.onLine : false);
-  const [queuedCount, setQueuedCount] = useState(0);
   const [failedMessages, setFailedMessages] = useState<FailedChatMessage[]>([]);
   const [contactPreviews, setContactPreviews] = useState<Record<string, ContactPreview>>({});
   const [actionMessage, setActionMessage] = useState<Message | null>(null);
@@ -107,14 +106,14 @@ const Chat = () => {
   const [editHistoryLoading, setEditHistoryLoading] = useState(false);
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastTypingRef = useRef(0);
   const recentSendAtRef = useRef(0);
   const messageListRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-  const msgUpdateTimerRef = useRef<number | null>(null);
   const autoSelectedRef = useRef(false);
+
+  const { isOffline, queuedCount, setQueuedCount } = useChatConnectivity(selectedContact?.id);
+  const presenceMap = useChatPresence(!!session, contacts.map(c => c.id));
+  const { isOtherTyping, emitTyping } = useChatTyping(session?.contactId, selectedContact?.id);
 
   const restoreInputFocus = useCallback((force = false) => {
     const focusInput = () => {
@@ -131,21 +130,6 @@ const Chat = () => {
       window.setTimeout(focusInput, 40);
     });
   }, []);
-
-  useEffect(() => {
-    const syncConnectivity = () => setIsOffline(!navigator.onLine);
-    const syncQueueCount = () => setQueuedCount(selectedContact ? getOfflineQueueCountForContact(selectedContact.id) : 0);
-    syncConnectivity();
-    syncQueueCount();
-    window.addEventListener("online", syncConnectivity);
-    window.addEventListener("offline", syncConnectivity);
-    window.addEventListener("offline-chat-queue-changed", syncQueueCount as EventListener);
-    return () => {
-      window.removeEventListener("online", syncConnectivity);
-      window.removeEventListener("offline", syncConnectivity);
-      window.removeEventListener("offline-chat-queue-changed", syncQueueCount as EventListener);
-    };
-  }, [selectedContact]);
 
   useEffect(() => {
     if (selectedContact) {
@@ -166,104 +150,16 @@ const Chat = () => {
     return () => clearInterval(heartbeat);
   }, [session]);
 
-  useEffect(() => {
-    if (!session || contacts.length === 0) return;
-    const ids = contacts.map(c => c.id);
-    const fetchPresence = async () => {
-      try {
-        const { data } = await supabase.rpc("get_user_presence", { p_contact_ids: ids });
-        if (data) {
-          const map: Record<string, { is_online: boolean; last_seen_at: string }> = {};
-          (data as any[]).forEach(p => { map[p.contact_id] = { is_online: p.is_online, last_seen_at: p.last_seen_at }; });
-          setPresenceMap(map);
-        }
-      } catch {}
-    };
-    fetchPresence();
-    const interval = setInterval(fetchPresence, 20000);
-    const idSet = new Set(ids);
-    const channel = supabase
-      .channel(`presence-user-${session.contactId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "user_presence" }, (payload) => {
-        const row: any = payload.new || payload.old;
-        if (!row || !idSet.has(row.contact_id)) return;
-        setPresenceMap(prev => ({ ...prev, [row.contact_id]: { is_online: !!row.is_online, last_seen_at: row.last_seen_at } }));
-      })
-      .subscribe();
-    return () => { clearInterval(interval); supabase.removeChannel(channel); };
-  }, [session, contacts]);
-
-  useEffect(() => {
-    if (!session || !selectedContact) return;
-    const sortedIds = [session.contactId, selectedContact.id].sort();
-    const topic = `msg:${sortedIds[0]}:${sortedIds[1]}`;
-    const channel = supabase
-      .channel(topic, { config: { private: false } })
-      .on("broadcast", { event: "new_message" }, (payload) => {
-        const data = payload.payload as { id: string; sender_id: string; receiver_id: string };
-        if (!data) return;
-        if (selectedContact && (
-          (data.sender_id === selectedContact.id && data.receiver_id === session.contactId) ||
-          (data.sender_id === session.contactId && data.receiver_id === selectedContact.id)
-        )) {
-          void loadMessages(selectedContact);
-        }
-        if (data.receiver_id === session.contactId && data.sender_id !== session.contactId) {
-          notifyNewMessage();
-        }
-        if (data.receiver_id === session.contactId && data.sender_id !== selectedContact?.id) {
-          setUnreadMap((prev) => ({ ...prev, [data.sender_id]: (prev[data.sender_id] || 0) + 1 }));
-        }
-      })
-      .on("broadcast", { event: "msg_update" }, (payload) => {
-        const data = payload.payload as { id: string; sender_id: string; receiver_id: string; event: string };
-        if (!data || !selectedContact) return;
-        const inThread =
-          (data.sender_id === selectedContact.id && data.receiver_id === session.contactId) ||
-          (data.sender_id === session.contactId && data.receiver_id === selectedContact.id);
-        if (!inThread) return;
-        if (msgUpdateTimerRef.current) return;
-        msgUpdateTimerRef.current = window.setTimeout(() => {
-          msgUpdateTimerRef.current = null;
-          void loadMessages(selectedContact);
-        }, 200);
-      })
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-      if (msgUpdateTimerRef.current) { clearTimeout(msgUpdateTimerRef.current); msgUpdateTimerRef.current = null; }
-    };
-  }, [session, selectedContact]);
-
-  useEffect(() => {
-    if (!session || !selectedContact) { setIsOtherTyping(false); typingChannelRef.current = null; return; }
-    const channelName = `typing:${[session.contactId, selectedContact.id].sort().join(":")}`;
-    const channel = supabase.channel(channelName)
-      .on("broadcast", { event: "typing" }, (payload) => {
-        if (payload.payload?.sender_id === selectedContact.id) {
-          setIsOtherTyping(true);
-          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-          typingTimeoutRef.current = setTimeout(() => setIsOtherTyping(false), 3000);
-        }
-      })
-      .subscribe();
-    typingChannelRef.current = channel;
-    return () => {
-      typingChannelRef.current = null;
-      supabase.removeChannel(channel);
-      setIsOtherTyping(false);
-    };
-  }, [session, selectedContact]);
-
-  const emitTyping = () => {
-    if (!session || !selectedContact) return;
-    const now = Date.now();
-    if (now - lastTypingRef.current < 2000) return;
-    lastTypingRef.current = now;
-    const channel = typingChannelRef.current;
-    if (!channel) return;
-    void channel.send({ type: "broadcast", event: "typing", payload: { sender_id: session.contactId } });
-  };
+  useChatRealtime({
+    myContactId: session?.contactId,
+    otherContactId: selectedContact?.id,
+    onThreadEvent: useCallback(() => {
+      if (selectedContact) void loadMessages(selectedContact);
+    }, [selectedContact]),
+    onIncomingFromOther: useCallback((senderId: string) => {
+      setUnreadMap((prev) => ({ ...prev, [senderId]: (prev[senderId] || 0) + 1 }));
+    }, []),
+  });
 
   const { newBelowCount, scrollToBottom, resetForNewThread } = useSmartAutoScroll(
     messageListRef,
@@ -399,19 +295,12 @@ const Chat = () => {
     }
   }, [contacts, selectedContact, handleSelectContact]);
 
-  useEffect(() => {
-    if (!session) return;
-    const deliverQueued = async () => {
-      const result = await flushOfflineQueue((item: QueuedChatMessage) => {
-        if (selectedContact?.id === item.receiverId) void loadMessages(selectedContact);
-      });
-      if (result.sent > 0) toast.success(`${result.sent}টি pending মেসেজ পাঠানো হয়েছে`);
-      if (selectedContact) setQueuedCount(getOfflineQueueCountForContact(selectedContact.id));
-    };
-    if (navigator.onLine) void deliverQueued();
-    window.addEventListener("online", deliverQueued);
-    return () => window.removeEventListener("online", deliverQueued);
-  }, [session, selectedContact, loadMessages]);
+  useOfflineQueueFlusher({
+    enabled: !!session,
+    selectedContactId: selectedContact?.id,
+    onDeliveredForSelected: () => { if (selectedContact) void loadMessages(selectedContact); },
+    onQueueCountChanged: setQueuedCount,
+  });
 
   useEffect(() => {
     if (failedMessages.length === 0) return;
