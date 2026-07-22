@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const SESSION_KEY = "aponjon_chat_session";
 const SESSION_EXPIRY_HOURS = 24;
+const SESSION_EVENT = "aponjon-chat-session-changed";
 
 // Use sessionStorage so the chat session is scoped to the tab —
 // closing the tab/browser invalidates the session (defence-in-depth for shared devices).
@@ -41,13 +42,17 @@ export function getChatSession(): ChatSession | null {
 export function saveChatSession(session: ChatSession) {
   if (!sessionStore) return;
   sessionStore.setItem(SESSION_KEY, JSON.stringify(session));
+  window.dispatchEvent(new Event(SESSION_EVENT));
 }
 
 export function clearChatSession() {
   if (!sessionStore) return;
   sessionStore.removeItem(SESSION_KEY);
   try { localStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
+  window.dispatchEvent(new Event(SESSION_EVENT));
 }
+
+export { SESSION_EVENT as CHAT_SESSION_CHANGED_EVENT };
 
 export async function createChatSession(phone: string, secretCode: string): Promise<ChatSession | null> {
   const { data, error } = await supabase.rpc("create_chat_session", {
