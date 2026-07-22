@@ -121,6 +121,7 @@ const AdminDashboard = () => {
     const checkAuth = async () => {
       const session = await getSession();
       if (!session) { navigate("/admin"); return; }
+      setAdminEmail(session.user?.email || "");
       await loadContacts();
       await loadUnreadCount();
       logAdminActivity("login", "এডমিন ড্যাশবোর্ডে প্রবেশ করেছেন");
