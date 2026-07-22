@@ -6,6 +6,7 @@ import {
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useGlobalChatNotifier } from "@/hooks/useGlobalChatNotifier";
+import { getMeSession } from "@/lib/userSession";
 
 /**
  * Native-app-style bottom tab bar shown on mobile across the app.
@@ -78,10 +79,11 @@ export function MobileBottomNav() {
       { key: "settings", to: "/admin/dashboard?tab=settings", label: "সেটিংস", icon: Settings, isActive: currentTab === "settings" },
     ];
   } else {
+    const hasMe = !!getMeSession();
     tabs = [
       { key: "home", to: "/", label: "হোম", icon: Home, exact: true },
       { key: "add", to: "/add", label: "যোগ", icon: UserPlus },
-      { key: "access", to: "/access", label: "আমার তথ্য", icon: ShieldCheck },
+      { key: "access", to: hasMe ? "/me" : "/verify?next=view", label: "আমার তথ্য", icon: ShieldCheck },
       ...(hasSession
         ? [{ key: "chat", to: "/chat", label: "চ্যাট", icon: MessageCircle, badge: totalUnread } as Tab]
         : []),

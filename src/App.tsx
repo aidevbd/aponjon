@@ -2,10 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import AddContact from "./pages/AddContact";
-import AccessData from "./pages/AccessData";
 import Verify from "./pages/Verify";
 import MyInfo from "./pages/MyInfo";
 import AdminLogin from "./pages/AdminLogin";
@@ -30,7 +29,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/add" element={<AddContact />} />
-          <Route path="/access" element={<AccessData />} />
+          <Route path="/access" element={<Navigate to="/verify?next=view" replace />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/me" element={<MyInfo />} />
           <Route path="/admin" element={<AdminLogin />} />

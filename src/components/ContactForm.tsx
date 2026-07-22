@@ -12,6 +12,7 @@ import { saveContact } from "@/lib/store";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhoneWithMessengers, PhoneEntry, deriveMessengers } from "@/components/PhoneWithMessengers";
 import { createChatSession } from "@/lib/chatSession";
+import { saveMeSession } from "@/lib/userSession";
 import { toast } from "sonner";
 
 export function ContactForm() {
@@ -90,14 +91,37 @@ export function ContactForm() {
       });
 
       // Auto-create a chat session if the user set a secret code so messaging
-      // works with a single tap on the success screen.
+      // works with a single tap on the success screen. Also seed MeSession so
+      // /me works without re-verification.
       if (form.secretCode && form.secretCode.trim()) {
         try {
           const session = await createChatSession(primaryPhone, form.secretCode.trim());
           if (session) setChatReady(true);
         } catch {
-          // Non-fatal: user can still sign in via /access
+          // Non-fatal
         }
+        // Seed unified MeSession for view/edit on /me
+        try {
+          saveMeSession(
+            { type: "secret", phone: primaryPhone, secretCode: form.secretCode.trim() },
+            {
+              name: form.name,
+              phone: primaryPhone,
+              whatsapp: messengers.whatsapp,
+              imo: messengers.imo,
+              telegram: messengers.telegram,
+              facebook: form.facebook,
+              email: form.email,
+              category: form.category || "অন্যান্য",
+              custom_category: form.customCategory,
+              note: form.note,
+              address: form.address,
+              blood_group: form.bloodGroup,
+              birthday: form.birthday,
+              photo_url: form.photoUrl,
+            },
+          );
+        } catch { /* non-fatal */ }
       }
 
       setSubmitted(true);
@@ -119,7 +143,7 @@ export function ContactForm() {
       return;
     }
     if (!savedProfile || !form.secretCode.trim()) {
-      navigate("/access");
+      navigate("/me");
       return;
     }
     setChatLoading(true);
@@ -130,7 +154,7 @@ export function ContactForm() {
         navigate("/chat");
       } else {
         toast.error("চ্যাট সেশন তৈরি করা যায়নি। 'আমার তথ্য' থেকে চেষ্টা করুন।");
-        navigate("/access");
+        navigate("/me");
       }
     } catch {
       toast.error("চ্যাট সেশন তৈরি করা যায়নি। আবার চেষ্টা করুন।");
@@ -219,7 +243,7 @@ export function ContactForm() {
           </Button>
 
           <Button
-            onClick={() => navigate("/access")}
+            onClick={() => navigate("/me")}
             variant="heirloomGhost"
             size="lg"
             className="w-full gap-2 h-12 rounded-sm"
