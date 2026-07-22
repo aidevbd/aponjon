@@ -266,6 +266,48 @@ export function ActiveSessionsCard() {
           </AlertDialogContent>
         </AlertDialog>
       )}
+
+      <Dialog open={trustOpen} onOpenChange={(o) => !trusting && setTrustOpen(o)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>এই ডিভাইসকে ৩০ দিনের জন্য মনে রাখুন</DialogTitle>
+            <DialogDescription>
+              সক্রিয় ডিভাইসের তালিকায় সহজে চেনার জন্য একটি নাম দিন।
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="device-label" className="text-xs">
+              ডিভাইসের নাম
+            </Label>
+            <Input
+              id="device-label"
+              value={labelInput}
+              onChange={(e) => setLabelInput(e.target.value.slice(0, 40))}
+              placeholder="যেমন: আমার ফোন, অফিস ল্যাপটপ"
+              maxLength={40}
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !trusting) {
+                  e.preventDefault();
+                  void handleTrust();
+                }
+              }}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              খালি রাখলে স্বয়ংক্রিয় নাম ব্যবহার হবে ({getDeviceLabel()})।
+            </p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setTrustOpen(false)} disabled={trusting}>
+              বাতিল
+            </Button>
+            <Button onClick={handleTrust} disabled={trusting}>
+              {trusting ? <Loader2 className="h-4 w-4 animate-spin" /> : "নিশ্চিত করুন"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
