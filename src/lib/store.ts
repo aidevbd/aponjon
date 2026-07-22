@@ -219,7 +219,7 @@ export async function updateContactViaOtpSession(
     p_address: updates.address ?? undefined,
     p_blood_group: updates.blood_group ?? undefined,
     p_birthday: updates.birthday ?? undefined,
-    p_photo_url: updates.photo_url ?? undefined,
+    p_photo_url: updates.photo_url === null ? "" : updates.photo_url ?? undefined,
   });
   if (error) throw error;
   return !!data;
