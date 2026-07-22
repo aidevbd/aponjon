@@ -36,10 +36,11 @@ function isMobileLabel(label: string | null) {
  */
 export function ActiveSessionsCard() {
   const navigate = useNavigate();
-  const [session] = useState(() => getChatSession());
+  const [session, setSession] = useState(() => getChatSession());
   const [rows, setRows] = useState<ActiveChatSession[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [trusting, setTrusting] = useState(false);
 
   const load = async () => {
     if (!session) return;
@@ -55,6 +56,24 @@ export function ActiveSessionsCard() {
   };
 
   useEffect(() => { void load(); /* eslint-disable-next-line */ }, []);
+
+  const handleTrust = async () => {
+    if (!session) return;
+    setTrusting(true);
+    try {
+      const exp = await trustCurrentChatSession(session.token);
+      if (exp) {
+        toast.success("এই ডিভাইস ৩০ দিনের জন্য মনে রাখা হলো");
+        setSession(getChatSession());
+        await load();
+      } else {
+        toast.error("সম্ভব হয়নি, আবার চেষ্টা করুন");
+      }
+    } finally {
+      setTrusting(false);
+    }
+  };
+
 
   if (!session) {
     return (
