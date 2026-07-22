@@ -771,6 +771,7 @@ export type Database = {
       }
       toggle_pin_message: { Args: { p_message_id: string }; Returns: boolean }
       touch_chat_session: { Args: { p_token: string }; Returns: Json }
+      trust_current_chat_session: { Args: { p_token: string }; Returns: Json }
       unsend_message: {
         Args: { p_message_id: string; p_token: string }
         Returns: boolean

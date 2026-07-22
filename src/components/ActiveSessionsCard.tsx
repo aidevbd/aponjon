@@ -9,7 +9,7 @@ import {
 import { toast } from "sonner";
 import {
   getChatSession, clearChatSession, listChatSessions, revokeChatSession,
-  revokeAllOtherChatSessions, revokeAllChatSessions,
+  revokeAllOtherChatSessions, revokeAllChatSessions, trustCurrentChatSession,
   type ActiveChatSession,
 } from "@/lib/chatSession";
 
@@ -36,10 +36,11 @@ function isMobileLabel(label: string | null) {
  */
 export function ActiveSessionsCard() {
   const navigate = useNavigate();
-  const [session] = useState(() => getChatSession());
+  const [session, setSession] = useState(() => getChatSession());
   const [rows, setRows] = useState<ActiveChatSession[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [trusting, setTrusting] = useState(false);
 
   const load = async () => {
     if (!session) return;
@@ -55,6 +56,24 @@ export function ActiveSessionsCard() {
   };
 
   useEffect(() => { void load(); /* eslint-disable-next-line */ }, []);
+
+  const handleTrust = async () => {
+    if (!session) return;
+    setTrusting(true);
+    try {
+      const exp = await trustCurrentChatSession(session.token);
+      if (exp) {
+        toast.success("এই ডিভাইস ৩০ দিনের জন্য মনে রাখা হলো");
+        setSession(getChatSession());
+        await load();
+      } else {
+        toast.error("সম্ভব হয়নি, আবার চেষ্টা করুন");
+      }
+    } finally {
+      setTrusting(false);
+    }
+  };
+
 
   if (!session) {
     return (
@@ -113,6 +132,27 @@ export function ActiveSessionsCard() {
           <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
         </button>
       </div>
+
+      {session && !session.trusted && (
+        <div className="mb-3 flex flex-col gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-2">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <p className="text-xs leading-relaxed text-foreground/80">
+              এই ডিভাইসে সাইন-ইন থাকা শেষ হবে ২৪ ঘণ্টায়। চাইলে ৩০ দিনের জন্য মনে রাখতে পারেন।
+            </p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={trusting}
+            onClick={handleTrust}
+            className="shrink-0 text-xs"
+          >
+            {trusting ? <Loader2 className="h-3 w-3 animate-spin" /> : "৩০ দিন মনে রাখুন"}
+          </Button>
+        </div>
+      )}
+
 
       {loading && !rows ? (
         <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
