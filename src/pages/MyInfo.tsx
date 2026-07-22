@@ -3,10 +3,9 @@ import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
  Pencil, MessageCircle, LogOut, Phone, Mail, MapPin, Droplets, Calendar,
- Send,
-
   Facebook, Save, X, ShieldAlert, Copy, Video, Send, ExternalLink, FileText,
 } from "lucide-react";
+
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
