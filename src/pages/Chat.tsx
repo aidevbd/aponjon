@@ -1,41 +1,49 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Lock, Phone, X, Loader2, Pencil, Reply, Search, Pin, Settings2, Home, LogOut, WifiOff, Clock3, CheckCircle2, Bell, ArrowDownToLine, RefreshCw } from "lucide-react";
+import {
+  MessageCircle, ArrowLeft, Loader2, Search, Pin, Settings2, Home, LogOut,
+  WifiOff, Clock3, Bell, ArrowDownToLine, RefreshCw, X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   getChatSession, createChatSession, getChatContacts,
   sendMessage, getMessages, getUnreadCounts, uploadChatImage,
   clearChatSession, editMessage,
   reactToMessage, unsendMessage, removeMessageForMe, getMessageEditHistory,
-  signMessagesImages, getSignedChatImageUrl,
+  signMessagesImages,
   type ChatSession,
 } from "@/lib/chatSession";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Header } from "@/components/Header";
-import { EmojiPicker } from "@/components/EmojiPicker";
-import { enqueueOfflineMessage, flushOfflineQueue, getOfflineQueueCountForContact, type QueuedChatMessage } from "@/lib/offlineChatQueue";
-import { MessageBubble } from "@/components/chat/MessageBubble";
+import {
+  enqueueOfflineMessage, flushOfflineQueue, getOfflineQueueCountForContact,
+  type QueuedChatMessage,
+} from "@/lib/offlineChatQueue";
 import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
 import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
 import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
-import { ChatMessagesSkeleton } from "@/components/chat/ChatMessagesSkeleton";
 import { reconcileMessages } from "@/lib/chatMessageUtils";
 import { notifyNewMessage } from "@/lib/notificationPrefs";
 import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
 import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
-import { AutoResizeTextarea } from "@/components/chat/AutoResizeTextarea";
 import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
 import { useChatSessionKeepalive } from "@/hooks/useChatSessionKeepalive";
-
+import { ChatContactList } from "@/components/chat/ChatContactList";
+import { ChatMessageList } from "@/components/chat/ChatMessageList";
+import { ChatComposer } from "@/components/chat/ChatComposer";
+import { formatLastSeen } from "@/lib/chatFormatters";
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
 type Message = {
@@ -43,21 +51,16 @@ type Message = {
   image_url: string | null; is_read: boolean; created_at: string;
   delivered_at?: string | null;
   read_at?: string | null;
-
   edited_at?: string | null; original_content?: string | null;
   reply_to_id?: string | null; reply_content?: string | null; reply_sender_id?: string | null;
   is_pinned?: boolean;
   unsent_at?: string | null;
   has_edit_history?: boolean;
   reactions?: { emoji: string; reactor_id: string }[];
-  // Client-only: optimistic pending flag (message in-flight)
   pending?: boolean;
 };
 
-type ContactPreview = {
-  preview: string;
-  time: string | null;
-};
+type ContactPreview = { preview: string; time: string | null };
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -65,8 +68,6 @@ const Chat = () => {
   const isTouch = useIsTouchDevice();
   useChatSessionKeepalive();
 
-  // Lock body scroll while chat page is open so the fixed viewport never
-  // shows blank space when mobile browser chrome hides/shows.
   useEffect(() => {
     const prevHtml = document.documentElement.style.overflow;
     const prevBody = document.body.style.overflow;
@@ -79,10 +80,6 @@ const Chat = () => {
   }, []);
 
   const [session, setSession] = useState<ChatSession | null>(() => getChatSession());
-  const [loginPhone, setLoginPhone] = useState("");
-  const [loginSecret, setLoginSecret] = useState("");
-  const [loginLoading, setLoginLoading] = useState(false);
-
   const [contacts, setContacts] = useState<ChatContact[]>([]);
   const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
   const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null);
@@ -92,7 +89,6 @@ const Chat = () => {
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [presenceMap, setPresenceMap] = useState<Record<string, { is_online: boolean; last_seen_at: string }>>({});
-  
   const [isOtherTyping, setIsOtherTyping] = useState(false);
   const [editingMsg, setEditingMsg] = useState<Message | null>(null);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
@@ -112,15 +108,13 @@ const Chat = () => {
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   const lastTypingRef = useRef(0);
   const recentSendAtRef = useRef(0);
   const messageListRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const longPressTimeoutRef = useRef<number | null>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const msgUpdateTimerRef = useRef<number | null>(null);
+  const autoSelectedRef = useRef(false);
 
   const restoreInputFocus = useCallback((force = false) => {
     const focusInput = () => {
@@ -132,7 +126,6 @@ const Chat = () => {
         try { input.setSelectionRange(caret, caret); } catch {}
       }
     };
-
     requestAnimationFrame(() => {
       focusInput();
       window.setTimeout(focusInput, 40);
@@ -142,14 +135,11 @@ const Chat = () => {
   useEffect(() => {
     const syncConnectivity = () => setIsOffline(!navigator.onLine);
     const syncQueueCount = () => setQueuedCount(selectedContact ? getOfflineQueueCountForContact(selectedContact.id) : 0);
-
     syncConnectivity();
     syncQueueCount();
-
     window.addEventListener("online", syncConnectivity);
     window.addEventListener("offline", syncConnectivity);
     window.addEventListener("offline-chat-queue-changed", syncQueueCount as EventListener);
-
     return () => {
       window.removeEventListener("online", syncConnectivity);
       window.removeEventListener("offline", syncConnectivity);
@@ -157,15 +147,12 @@ const Chat = () => {
     };
   }, [selectedContact]);
 
-  // Mark chat as immersive (hides mobile bottom nav) only while a conversation is open
   useEffect(() => {
     if (selectedContact) {
       document.body.setAttribute("data-immersive", "true");
       return () => document.body.removeAttribute("data-immersive");
     }
   }, [selectedContact]);
-
-
 
   useEffect(() => {
     if (!session) return;
@@ -200,22 +187,14 @@ const Chat = () => {
       .on("postgres_changes", { event: "*", schema: "public", table: "user_presence" }, (payload) => {
         const row: any = payload.new || payload.old;
         if (!row || !idSet.has(row.contact_id)) return;
-        setPresenceMap(prev => ({
-          ...prev,
-          [row.contact_id]: { is_online: !!row.is_online, last_seen_at: row.last_seen_at },
-        }));
+        setPresenceMap(prev => ({ ...prev, [row.contact_id]: { is_online: !!row.is_online, last_seen_at: row.last_seen_at } }));
       })
       .subscribe();
     return () => { clearInterval(interval); supabase.removeChannel(channel); };
   }, [session, contacts]);
 
-
   useEffect(() => {
-    if (!session) return;
-    // Regular users no longer have direct SELECT on the messages table for privacy.
-    // Subscribe to a per-conversation broadcast topic emitted by send_message / send_admin_message
-    // and refetch the conversation via the secure RPC when a new message arrives.
-    if (!selectedContact) return;
+    if (!session || !selectedContact) return;
     const sortedIds = [session.contactId, selectedContact.id].sort();
     const topic = `msg:${sortedIds[0]}:${sortedIds[1]}`;
     const channel = supabase
@@ -223,7 +202,6 @@ const Chat = () => {
       .on("broadcast", { event: "new_message" }, (payload) => {
         const data = payload.payload as { id: string; sender_id: string; receiver_id: string };
         if (!data) return;
-        // Refetch messages so the user sees the new content (including any reply context)
         if (selectedContact && (
           (data.sender_id === selectedContact.id && data.receiver_id === session.contactId) ||
           (data.sender_id === session.contactId && data.receiver_id === selectedContact.id)
@@ -237,7 +215,6 @@ const Chat = () => {
           setUnreadMap((prev) => ({ ...prev, [data.sender_id]: (prev[data.sender_id] || 0) + 1 }));
         }
       })
-
       .on("broadcast", { event: "msg_update" }, (payload) => {
         const data = payload.payload as { id: string; sender_id: string; receiver_id: string; event: string };
         if (!data || !selectedContact) return;
@@ -245,7 +222,6 @@ const Chat = () => {
           (data.sender_id === selectedContact.id && data.receiver_id === session.contactId) ||
           (data.sender_id === session.contactId && data.receiver_id === selectedContact.id);
         if (!inThread) return;
-        // Coalesce bursty msg_update events (delivered/read fire once per message)
         if (msgUpdateTimerRef.current) return;
         msgUpdateTimerRef.current = window.setTimeout(() => {
           msgUpdateTimerRef.current = null;
@@ -284,7 +260,6 @@ const Chat = () => {
     const now = Date.now();
     if (now - lastTypingRef.current < 2000) return;
     lastTypingRef.current = now;
-    // Re-use the already-subscribed typing channel instead of creating a new one each keystroke.
     const channel = typingChannelRef.current;
     if (!channel) return;
     void channel.send({ type: "broadcast", event: "typing", payload: { sender_id: session.contactId } });
@@ -309,8 +284,6 @@ const Chat = () => {
     highlightTimerRef.current = window.setTimeout(() => setHighlightedMsgId(null), 1800);
   };
 
-  // When viewport height changes (e.g. keyboard opens), keep the latest message in view
-  // if the user was already near the bottom of the conversation.
   const prevViewportRef = useRef<number>(viewportHeight);
   useEffect(() => {
     const el = messageListRef.current;
@@ -326,11 +299,8 @@ const Chat = () => {
     }
   }, [viewportHeight]);
 
-  // On own-send, restore keyboard focus without losing state.
   useEffect(() => {
-    if (Date.now() - recentSendAtRef.current < 1500) {
-      restoreInputFocus(true);
-    }
+    if (Date.now() - recentSendAtRef.current < 1500) restoreInputFocus(true);
   }, [messages, restoreInputFocus]);
 
   const loadContacts = async () => {
@@ -352,13 +322,10 @@ const Chat = () => {
           try {
             const contactMessages = await getMessages(session.token, contact.id);
             const lastMessage = contactMessages[contactMessages.length - 1];
-            return [
-              contact.id,
-              {
-                preview: lastMessage?.content || (lastMessage?.image_url ? "ছবি পাঠানো হয়েছে" : "ট্যাপ করে মেসেজ করুন"),
-                time: lastMessage?.created_at || null,
-              },
-            ] as const;
+            return [contact.id, {
+              preview: lastMessage?.content || (lastMessage?.image_url ? "ছবি পাঠানো হয়েছে" : "ট্যাপ করে মেসেজ করুন"),
+              time: lastMessage?.created_at || null,
+            }] as const;
           } catch {
             return [contact.id, { preview: "ট্যাপ করে মেসেজ করুন", time: null }] as const;
           }
@@ -388,7 +355,6 @@ const Chat = () => {
       const raw = await getMessages(session.token, contact.id);
       const data = await signMessagesImages(raw, session.token).catch(() => raw);
       setMessages(prev => {
-        // Preserve optimistic pending temps whose real counterpart isn't on the server yet.
         const pendings = prev.filter(m => m.pending);
         const survivors = pendings.filter(p => !data.some(d =>
           d.sender_id === p.sender_id &&
@@ -406,9 +372,7 @@ const Chat = () => {
         },
       }));
       setUnreadMap((prev) => { const n = { ...prev }; delete n[contact.id]; return n; });
-      // Fire-and-forget: mark inbound messages as delivered so the sender sees ✓✓
       void (async () => { try { await supabase.rpc("mark_conversation_delivered", { p_token: session.token, p_other_id: contact.id } as any); } catch {} })();
-
     } catch (err) {
       console.error("[catch]", err);
       toast.error("মেসেজ লোড করতে সমস্যা");
@@ -417,33 +381,38 @@ const Chat = () => {
     }
   }, [session]);
 
+  const handleSelectContact = useCallback((contact: ChatContact) => {
+    setSelectedContact(contact);
+    setQueuedCount(getOfflineQueueCountForContact(contact.id));
+    setFailedMessages([]);
+    setMessages([]);
+    resetForNewThread();
+    loadMessages(contact);
+  }, [loadMessages, resetForNewThread]);
+
+  // P3: auto-select if there is exactly one contact (typical heirloom case)
+  useEffect(() => {
+    if (autoSelectedRef.current) return;
+    if (contacts.length === 1 && !selectedContact) {
+      autoSelectedRef.current = true;
+      handleSelectContact(contacts[0]);
+    }
+  }, [contacts, selectedContact, handleSelectContact]);
+
   useEffect(() => {
     if (!session) return;
-
     const deliverQueued = async () => {
       const result = await flushOfflineQueue((item: QueuedChatMessage) => {
-        if (selectedContact?.id === item.receiverId) {
-          void loadMessages(selectedContact);
-        }
+        if (selectedContact?.id === item.receiverId) void loadMessages(selectedContact);
       });
-
-      if (result.sent > 0) {
-        toast.success(`${result.sent}টি pending মেসেজ পাঠানো হয়েছে`);
-      }
-      if (selectedContact) {
-        setQueuedCount(getOfflineQueueCountForContact(selectedContact.id));
-      }
+      if (result.sent > 0) toast.success(`${result.sent}টি pending মেসেজ পাঠানো হয়েছে`);
+      if (selectedContact) setQueuedCount(getOfflineQueueCountForContact(selectedContact.id));
     };
-
-    if (navigator.onLine) {
-      void deliverQueued();
-    }
-
+    if (navigator.onLine) void deliverQueued();
     window.addEventListener("online", deliverQueued);
     return () => window.removeEventListener("online", deliverQueued);
   }, [session, selectedContact, loadMessages]);
 
-  // Auto-retry any failed-in-flight messages when the network comes back.
   useEffect(() => {
     if (failedMessages.length === 0) return;
     const retryAll = () => {
@@ -455,16 +424,6 @@ const Chat = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [failedMessages]);
 
-  const handleSelectContact = (contact: ChatContact) => {
-    setSelectedContact(contact);
-    setQueuedCount(getOfflineQueueCountForContact(contact.id));
-    setFailedMessages([]);
-    setMessages([]);
-    resetForNewThread();
-    loadMessages(contact);
-  };
-
-  // Consistency check: resync current thread on tab focus / online events.
   useEffect(() => {
     if (!session || !selectedContact) return;
     const resync = () => {
@@ -478,48 +437,34 @@ const Chat = () => {
     };
   }, [session, selectedContact, loadMessages]);
 
-  const handleLogin = async () => {
-    if (!loginPhone.trim() || !loginSecret.trim()) {
-      toast.error("ফোন নম্বর ও সিক্রেট কোড দিন");
-      return;
-    }
-    setLoginLoading(true);
-    try {
-      const s = await createChatSession(loginPhone, loginSecret);
-      if (s) {
-        setSession(s);
-        toast.success(`স্বাগতম, ${s.name}! 💬`);
-      } else {
-        toast.error("ফোন বা সিক্রেট কোড ভুল");
+  const sendWithRetry = async <T,>(fn: () => Promise<T>, tries = 3): Promise<T> => {
+    let lastErr: any;
+    for (let i = 0; i < tries; i++) {
+      try { return await fn(); }
+      catch (err: any) {
+        lastErr = err;
+        if (err?.message?.includes("Invalid session")) throw err;
+        if (typeof navigator !== "undefined" && !navigator.onLine) throw err;
+        if (i < tries - 1) await new Promise(r => setTimeout(r, 500 * Math.pow(2, i)));
       }
-    } catch (err: any) {
-      if (err?.message === "RATE_LIMITED") {
-        toast.error("অনেকবার চেষ্টা করেছেন। ৩০ মিনিট পর আবার চেষ্টা করুন। 🔒");
-      } else {
-        toast.error("লগইন সমস্যা হয়েছে");
-      }
-    } finally {
-      setLoginLoading(false);
     }
+    throw lastErr;
   };
 
   const handleSend = async () => {
     if (sending || !session || !selectedContact) return;
-
     const text = msgInput.trim();
-    if (!text) {
-      restoreInputFocus(true);
-      return;
-    }
+    if (!text) { restoreInputFocus(true); return; }
 
-    // If editing
     if (editingMsg) {
       recentSendAtRef.current = Date.now();
       setSending(true);
       setMsgInput("");
       try {
         await editMessage(session.token, editingMsg.id, text);
-        setMessages(prev => prev.map(m => m.id === editingMsg.id ? { ...m, content: text, edited_at: new Date().toISOString(), original_content: m.original_content || m.content } : m));
+        setMessages(prev => prev.map(m => m.id === editingMsg.id
+          ? { ...m, content: text, edited_at: new Date().toISOString(), original_content: m.original_content || m.content }
+          : m));
         toast.success("মেসেজ এডিট হয়েছে");
       } catch (err) {
         console.error("[catch]", err);
@@ -553,7 +498,6 @@ const Chat = () => {
       return;
     }
 
-    // Optimistic insert — bubble appears instantly; auto-retry on transient failures.
     const tempId = `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const nowIso = new Date().toISOString();
     const optimistic: Message = {
@@ -580,8 +524,6 @@ const Chat = () => {
       const realId = await sendWithRetry(() =>
         sendMessage(session.token, selectedContact.id, text, undefined, replyIdSnapshot)
       );
-      // Swap tempId → real id and clear pending. If a broadcast refetch already
-      // reconciled the temp away, this no-op is harmless.
       setMessages(prev => prev.map(m =>
         m.id === tempId ? { ...m, id: (realId as string) || m.id, pending: false } : m
       ));
@@ -591,7 +533,6 @@ const Chat = () => {
         setSession(null);
         toast.error("সেশন শেষ হয়ে গেছে। আবার লগইন করুন।");
       } else {
-        // Drop the optimistic bubble and fall back to the visible failed list for manual resend.
         setMessages(prev => prev.filter(m => m.id !== tempId));
         const failed: FailedChatMessage = {
           id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -610,24 +551,6 @@ const Chat = () => {
     }
   };
 
-  // Retry helper: 3 attempts with exponential backoff, aborts early on offline / auth errors.
-  const sendWithRetry = async <T,>(fn: () => Promise<T>, tries = 3): Promise<T> => {
-    let lastErr: any;
-    for (let i = 0; i < tries; i++) {
-      try {
-        return await fn();
-      } catch (err: any) {
-        lastErr = err;
-        if (err?.message?.includes("Invalid session")) throw err;
-        if (typeof navigator !== "undefined" && !navigator.onLine) throw err;
-        if (i < tries - 1) {
-          await new Promise(r => setTimeout(r, 500 * Math.pow(2, i)));
-        }
-      }
-    }
-    throw lastErr;
-  };
-
   const handleResendFailed = async (failedId: string) => {
     if (!session || !selectedContact) return;
     const item = failedMessages.find(f => f.id === failedId);
@@ -635,11 +558,8 @@ const Chat = () => {
     setFailedMessages(prev => prev.map(f => f.id === failedId ? { ...f, retrying: true } : f));
     try {
       await sendWithRetry(() => sendMessage(
-        session.token,
-        selectedContact.id,
-        item.content || undefined,
-        item.imageUrl || undefined,
-        item.replyToId || undefined,
+        session.token, selectedContact.id,
+        item.content || undefined, item.imageUrl || undefined, item.replyToId || undefined,
       ));
       setFailedMessages(prev => prev.filter(f => f.id !== failedId));
       toast.success("মেসেজ পাঠানো হয়েছে");
@@ -663,7 +583,8 @@ const Chat = () => {
     if (!session || !unsendTargetId) return;
     try {
       await unsendMessage(session.token, unsendTargetId);
-      setMessages(prev => prev.map(m => m.id === unsendTargetId ? { ...m, content: null, image_url: null, unsent_at: new Date().toISOString() } : m));
+      setMessages(prev => prev.map(m => m.id === unsendTargetId
+        ? { ...m, content: null, image_url: null, unsent_at: new Date().toISOString() } : m));
       toast.success("মেসেজ আনসেন্ড করা হয়েছে");
     } catch (err) {
       console.error("[catch]", err);
@@ -687,15 +608,12 @@ const Chat = () => {
 
   const handleReact = async (msg: Message, emoji: string) => {
     if (!session) return;
-    // optimistic toggle
     setMessages(prev => prev.map(m => {
       if (m.id !== msg.id) return m;
       const reactions = m.reactions || [];
       const mine = reactions.find(r => r.reactor_id === session.contactId);
       let next = reactions.filter(r => r.reactor_id !== session.contactId);
-      if (!mine || mine.emoji !== emoji) {
-        next = [...next, { emoji, reactor_id: session.contactId }];
-      }
+      if (!mine || mine.emoji !== emoji) next = [...next, { emoji, reactor_id: session.contactId }];
       return { ...m, reactions: next };
     }));
     try {
@@ -737,9 +655,8 @@ const Chat = () => {
     inputRef.current?.focus();
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !session || !selectedContact) return;
+  const handleImagePick = async (file: File) => {
+    if (!session || !selectedContact) return;
     if (!file.type.startsWith("image/")) { toast.error("শুধুমাত্র ছবি পাঠানো যাবে"); return; }
     setUploading(true);
     try {
@@ -747,11 +664,10 @@ const Chat = () => {
       try {
         await sendMessage(session.token, selectedContact.id, undefined, url, replyingTo?.id);
         setReplyingTo(null);
-      } catch (sendErr) {
+      } catch {
         const failed: FailedChatMessage = {
           id: `failed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-          content: null,
-          imageUrl: url,
+          content: null, imageUrl: url,
           replyToId: replyingTo?.id || null,
           replyContent: replyingTo?.content || null,
           createdAt: new Date().toISOString(),
@@ -765,7 +681,6 @@ const Chat = () => {
       toast.error("ছবি পাঠাতে সমস্যা");
     } finally {
       setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -776,43 +691,6 @@ const Chat = () => {
     setMessages([]);
     setContacts([]);
     toast.info("লগআউট হয়েছে");
-  };
-
-  const formatTime = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return d.toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" });
-  };
-
-  const getDateLabel = (dateStr: string) => {
-    const d = new Date(dateStr);
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const msgDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const diffDays = Math.floor((today.getTime() - msgDate.getTime()) / 86400000);
-    if (diffDays === 0) return "আজ";
-    if (diffDays === 1) return "গতকাল";
-    if (diffDays < 7) return d.toLocaleDateString("bn-BD", { weekday: "long" });
-    return d.toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" });
-  };
-
-  const shouldShowDateHeader = (msgs: Message[], idx: number) => {
-    if (idx === 0) return true;
-    const prev = new Date(msgs[idx - 1].created_at).toDateString();
-    const curr = new Date(msgs[idx].created_at).toDateString();
-    return prev !== curr;
-  };
-
-  const formatLastSeen = (presence?: { is_online: boolean; last_seen_at: string }) => {
-    if (!presence) return null;
-    if (presence.is_online) return "এখন অনলাইন";
-    const diff = Date.now() - new Date(presence.last_seen_at).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return "এইমাত্র অনলাইন ছিলেন";
-    if (mins < 60) return `${mins} মিনিট আগে`;
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours} ঘন্টা আগে`;
-    const days = Math.floor(hours / 24);
-    return `${days} দিন আগে`;
   };
 
   const pinnedMessages = messages.filter(m => m.is_pinned);
@@ -828,33 +706,37 @@ const Chat = () => {
         ? `${queuedCount}টি মেসেজ অপেক্ষায় আছে`
         : "অনলাইন — এখনই মেসেজ যাবে";
 
-  // ============ LOGIN SCREEN ============
-  if (!session) {
-    // Unified flow: chat sign-in lives on /verify. Redirect there and come back after verification.
-    return <Navigate to="/verify?next=chat" replace />;
-  }
+  if (!session) return <Navigate to="/verify?next=chat" replace />;
 
+  const singleContact = contacts.length === 1;
+  const showBackButton = !!selectedContact && !singleContact;
+  const showListPane = !selectedContact || !singleContact; // desktop shows both
 
-
-
-  // ============ CHAT INTERFACE ============
   return (
     <div className="warm-gradient flex flex-col overflow-hidden fixed inset-0" style={{ height: viewportHeight ? `${viewportHeight}px` : "100dvh" }}>
+      {/* ============ HEADER ============ */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background shrink-0 pt-[env(safe-area-inset-top)] shadow-[0_8px_18px_-18px_hsl(var(--heirloom-ink)/0.35)]">
-        <div className="container mx-auto max-w-3xl lg:max-w-4xl flex h-14 items-center justify-between px-4 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
+        <div className="container mx-auto max-w-5xl flex h-14 items-center justify-between px-4 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
           <div className="flex items-center gap-2 min-w-0 flex-1 relative">
             <AnimatePresence mode="wait" initial={false}>
               {selectedContact ? (
-                <motion.button
+                <motion.div
                   key={`hdr-thread-${selectedContact.id}`}
                   initial={{ opacity: 0, x: 12 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 12 }}
                   transition={{ duration: 0.18, ease: "easeOut" }}
-                  onClick={() => { setSelectedContact(null); setSearchOpen(false); setSearchQuery(""); }}
-                  className="flex items-center gap-2 text-foreground hover:text-primary transition-colors min-w-0"
+                  className="flex items-center gap-2 min-w-0"
                 >
-                  <ArrowLeft className="h-5 w-5 shrink-0" />
+                  {showBackButton && (
+                    <button
+                      onClick={() => { setSelectedContact(null); setSearchOpen(false); setSearchQuery(""); }}
+                      className="text-foreground hover:text-primary transition-colors shrink-0 md:hidden"
+                      aria-label="ফিরে যান"
+                    >
+                      <ArrowLeft className="h-5 w-5" />
+                    </button>
+                  )}
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="relative shrink-0">
                       {selectedContact.photo_url ? (
@@ -869,13 +751,13 @@ const Chat = () => {
                     <div className="min-w-0 text-left">
                       <span className="font-semibold text-sm truncate block">{selectedContact.name}</span>
                       {presenceMap[selectedContact.id] && (
-                        <p className={`text-[10px] truncate ${presenceMap[selectedContact.id].is_online ? "text-emerald-500" : "text-muted-foreground"}`}>
+                        <p className={`text-xs truncate ${presenceMap[selectedContact.id].is_online ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
                           {formatLastSeen(presenceMap[selectedContact.id])}
                         </p>
                       )}
                     </div>
                   </div>
-                </motion.button>
+                </motion.div>
               ) : (
                 <motion.div
                   key="hdr-list"
@@ -914,16 +796,10 @@ const Chat = () => {
                 </DropdownMenuItem>
                 {selectedContact && (
                   <>
-                    <DropdownMenuItem
-                      onSelect={() => { setSettingsOpen(false); scrollToBottom(true); }}
-                      className="gap-2 text-sm"
-                    >
+                    <DropdownMenuItem onSelect={() => { setSettingsOpen(false); scrollToBottom(true); }} className="gap-2 text-sm">
                       <ArrowDownToLine className="h-4 w-4" /> সর্বশেষ মেসেজে যান
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onSelect={() => { setSettingsOpen(false); if (selectedContact) void loadMessages(selectedContact); }}
-                      className="gap-2 text-sm"
-                    >
+                    <DropdownMenuItem onSelect={() => { setSettingsOpen(false); if (selectedContact) void loadMessages(selectedContact); }} className="gap-2 text-sm">
                       <RefreshCw className="h-4 w-4" /> রিফ্রেশ
                     </DropdownMenuItem>
                   </>
@@ -935,259 +811,134 @@ const Chat = () => {
                   <LogOut className="h-4 w-4" /> লগআউট
                 </DropdownMenuItem>
               </DropdownMenuContent>
-
             </DropdownMenu>
           </div>
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col min-h-0 overflow-hidden container mx-auto max-w-3xl lg:max-w-4xl w-full px-0">
-        {/* Search bar */}
-        {searchOpen && (
-          <div className="relative z-40 isolate shrink-0 px-4 pt-2 pb-2 bg-background">
-            <div className="flex items-center gap-2">
-              <Input placeholder="মেসেজ খুঁজুন..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-card h-8 text-sm" autoFocus />
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="সার্চ বন্ধ করুন" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            {searchQuery && <p className="text-[10px] text-muted-foreground mt-1">{filteredMessages.length} টি মেসেজ পাওয়া গেছে</p>}
-          </div>
-        )}
+      {/* ============ BODY (mobile: single pane | desktop: split) ============ */}
+      <div className="flex-1 min-h-0 overflow-hidden container mx-auto max-w-5xl w-full px-0">
+        <div className="h-full md:grid md:grid-cols-[300px_1fr] md:gap-0">
 
-        {/* Pinned messages */}
-        {selectedContact && pinnedMessages.length > 0 && !searchOpen && (
-          <div className="px-4 pt-2">
-            <div className="bg-accent/50 rounded-lg p-2 border border-border/50">
-              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
-                <Pin className="h-3 w-3" /> পিন করা মেসেজ
-              </div>
-              {pinnedMessages.slice(0, 2).map(pm => (
-                <p key={pm.id} className="text-xs text-foreground truncate">📌 {pm.content || "ছবি"}</p>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <AnimatePresence mode="wait" initial={false}>
-          {!selectedContact ? (
-            <motion.div key="contacts" initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }} className="flex-1 px-4 py-4 overflow-y-auto chat-scroll">
-              {contacts.length === 0 ? (
-                <div className="text-center py-16 text-muted-foreground">
-                  <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                  <p className="text-sm">এখনো কথা শুরু হয়নি</p>
-                  <p className="text-xs mt-1">শীঘ্রই এখান থেকে আপনজনের সাথে মনের কথা ভাগ করা যাবে</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {contacts.map((c) => (
-                    <button
-                      key={c.id}
-                      onClick={() => handleSelectContact(c)}
-                      className="w-full flex items-center gap-3 rounded-xl p-3 hover:bg-card/80 transition-colors text-left border border-transparent hover:border-border/50"
-                    >
-                      <div className="relative shrink-0">
-                        {c.photo_url ? (
-                          <img src={c.photo_url} alt={c.name} className="h-11 w-11 rounded-full object-cover border border-primary/20" />
-                        ) : (
-                          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">{c.name.charAt(0)}</div>
-                        )}
-                        {presenceMap[c.id]?.is_online && (
-                          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div className="font-medium text-foreground text-sm truncate">{c.name} <span className="text-[10px] love-badge ml-1">আপনার আপনজন</span></div>
-                          {contactPreviews[c.id]?.time && (
-                            <span className="text-[10px] text-muted-foreground shrink-0">{formatTime(contactPreviews[c.id].time!)}</span>
-                          )}
-                        </div>
-                        <div className={`text-xs truncate ${presenceMap[c.id]?.is_online ? "text-green-500" : "text-muted-foreground"}`}>
-                          {contactPreviews[c.id]?.preview || formatLastSeen(presenceMap[c.id]) || "ট্যাপ করে মেসেজ করুন"}
-                        </div>
-                      </div>
-                      {unreadMap[c.id] && (
-                        <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[10px] font-bold px-1.5">
-                          {unreadMap[c.id]}
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </motion.div>
-          ) : (
-            <motion.div key="thread" initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 24 }} transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }} className="flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div className="relative z-0 flex-1 flex flex-col min-h-0 overflow-hidden">
-                <div ref={messageListRef} className={`chat-scroll flex-1 overflow-y-auto overflow-x-hidden px-3 sm:px-5 md:px-6 pb-2 ${searchOpen ? "pt-7" : "pt-4"} space-y-1`}>
-                  {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
-                  {!messagesLoading && filteredMessages.length === 0 && (
-                    <div className="text-center py-16 text-muted-foreground">
-                      <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                      <p className="text-sm">{searchQuery ? "কোনো মেসেজ পাওয়া যায়নি" : "এখনো কোনো মেসেজ নেই"}</p>
-                      {!searchQuery && <p className="text-xs mt-1">নিচের বক্সে লিখে প্রথম মেসেজ শুরু করুন</p>}
-                    </div>
-                  )}
-                  {(() => {
-                    // Find last own message id for receipt rendering
-                    let lastMineId: string | null = null;
-                    for (let i = filteredMessages.length - 1; i >= 0; i--) {
-                      if (filteredMessages[i].sender_id === session.contactId) { lastMineId = filteredMessages[i].id; break; }
-                    }
-                    return filteredMessages.map((msg, idx) => {
-                      const isMine = msg.sender_id === session.contactId;
-                      const showDateHeader = !searchQuery && shouldShowDateHeader(filteredMessages, idx);
-                      const prev = idx > 0 ? filteredMessages[idx - 1] : null;
-                      const next = idx < filteredMessages.length - 1 ? filteredMessages[idx + 1] : null;
-                      const sameAsNext = next && next.sender_id === msg.sender_id && (new Date(next.created_at).getTime() - new Date(msg.created_at).getTime() < 5 * 60 * 1000);
-                      const sameAsPrev = prev && prev.sender_id === msg.sender_id && (new Date(msg.created_at).getTime() - new Date(prev.created_at).getTime() < 5 * 60 * 1000);
-                      const showTail = !sameAsNext;
-                      const showAvatar = !isMine && !sameAsNext;
-                      return (
-                        <div key={msg.id} className={msg.pending ? "opacity-70" : ""}>
-                          {showDateHeader && (
-                            <div className="flex justify-center my-3">
-                              <span className="text-[10px] text-muted-foreground bg-muted/60 px-3 py-0.5 rounded-full">{getDateLabel(msg.created_at)}</span>
-                            </div>
-                          )}
-                          {!sameAsPrev && !isMine && (
-                            <div className="text-[10px] text-muted-foreground ml-10 mb-0.5">{selectedContact?.name}</div>
-                          )}
-                          <MessageBubble
-                            msg={msg}
-                            isMine={isMine}
-                            myId={session.contactId}
-                            otherName={selectedContact?.name || ""}
-                            showTail={showTail}
-                            showAvatar={showAvatar}
-                            avatarUrl={selectedContact?.photo_url || null}
-                            onOpenActions={(m, rect, el) => { setActionMessage(m); setActionAnchor(rect); setActionAnchorEl(el ?? null); }}
-                            onQuickReact={(m, e) => handleReact(m, e)}
-                            onStartReply={(m) => handleStartReply(m)}
-                            onShowEditHistory={(m) => handleShowEditHistory(m)}
-                            onJumpToReply={jumpToMessage}
-                            isDelivered={!!msg.delivered_at || !!msg.is_read}
-                            showReceipt={isMine && (showTail || msg.id === lastMineId)}
-                            highlightQuery={searchQuery}
-                            highlight={msg.id === highlightedMsgId}
-                          />
-                        </div>
-                      );
-                    });
-                  })()}
-                  <div className="h-0" />
-                </div>
-                <JumpToLatest
-                  show={newBelowCount > 0}
-                  count={newBelowCount}
-                  onClick={() => scrollToBottom(true)}
-                  className="bottom-3"
-                />
-              </div>
-
-              {isOtherTyping && (
-                <div className="px-4 pb-1">
-                  <TypingIndicator />
-                </div>
-              )}
-
-              {/* Edit/Reply bar */}
-              {(editingMsg || replyingTo) && (
-                <div className="px-4 pt-2">
-                  <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-1.5 text-xs">
-                    {editingMsg && (
-                      <>
-                        <Pencil className="h-3 w-3 text-primary shrink-0" />
-                        <span className="truncate flex-1">এডিট করছেন: {editingMsg.content}</span>
-                      </>
-                    )}
-                    {replyingTo && (
-                      <>
-                        <Reply className="h-3 w-3 text-primary shrink-0" />
-                        <span className="truncate flex-1">রিপ্লাই: {replyingTo.content || "ছবি"}</span>
-                      </>
-                    )}
-                    <button onClick={() => { setEditingMsg(null); setReplyingTo(null); setMsgInput(""); }} className="shrink-0">
-                      <X className="h-3.5 w-3.5 text-muted-foreground" />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {(sending || isOffline || queuedCount > 0) && (
-                <div className="px-4 pt-1.5">
-                  <div className={`flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-muted/60 px-3 py-1.5 text-[11px] ${statusTone}`}>
-                    <div className="flex items-center gap-2 min-w-0">
-                      {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : isOffline ? <WifiOff className="h-3.5 w-3.5 shrink-0" /> : <Clock3 className="h-3.5 w-3.5 shrink-0" />}
-                      <span className="truncate">{statusLabel}</span>
-                    </div>
-                    {queuedCount > 0 && (
-                      <span className="rounded-full bg-card px-2 py-0.5 text-foreground shrink-0">
-                        {queuedCount}টি অপেক্ষায়
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              <FailedMessagesList
-                items={failedMessages}
-                onResend={handleResendFailed}
-                onDelete={handleDeleteFailed}
+          {/* Contact list pane */}
+          <aside
+            className={`h-full min-h-0 overflow-hidden border-r border-border/50 bg-background/50 ${
+              selectedContact ? "hidden md:flex md:flex-col" : "flex flex-col"
+            } ${singleContact ? "md:hidden" : ""}`}
+          >
+            <div className="flex-1 overflow-y-auto chat-scroll">
+              <ChatContactList
+                contacts={contacts}
+                selectedId={selectedContact?.id}
+                unreadMap={unreadMap}
+                presenceMap={presenceMap}
+                contactPreviews={contactPreviews}
+                onSelect={handleSelectContact}
               />
+            </div>
+          </aside>
 
-
-
-
-              <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm py-2 shrink-0 pb-[max(0.5rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
-                <div className="flex items-end gap-1.5 sm:gap-2 w-full">
-                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                  <div className="flex items-center shrink-0">
-                    <EmojiPicker inputRef={inputRef} onSelect={(emoji) => setMsgInput(prev => prev + emoji)} />
-                    <Button
-                      variant="ghost" size="icon"
-                      className="h-9 w-9"
-                      aria-label="ছবি পাঠান"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
-                    >
-                      {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4 text-primary" />}
-                    </Button>
-                  </div>
-                  <AutoResizeTextarea
-                    ref={inputRef}
-                    placeholder={editingMsg ? "এডিট করুন..." : "মেসেজ লিখুন..."}
-                    value={msgInput}
-                    onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey && !isTouch) {
-                        e.preventDefault();
-                        void handleSend();
-                      }
-                    }}
-                    className="flex-1 min-w-0"
-                    maxHeight={120}
-                  />
-                  <Button
-                    type="button"
-                    tabIndex={-1}
-                    variant="hero" size="icon"
-                    className="h-9 w-9 shrink-0 rounded-full"
-                    aria-label="মেসেজ পাঠান"
-                    onMouseDown={(e) => { e.preventDefault(); restoreInputFocus(true); }}
-                    onTouchStart={(e) => { e.preventDefault(); restoreInputFocus(true); }}
-                    onPointerDown={(e) => { e.preventDefault(); restoreInputFocus(true); if (!sending) void handleSend(); }}
-                    onClick={(e) => e.preventDefault()}
-                    disabled={!msgInput.trim()}
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
+          {/* Thread pane */}
+          <section className={`h-full min-h-0 flex flex-col overflow-hidden ${!selectedContact ? "hidden md:flex" : "flex"}`}>
+            {!selectedContact ? (
+              <div className="flex-1 flex items-center justify-center text-center px-6 text-muted-foreground">
+                <div>
+                  <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                  <p className="text-sm">বাম দিকের তালিকা থেকে একজনকে বাছুন</p>
+                  <p className="text-xs mt-1">তারপর এখানে মনের কথা লেখা যাবে</p>
                 </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            ) : (
+              <>
+                {searchOpen && (
+                  <div className="relative z-40 isolate shrink-0 px-4 pt-2 pb-2 bg-background">
+                    <div className="flex items-center gap-2">
+                      <Input placeholder="মেসেজ খুঁজুন..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-card h-8 text-sm" autoFocus />
+                      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="সার্চ বন্ধ করুন" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    {searchQuery && <p className="text-xs text-muted-foreground mt-1">{filteredMessages.length} টি মেসেজ পাওয়া গেছে</p>}
+                  </div>
+                )}
+
+                {pinnedMessages.length > 0 && !searchOpen && (
+                  <div className="px-4 pt-2 shrink-0">
+                    <div className="bg-accent/50 rounded-lg p-2 border border-border/50">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+                        <Pin className="h-3 w-3" /> পিন করা মেসেজ
+                      </div>
+                      {pinnedMessages.slice(0, 2).map(pm => (
+                        <p key={pm.id} className="text-xs text-foreground truncate">📌 {pm.content || "ছবি"}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="relative z-0 flex-1 flex flex-col min-h-0 overflow-hidden">
+                  <ChatMessageList
+                    ref={messageListRef}
+                    messages={filteredMessages}
+                    loading={messagesLoading}
+                    myId={session.contactId}
+                    otherName={selectedContact.name}
+                    otherPhoto={selectedContact.photo_url}
+                    searchQuery={searchQuery}
+                    highlightedMsgId={highlightedMsgId}
+                    searchOpen={searchOpen}
+                    onOpenActions={(m, rect, el) => { setActionMessage(m); setActionAnchor(rect); setActionAnchorEl(el ?? null); }}
+                    onQuickReact={handleReact}
+                    onStartReply={handleStartReply}
+                    onShowEditHistory={handleShowEditHistory}
+                    onJumpToReply={jumpToMessage}
+                  />
+                  <JumpToLatest
+                    show={newBelowCount > 0}
+                    count={newBelowCount}
+                    onClick={() => scrollToBottom(true)}
+                    className="bottom-3"
+                  />
+                </div>
+
+                {isOtherTyping && (
+                  <div className="px-4 pb-1"><TypingIndicator /></div>
+                )}
+
+                {(sending || isOffline || queuedCount > 0) && (
+                  <div className="px-4 pt-1.5">
+                    <div className={`flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-muted/60 px-3 py-1.5 text-xs ${statusTone}`}>
+                      <div className="flex items-center gap-2 min-w-0">
+                        {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : isOffline ? <WifiOff className="h-3.5 w-3.5 shrink-0" /> : <Clock3 className="h-3.5 w-3.5 shrink-0" />}
+                        <span className="truncate">{statusLabel}</span>
+                      </div>
+                      {queuedCount > 0 && (
+                        <span className="rounded-full bg-card px-2 py-0.5 text-foreground shrink-0">{queuedCount}টি অপেক্ষায়</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <FailedMessagesList items={failedMessages} onResend={handleResendFailed} onDelete={handleDeleteFailed} />
+
+                <ChatComposer
+                  ref={inputRef}
+                  value={msgInput}
+                  onChange={setMsgInput}
+                  onSend={handleSend}
+                  onImagePick={handleImagePick}
+                  onCancelEditReply={() => { setEditingMsg(null); setReplyingTo(null); setMsgInput(""); }}
+                  onFocusInput={restoreInputFocus}
+                  emitTyping={emitTyping}
+                  sending={sending}
+                  uploading={uploading}
+                  editingMsg={editingMsg}
+                  replyingTo={replyingTo}
+                  isTouch={isTouch}
+                />
+              </>
+            )}
+          </section>
+        </div>
       </div>
 
       <AlertDialog open={!!unsendTargetId} onOpenChange={(open) => !open && setUnsendTargetId(null)}>
@@ -1228,7 +979,6 @@ const Chat = () => {
 
       <NotificationPreferencesDialog open={notifPrefsOpen} onOpenChange={setNotifPrefsOpen} />
     </div>
-
   );
 };
 
