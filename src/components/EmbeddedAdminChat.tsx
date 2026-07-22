@@ -940,35 +940,40 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              <div className="flex min-w-0 flex-1 items-center">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
                 <button
                   type="button"
                   onClick={() => onOpenProfile?.(selectedUser.id)}
-                  className="inline-flex items-center gap-2 min-w-0 max-w-full rounded-full py-1 pr-3 pl-1 text-left hover:bg-primary/5 active:scale-[0.99] transition-colors cursor-pointer"
+                  className="relative shrink-0 rounded-full hover:ring-2 hover:ring-primary/20 active:scale-[0.97] transition cursor-pointer"
                   aria-label={`${selectedUser.name} এর প্রোফাইল দেখুন`}
                 >
-                  <span className="relative shrink-0">
-                    {selectedUser.photo_url ? (
-                      <img src={selectedUser.photo_url} alt={selectedUser.name} className="h-9 w-9 rounded-full object-cover border border-primary/20" />
-                    ) : (
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</span>
-                    )}
-                    {presenceMap[selectedUser.id]?.isOnline && (
-                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-[hsl(var(--heirloom-paper))]" />
-                    )}
-                  </span>
-                  <span className="min-w-0 leading-tight">
-                    <span className="block font-semibold text-sm text-foreground truncate">{selectedUser.name}</span>
-                    <span className="block text-[11px] text-muted-foreground truncate">
-                      {(() => {
-                        const p = presenceMap[selectedUser.id];
-                        const txt = formatLastSeen(p);
-                        if (!txt) return selectedUser.phone;
-                        return <span className={p?.isOnline ? "text-emerald-600" : ""}>{txt}</span>;
-                      })()}
-                    </span>
-                  </span>
+                  {selectedUser.photo_url ? (
+                    <img src={selectedUser.photo_url} alt={selectedUser.name} className="h-9 w-9 rounded-full object-cover border border-primary/20" />
+                  ) : (
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</span>
+                  )}
+                  {presenceMap[selectedUser.id]?.isOnline && (
+                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-[hsl(var(--heirloom-paper))]" />
+                  )}
                 </button>
+                <div className="min-w-0 leading-tight flex flex-col items-start">
+                  <button
+                    type="button"
+                    onClick={() => onOpenProfile?.(selectedUser.id)}
+                    className="max-w-full rounded-md px-1 -mx-1 font-semibold text-sm text-foreground truncate text-left hover:bg-primary/5 active:scale-[0.99] transition-colors cursor-pointer"
+                    aria-label={`${selectedUser.name} এর প্রোফাইল দেখুন`}
+                  >
+                    {selectedUser.name}
+                  </button>
+                  <span className="block text-[11px] text-muted-foreground truncate px-1 -mx-1 max-w-full">
+                    {(() => {
+                      const p = presenceMap[selectedUser.id];
+                      const txt = formatLastSeen(p);
+                      if (!txt) return selectedUser.phone;
+                      return <span className={p?.isOnline ? "text-emerald-600" : ""}>{txt}</span>;
+                    })()}
+                  </span>
+                </div>
               </div>
               <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-full" aria-label="মেসেজ খুঁজুন" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
                 <Search className="h-4 w-4" />
