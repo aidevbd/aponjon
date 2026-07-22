@@ -188,10 +188,14 @@ export function ActiveSessionsCard() {
       ) : rows && rows.length > 0 ? (
         <ul className="space-y-2">
           {rows.map((r) => {
-            const Icon = isMobileLabel(r.device_label) ? Smartphone : Monitor;
+            const DeviceIcon = pickDeviceIcon(r.device_label);
+            const BrowserIcon = pickBrowserIcon(r.device_label);
             return (
               <li key={r.id} className="flex items-start gap-3 rounded-lg border border-border/60 bg-background/60 p-3">
-                <Icon className="h-5 w-5 mt-0.5 text-primary shrink-0" />
+                <div className="relative mt-0.5 shrink-0">
+                  <DeviceIcon className="h-6 w-6 text-primary" />
+                  <BrowserIcon className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-card p-[1px] text-muted-foreground ring-1 ring-border" />
+                </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="text-sm font-medium truncate">{r.device_label || "অজানা ডিভাইস"}</span>
