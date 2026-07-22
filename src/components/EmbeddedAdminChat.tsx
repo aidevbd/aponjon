@@ -960,7 +960,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
                   <button
                     type="button"
                     onClick={() => onOpenProfile?.(selectedUser.id)}
-                    className="max-w-full rounded-md px-1 -mx-1 font-semibold text-sm text-foreground truncate text-left hover:bg-primary/5 active:scale-[0.99] transition-colors cursor-pointer"
+                    className="rounded-md px-1 -mx-1 font-semibold text-sm text-foreground whitespace-nowrap text-left hover:bg-primary/5 active:scale-[0.99] transition-colors cursor-pointer"
                     aria-label={`${selectedUser.name} এর প্রোফাইল দেখুন`}
                   >
                     {selectedUser.name}
