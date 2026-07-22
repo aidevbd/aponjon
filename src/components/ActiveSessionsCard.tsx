@@ -280,14 +280,22 @@ export function ActiveSessionsCard() {
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>অন্য সব ডিভাইস থেকে সাইন-আউট?</AlertDialogTitle>
-              <AlertDialogDescription>
+              <div className="mx-auto mb-1 flex h-11 w-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                <LogOut className="h-5 w-5" />
+              </div>
+              <AlertDialogTitle className="text-center">অন্য সব ডিভাইস থেকে সাইন-আউট?</AlertDialogTitle>
+              <AlertDialogDescription className="text-center">
                 এই ডিভাইস ছাড়া বাকি সব ডিভাইস তৎক্ষণাৎ সাইন-আউট হবে। আবার ঢুকতে সিক্রেট কোড দিতে হবে।
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>বাতিল</AlertDialogCancel>
-              <AlertDialogAction onClick={handleRevokeOthers}>করুন</AlertDialogAction>
+              <AlertDialogAction
+                onClick={handleRevokeOthers}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                সাইন-আউট করুন
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
