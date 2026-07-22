@@ -1,9 +1,13 @@
 import { motion } from "framer-motion";
-import { ArrowRight, PlusCircle, Search } from "lucide-react";
+import { ArrowRight, PlusCircle, ShieldCheck, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
+import { getMeSession } from "@/lib/userSession";
+import { getChatSession } from "@/lib/chatSession";
 
 const Index = () => {
+  const hasMe = !!getMeSession();
+  const hasChat = !!getChatSession();
   return (
     <div className="flex min-h-app flex-col bg-[hsl(var(--heirloom-bg))]">
       <Header />
@@ -37,7 +41,7 @@ const Index = () => {
                 বন্ধু, বেস্ট ফ্রেন্ড কিংবা ভালোবাসার মানুষ — আপনারা আমার জীবনের সবচেয়ে দামী অংশ। মোবাইল হারালে যেন আপনাদের হারিয়ে না ফেলি, তাই একটু কষ্ট করে নাম-নম্বরটা এখানে রেখে দেবেন? 🤍
               </p>
 
-              {/* CTAs */}
+              {/* CTAs — three clear intents */}
               <div className="mx-auto mt-8 flex w-full max-w-sm flex-col gap-3 sm:mt-9 md:max-w-[420px]">
                 <Link
                   to="/add"
@@ -49,11 +53,19 @@ const Index = () => {
                 </Link>
 
                 <Link
-                  to="/access"
+                  to={hasMe ? "/me" : "/verify?next=view"}
                   className="heirloom-btn-ghost group flex w-full items-center justify-center gap-2 rounded-sm border px-5 py-3.5 text-[14px] font-medium transition-all duration-300 sm:text-[15px]"
                 >
-                  <Search className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden />
-                  <span>আগে যোগ করেছি — দেখতে চাই</span>
+                  <ShieldCheck className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden />
+                  <span>আমার তথ্য দেখি / এডিট করি</span>
+                </Link>
+
+                <Link
+                  to={hasChat ? "/chat" : "/verify?next=chat"}
+                  className="heirloom-btn-ghost group flex w-full items-center justify-center gap-2 rounded-sm border px-5 py-3.5 text-[14px] font-medium transition-all duration-300 sm:text-[15px]"
+                >
+                  <MessageCircle className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden />
+                  <span>এডমিনকে মেসেজ করি</span>
                 </Link>
               </div>
 

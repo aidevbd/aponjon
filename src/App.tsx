@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AddContact from "./pages/AddContact";
 import AccessData from "./pages/AccessData";
+import Verify from "./pages/Verify";
+import MyInfo from "./pages/MyInfo";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import Chat from "./pages/Chat";
@@ -29,6 +31,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/add" element={<AddContact />} />
           <Route path="/access" element={<AccessData />} />
+          <Route path="/verify" element={<Verify />} />
+          <Route path="/me" element={<MyInfo />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
           <Route path="/chat" element={<Chat />} />
