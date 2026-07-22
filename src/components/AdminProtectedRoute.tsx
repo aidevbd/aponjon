@@ -26,7 +26,7 @@ export const AdminProtectedRoute = ({ children }: { children: React.ReactNode })
 
   if (state === "loading") {
     return (
-      <div className="min-h-screen warm-gradient flex items-center justify-center">
+      <div className="min-h-dvh warm-gradient flex items-center justify-center">
         <Heart className="h-8 w-8 text-primary animate-pulse" />
       </div>
     );
