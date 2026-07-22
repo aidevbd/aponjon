@@ -1,7 +1,9 @@
 import { Heart, ChevronLeft, MessageCircle } from "lucide-react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 import { useGlobalChatNotifier } from "@/hooks/useGlobalChatNotifier";
+import { ChatGateDialog } from "@/components/ChatGateDialog";
 
 
 export function Header() {
@@ -14,15 +16,19 @@ export function Header() {
   const isRoot = location.pathname === "/";
   const isChat = location.pathname.startsWith("/chat");
   const { totalUnread, hasSession } = useGlobalChatNotifier();
+  const [gateOpen, setGateOpen] = useState(false);
 
   // Where should the messenger icon take us?
   const adminOnChatTab = isAdminDashboard && searchParams.get("tab") === "chat";
   const chatHref = isAdmin ? "/admin/dashboard?tab=chat" : "/chat";
+  // For non-admin: always show icon (unless on chat page itself).
+  // Without session → tapping opens gate dialog instead of navigating.
   const showChatIcon =
     !isChat &&
     !adminOnChatTab &&
     !isAdminLogin &&
-    (isAdmin ? isAdminDashboard : hasSession);
+    (isAdmin ? isAdminDashboard : true);
+  const chatGated = !isAdmin && !hasSession;
 
   const handleBack = () => {
     if (window.history.length > 1) navigate(-1);
