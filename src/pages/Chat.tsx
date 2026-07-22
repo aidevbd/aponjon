@@ -823,9 +823,9 @@ const Chat = () => {
   const statusLabel = sending
     ? "মেসেজ পাঠানো হচ্ছে..."
     : isOffline
-      ? "অফলাইন — মেসেজ queue হবে"
+      ? "নেটওয়ার্ক নেই — মেসেজটা অপেক্ষায় থাকবে"
       : queuedCount > 0
-        ? `${queuedCount}টি pending মেসেজ আছে`
+        ? `${queuedCount}টি মেসেজ অপেক্ষায় আছে`
         : "অনলাইন — এখনই মেসেজ যাবে";
 
   // ============ LOGIN SCREEN ============
