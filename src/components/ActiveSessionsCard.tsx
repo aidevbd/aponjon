@@ -30,9 +30,19 @@ function timeAgo(iso: string): string {
   return `${d} দিন আগে`;
 }
 
-function isMobileLabel(label: string | null) {
-  if (!label) return false;
-  return /Android|iOS/i.test(label);
+/** Parse a device label (either "Chrome · Android মোবাইল" or free-form) into a device icon. */
+function pickDeviceIcon(label: string | null) {
+  const l = (label || "").toLowerCase();
+  if (/ট্যাবলেট|tablet|ipad/.test(l)) return Tablet;
+  if (/মোবাইল|mobile|phone|android|iphone|ios/.test(l)) return Smartphone;
+  return Monitor;
+}
+
+/** Pick a browser glyph; Chrome gets its own icon, everything else uses a globe. */
+function pickBrowserIcon(label: string | null) {
+  const l = (label || "").toLowerCase();
+  if (/chrome/.test(l) && !/chromeos/.test(l)) return Chrome;
+  return Globe;
 }
 
 /**
