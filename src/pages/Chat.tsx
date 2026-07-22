@@ -75,6 +75,7 @@ const Chat = () => {
       document.body.style.overflow = prevBody;
     };
   }, []);
+
   const [session, setSession] = useState<ChatSession | null>(() => getChatSession());
   const [loginPhone, setLoginPhone] = useState("");
   const [loginSecret, setLoginSecret] = useState("");
