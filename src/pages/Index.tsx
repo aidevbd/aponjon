@@ -58,13 +58,6 @@ const Index = () => {
                   <span>আমার তথ্য দেখি / এডিট করি</span>
                 </Link>
 
-                <Link
-                  to={hasChat ? "/chat" : "/verify?next=chat"}
-                  className="heirloom-btn-ghost group flex w-full items-center justify-center gap-2 rounded-sm border px-5 py-3.5 text-[14px] font-medium transition-all duration-300 sm:text-[15px]"
-                >
-                  <MessageCircle className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden />
-                  <span>এডমিনকে মেসেজ করি</span>
-                </Link>
               </div>
 
               {/* Signature */}
