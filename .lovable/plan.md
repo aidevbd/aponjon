@@ -1,94 +1,94 @@
-# চ্যাট সেশন UX — পূর্ণ মডেল
+## /chat পুরো Refactor — P1 থেকে P5
 
-বর্তমান: ২৪ ঘণ্টা fixed, sessionStorage only, কোনো warning/refresh নেই।
-লক্ষ্য: WhatsApp Web-স্টাইল rolling সেশন + ইউজার-কন্ট্রোল।
-
----
-
-## ১. ডাটাবেস পরিবর্তন
-
-`chat_sessions` টেবিলে নতুন কলাম:
-- `last_used_at timestamptz` — sliding expiry-র জন্য
-- `trusted_device boolean` — ইউজার "এই ডিভাইসে মনে রাখুন" চেপেছেন কি না
-- `device_label text` — UA থেকে ছোট নাম (যেমন "Chrome on Android")
-- `created_at timestamptz` (যদি না থাকে) — session list দেখানোর জন্য
-
-`create_chat_session` RPC আপডেট:
-- নতুন প্যারাম `p_trusted boolean` (default false)
-- Trusted হলে `expires_at = now() + 30 days`, নাহলে `now() + 24 hours`
-- `device_label`, `last_used_at` সেট
-- **পুরনো একই-ডিভাইসের সেশন ডিলিট নয়** — অন্য ডিভাইসে লগইন থাকা অক্ষুণ্ণ থাকবে
-
-নতুন RPC:
-- `touch_chat_session(p_token)` — `last_used_at = now()`; trusted হলে `expires_at = now() + 30 days` (sliding refresh)
-- `list_my_chat_sessions(p_token)` — সব active সেশন return (device_label, last_used_at, current কি না)
-- `revoke_chat_session(p_token, p_session_id)` — নির্দিষ্ট একটা রিভোক
-- `revoke_all_other_chat_sessions(p_token)` — বর্তমানটা ছাড়া সব রিভোক
-- `revoke_all_chat_sessions(p_token)` — নিজেরটাসহ সব (=সব ডিভাইস থেকে সাইন-আউট)
+### লক্ষ্য
+Chat.tsx (1235 lines, 58 hooks) কে ছোট ছোট, testable module-এ ভাঙা এবং একই সময়ে UX/design সমস্যাগুলো ঠিক করা। কোনো feature বাদ যাবে না — সব behavior preserve হবে।
 
 ---
 
-## ২. ফ্রন্টএন্ড — session storage
+### Phase 1 — Custom hooks-এ logic বের করা (কোন UI change নেই)
+Chat.tsx থেকে business logic আলাদা hook-এ:
 
-`src/lib/chatSession.ts`:
-- `sessionStorage` → পলিসি-ভিত্তিক: trusted হলে `localStorage`, নাহলে `sessionStorage`
-- `ChatSession`-এ `trusted: boolean`, `expiresAt: number` (সার্ভার থেকে ফেরত) যোগ
-- `getChatSession()`-এ প্রি-এক্সপায়ারি চেক: expiry-র <২৪ ঘণ্টা বাকি থাকলে flag return করে যাতে UI toast দেখায়
-- `touchChatSession()` helper — প্রতি ১০ মিনিট বা প্রতি sendMessage-এ ব্যাকগ্রাউন্ডে কল
+- `hooks/useChatContacts.ts` — contacts fetch, unread map, previews, presence subscribe
+- `hooks/useChatMessages.ts` — messages fetch, realtime subscribe, reconcile, signing
+- `hooks/useChatComposer.ts` — msgInput, send, edit, reply, image upload, offline queue
+- `hooks/useChatTyping.ts` — typing indicator broadcast + receive
+- `hooks/useChatSearch.ts` — search state + filter
+- `hooks/useChatActions.ts` — react, unsend, remove-for-me, edit history, pin
 
----
-
-## ৩. Verify পেজে ট্রাস্টেড-ডিভাইস চয়েস
-
-`src/pages/Verify.tsx`:
-- সিক্রেট কোড ইনপুটের নিচে চেকবক্স: **"এই ডিভাইসে ৩০ দিন মনে রাখুন"** (ডিফল্ট off)
-- সহায়ক টেক্সট: *"শেয়ারড/পাবলিক ডিভাইসে চেক করবেন না।"*
-- ভ্যালু `createChatSession(phone, code, trusted)`-এ পাস
+Chat.tsx এখন এই hook-গুলো compose করবে মাত্র।
 
 ---
 
-## ৪. Sliding refresh + pre-expiry warning
+### Phase 2 — UI components-এ break করা
+- `components/chat/ChatHeader.tsx` — avatar, name, "আপনার আপনজন" badge, presence, actions menu
+- `components/chat/ChatContactList.tsx` — sidebar list (desktop) + fallback
+- `components/chat/ChatThread.tsx` — message list, grouping, auto-scroll
+- `components/chat/ChatComposer.tsx` — textarea, image, emoji, reply/edit preview, send
+- `components/chat/ChatSearchBar.tsx` — search overlay
+- `components/chat/ChatEmptyState.tsx` — "এখনো কথা শুরু হয়নি" heirloom empty state
+- `components/chat/ChatLoginForm.tsx` — session bootstrap form
 
-`useGlobalChatNotifier`-এর মতো একটি hook `useChatSessionKeepalive`:
-- প্রতি ১০ মিনিটে `touch_chat_session` কল (visible tab-এ)
-- প্রতি sendMessage-এর পর একবার
-- প্রতিটি tick-এ expiry চেক — <২৪ ঘণ্টা বাকি হলে দিনে একবার সফট টোস্ট: *"সেশন শীঘ্রই শেষ হবে। একটিভ থাকতে চ্যাটে ঢুকুন।"* (localStorage flag দিয়ে duplicate আটকাব)
-- এক্সপায়ার হলে টোস্ট: *"নিরাপত্তার জন্য আবার যাচাই করুন"* → `/verify?next=chat`
-
----
-
-## ৫. Settings-এ Active Sessions সেকশন
-
-`DashboardHome.tsx`-এর সেটিং অংশে (অথবা `/me`-তে) নতুন কার্ড **"সক্রিয় ডিভাইস"**:
-- সেশনের তালিকা: device label, "শেষ সক্রিয়: X মিনিট আগে", বর্তমান হলে "এই ডিভাইস" ব্যাজ
-- প্রতিটির পাশে "সাইন-আউট" বাটন → `revoke_chat_session`
-- নিচে দুটি বাটন:
-  - **"অন্য সব ডিভাইস থেকে সাইন-আউট"** (কনফার্মেশন সহ)
-  - **"সব ডিভাইস থেকে সাইন-আউট"** (destructive; কনফার্ম করলে নিজেও logout → `/`)
-
-`/me` পেজের সাইন-আউট বাটনের নিচে নতুন link: *"সব ডিভাইস থেকে বেরিয়ে যান"*।
+Chat.tsx target: <200 lines।
 
 ---
 
-## ৬. প্রযুক্তিগত ডিটেইলস
-
-- Device label: `navigator.userAgent` থেকে ক্লায়েন্টে parse (browser + OS), সার্ভারে string হিসেবে save
-- Rate limit: `revoke_all_*` fns-এ per-session rate limit (rate_limit_attempts টেবিল ব্যবহার)
-- Migration-এ existing rows-এ `last_used_at = created_at`, `trusted_device = false` backfill
-- `validate_chat_session` অপরিবর্তিত থাকবে (already checks `expires_at > now()`)
-- Grant: `chat_sessions`-এ SELECT/DELETE service_role only (RPC-এর মাধ্যমেই সব access)
+### Phase 3 — Desktop split layout (P1 fix)
+- ≥768px-এ two-pane: বাম দিকে contact list (280px), ডান দিকে thread
+- একটাই contact থাকলে সরাসরি thread খোলা (P3 fix)
+- <768px-এ current fixed-viewport mobile behavior অক্ষুণ্ণ
 
 ---
 
-## ৭. পরীক্ষার চেকলিস্ট
-
-- Trust off → sessionStorage, ২৪ ঘণ্টা; ট্যাব বন্ধ = লগআউট
-- Trust on → localStorage, ৩০ দিন; ট্যাব বন্ধ করলেও থাকে
-- একটিভ ইউজারের expiry কখনো hit করে না (sliding refresh কাজ করছে)
-- দুটি ডিভাইস থেকে লগইন → দুটোই তালিকায় দেখা যায়
-- এক ডিভাইস থেকে "অন্য সব সাইন-আউট" → অন্য ডিভাইসে next RPC 401 → verify redirect
-- Expiry-র ২৩ ঘণ্টা আগে টোস্ট আসে (একবারই)
+### Phase 4 — Header simplify (P3 fix)
+- Mobile header: Avatar + Name + overflow menu (Search/Settings/Notif/Home/Logout DropdownMenu-তে)
+- Desktop header: full spread, কিন্তু breathing room বেশি
 
 ---
 
-কনফার্ম দিলে ধাপে ধাপে ইমপ্লিমেন্ট করব — মাইগ্রেশন প্রথমে, তারপর ক্লায়েন্ট।
+### Phase 5 — Design token cleanup (P4 fix)
+- Hardcoded color (`text-white`, `bg-black`, hex) → semantic token
+- `text-[10px]` মত tiny font → `text-xs` বা proper scale
+- MessageBubble-এ heirloom rose/gold tokens verify
+
+---
+
+### Technical Details
+
+**File structure after refactor:**
+```text
+src/pages/Chat.tsx                 (~180 lines, composition only)
+src/hooks/
+  useChatContacts.ts
+  useChatMessages.ts
+  useChatComposer.ts
+  useChatTyping.ts
+  useChatSearch.ts
+  useChatActions.ts
+src/components/chat/
+  ChatHeader.tsx
+  ChatContactList.tsx
+  ChatThread.tsx
+  ChatComposer.tsx
+  ChatSearchBar.tsx
+  ChatEmptyState.tsx
+  ChatLoginForm.tsx
+  (existing: MessageBubble, MessageActionSheet, etc.)
+```
+
+**Preservation guarantees:**
+- সব realtime subscription (messages, typing, presence, reactions) same
+- Offline queue behavior same
+- Session/keepalive/trust-device same
+- MessageBubble, ActionSheet, ImageLightbox unchanged
+- Chat RPCs (create_chat_session, mark_conversation_read_admin, ইত্যাদি) same
+
+**Risk mitigation:**
+- Phase-by-phase commit-able state
+- প্রতি phase-এর পর manually verify: login → contact select → send text → send image → reply → edit → react → unsend → search → offline queue
+
+---
+
+### সময়/scope estimate
+৫টা phase একসাথে করলে file count বাড়বে ~13টা, কিন্তু কোনো file 300 লাইনের বেশি না। এক turn-এ পুরোটা করব — শেষে build check + `/chat` flow verify।
+
+শুরু করি?
