@@ -6,6 +6,7 @@ import {
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useGlobalChatNotifier } from "@/hooks/useGlobalChatNotifier";
+import { getMeSession } from "@/lib/userSession";
 
 /**
  * Native-app-style bottom tab bar shown on mobile across the app.
