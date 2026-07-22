@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  MessageCircle, ArrowLeft, Loader2, Search, Pin, Settings2, Home, LogOut,
+  MessageCircle, ChevronLeft, Loader2, Search, Pin, Settings2, Home, LogOut,
   WifiOff, Clock3, Bell, ArrowDownToLine, RefreshCw, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
