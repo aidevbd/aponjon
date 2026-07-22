@@ -155,6 +155,16 @@ const Chat = () => {
     };
   }, [selectedContact]);
 
+  // Mark chat as immersive (hides mobile bottom nav) only while a conversation is open
+  useEffect(() => {
+    if (selectedContact) {
+      document.body.setAttribute("data-immersive", "true");
+      return () => document.body.removeAttribute("data-immersive");
+    }
+  }, [selectedContact]);
+
+
+
   useEffect(() => {
     if (!session) return;
     loadContacts();
