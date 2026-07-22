@@ -63,6 +63,7 @@ const Chat = () => {
   const navigate = useNavigate();
   const viewportHeight = useVisualViewportHeight();
   const isTouch = useIsTouchDevice();
+  useChatSessionKeepalive();
 
   // Lock body scroll while chat page is open so the fixed viewport never
   // shows blank space when mobile browser chrome hides/shows.
