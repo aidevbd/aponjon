@@ -1,12 +1,20 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const SESSION_KEY = "aponjon_chat_session";
-const SESSION_EXPIRY_HOURS = 24;
 const SESSION_EVENT = "aponjon-chat-session-changed";
 
-// Use sessionStorage so the chat session is scoped to the tab —
-// closing the tab/browser invalidates the session (defence-in-depth for shared devices).
-const sessionStore: Storage | null =
+/**
+ * Storage strategy:
+ * - Trusted device: localStorage (persists across tab/browser close, up to 30 days server-side)
+ * - Untrusted device: sessionStorage (tab-scoped; server-side max 24h)
+ *
+ * We read from BOTH on load so switching "remember me" doesn't leave a stale copy.
+ */
+const localStore: Storage | null =
+  typeof window !== "undefined" && typeof window.localStorage !== "undefined"
+    ? window.localStorage
+    : null;
+const tabStore: Storage | null =
   typeof window !== "undefined" && typeof window.sessionStorage !== "undefined"
     ? window.sessionStorage
     : null;
@@ -17,63 +25,151 @@ export interface ChatSession {
   name: string;
   photoUrl: string | null;
   createdAt: number;
+  /** Server-side expiry (ms). Client uses for warnings only; server enforces. */
+  expiresAt: number;
+  /** true = localStorage + 30d; false = sessionStorage + 24h */
+  trusted: boolean;
 }
 
-export function getChatSession(): ChatSession | null {
-  if (!sessionStore) return null;
+function readFromStore(store: Storage | null): ChatSession | null {
+  if (!store) return null;
   try {
-    // Migration: if an older localStorage session exists, drop it (no longer trusted).
-    try { localStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
-    const raw = sessionStore.getItem(SESSION_KEY);
+    const raw = store.getItem(SESSION_KEY);
     if (!raw) return null;
-    const session: ChatSession = JSON.parse(raw);
-    const elapsed = Date.now() - session.createdAt;
-    if (elapsed > SESSION_EXPIRY_HOURS * 60 * 60 * 1000) {
-      sessionStore.removeItem(SESSION_KEY);
+    const s: ChatSession = JSON.parse(raw);
+    if (s.expiresAt && s.expiresAt < Date.now()) {
+      store.removeItem(SESSION_KEY);
       return null;
     }
-    return session;
+    return s;
   } catch {
-    sessionStore.removeItem(SESSION_KEY);
+    store.removeItem(SESSION_KEY);
     return null;
   }
 }
 
+export function getChatSession(): ChatSession | null {
+  return readFromStore(localStore) ?? readFromStore(tabStore);
+}
+
 export function saveChatSession(session: ChatSession) {
-  if (!sessionStore) return;
-  sessionStore.setItem(SESSION_KEY, JSON.stringify(session));
+  const target = session.trusted ? localStore : tabStore;
+  const other = session.trusted ? tabStore : localStore;
+  try { other?.removeItem(SESSION_KEY); } catch { /* ignore */ }
+  target?.setItem(SESSION_KEY, JSON.stringify(session));
   window.dispatchEvent(new Event(SESSION_EVENT));
 }
 
 export function clearChatSession() {
-  if (!sessionStore) return;
-  sessionStore.removeItem(SESSION_KEY);
-  try { localStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
+  try { localStore?.removeItem(SESSION_KEY); } catch { /* ignore */ }
+  try { tabStore?.removeItem(SESSION_KEY); } catch { /* ignore */ }
   window.dispatchEvent(new Event(SESSION_EVENT));
 }
 
 export { SESSION_EVENT as CHAT_SESSION_CHANGED_EVENT };
 
-export async function createChatSession(phone: string, secretCode: string): Promise<ChatSession | null> {
+/** Short device label from UA (e.g. "Chrome on Android"). */
+export function getDeviceLabel(): string {
+  if (typeof navigator === "undefined") return "Unknown";
+  const ua = navigator.userAgent;
+  const browser =
+    /Edg\//.test(ua) ? "Edge" :
+    /OPR\//.test(ua) ? "Opera" :
+    /Chrome\//.test(ua) ? "Chrome" :
+    /Firefox\//.test(ua) ? "Firefox" :
+    /Safari\//.test(ua) ? "Safari" : "Browser";
+  const os =
+    /Android/.test(ua) ? "Android" :
+    /iPhone|iPad|iPod/.test(ua) ? "iOS" :
+    /Windows/.test(ua) ? "Windows" :
+    /Mac OS X/.test(ua) ? "macOS" :
+    /Linux/.test(ua) ? "Linux" : "";
+  return os ? `${browser} on ${os}` : browser;
+}
+
+export async function createChatSession(
+  phone: string,
+  secretCode: string,
+  trusted: boolean = false,
+): Promise<ChatSession | null> {
   const { data, error } = await supabase.rpc("create_chat_session", {
     p_phone: phone,
     p_secret_code: secretCode,
-  });
+    p_trusted: trusted,
+    p_device_label: getDeviceLabel(),
+  } as any);
   if (error) throw error;
   const result = data as any;
   if (!result?.success) {
     if (result?.error === "RATE_LIMITED") throw new Error("RATE_LIMITED");
     return null;
   }
+  const expiresAt = result.expires_at
+    ? new Date(result.expires_at).getTime()
+    : Date.now() + (trusted ? 30 * 24 : 24) * 60 * 60 * 1000;
   const session: ChatSession = {
     token: result.token,
     contactId: result.contact_id,
     name: result.name,
     photoUrl: result.photo_url || null,
     createdAt: Date.now(),
+    expiresAt,
+    trusted: !!result.trusted,
   };
   saveChatSession(session);
   return session;
+}
+
+/** Sliding refresh — call periodically while user is active. Returns new expiry, or null if session invalid. */
+export async function touchChatSession(token: string): Promise<number | null> {
+  const { data, error } = await supabase.rpc("touch_chat_session" as any, { p_token: token });
+  if (error) return null;
+  const r = data as any;
+  if (!r?.valid) return null;
+  const exp = r.expires_at ? new Date(r.expires_at).getTime() : null;
+  if (exp) {
+    const cur = getChatSession();
+    if (cur && cur.token === token && cur.expiresAt !== exp) {
+      saveChatSession({ ...cur, expiresAt: exp });
+    }
+  }
+  return exp;
+}
+
+export type ActiveChatSession = {
+  id: string;
+  device_label: string | null;
+  trusted_device: boolean;
+  is_current: boolean;
+  created_at: string;
+  last_used_at: string;
+  expires_at: string;
+};
+
+export async function listChatSessions(token: string): Promise<ActiveChatSession[]> {
+  const { data, error } = await supabase.rpc("list_my_chat_sessions" as any, { p_token: token });
+  if (error) throw error;
+  return (data || []) as ActiveChatSession[];
+}
+
+export async function revokeChatSession(token: string, sessionId: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc("revoke_chat_session" as any, {
+    p_token: token, p_session_id: sessionId,
+  });
+  if (error) throw error;
+  return !!data;
+}
+
+export async function revokeAllOtherChatSessions(token: string): Promise<number> {
+  const { data, error } = await supabase.rpc("revoke_all_other_chat_sessions" as any, { p_token: token });
+  if (error) throw error;
+  return Number(data) || 0;
+}
+
+export async function revokeAllChatSessions(token: string): Promise<number> {
+  const { data, error } = await supabase.rpc("revoke_all_chat_sessions" as any, { p_token: token });
+  if (error) throw error;
+  return Number(data) || 0;
 }
 
 export async function getChatContacts(token: string) {
