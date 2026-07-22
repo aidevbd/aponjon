@@ -14,6 +14,8 @@ export function Header() {
   const isAdminLogin = location.pathname === "/admin" || location.pathname.startsWith("/admin/login");
   const isAdminDashboard = location.pathname.startsWith("/admin/dashboard");
   const isRoot = location.pathname === "/";
+  // Back button only for flow sub-steps, not top-level destinations
+  const backAllowed = /^\/(verify|forgot-password|reset-password|oauth\/consent)/.test(location.pathname);
   const isChat = location.pathname.startsWith("/chat");
   const { totalUnread, hasSession } = useGlobalChatNotifier();
   const [gateOpen, setGateOpen] = useState(false);
@@ -45,7 +47,7 @@ export function Header() {
     >
       <div className="container mx-auto flex h-14 items-center justify-between gap-2 px-3 sm:h-16 sm:px-4">
         {/* Mobile: back button on sub-pages */}
-        {!isRoot && (
+        {backAllowed && (
           <button
             type="button"
             onClick={handleBack}
@@ -125,7 +127,7 @@ export function Header() {
           )}
 
           {/* Spacer to balance flex when only back button is on left */}
-          {!isRoot && !showChatIcon && <span className="w-10 sm:hidden" aria-hidden />}
+          {!isRoot && !showChatIcon && !backAllowed && <span className="w-10 sm:hidden" aria-hidden />}
         </div>
 
       </div>
