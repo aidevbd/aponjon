@@ -1,6 +1,8 @@
-import { Heart, ChevronLeft } from "lucide-react";
+import { Heart, ChevronLeft, MessageCircle } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useGlobalChatNotifier } from "@/hooks/useGlobalChatNotifier";
+
 
 export function Header() {
   const location = useLocation();
