@@ -276,49 +276,41 @@ export function ContactForm() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <div className="heirloom-chip mb-5 rounded-sm border p-4">
-        <div className="flex items-start gap-3">
-          <Info className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--heirloom-gold-deep))]" />
-          <div>
-            <p className="text-sm font-medium text-[hsl(var(--heirloom-ink))]">৩ ধাপে তথ্য যোগ করুন</p>
-            <p className="text-xs text-[hsl(var(--heirloom-ink-mute))] mt-1">প্রথমে প্রয়োজনীয় তথ্য, তারপর অতিরিক্ত তথ্য, শেষে সিক্রেট কোড। চাইলে মাঝপথে আগের ধাপে ফিরে যেতে পারবেন।</p>
-          </div>
+      {/* Compact step indicator with active label — replaces the old info box */}
+      <div className="mb-6 flex flex-col items-center gap-2">
+        <div className="flex items-center gap-2">
+          {[1, 2, 3].map((s) => (
+            <div key={s} className="flex items-center gap-2">
+              <button
+                onClick={() => setStep(s)}
+                aria-label={`ধাপ ${s}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all ${
+                  s === step
+                    ? "bg-[hsl(var(--heirloom-gold-deep))] text-[hsl(var(--heirloom-bg))] shadow-[0_2px_8px_hsl(var(--heirloom-gold-deep)/0.35)]"
+                    : s < step
+                    ? "bg-[hsl(var(--heirloom-gold))]/25 text-[hsl(var(--heirloom-gold-deep))]"
+                    : "bg-[hsl(var(--heirloom-line))]/40 text-[hsl(var(--heirloom-ink-mute))]"
+                }`}
+              >
+                {s}
+              </button>
+              {s < 3 && <div className={`h-0.5 w-8 rounded ${s < step ? "bg-[hsl(var(--heirloom-gold))]/60" : "bg-[hsl(var(--heirloom-line))]"}`} />}
+            </div>
+          ))}
         </div>
+        <p className="text-[11px] tracking-wide text-[hsl(var(--heirloom-ink-mute))]">
+          ধাপ {step} / ৩ · {step === 1 ? "মূল তথ্য" : step === 2 ? "অতিরিক্ত তথ্য" : "সিক্রেট কোড"}
+        </p>
       </div>
 
-      <div className="mb-8 flex items-center justify-center gap-2">
-        {[1, 2, 3].map((s) => (
-          <div key={s} className="flex items-center gap-2">
-            <button
-              onClick={() => setStep(s)}
-              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all ${
-                s === step
-                  ? "bg-[hsl(var(--heirloom-gold-deep))] text-[hsl(var(--heirloom-bg))] shadow-[0_2px_8px_hsl(var(--heirloom-gold-deep)/0.35)]"
-                  : s < step
-                  ? "bg-[hsl(var(--heirloom-gold))]/25 text-[hsl(var(--heirloom-gold-deep))]"
-                  : "bg-[hsl(var(--heirloom-line))]/40 text-[hsl(var(--heirloom-ink-mute))]"
-              }`}
-            >
-              {s}
-            </button>
-            {s < 3 && <div className={`h-0.5 w-8 rounded ${s < step ? "bg-[hsl(var(--heirloom-gold))]/60" : "bg-[hsl(var(--heirloom-line))]"}`} />}
-          </div>
-        ))}
-      </div>
 
       <AnimatePresence mode="wait">
         {step === 1 && (
           <motion.div key="step1" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-5">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-display font-semibold text-foreground">মূল তথ্য</h3>
-              <p className="text-sm text-muted-foreground">আপনার নাম ও যোগাযোগের তথ্য দিন</p>
-            </div>
-            <div className="heirloom-chip rounded-sm border p-3 text-xs">
-              * চিহ্নিত তথ্যগুলো আবশ্যক। ফোন নম্বরটি ভবিষ্যতে আপনার তথ্য খুঁজে পেতে ব্যবহার হবে।
-            </div>
             <div className="flex justify-center">
               <PhotoUpload value={form.photoUrl || undefined} onChange={(url) => updateForm("photoUrl", url || "")} />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="name" className="flex items-center gap-2"><Heart className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> আপনার নাম *</Label>
               <Input id="name" placeholder="আপনার পূর্ণ নাম" value={form.name} onChange={(e) => updateForm("name", e.target.value)} className="bg-card" />
@@ -340,13 +332,8 @@ export function ContactForm() {
 
         {step === 2 && (
           <motion.div key="step2" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-5">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-display font-semibold text-foreground">অতিরিক্ত তথ্য</h3>
-              <p className="text-sm text-muted-foreground">ক্যাটাগরি ও অন্যান্য বিবরণ</p>
-            </div>
-            <div className="heirloom-chip rounded-sm border p-3 text-xs">
-              এই ধাপের সব তথ্য ঐচ্ছিক। যতটুকু দরকার ততটুকুই দিন।
-            </div>
+            <p className="text-center text-xs italic text-[hsl(var(--heirloom-ink-mute))]">এই ধাপের সব তথ্য ঐচ্ছিক — যতটুকু দরকার ততটুকুই দিন।</p>
+
             <div className="space-y-2">
               <Label className="flex items-center gap-2">সম্পর্ক/ক্যাটাগরি</Label>
               <Select value={form.category} onValueChange={(v) => updateForm("category", v)}>
@@ -390,13 +377,10 @@ export function ContactForm() {
 
         {step === 3 && (
           <motion.div key="step3" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-5">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-display font-semibold text-foreground">সিক্রেট কোড (ঐচ্ছিক)</h3>
-              <p className="text-sm text-muted-foreground">ভবিষ্যতে নিজের তথ্য এক্সেস করতে</p>
-            </div>
-            <div className="heirloom-chip rounded-sm border p-3 text-xs">
-              ছোট কিন্তু মনে রাখার মতো কোড দিন—যেমন ডাকনাম, বিশেষ শব্দ, বা সংখ্যা+অক্ষরের মিশ্রণ।
-            </div>
+            <p className="text-center text-xs italic text-[hsl(var(--heirloom-ink-mute))]">
+              ভবিষ্যতে নিজে তথ্য এডিট করতে ছোট কিন্তু মনে রাখার মতো কোড দিন — ডাকনাম, বিশেষ শব্দ বা সংখ্যা+অক্ষরের মিশ্রণ।
+            </p>
+
             <div className="space-y-2">
               <Label htmlFor="secretCode" className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> সিক্রেট কোড</Label>
               <Input id="secretCode" placeholder="আপনার গোপন কোড (যেমন: জন্মতারিখ, নিকনেম)" value={form.secretCode} onChange={(e) => updateForm("secretCode", e.target.value)} className="bg-card" />
