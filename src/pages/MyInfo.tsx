@@ -169,72 +169,38 @@ const MyInfo = () => {
               </div>
             </div>
 
-            {/* Quick actions */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-              <button
-                type="button"
-                onClick={() => callPhone(contact.phone)}
-                className="contact-action-card flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 transition-colors hover:bg-secondary"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
-                  <Phone className="h-6 w-6 text-primary" />
-                </div>
-                <span className="text-sm font-medium text-foreground">কল করুন</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => hasWhatsApp && openWhatsApp(contact.whatsapp!.split(",")[0].trim())}
-                disabled={!hasWhatsApp}
-                className="contact-action-card flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:bg-muted"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
-                  <MessageCircle className="h-6 w-6 text-primary" />
-                </div>
-                <span className="text-sm font-medium text-foreground">WhatsApp</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => hasIMO && openIMO(contact.imo!.split(",")[0].trim())}
-                disabled={!hasIMO}
-                className="contact-action-card flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:bg-muted"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
-                  <Video className="h-6 w-6 text-primary" />
-                </div>
-                <span className="text-sm font-medium text-foreground">IMO</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => hasFacebook && openFacebook(contact.facebook!)}
-                disabled={!hasFacebook}
-                className="contact-action-card flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:bg-muted"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
-                  <ExternalLink className="h-6 w-6 text-primary" />
-                </div>
-                <span className="text-sm font-medium text-foreground">Facebook</span>
-              </button>
+            {/* Primary actions — this is user's OWN profile, so main actions are: edit self, message admin, share card */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <Button onClick={startEdit} className="h-12 gap-2 rounded-xl">
+                <Pencil className="h-4 w-4" /> তথ্য এডিট
+              </Button>
+              {hasChat ? (
+                <Link to="/chat">
+                  <Button variant="outline" className="w-full h-12 gap-2 rounded-xl">
+                    <MessageCircle className="h-4 w-4" /> এডমিনকে মেসেজ
+                  </Button>
+                </Link>
+              ) : (
+                <Link to="/verify?next=chat">
+                  <Button variant="outline" className="w-full h-12 gap-2 rounded-xl">
+                    <MessageCircle className="h-4 w-4" /> চ্যাট চালু করুন
+                  </Button>
+                </Link>
+              )}
             </div>
 
-            {hasTelegram && (
-              <div className="mb-6">
-                <button
-                  type="button"
-                  onClick={() => openTelegram(contact.telegram!.split(",")[0].trim())}
-                  className="contact-action-card w-full flex items-center justify-center gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:bg-secondary"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
-                    <Send className="h-5 w-5 text-primary" />
-                  </div>
-                  <span className="text-sm font-medium text-foreground">Telegram</span>
-                </button>
+            {/* OTP-auth banner — set secret code prompt */}
+            {isOtpAuth && (
+              <div className="mb-4 flex items-start gap-2 rounded-xl border border-[hsl(var(--heirloom-gold)/0.35)] bg-[hsl(var(--heirloom-gold)/0.08)] p-3">
+                <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5 text-[hsl(var(--heirloom-gold-deep))]" />
+                <p className="text-xs text-[hsl(var(--heirloom-ink-soft))]">
+                  ভবিষ্যতে সহজে সাইন-ইন করতে একটি সিক্রেট কোড সেট করে রাখুন।{" "}
+                  <button onClick={startEdit} className="underline underline-offset-2 text-[hsl(var(--heirloom-gold-deep))]">এডিটে গিয়ে যোগ করুন</button>
+                </p>
               </div>
             )}
 
-            {/* Note */}
+            {/* Note / পরিচিতি */}
             {contact.note && (
               <div className="mb-4 rounded-xl border border-border bg-card p-4">
                 <div className="flex items-center gap-2 mb-2 text-muted-foreground">
@@ -245,25 +211,25 @@ const MyInfo = () => {
               </div>
             )}
 
-            {/* Contact info */}
+            {/* যোগাযোগ তথ্য — read-only, no self-call/copy buttons */}
             <div className="rounded-xl border border-border bg-card p-4 mb-4">
               <h3 className="text-sm font-medium text-muted-foreground mb-3">যোগাযোগ তথ্য</h3>
               <div className="space-y-3">
-                <InfoRow icon={<Phone className="h-5 w-5 text-primary" />} label="মোবাইল নম্বর (মূল)" value={contact.phone} onCopy={() => copyToClipboard(contact.phone)} />
+                <ReadRow icon={<Phone className="h-5 w-5 text-primary" />} label="মোবাইল নম্বর" value={contact.phone} mono />
                 {hasWhatsApp && contact.whatsapp!.split(",").map((n, i) => (
-                  <InfoRow key={`wa-${i}`} icon={<MessageCircle className="h-5 w-5 text-primary" />} label="WhatsApp" value={n.trim()} onCopy={() => copyToClipboard(n.trim())} />
+                  <ReadRow key={`wa-${i}`} icon={<MessageCircle className="h-5 w-5 text-primary" />} label="WhatsApp" value={n.trim()} mono />
                 ))}
                 {hasIMO && contact.imo!.split(",").map((n, i) => (
-                  <InfoRow key={`imo-${i}`} icon={<Video className="h-5 w-5 text-primary" />} label="IMO" value={n.trim()} onCopy={() => copyToClipboard(n.trim())} />
+                  <ReadRow key={`imo-${i}`} icon={<Video className="h-5 w-5 text-primary" />} label="IMO" value={n.trim()} mono />
                 ))}
                 {hasTelegram && contact.telegram!.split(",").map((n, i) => (
-                  <InfoRow key={`tg-${i}`} icon={<Send className="h-5 w-5 text-primary" />} label="Telegram" value={n.trim()} onCopy={() => copyToClipboard(n.trim())} />
+                  <ReadRow key={`tg-${i}`} icon={<Send className="h-5 w-5 text-primary" />} label="Telegram" value={n.trim()} mono />
                 ))}
                 {contact.email && (
-                  <InfoRow icon={<Mail className="h-5 w-5 text-primary" />} label="ইমেইল" value={contact.email} onCopy={() => copyToClipboard(contact.email!)} />
+                  <ReadRow icon={<Mail className="h-5 w-5 text-primary" />} label="ইমেইল" value={contact.email} />
                 )}
                 {hasFacebook && (
-                  <InfoRow icon={<Facebook className="h-5 w-5 text-primary" />} label="ফেসবুক" value={contact.facebook!} onCopy={() => copyToClipboard(contact.facebook!)} />
+                  <ReadRow icon={<Facebook className="h-5 w-5 text-primary" />} label="ফেসবুক" value={contact.facebook!} />
                 )}
               </div>
             </div>
@@ -274,45 +240,15 @@ const MyInfo = () => {
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">অতিরিক্ত তথ্য</h3>
                 <div className="space-y-3">
                   {contact.address && (
-                    <MetaRow icon={<MapPin className="h-5 w-5 text-primary" />} label="ঠিকানা" value={contact.address} />
+                    <ReadRow icon={<MapPin className="h-5 w-5 text-primary" />} label="ঠিকানা" value={contact.address} />
                   )}
                   {contact.birthday && (
-                    <MetaRow icon={<Calendar className="h-5 w-5 text-primary" />} label="জন্মদিন" value={new Date(contact.birthday).toLocaleDateString("bn-BD")} />
+                    <ReadRow icon={<Calendar className="h-5 w-5 text-primary" />} label="জন্মদিন" value={new Date(contact.birthday).toLocaleDateString("bn-BD")} />
                   )}
                 </div>
               </div>
             )}
 
-            {/* OTP-auth banner */}
-            {isOtpAuth && (
-              <div className="mb-4 flex items-start gap-2 rounded-xl border border-[hsl(var(--heirloom-gold)/0.35)] bg-[hsl(var(--heirloom-gold)/0.08)] p-3">
-                <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5 text-[hsl(var(--heirloom-gold-deep))]" />
-                <p className="text-xs text-[hsl(var(--heirloom-ink-soft))]">
-                  চ্যাট চালু করতে ও ভবিষ্যতে সহজে সাইন-ইন করতে একটি সিক্রেট কোড সেট করে রাখুন।{" "}
-                  <button onClick={startEdit} className="underline underline-offset-2 text-[hsl(var(--heirloom-gold-deep))]">এডিটে গিয়ে যোগ করুন</button>
-                </p>
-              </div>
-            )}
-
-            {/* Bottom actions */}
-            <div className="flex gap-3 mt-6">
-              <Button variant="outline" className="flex-1 gap-2 h-12 rounded-xl" onClick={startEdit}>
-                <Pencil className="h-4 w-4" /> এডিট
-              </Button>
-              {hasChat ? (
-                <Link to="/chat" className="flex-1">
-                  <Button variant="outline" className="w-full gap-2 h-12 rounded-xl">
-                    <MessageCircle className="h-4 w-4" /> মেসেজ
-                  </Button>
-                </Link>
-              ) : (
-                <Link to="/verify?next=chat" className="flex-1">
-                  <Button variant="outline" className="w-full gap-2 h-12 rounded-xl">
-                    <MessageCircle className="h-4 w-4" /> চ্যাট চালু
-                  </Button>
-                </Link>
-              )}
-            </div>
 
             <button
               onClick={handleLogout}
@@ -409,35 +345,19 @@ const MyInfo = () => {
   );
 };
 
-function InfoRow({ icon, label, value, onCopy }: { icon: React.ReactNode; label: string; value: string; onCopy: () => void }) {
+function ReadRow({ icon, label, value, mono }: { icon: React.ReactNode; label: string; value: string; mono?: boolean }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-start gap-3">
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary shrink-0">
         {icon}
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-base font-medium text-foreground break-words">{value}</p>
+        <p className={`text-[15px] text-foreground break-words ${mono ? "font-mono" : ""}`}>{value}</p>
       </div>
-      <button onClick={onCopy} className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground shrink-0" aria-label="কপি">
-        <Copy className="h-4 w-4" />
-      </button>
     </div>
   );
 }
 
-function MetaRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
-        {icon}
-      </div>
-      <div>
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-sm text-foreground">{value}</p>
-      </div>
-    </div>
-  );
-}
 
 export default MyInfo;
