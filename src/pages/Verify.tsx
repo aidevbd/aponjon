@@ -43,7 +43,7 @@ const Verify = () => {
   const [otp, setOtp] = useState("");
   const [otpToken, setOtpToken] = useState("");
   const [loading, setLoading] = useState(false);
-  const [trustDevice, setTrustDevice] = useState(false);
+  const [trustDevice, setTrustDevice] = useState(true);
 
   const intentLabel =
     next === "chat" ? "চ্যাট চালু করতে" :
