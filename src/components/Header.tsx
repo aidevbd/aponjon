@@ -15,7 +15,7 @@ export function Header() {
   const isAdminDashboard = location.pathname.startsWith("/admin/dashboard");
   const isRoot = location.pathname === "/";
   // Back button only for flow sub-steps, not top-level destinations
-  const backAllowed = /^\/(verify|forgot-password|reset-password|oauth\/consent)/.test(location.pathname);
+  const backAllowed = /^\/(verify|forgot-password|reset-password|oauth\/consent|chat)/.test(location.pathname);
   const isChat = location.pathname.startsWith("/chat");
   const { totalUnread, hasSession } = useGlobalChatNotifier();
   const [gateOpen, setGateOpen] = useState(false);
