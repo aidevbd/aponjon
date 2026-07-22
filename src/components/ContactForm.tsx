@@ -276,35 +276,33 @@ export function ContactForm() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <div className="heirloom-chip mb-5 rounded-sm border p-4">
-        <div className="flex items-start gap-3">
-          <Info className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--heirloom-gold-deep))]" />
-          <div>
-            <p className="text-sm font-medium text-[hsl(var(--heirloom-ink))]">৩ ধাপে তথ্য যোগ করুন</p>
-            <p className="text-xs text-[hsl(var(--heirloom-ink-mute))] mt-1">প্রথমে প্রয়োজনীয় তথ্য, তারপর অতিরিক্ত তথ্য, শেষে সিক্রেট কোড। চাইলে মাঝপথে আগের ধাপে ফিরে যেতে পারবেন।</p>
-          </div>
+      {/* Compact step indicator with active label — replaces the old info box */}
+      <div className="mb-6 flex flex-col items-center gap-2">
+        <div className="flex items-center gap-2">
+          {[1, 2, 3].map((s) => (
+            <div key={s} className="flex items-center gap-2">
+              <button
+                onClick={() => setStep(s)}
+                aria-label={`ধাপ ${s}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all ${
+                  s === step
+                    ? "bg-[hsl(var(--heirloom-gold-deep))] text-[hsl(var(--heirloom-bg))] shadow-[0_2px_8px_hsl(var(--heirloom-gold-deep)/0.35)]"
+                    : s < step
+                    ? "bg-[hsl(var(--heirloom-gold))]/25 text-[hsl(var(--heirloom-gold-deep))]"
+                    : "bg-[hsl(var(--heirloom-line))]/40 text-[hsl(var(--heirloom-ink-mute))]"
+                }`}
+              >
+                {s}
+              </button>
+              {s < 3 && <div className={`h-0.5 w-8 rounded ${s < step ? "bg-[hsl(var(--heirloom-gold))]/60" : "bg-[hsl(var(--heirloom-line))]"}`} />}
+            </div>
+          ))}
         </div>
+        <p className="text-[11px] tracking-wide text-[hsl(var(--heirloom-ink-mute))]">
+          ধাপ {step} / ৩ · {step === 1 ? "মূল তথ্য" : step === 2 ? "অতিরিক্ত তথ্য" : "সিক্রেট কোড"}
+        </p>
       </div>
 
-      <div className="mb-8 flex items-center justify-center gap-2">
-        {[1, 2, 3].map((s) => (
-          <div key={s} className="flex items-center gap-2">
-            <button
-              onClick={() => setStep(s)}
-              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all ${
-                s === step
-                  ? "bg-[hsl(var(--heirloom-gold-deep))] text-[hsl(var(--heirloom-bg))] shadow-[0_2px_8px_hsl(var(--heirloom-gold-deep)/0.35)]"
-                  : s < step
-                  ? "bg-[hsl(var(--heirloom-gold))]/25 text-[hsl(var(--heirloom-gold-deep))]"
-                  : "bg-[hsl(var(--heirloom-line))]/40 text-[hsl(var(--heirloom-ink-mute))]"
-              }`}
-            >
-              {s}
-            </button>
-            {s < 3 && <div className={`h-0.5 w-8 rounded ${s < step ? "bg-[hsl(var(--heirloom-gold))]/60" : "bg-[hsl(var(--heirloom-line))]"}`} />}
-          </div>
-        ))}
-      </div>
 
       <AnimatePresence mode="wait">
         {step === 1 && (
