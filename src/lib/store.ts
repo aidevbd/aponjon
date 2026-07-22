@@ -144,6 +144,7 @@ export async function updateVerifiedContact(
     address?: string;
     blood_group?: string;
     birthday?: string;
+    photo_url?: string | null;
   }
 ) {
   const { data, error } = await supabase.rpc("update_verified_contact", {
@@ -161,10 +162,13 @@ export async function updateVerifiedContact(
     p_address: updates.address ?? undefined,
     p_blood_group: updates.blood_group ?? undefined,
     p_birthday: updates.birthday ?? undefined,
-  });
+    // empty string signals "clear photo"; undefined leaves it unchanged
+    p_photo_url: updates.photo_url === null ? "" : updates.photo_url ?? undefined,
+  } as any);
   if (error) throw error;
   return data;
 }
+
 
 // ---------- OTP ----------
 export async function generateOtp(phone: string): Promise<GenerateOtpStatus> {
