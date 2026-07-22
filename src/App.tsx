@@ -1,25 +1,45 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
-import AddContact from "./pages/AddContact";
-import Verify from "./pages/Verify";
-import MyInfo from "./pages/MyInfo";
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
-import Chat from "./pages/Chat";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import OAuthConsent from "./pages/OAuthConsent";
-import NotFound from "./pages/NotFound";
 import { AdminProtectedRoute } from "./components/AdminProtectedRoute";
 import { ChatFloatingButton } from "./components/ChatFloatingButton";
 import { MobileBottomNav } from "./components/MobileBottomNav";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
+// Route-level code splitting: keep the initial bundle small.
+// Home (`/`) stays eager for fastest first paint; everything else lazy-loads.
+const AddContact = lazy(() => import("./pages/AddContact"));
+const Verify = lazy(() => import("./pages/Verify"));
+const MyInfo = lazy(() => import("./pages/MyInfo"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const Chat = lazy(() => import("./pages/Chat"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
 const queryClient = new QueryClient();
+
+/** Minimal heirloom-toned fallback while a route chunk is downloading. */
+function RouteFallback() {
+  return (
+    <div
+      className="flex min-h-dvh items-center justify-center bg-[hsl(var(--heirloom-bg))]"
+      aria-busy="true"
+      aria-live="polite"
+    >
+      <div className="flex flex-col items-center gap-3">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[hsl(var(--heirloom-gold)/0.25)] border-t-[hsl(var(--heirloom-gold-deep))]" />
+        <p className="text-[13px] text-[hsl(var(--heirloom-ink-soft))]">অপেক্ষা করুন…</p>
+      </div>
+    </div>
+  );
+}
 
 const App = () => (
   <ErrorBoundary>
@@ -35,20 +55,22 @@ const App = () => (
             মূল কন্টেন্টে যান
           </a>
           <ErrorBoundary>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/add" element={<AddContact />} />
-              <Route path="/access" element={<Navigate to="/verify?next=view" replace />} />
-              <Route path="/verify" element={<Verify />} />
-              <Route path="/me" element={<MyInfo />} />
-              <Route path="/admin" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
-              <Route path="/chat" element={<Chat />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <Suspense fallback={<RouteFallback />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/add" element={<AddContact />} />
+                <Route path="/access" element={<Navigate to="/verify?next=view" replace />} />
+                <Route path="/verify" element={<Verify />} />
+                <Route path="/me" element={<MyInfo />} />
+                <Route path="/admin" element={<AdminLogin />} />
+                <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </ErrorBoundary>
           <ChatFloatingButton />
           <MobileBottomNav />
