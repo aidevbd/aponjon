@@ -132,21 +132,6 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    const syncConnectivity = () => setIsOffline(!navigator.onLine);
-    const syncQueueCount = () => setQueuedCount(selectedContact ? getOfflineQueueCountForContact(selectedContact.id) : 0);
-    syncConnectivity();
-    syncQueueCount();
-    window.addEventListener("online", syncConnectivity);
-    window.addEventListener("offline", syncConnectivity);
-    window.addEventListener("offline-chat-queue-changed", syncQueueCount as EventListener);
-    return () => {
-      window.removeEventListener("online", syncConnectivity);
-      window.removeEventListener("offline", syncConnectivity);
-      window.removeEventListener("offline-chat-queue-changed", syncQueueCount as EventListener);
-    };
-  }, [selectedContact]);
-
-  useEffect(() => {
     if (selectedContact) {
       document.body.setAttribute("data-immersive", "true");
       return () => document.body.removeAttribute("data-immersive");
@@ -165,104 +150,16 @@ const Chat = () => {
     return () => clearInterval(heartbeat);
   }, [session]);
 
-  useEffect(() => {
-    if (!session || contacts.length === 0) return;
-    const ids = contacts.map(c => c.id);
-    const fetchPresence = async () => {
-      try {
-        const { data } = await supabase.rpc("get_user_presence", { p_contact_ids: ids });
-        if (data) {
-          const map: Record<string, { is_online: boolean; last_seen_at: string }> = {};
-          (data as any[]).forEach(p => { map[p.contact_id] = { is_online: p.is_online, last_seen_at: p.last_seen_at }; });
-          setPresenceMap(map);
-        }
-      } catch {}
-    };
-    fetchPresence();
-    const interval = setInterval(fetchPresence, 20000);
-    const idSet = new Set(ids);
-    const channel = supabase
-      .channel(`presence-user-${session.contactId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "user_presence" }, (payload) => {
-        const row: any = payload.new || payload.old;
-        if (!row || !idSet.has(row.contact_id)) return;
-        setPresenceMap(prev => ({ ...prev, [row.contact_id]: { is_online: !!row.is_online, last_seen_at: row.last_seen_at } }));
-      })
-      .subscribe();
-    return () => { clearInterval(interval); supabase.removeChannel(channel); };
-  }, [session, contacts]);
-
-  useEffect(() => {
-    if (!session || !selectedContact) return;
-    const sortedIds = [session.contactId, selectedContact.id].sort();
-    const topic = `msg:${sortedIds[0]}:${sortedIds[1]}`;
-    const channel = supabase
-      .channel(topic, { config: { private: false } })
-      .on("broadcast", { event: "new_message" }, (payload) => {
-        const data = payload.payload as { id: string; sender_id: string; receiver_id: string };
-        if (!data) return;
-        if (selectedContact && (
-          (data.sender_id === selectedContact.id && data.receiver_id === session.contactId) ||
-          (data.sender_id === session.contactId && data.receiver_id === selectedContact.id)
-        )) {
-          void loadMessages(selectedContact);
-        }
-        if (data.receiver_id === session.contactId && data.sender_id !== session.contactId) {
-          notifyNewMessage();
-        }
-        if (data.receiver_id === session.contactId && data.sender_id !== selectedContact?.id) {
-          setUnreadMap((prev) => ({ ...prev, [data.sender_id]: (prev[data.sender_id] || 0) + 1 }));
-        }
-      })
-      .on("broadcast", { event: "msg_update" }, (payload) => {
-        const data = payload.payload as { id: string; sender_id: string; receiver_id: string; event: string };
-        if (!data || !selectedContact) return;
-        const inThread =
-          (data.sender_id === selectedContact.id && data.receiver_id === session.contactId) ||
-          (data.sender_id === session.contactId && data.receiver_id === selectedContact.id);
-        if (!inThread) return;
-        if (msgUpdateTimerRef.current) return;
-        msgUpdateTimerRef.current = window.setTimeout(() => {
-          msgUpdateTimerRef.current = null;
-          void loadMessages(selectedContact);
-        }, 200);
-      })
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-      if (msgUpdateTimerRef.current) { clearTimeout(msgUpdateTimerRef.current); msgUpdateTimerRef.current = null; }
-    };
-  }, [session, selectedContact]);
-
-  useEffect(() => {
-    if (!session || !selectedContact) { setIsOtherTyping(false); typingChannelRef.current = null; return; }
-    const channelName = `typing:${[session.contactId, selectedContact.id].sort().join(":")}`;
-    const channel = supabase.channel(channelName)
-      .on("broadcast", { event: "typing" }, (payload) => {
-        if (payload.payload?.sender_id === selectedContact.id) {
-          setIsOtherTyping(true);
-          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-          typingTimeoutRef.current = setTimeout(() => setIsOtherTyping(false), 3000);
-        }
-      })
-      .subscribe();
-    typingChannelRef.current = channel;
-    return () => {
-      typingChannelRef.current = null;
-      supabase.removeChannel(channel);
-      setIsOtherTyping(false);
-    };
-  }, [session, selectedContact]);
-
-  const emitTyping = () => {
-    if (!session || !selectedContact) return;
-    const now = Date.now();
-    if (now - lastTypingRef.current < 2000) return;
-    lastTypingRef.current = now;
-    const channel = typingChannelRef.current;
-    if (!channel) return;
-    void channel.send({ type: "broadcast", event: "typing", payload: { sender_id: session.contactId } });
-  };
+  useChatRealtime({
+    myContactId: session?.contactId,
+    otherContactId: selectedContact?.id,
+    onThreadEvent: useCallback(() => {
+      if (selectedContact) void loadMessages(selectedContact);
+    }, [selectedContact]),
+    onIncomingFromOther: useCallback((senderId: string) => {
+      setUnreadMap((prev) => ({ ...prev, [senderId]: (prev[senderId] || 0) + 1 }));
+    }, []),
+  });
 
   const { newBelowCount, scrollToBottom, resetForNewThread } = useSmartAutoScroll(
     messageListRef,
