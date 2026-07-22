@@ -91,14 +91,37 @@ export function ContactForm() {
       });
 
       // Auto-create a chat session if the user set a secret code so messaging
-      // works with a single tap on the success screen.
+      // works with a single tap on the success screen. Also seed MeSession so
+      // /me works without re-verification.
       if (form.secretCode && form.secretCode.trim()) {
         try {
           const session = await createChatSession(primaryPhone, form.secretCode.trim());
           if (session) setChatReady(true);
         } catch {
-          // Non-fatal: user can still sign in via /access
+          // Non-fatal
         }
+        // Seed unified MeSession for view/edit on /me
+        try {
+          saveMeSession(
+            { type: "secret", phone: primaryPhone, secretCode: form.secretCode.trim() },
+            {
+              name: form.name,
+              phone: primaryPhone,
+              whatsapp: messengers.whatsapp,
+              imo: messengers.imo,
+              telegram: messengers.telegram,
+              facebook: form.facebook,
+              email: form.email,
+              category: form.category || "অন্যান্য",
+              custom_category: form.customCategory,
+              note: form.note,
+              address: form.address,
+              blood_group: form.bloodGroup,
+              birthday: form.birthday,
+              photo_url: form.photoUrl,
+            },
+          );
+        } catch { /* non-fatal */ }
       }
 
       setSubmitted(true);
