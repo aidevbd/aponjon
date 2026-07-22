@@ -998,7 +998,7 @@ const Chat = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className="font-medium text-foreground text-sm truncate">{c.name} <span className="text-[10px] love-badge ml-1">এডমিন</span></div>
+                          <div className="font-medium text-foreground text-sm truncate">{c.name} <span className="text-[10px] love-badge ml-1">আপনার আপনজন</span></div>
                           {contactPreviews[c.id]?.time && (
                             <span className="text-[10px] text-muted-foreground shrink-0">{formatTime(contactPreviews[c.id].time!)}</span>
                           )}
