@@ -337,19 +337,37 @@ const AdminDashboard = () => {
               অ্যাডমিন
             </span>
           </div>
-          <div className="hidden md:flex items-center gap-2 text-[12px] text-[hsl(var(--heirloom-ink-soft))]">
-            <span>{stats.total} কন্টাক্ট</span>
-            {totalUnread > 0 && (
-              <>
-                <span aria-hidden className="h-3 w-px bg-[hsl(var(--heirloom-line))]" />
-                <span className="text-[hsl(var(--heirloom-gold-deep))]">{totalUnread} অপঠিত</span>
-              </>
-            )}
-            {upcomingBirthdays.length > 0 && (
-              <>
-                <span aria-hidden className="h-3 w-px bg-[hsl(var(--heirloom-line))]" />
-                <span>{upcomingBirthdays.length} আসন্ন জন্মদিন</span>
-              </>
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-2 text-[12px] text-[hsl(var(--heirloom-ink-soft))]">
+              <span>{stats.total} কন্টাক্ট</span>
+              {totalUnread > 0 && (
+                <>
+                  <span aria-hidden className="h-3 w-px bg-[hsl(var(--heirloom-line))]" />
+                  <span className="text-[hsl(var(--heirloom-gold-deep))]">{totalUnread} অপঠিত</span>
+                </>
+              )}
+              {upcomingBirthdays.length > 0 && (
+                <>
+                  <span aria-hidden className="h-3 w-px bg-[hsl(var(--heirloom-line))]" />
+                  <span>{upcomingBirthdays.length} আসন্ন জন্মদিন</span>
+                </>
+              )}
+            </div>
+            {activeTab !== "chat" && (
+              <button
+                type="button"
+                onClick={() => setActiveTab("chat")}
+                aria-label={totalUnread > 0 ? `চ্যাট — ${totalUnread}টি অপঠিত` : "চ্যাট খুলুন"}
+                className="relative flex h-10 w-10 items-center justify-center rounded-full text-[hsl(var(--heirloom-ink))] hover:bg-[hsl(var(--heirloom-cream)/0.6)] active:scale-95 transition-transform duration-150 touch-manipulation"
+                style={{ WebkitTapHighlightColor: "transparent" }}
+              >
+                <MessageCircle className="h-5 w-5" />
+                {totalUnread > 0 && (
+                  <span className="absolute top-1 right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[hsl(var(--heirloom-gold))] px-1 text-[10px] font-semibold text-[hsl(var(--heirloom-ink))] shadow">
+                    {totalUnread > 99 ? "99+" : totalUnread}
+                  </span>
+                )}
+              </button>
             )}
           </div>
         </div>
