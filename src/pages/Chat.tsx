@@ -734,7 +734,7 @@ const Chat = () => {
                       className="text-foreground hover:text-primary transition-colors shrink-0 md:hidden"
                       aria-label="ফিরে যান"
                     >
-                      <ArrowLeft className="h-5 w-5" />
+                      <ChevronLeft className="h-5 w-5" />
                     </button>
                   ) : (
                     <button
@@ -742,7 +742,7 @@ const Chat = () => {
                       className="text-foreground hover:text-primary transition-colors shrink-0 md:hidden"
                       aria-label="পিছনে যান"
                     >
-                      <ArrowLeft className="h-5 w-5" />
+                      <ChevronLeft className="h-5 w-5" />
                     </button>
                   )}
                   <div className="flex items-center gap-2 min-w-0">
