@@ -1,13 +1,11 @@
 import { motion } from "framer-motion";
-import { ArrowRight, PlusCircle, ShieldCheck, MessageCircle } from "lucide-react";
+import { ArrowRight, PlusCircle, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { getMeSession } from "@/lib/userSession";
-import { getChatSession } from "@/lib/chatSession";
 
 const Index = () => {
   const hasMe = !!getMeSession();
-  const hasChat = !!getChatSession();
   return (
     <div className="flex min-h-app flex-col bg-[hsl(var(--heirloom-bg))]">
       <Header />
