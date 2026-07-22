@@ -34,6 +34,7 @@ import { JumpToLatest } from "@/components/chat/JumpToLatest";
 import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
 import { AutoResizeTextarea } from "@/components/chat/AutoResizeTextarea";
 import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
+import { useChatSessionKeepalive } from "@/hooks/useChatSessionKeepalive";
 
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
@@ -62,6 +63,7 @@ const Chat = () => {
   const navigate = useNavigate();
   const viewportHeight = useVisualViewportHeight();
   const isTouch = useIsTouchDevice();
+  useChatSessionKeepalive();
 
   // Lock body scroll while chat page is open so the fixed viewport never
   // shows blank space when mobile browser chrome hides/shows.

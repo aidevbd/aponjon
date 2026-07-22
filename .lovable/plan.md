@@ -1,41 +1,94 @@
-# ডেস্কটপ UX অডিট + প্ল্যান
+# চ্যাট সেশন UX — পূর্ণ মডেল
 
-মোবাইল অপটিমাইজেশন করতে গিয়ে ডেস্কটপে যেসব জায়গায় empty space, narrow content, বা native-mobile-only ইন্টারঅ্যাকশন থেকে যাচ্ছে সেগুলো সব ঠিক করব।
-
-## Priority 1 — বড় সমস্যা (must-fix)
-
-1. **অ্যাডমিন চ্যাট ট্যাব: two-pane split view (lg+)**
-   - বর্তমানে ডেস্কটপে চ্যাট খুললে বাম দিকে ন্যারো কন্টাক্ট লিস্ট, ডান দিকে ~60% ফাঁকা — messenger/WhatsApp-style desktop এ যেমন থাকে তেমন হবে না।
-   - Fix: `lg:grid lg:grid-cols-[320px_1fr]` — বাম কলামে user list সবসময় visible, ডানে thread; কোনো user select না করলে ডানে "চ্যাট বেছে নিন" placeholder।
-   - মোবাইলে current single-pane behavior অপরিবর্তিত।
-
-2. **পাবলিক `/chat` পেজ (signed-out state)**
-   - Login card 400px, চারপাশে বিশাল খালি জায়গা — কেন্দ্রে বসিয়ে দুইপাশে soft heirloom decoration/tagline দিয়ে ব্যালান্স করা।
-
-3. **হোম + অ্যাক্সেস পেজ**
-   - ডেস্কটপে vertical center হওয়ায় নিচে অনেক ফাঁকা — `min-height` টাইট করে content-hugging + subtle side decoration যোগ করে ব্যালান্স।
-
-## Priority 2 — polish
-
-4. **অ্যাডমিন কন্টাক্ট লিস্ট (lg+)**: ১৪৪০px-এ single-column list-item lines অনেক wide লাগে — `lg:grid lg:grid-cols-2 xl:grid-cols-2` করে density বাড়ানো (search/filter row full-width থাকবে)।
-
-5. **অ্যাডমিন Activity Log / Settings**: max-width টাইট করে center-align, empty right column ঠিক করা।
-
-6. **অ্যাডমিন হেডার**: `justify-between` এ logo বাম কোণে ও লগআউট ডান কোণে যা বিশাল ফাঁকা মাঝখান তৈরি করে — মাঝখানে subtle breadcrumb/section-label বসানো।
-
-7. **Hover states + keyboard focus rings** সব প্রধান বোতাম/লিংকে verify — ডেস্কটপে mouse users যেন consistent feedback পায়।
-
-## টেকনিক্যাল বিবরণ
-
-- সব ব্রেকপয়েন্ট Tailwind `sm/md/lg/xl` follow করবে; `lg: ≥1024px` থেকে desktop treatment।
-- `EmbeddedAdminChat.tsx` — root wrapper refactor: `AnimatePresence` মোবাইলে থাকবে, lg-এ দুই কলাম parallel render, ডান pane empty-state fallback সহ।
-- Framer motion animations preserved; শুধু layout container বদলাবে।
-- কোনো business logic / RPC / auth ফ্লো ছোঁয়া হবে না — pure presentational।
-
-## Verification
-
-প্রতিটা পেজে Playwright দিয়ে 1440×900 screenshot নিয়ে confirm করব যে empty space নেই এবং সব interactive element accessible।
+বর্তমান: ২৪ ঘণ্টা fixed, sessionStorage only, কোনো warning/refresh নেই।
+লক্ষ্য: WhatsApp Web-স্টাইল rolling সেশন + ইউজার-কন্ট্রোল।
 
 ---
 
-**Approve করলে P1 থেকে সিরিয়ালি শুরু করব** (chat two-pane আগে, তারপর home/access, তারপর P2)।
+## ১. ডাটাবেস পরিবর্তন
+
+`chat_sessions` টেবিলে নতুন কলাম:
+- `last_used_at timestamptz` — sliding expiry-র জন্য
+- `trusted_device boolean` — ইউজার "এই ডিভাইসে মনে রাখুন" চেপেছেন কি না
+- `device_label text` — UA থেকে ছোট নাম (যেমন "Chrome on Android")
+- `created_at timestamptz` (যদি না থাকে) — session list দেখানোর জন্য
+
+`create_chat_session` RPC আপডেট:
+- নতুন প্যারাম `p_trusted boolean` (default false)
+- Trusted হলে `expires_at = now() + 30 days`, নাহলে `now() + 24 hours`
+- `device_label`, `last_used_at` সেট
+- **পুরনো একই-ডিভাইসের সেশন ডিলিট নয়** — অন্য ডিভাইসে লগইন থাকা অক্ষুণ্ণ থাকবে
+
+নতুন RPC:
+- `touch_chat_session(p_token)` — `last_used_at = now()`; trusted হলে `expires_at = now() + 30 days` (sliding refresh)
+- `list_my_chat_sessions(p_token)` — সব active সেশন return (device_label, last_used_at, current কি না)
+- `revoke_chat_session(p_token, p_session_id)` — নির্দিষ্ট একটা রিভোক
+- `revoke_all_other_chat_sessions(p_token)` — বর্তমানটা ছাড়া সব রিভোক
+- `revoke_all_chat_sessions(p_token)` — নিজেরটাসহ সব (=সব ডিভাইস থেকে সাইন-আউট)
+
+---
+
+## ২. ফ্রন্টএন্ড — session storage
+
+`src/lib/chatSession.ts`:
+- `sessionStorage` → পলিসি-ভিত্তিক: trusted হলে `localStorage`, নাহলে `sessionStorage`
+- `ChatSession`-এ `trusted: boolean`, `expiresAt: number` (সার্ভার থেকে ফেরত) যোগ
+- `getChatSession()`-এ প্রি-এক্সপায়ারি চেক: expiry-র <২৪ ঘণ্টা বাকি থাকলে flag return করে যাতে UI toast দেখায়
+- `touchChatSession()` helper — প্রতি ১০ মিনিট বা প্রতি sendMessage-এ ব্যাকগ্রাউন্ডে কল
+
+---
+
+## ৩. Verify পেজে ট্রাস্টেড-ডিভাইস চয়েস
+
+`src/pages/Verify.tsx`:
+- সিক্রেট কোড ইনপুটের নিচে চেকবক্স: **"এই ডিভাইসে ৩০ দিন মনে রাখুন"** (ডিফল্ট off)
+- সহায়ক টেক্সট: *"শেয়ারড/পাবলিক ডিভাইসে চেক করবেন না।"*
+- ভ্যালু `createChatSession(phone, code, trusted)`-এ পাস
+
+---
+
+## ৪. Sliding refresh + pre-expiry warning
+
+`useGlobalChatNotifier`-এর মতো একটি hook `useChatSessionKeepalive`:
+- প্রতি ১০ মিনিটে `touch_chat_session` কল (visible tab-এ)
+- প্রতি sendMessage-এর পর একবার
+- প্রতিটি tick-এ expiry চেক — <২৪ ঘণ্টা বাকি হলে দিনে একবার সফট টোস্ট: *"সেশন শীঘ্রই শেষ হবে। একটিভ থাকতে চ্যাটে ঢুকুন।"* (localStorage flag দিয়ে duplicate আটকাব)
+- এক্সপায়ার হলে টোস্ট: *"নিরাপত্তার জন্য আবার যাচাই করুন"* → `/verify?next=chat`
+
+---
+
+## ৫. Settings-এ Active Sessions সেকশন
+
+`DashboardHome.tsx`-এর সেটিং অংশে (অথবা `/me`-তে) নতুন কার্ড **"সক্রিয় ডিভাইস"**:
+- সেশনের তালিকা: device label, "শেষ সক্রিয়: X মিনিট আগে", বর্তমান হলে "এই ডিভাইস" ব্যাজ
+- প্রতিটির পাশে "সাইন-আউট" বাটন → `revoke_chat_session`
+- নিচে দুটি বাটন:
+  - **"অন্য সব ডিভাইস থেকে সাইন-আউট"** (কনফার্মেশন সহ)
+  - **"সব ডিভাইস থেকে সাইন-আউট"** (destructive; কনফার্ম করলে নিজেও logout → `/`)
+
+`/me` পেজের সাইন-আউট বাটনের নিচে নতুন link: *"সব ডিভাইস থেকে বেরিয়ে যান"*।
+
+---
+
+## ৬. প্রযুক্তিগত ডিটেইলস
+
+- Device label: `navigator.userAgent` থেকে ক্লায়েন্টে parse (browser + OS), সার্ভারে string হিসেবে save
+- Rate limit: `revoke_all_*` fns-এ per-session rate limit (rate_limit_attempts টেবিল ব্যবহার)
+- Migration-এ existing rows-এ `last_used_at = created_at`, `trusted_device = false` backfill
+- `validate_chat_session` অপরিবর্তিত থাকবে (already checks `expires_at > now()`)
+- Grant: `chat_sessions`-এ SELECT/DELETE service_role only (RPC-এর মাধ্যমেই সব access)
+
+---
+
+## ৭. পরীক্ষার চেকলিস্ট
+
+- Trust off → sessionStorage, ২৪ ঘণ্টা; ট্যাব বন্ধ = লগআউট
+- Trust on → localStorage, ৩০ দিন; ট্যাব বন্ধ করলেও থাকে
+- একটিভ ইউজারের expiry কখনো hit করে না (sliding refresh কাজ করছে)
+- দুটি ডিভাইস থেকে লগইন → দুটোই তালিকায় দেখা যায়
+- এক ডিভাইস থেকে "অন্য সব সাইন-আউট" → অন্য ডিভাইসে next RPC 401 → verify redirect
+- Expiry-র ২৩ ঘণ্টা আগে টোস্ট আসে (একবারই)
+
+---
+
+কনফার্ম দিলে ধাপে ধাপে ইমপ্লিমেন্ট করব — মাইগ্রেশন প্রথমে, তারপর ক্লায়েন্ট।

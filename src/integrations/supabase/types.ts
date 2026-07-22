@@ -51,23 +51,32 @@ export type Database = {
         Row: {
           contact_id: string
           created_at: string
+          device_label: string | null
           expires_at: string
           id: string
+          last_used_at: string
           session_token: string
+          trusted_device: boolean
         }
         Insert: {
           contact_id: string
           created_at?: string
+          device_label?: string | null
           expires_at?: string
           id?: string
+          last_used_at?: string
           session_token: string
+          trusted_device?: boolean
         }
         Update: {
           contact_id?: string
           created_at?: string
+          device_label?: string | null
           expires_at?: string
           id?: string
+          last_used_at?: string
           session_token?: string
+          trusted_device?: boolean
         }
         Relationships: [
           {
@@ -471,10 +480,17 @@ export type Database = {
         Args: { p_action_type: string; p_key: string }
         Returns: boolean
       }
-      create_chat_session: {
-        Args: { p_phone: string; p_secret_code: string }
-        Returns: Json
-      }
+      create_chat_session:
+        | { Args: { p_phone: string; p_secret_code: string }; Returns: Json }
+        | {
+            Args: {
+              p_device_label?: string
+              p_phone: string
+              p_secret_code: string
+              p_trusted?: boolean
+            }
+            Returns: Json
+          }
       current_chat_session_contact: { Args: never; Returns: string }
       delete_admin_message: { Args: { p_message_id: string }; Returns: boolean }
       delete_message: {
@@ -606,6 +622,18 @@ export type Database = {
         }[]
       }
       is_current_user_admin: { Args: never; Returns: boolean }
+      list_my_chat_sessions: {
+        Args: { p_token: string }
+        Returns: {
+          created_at: string
+          device_label: string
+          expires_at: string
+          id: string
+          is_current: boolean
+          last_used_at: string
+          trusted_device: boolean
+        }[]
+      }
       log_admin_activity: {
         Args: {
           p_action_type: string
@@ -647,6 +675,15 @@ export type Database = {
       reset_rate_limit: {
         Args: { p_action_type: string; p_key: string }
         Returns: undefined
+      }
+      revoke_all_chat_sessions: { Args: { p_token: string }; Returns: number }
+      revoke_all_other_chat_sessions: {
+        Args: { p_token: string }
+        Returns: number
+      }
+      revoke_chat_session: {
+        Args: { p_session_id: string; p_token: string }
+        Returns: boolean
       }
       save_contact_with_hash:
         | {
@@ -733,6 +770,7 @@ export type Database = {
         Returns: Json
       }
       toggle_pin_message: { Args: { p_message_id: string }; Returns: boolean }
+      touch_chat_session: { Args: { p_token: string }; Returns: Json }
       unsend_message: {
         Args: { p_message_id: string; p_token: string }
         Returns: boolean
