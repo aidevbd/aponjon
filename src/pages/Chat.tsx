@@ -739,7 +739,7 @@ const Chat = () => {
                   ) : (
                     <button
                       onClick={() => { if (window.history.length > 1) navigate(-1); else navigate("/"); }}
-                      className="text-foreground hover:text-primary transition-colors shrink-0 md:hidden"
+                      className="text-foreground hover:text-primary transition-colors shrink-0"
                       aria-label="পিছনে যান"
                     >
                       <ChevronLeft className="h-5 w-5" />
