@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, PlusCircle, ShieldCheck, Pencil, MessageCircle } from "lucide-react";
+import { ArrowRight, PlusCircle, ShieldCheck, Pencil } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { getMeSession } from "@/lib/userSession";
