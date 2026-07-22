@@ -840,6 +840,26 @@ export type Database = {
             }
             Returns: boolean
           }
+        | {
+            Args: {
+              p_address?: string
+              p_birthday?: string
+              p_blood_group?: string
+              p_category?: string
+              p_custom_category?: string
+              p_email?: string
+              p_facebook?: string
+              p_imo?: string
+              p_name?: string
+              p_note?: string
+              p_phone: string
+              p_photo_url?: string
+              p_secret_code: string
+              p_telegram?: string
+              p_whatsapp?: string
+            }
+            Returns: boolean
+          }
       validate_chat_session: { Args: { p_token: string }; Returns: string }
       verify_and_get_contact: {
         Args: { p_phone: string; p_secret_code: string }
