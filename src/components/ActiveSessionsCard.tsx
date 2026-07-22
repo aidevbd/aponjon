@@ -182,9 +182,7 @@ export function ActiveSessionsCard() {
 
 
       {loading && !rows ? (
-        <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
-          <Loader2 className="h-3.5 w-3.5 animate-spin" /> লোড হচ্ছে…
-        </div>
+        <SessionsListSkeleton rows={2} />
       ) : rows && rows.length > 0 ? (
         <ul className="space-y-2">
           {rows.map((r) => {
