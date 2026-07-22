@@ -965,7 +965,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
                   >
                     {selectedUser.name}
                   </button>
-                  <span className="block text-[11px] text-muted-foreground truncate px-1 -mx-1 max-w-full">
+                  <span className="block text-[11px] text-muted-foreground whitespace-nowrap px-1 -mx-1">
                     {(() => {
                       const p = presenceMap[selectedUser.id];
                       const txt = formatLastSeen(p);
