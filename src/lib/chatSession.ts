@@ -136,6 +136,20 @@ export async function touchChatSession(token: string): Promise<number | null> {
   return exp;
 }
 
+/** Promote the current session's device to trusted (30 days). Returns new expiry ms or null. */
+export async function trustCurrentChatSession(token: string): Promise<number | null> {
+  const { data, error } = await supabase.rpc("trust_current_chat_session" as any, { p_token: token });
+  if (error) return null;
+  const r = data as any;
+  if (!r?.valid) return null;
+  const exp = r.expires_at ? new Date(r.expires_at).getTime() : null;
+  const cur = getChatSession();
+  if (cur && cur.token === token) {
+    saveChatSession({ ...cur, trusted: true, expiresAt: exp ?? cur.expiresAt });
+  }
+  return exp;
+}
+
 export type ActiveChatSession = {
   id: string;
   device_label: string | null;
