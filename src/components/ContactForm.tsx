@@ -332,13 +332,8 @@ export function ContactForm() {
 
         {step === 2 && (
           <motion.div key="step2" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-5">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-display font-semibold text-foreground">অতিরিক্ত তথ্য</h3>
-              <p className="text-sm text-muted-foreground">ক্যাটাগরি ও অন্যান্য বিবরণ</p>
-            </div>
-            <div className="heirloom-chip rounded-sm border p-3 text-xs">
-              এই ধাপের সব তথ্য ঐচ্ছিক। যতটুকু দরকার ততটুকুই দিন।
-            </div>
+            <p className="text-center text-xs italic text-[hsl(var(--heirloom-ink-mute))]">এই ধাপের সব তথ্য ঐচ্ছিক — যতটুকু দরকার ততটুকুই দিন।</p>
+
             <div className="space-y-2">
               <Label className="flex items-center gap-2">সম্পর্ক/ক্যাটাগরি</Label>
               <Select value={form.category} onValueChange={(v) => updateForm("category", v)}>
