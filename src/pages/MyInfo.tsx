@@ -36,9 +36,11 @@ const MyInfo = () => {
   );
   const [saving, setSaving] = useState(false);
 
-  const chatSession = getChatSession();
+  const [chatSession, setChatSession] = useState(getChatSession);
+  const [openingChat, setOpeningChat] = useState(false);
   const hasChat = !!chatSession;
   const isOtpAuth = session?.auth.type === "otp";
+  const canBootstrapChat = session?.auth.type === "secret";
 
   useEffect(() => {
     if (!session) navigate("/verify?next=view", { replace: true });
