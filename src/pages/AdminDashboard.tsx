@@ -619,6 +619,16 @@ const AdminDashboard = () => {
      </Tabs>
       </main>
 
+      {/* Contact Detail Sheet (globally mounted so it works from any tab, e.g. chat header) */}
+      <ContactDetailSheet
+        contact={selectedContact}
+        open={!!selectedContact}
+        onClose={() => setSelectedContact(null)}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+
+
 
       {/* ===== Floating Add Button (FAB) ===== */}
       {activeTab === "contacts" && (
