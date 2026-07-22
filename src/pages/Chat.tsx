@@ -826,7 +826,7 @@ const Chat = () => {
 
       {/* ============ BODY (mobile: single pane | desktop: split) ============ */}
       <div className="flex-1 min-h-0 overflow-hidden container mx-auto max-w-5xl w-full px-0">
-        <div className="h-full md:grid md:grid-cols-[300px_1fr] md:gap-0">
+        <div className={`h-full ${singleContact ? "" : "md:grid md:grid-cols-[300px_1fr] md:gap-0"}`}>
 
           {/* Contact list pane */}
           <aside
