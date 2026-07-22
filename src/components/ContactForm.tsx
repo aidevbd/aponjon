@@ -12,6 +12,7 @@ import { saveContact } from "@/lib/store";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhoneWithMessengers, PhoneEntry, deriveMessengers } from "@/components/PhoneWithMessengers";
 import { createChatSession } from "@/lib/chatSession";
+import { saveMeSession } from "@/lib/userSession";
 import { toast } from "sonner";
 
 export function ContactForm() {
