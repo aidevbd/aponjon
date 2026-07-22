@@ -289,9 +289,7 @@ const MyInfo = () => {
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <button
-                  className="mx-auto mt-8 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-                >
+                <button className="mx-auto mt-8 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
                   <LogOut className="h-3.5 w-3.5" /> সাইন-আউট
                 </button>
               </AlertDialogTrigger>
@@ -299,7 +297,7 @@ const MyInfo = () => {
                 <AlertDialogHeader>
                   <AlertDialogTitle>সাইন-আউট করবেন?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    সাইন-আউট করলে আবার তথ্য দেখতে বা এডিট করতে ভেরিফাই করতে হবে।
+                    এই ডিভাইস থেকে সাইন-আউট হবেন। আবার ঢুকতে ভেরিফাই করতে হবে।
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

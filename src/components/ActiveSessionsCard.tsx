@@ -257,29 +257,8 @@ export function ActiveSessionsCard() {
         </div>
       )}
 
-      {rows && rows.length > 0 && (
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <button className="mx-auto mt-4 flex items-center gap-1.5 text-xs text-destructive/80 hover:text-destructive">
-              <LogOut className="h-3 w-3" /> সব ডিভাইস থেকে সাইন-আউট
-            </button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>সব ডিভাইস থেকে সাইন-আউট?</AlertDialogTitle>
-              <AlertDialogDescription>
-                এই ডিভাইসসহ সব জায়গা থেকে সাইন-আউট হবেন। চ্যাট করতে আবার যাচাই করতে হবে।
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>বাতিল</AlertDialogCancel>
-              <AlertDialogAction onClick={handleRevokeAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                সব থেকে সাইন-আউট
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+      {/* "সব ডিভাইস থেকে সাইন-আউট" সরানো হয়েছে — /me পেজের নিচের সাইন-আউট বাটনই এই ডিভাইস সামলায়,
+          এবং একাধিক ডিভাইস থাকলে "অন্য সব ডিভাইস সাইন-আউট" দিয়ে বাকিগুলো সামলানো যায়। */}
 
       <Dialog open={trustOpen} onOpenChange={(o) => !trusting && setTrustOpen(o)}>
         <DialogContent className="sm:max-w-md">
