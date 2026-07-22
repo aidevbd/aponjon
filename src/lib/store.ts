@@ -201,11 +201,12 @@ export async function updateContactViaOtpSession(
     address?: string;
     blood_group?: string;
     birthday?: string;
-    photo_url?: string;
+    photo_url?: string | null;
   },
 ): Promise<boolean> {
   const { data, error } = await supabase.rpc("update_contact_via_otp_session", {
     p_session_token: sessionToken,
+
     p_name: updates.name ?? undefined,
     p_whatsapp: updates.whatsapp ?? undefined,
     p_imo: updates.imo ?? undefined,
