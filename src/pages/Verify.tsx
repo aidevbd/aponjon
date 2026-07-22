@@ -265,6 +265,18 @@ const Verify = () => {
                         autoFocus
                       />
                     </div>
+                    <label className="flex items-start gap-2.5 rounded-sm border border-[hsl(var(--heirloom-gold)/0.3)] bg-[hsl(var(--heirloom-gold)/0.05)] p-3 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={trustDevice}
+                        onChange={(e) => setTrustDevice(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 rounded border-[hsl(var(--heirloom-gold-deep))] accent-[hsl(var(--heirloom-gold-deep))]"
+                      />
+                      <div className="text-xs leading-relaxed">
+                        <div className="font-medium text-[hsl(var(--heirloom-ink))]">এই ডিভাইসে ৩০ দিন মনে রাখুন</div>
+                        <div className="text-[hsl(var(--heirloom-ink-soft))] mt-0.5">শেয়ারড বা পাবলিক ডিভাইসে চেক করবেন না।</div>
+                      </div>
+                    </label>
                     <Button onClick={handleSecretVerify} variant="heirloom" className="w-full" disabled={loading}>
                       {loading ? "যাচাই হচ্ছে..." : "ভেরিফাই করুন"}
                     </Button>
