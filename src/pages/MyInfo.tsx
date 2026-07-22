@@ -22,6 +22,7 @@ import { CategoryIcon } from "@/lib/categoryIcons";
 import { updateVerifiedContact, updateContactViaOtpSession } from "@/lib/store";
 import { getMeSession, clearMeSession, updateMeContactSnapshot } from "@/lib/userSession";
 import { getChatSession, clearChatSession, createChatSession } from "@/lib/chatSession";
+import { ActiveSessionsCard } from "@/components/ActiveSessionsCard";
 import { toast } from "sonner";
 
 /**
