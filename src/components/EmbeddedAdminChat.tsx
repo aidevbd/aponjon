@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ArrowLeft, Send, Image as ImageIcon, Heart, Loader2, Settings, Pencil, Reply, Search, X, Settings2, Bell, ArrowDownToLine, RefreshCw } from "lucide-react";
+import { MessageCircle, ChevronLeft, Send, Image as ImageIcon, Heart, Loader2, Settings, Pencil, Reply, Search, X, Settings2, Bell, ArrowDownToLine, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
