@@ -534,7 +534,15 @@ const AdminDashboard = () => {
 
         {/* ===== চ্যাট ট্যাব ===== */}
         <TabsContent value="chat" className={`mt-0 ${chatFullscreen ? "flex-1 min-h-0 data-[state=active]:flex flex-col" : ""}`}>
-          <EmbeddedAdminChat onUnreadChange={(count) => setTotalUnread(count)} onActiveChatChange={setChatOpen} fillHeight={chatFullscreen} />
+          <EmbeddedAdminChat
+            onUnreadChange={(count) => setTotalUnread(count)}
+            onActiveChatChange={setChatOpen}
+            fillHeight={chatFullscreen}
+            onOpenProfile={(userId) => {
+              const c = contacts.find((x) => x.id === userId);
+              if (c) openContactDetail(c);
+            }}
+          />
         </TabsContent>
 
 

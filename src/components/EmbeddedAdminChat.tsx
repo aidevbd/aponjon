@@ -48,9 +48,11 @@ interface EmbeddedAdminChatProps {
   onActiveChatChange?: (open: boolean) => void;
   /** When true, the shell fills its parent height (parent must be flex/grid with a definite height). */
   fillHeight?: boolean;
+  /** Called when admin taps the thread header (avatar/name) to view the contact's profile. */
+  onOpenProfile?: (userId: string) => void;
 }
 
-export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeight }: EmbeddedAdminChatProps) {
+export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeight, onOpenProfile }: EmbeddedAdminChatProps) {
 
   const isTouch = useIsTouchDevice();
   const isMobile = useIsMobile();
@@ -938,27 +940,34 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              <div className="relative shrink-0">
-                {selectedUser.photo_url ? (
-                  <img src={selectedUser.photo_url} alt={selectedUser.name} className="h-9 w-9 rounded-full object-cover border border-primary/20" />
-                ) : (
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</div>
-                )}
-                {presenceMap[selectedUser.id]?.isOnline && (
-                  <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-[hsl(var(--heirloom-paper))]" />
-                )}
-              </div>
-              <div className="min-w-0 flex-1 leading-tight">
-                <div className="font-semibold text-sm text-foreground truncate">{selectedUser.name}</div>
-                <div className="text-[11px] text-muted-foreground truncate">
-                  {(() => {
-                    const p = presenceMap[selectedUser.id];
-                    const txt = formatLastSeen(p);
-                    if (!txt) return selectedUser.phone;
-                    return <span className={p?.isOnline ? "text-emerald-600" : ""}>{txt}</span>;
-                  })()}
+              <button
+                type="button"
+                onClick={() => onOpenProfile?.(selectedUser.id)}
+                className="flex items-center gap-2 min-w-0 flex-1 rounded-full py-1 pr-2 -ml-1 pl-1 text-left hover:bg-primary/5 active:scale-[0.99] transition-colors"
+                aria-label={`${selectedUser.name} এর প্রোফাইল দেখুন`}
+              >
+                <div className="relative shrink-0">
+                  {selectedUser.photo_url ? (
+                    <img src={selectedUser.photo_url} alt={selectedUser.name} className="h-9 w-9 rounded-full object-cover border border-primary/20" />
+                  ) : (
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</div>
+                  )}
+                  {presenceMap[selectedUser.id]?.isOnline && (
+                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-[hsl(var(--heirloom-paper))]" />
+                  )}
                 </div>
-              </div>
+                <div className="min-w-0 flex-1 leading-tight">
+                  <div className="font-semibold text-sm text-foreground truncate">{selectedUser.name}</div>
+                  <div className="text-[11px] text-muted-foreground truncate">
+                    {(() => {
+                      const p = presenceMap[selectedUser.id];
+                      const txt = formatLastSeen(p);
+                      if (!txt) return selectedUser.phone;
+                      return <span className={p?.isOnline ? "text-emerald-600" : ""}>{txt}</span>;
+                    })()}
+                  </div>
+                </div>
+              </button>
               <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-full" aria-label="মেসেজ খুঁজুন" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
                 <Search className="h-4 w-4" />
               </Button>
