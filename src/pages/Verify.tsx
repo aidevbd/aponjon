@@ -232,7 +232,6 @@ const Verify = () => {
                         onChange={(e) => setPhone(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handlePhoneNext()}
                         className="bg-card"
-                        autoFocus
                         inputMode="tel"
                       />
                     </div>
