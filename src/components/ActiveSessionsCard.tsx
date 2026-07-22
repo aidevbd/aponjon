@@ -2,14 +2,20 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Monitor, Smartphone, ShieldCheck, LogOut, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   getChatSession, clearChatSession, listChatSessions, revokeChatSession,
   revokeAllOtherChatSessions, revokeAllChatSessions, trustCurrentChatSession,
+  getDeviceLabel,
   type ActiveChatSession,
 } from "@/lib/chatSession";
 
