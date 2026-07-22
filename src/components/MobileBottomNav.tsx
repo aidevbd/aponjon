@@ -1,6 +1,6 @@
 import { NavLink, useLocation, useSearchParams, Link } from "react-router-dom";
 import {
-  Home, UserPlus, ShieldCheck, MessageCircle,
+  Home, UserPlus, ShieldCheck, Mail,
   LayoutDashboard, Users, Activity, Settings,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -74,7 +74,7 @@ export function MobileBottomNav() {
     tabs = [
       { key: "dashboard", to: "/admin/dashboard?tab=dashboard", label: "ওভারভিউ", icon: LayoutDashboard, isActive: currentTab === "dashboard" },
       { key: "contacts", to: "/admin/dashboard", label: "কন্টাক্ট", icon: Users, isActive: currentTab === "contacts" },
-      { key: "chat", to: "/admin/dashboard?tab=chat", label: "চ্যাট", icon: MessageCircle, badge: totalUnread, isActive: currentTab === "chat" },
+      { key: "chat", to: "/admin/dashboard?tab=chat", label: "চ্যাট", icon: Mail, badge: totalUnread, isActive: currentTab === "chat" },
       { key: "logs", to: "/admin/dashboard?tab=logs", label: "লগ", icon: Activity, isActive: currentTab === "logs" },
       { key: "settings", to: "/admin/dashboard?tab=settings", label: "সেটিংস", icon: Settings, isActive: currentTab === "settings" },
     ];
@@ -85,7 +85,7 @@ export function MobileBottomNav() {
       { key: "add", to: "/add", label: "যোগ", icon: UserPlus },
       { key: "access", to: hasMe ? "/me" : "/verify?next=view", label: "আমার তথ্য", icon: ShieldCheck },
       ...(hasSession
-        ? [{ key: "chat", to: "/chat", label: "চ্যাট", icon: MessageCircle, badge: totalUnread } as Tab]
+        ? [{ key: "chat", to: "/chat", label: "চ্যাট", icon: Mail, badge: totalUnread } as Tab]
         : []),
     ];
   }

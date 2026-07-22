@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { MessageCircle } from "lucide-react";
+import { Mail } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGlobalChatNotifier } from "@/hooks/useGlobalChatNotifier";
 
@@ -34,7 +34,7 @@ export function ChatFloatingButton() {
         aria-label={totalUnread > 0 ? `চ্যাটে ${totalUnread}টি নতুন মেসেজ` : "চ্যাট খুলুন"}
         className="relative flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-rose transition-transform hover:scale-105 active:scale-95"
       >
-        <MessageCircle className="h-6 w-6" />
+        <Mail className="h-6 w-6" />
         <AnimatePresence>
           {totalUnread > 0 && (
             <motion.span

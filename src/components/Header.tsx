@@ -1,4 +1,4 @@
-import { Heart, ChevronLeft, MessageCircle } from "lucide-react";
+import { Heart, ChevronLeft, Mail } from "lucide-react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
@@ -95,7 +95,7 @@ export function Header() {
                 className="relative flex h-10 w-10 items-center justify-center rounded-full text-foreground hover:bg-accent active:scale-95 transition-transform duration-150 touch-manipulation will-change-transform"
                 style={{ WebkitTapHighlightColor: "transparent" }}
               >
-                <MessageCircle className="h-5 w-5" />
+                <Mail className="h-5 w-5" />
               </button>
             ) : (
               <Link
@@ -105,7 +105,7 @@ export function Header() {
                 className="relative flex h-10 w-10 items-center justify-center rounded-full text-foreground hover:bg-accent active:scale-95 transition-transform duration-150 touch-manipulation will-change-transform"
                 style={{ WebkitTapHighlightColor: "transparent" }}
               >
-                <MessageCircle className="h-5 w-5" />
+                <Mail className="h-5 w-5" />
                 <AnimatePresence>
                   {!isAdmin && totalUnread > 0 && (
                     <motion.span
