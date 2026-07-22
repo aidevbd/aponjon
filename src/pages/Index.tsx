@@ -78,39 +78,82 @@ const Index = () => {
                       >
                         <span className="relative flex h-5 w-5 items-center justify-center">
                           <svg
-                            viewBox="0 0 24 24"
+                            viewBox="0 0 32 32"
                             fill="none"
-                            className="h-[18px] w-[18px] text-[hsl(var(--heirloom-gold))] transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110"
+                            className="h-[20px] w-[20px] transition-transform duration-500 ease-out group-hover:-rotate-3 group-hover:scale-110"
                             aria-hidden
                           >
                             <defs>
-                              <linearGradient id="chatHeartGrad" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0%" stopColor="hsl(var(--heirloom-gold))" />
-                                <stop offset="100%" stopColor="hsl(var(--primary))" />
+                              <linearGradient id="envPaper" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="hsl(var(--heirloom-bg))" />
+                                <stop offset="100%" stopColor="hsl(var(--heirloom-line))" />
                               </linearGradient>
+                              <linearGradient id="envFlap" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="hsl(var(--heirloom-line))" />
+                                <stop offset="100%" stopColor="hsl(var(--heirloom-bg))" />
+                              </linearGradient>
+                              <radialGradient id="waxSeal" cx="0.35" cy="0.35" r="0.7">
+                                <stop offset="0%" stopColor="hsl(var(--heirloom-gold))" />
+                                <stop offset="60%" stopColor="hsl(var(--primary))" />
+                                <stop offset="100%" stopColor="hsl(var(--heirloom-ink))" />
+                              </radialGradient>
                             </defs>
+                            {/* envelope body */}
+                            <rect
+                              x="3.5"
+                              y="8"
+                              width="25"
+                              height="17"
+                              rx="1.5"
+                              fill="url(#envPaper)"
+                              stroke="hsl(var(--heirloom-ink-mute))"
+                              strokeWidth="1.1"
+                            />
+                            {/* left flap */}
                             <path
-                              d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v9a2.5 2.5 0 0 1-2.5 2.5H9.8l-3.5 3.2c-.5.46-1.3.11-1.3-.57V17H4.5A.5.5 0 0 1 4 16.5v-11Z"
-                              fill="url(#chatHeartGrad)"
-                              fillOpacity="0.14"
-                              stroke="url(#chatHeartGrad)"
-                              strokeWidth="1.6"
+                              d="M4 9 L16 18 L4 24 Z"
+                              fill="url(#envFlap)"
+                              stroke="hsl(var(--heirloom-ink-mute))"
+                              strokeWidth="1"
                               strokeLinejoin="round"
                             />
+                            {/* right flap */}
                             <path
-                              d="M12 13.6s-2.7-1.6-2.7-3.4a1.6 1.6 0 0 1 2.7-1.15A1.6 1.6 0 0 1 14.7 10.2c0 1.8-2.7 3.4-2.7 3.4Z"
-                              fill="url(#chatHeartGrad)"
+                              d="M28 9 L16 18 L28 24 Z"
+                              fill="url(#envFlap)"
+                              stroke="hsl(var(--heirloom-ink-mute))"
+                              strokeWidth="1"
+                              strokeLinejoin="round"
                             />
+                            {/* top flap crease */}
+                            <path
+                              d="M4 9 L16 18 L28 9"
+                              stroke="hsl(var(--heirloom-ink-mute))"
+                              strokeWidth="1"
+                              strokeLinejoin="round"
+                              fill="none"
+                            />
+                            {/* wax seal */}
+                            <circle
+                              cx="16"
+                              cy="18"
+                              r="4.6"
+                              fill="url(#waxSeal)"
+                              stroke="hsl(var(--heirloom-ink))"
+                              strokeOpacity="0.25"
+                              strokeWidth="0.6"
+                            />
+                            {/* seal heart imprint */}
+                            <path
+                              d="M16 20.3s-2.1-1.25-2.1-2.7a1.25 1.25 0 0 1 2.1-.9 1.25 1.25 0 0 1 2.1.9c0 1.45-2.1 2.7-2.1 2.7Z"
+                              fill="hsl(var(--heirloom-bg))"
+                              fillOpacity="0.85"
+                            />
+                            {/* seal highlight */}
+                            <ellipse cx="14.4" cy="16.4" rx="1" ry="0.55" fill="hsl(var(--heirloom-bg))" fillOpacity="0.35" />
                           </svg>
-                          <span
-                            aria-hidden
-                            className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-[hsl(var(--heirloom-gold))] shadow-[0_0_0_2px_hsl(var(--heirloom-bg))]"
-                          />
-                          <span
-                            aria-hidden
-                            className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-[hsl(var(--heirloom-gold))] animate-ping"
-                          />
                         </span>
+
                         <span>মেসেজ</span>
                       </Link>
                     </div>
