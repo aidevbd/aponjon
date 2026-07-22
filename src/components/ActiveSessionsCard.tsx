@@ -12,6 +12,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { SessionsListSkeleton } from "@/components/skeletons/LoadingSkeletons";
 import {
   getChatSession, clearChatSession, listChatSessions, revokeChatSession,
   revokeAllOtherChatSessions, revokeAllChatSessions, trustCurrentChatSession,
