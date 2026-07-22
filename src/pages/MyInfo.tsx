@@ -295,14 +295,22 @@ const MyInfo = () => {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>সাইন-আউট করবেন?</AlertDialogTitle>
-                  <AlertDialogDescription>
+                  <div className="mx-auto mb-1 flex h-11 w-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                    <LogOut className="h-5 w-5" />
+                  </div>
+                  <AlertDialogTitle className="text-center">সাইন-আউট করবেন?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-center">
                     এই ডিভাইস থেকে সাইন-আউট হবেন। আবার ঢুকতে ভেরিফাই করতে হবে।
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>বাতিল</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleLogout}>সাইন-আউট</AlertDialogAction>
+                  <AlertDialogAction
+                    onClick={handleLogout}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    সাইন-আউট
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
