@@ -87,29 +87,41 @@ export function Header() {
           )}
 
           {showChatIcon && (
-            <Link
-              to={chatHref}
-              preventScrollReset={isAdmin}
-              aria-label={totalUnread > 0 ? `চ্যাটে ${totalUnread}টি নতুন মেসেজ` : "চ্যাট খুলুন"}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full text-foreground hover:bg-accent active:scale-95 transition-transform duration-150 touch-manipulation will-change-transform"
-              style={{ WebkitTapHighlightColor: "transparent" }}
-            >
-              <MessageCircle className="h-5 w-5" />
-              <AnimatePresence>
-                {!isAdmin && totalUnread > 0 && (
-                  <motion.span
-                    key={totalUnread}
-                    initial={{ scale: 0.4, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.4, opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 380, damping: 18 }}
-                    className="absolute top-1 right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[hsl(var(--heirloom-gold))] px-1 text-[10px] font-semibold text-[hsl(var(--heirloom-ink))] shadow"
-                  >
-                    {totalUnread > 99 ? "99+" : totalUnread}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </Link>
+            chatGated ? (
+              <button
+                type="button"
+                onClick={() => setGateOpen(true)}
+                aria-label="চ্যাট খুলুন"
+                className="relative flex h-10 w-10 items-center justify-center rounded-full text-foreground hover:bg-accent active:scale-95 transition-transform duration-150 touch-manipulation will-change-transform"
+                style={{ WebkitTapHighlightColor: "transparent" }}
+              >
+                <MessageCircle className="h-5 w-5" />
+              </button>
+            ) : (
+              <Link
+                to={chatHref}
+                preventScrollReset={isAdmin}
+                aria-label={totalUnread > 0 ? `চ্যাটে ${totalUnread}টি নতুন মেসেজ` : "চ্যাট খুলুন"}
+                className="relative flex h-10 w-10 items-center justify-center rounded-full text-foreground hover:bg-accent active:scale-95 transition-transform duration-150 touch-manipulation will-change-transform"
+                style={{ WebkitTapHighlightColor: "transparent" }}
+              >
+                <MessageCircle className="h-5 w-5" />
+                <AnimatePresence>
+                  {!isAdmin && totalUnread > 0 && (
+                    <motion.span
+                      key={totalUnread}
+                      initial={{ scale: 0.4, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.4, opacity: 0 }}
+                      transition={{ type: "spring", stiffness: 380, damping: 18 }}
+                      className="absolute top-1 right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[hsl(var(--heirloom-gold))] px-1 text-[10px] font-semibold text-[hsl(var(--heirloom-ink))] shadow"
+                    >
+                      {totalUnread > 99 ? "99+" : totalUnread}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </Link>
+            )
           )}
 
           {/* Spacer to balance flex when only back button is on left */}
@@ -117,6 +129,7 @@ export function Header() {
         </div>
 
       </div>
+      <ChatGateDialog open={gateOpen} onClose={() => setGateOpen(false)} />
     </motion.header>
   );
 }
