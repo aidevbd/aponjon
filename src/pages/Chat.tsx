@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  MessageCircle, ArrowLeft, Loader2, Search, Pin, Settings2, Home, LogOut,
+  MessageCircle, ChevronLeft, Loader2, Search, Pin, Settings2, Home, LogOut,
   WifiOff, Clock3, Bell, ArrowDownToLine, RefreshCw, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -734,7 +734,7 @@ const Chat = () => {
                       className="text-foreground hover:text-primary transition-colors shrink-0 md:hidden"
                       aria-label="ফিরে যান"
                     >
-                      <ArrowLeft className="h-5 w-5" />
+                      <ChevronLeft className="h-5 w-5" />
                     </button>
                   ) : (
                     <button
@@ -742,7 +742,7 @@ const Chat = () => {
                       className="text-foreground hover:text-primary transition-colors shrink-0 md:hidden"
                       aria-label="পিছনে যান"
                     >
-                      <ArrowLeft className="h-5 w-5" />
+                      <ChevronLeft className="h-5 w-5" />
                     </button>
                   )}
                   <div className="flex items-center gap-2 min-w-0">
