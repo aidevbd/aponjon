@@ -522,14 +522,6 @@ const AdminDashboard = () => {
 
           </div>
 
-          {/* Contact Detail Sheet */}
-          <ContactDetailSheet
-            contact={selectedContact}
-            open={!!selectedContact}
-            onClose={() => setSelectedContact(null)}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
         </TabsContent>
 
         {/* ===== চ্যাট ট্যাব ===== */}
