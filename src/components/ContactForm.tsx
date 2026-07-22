@@ -377,13 +377,10 @@ export function ContactForm() {
 
         {step === 3 && (
           <motion.div key="step3" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-5">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-display font-semibold text-foreground">সিক্রেট কোড (ঐচ্ছিক)</h3>
-              <p className="text-sm text-muted-foreground">ভবিষ্যতে নিজের তথ্য এক্সেস করতে</p>
-            </div>
-            <div className="heirloom-chip rounded-sm border p-3 text-xs">
-              ছোট কিন্তু মনে রাখার মতো কোড দিন—যেমন ডাকনাম, বিশেষ শব্দ, বা সংখ্যা+অক্ষরের মিশ্রণ।
-            </div>
+            <p className="text-center text-xs italic text-[hsl(var(--heirloom-ink-mute))]">
+              ভবিষ্যতে নিজে তথ্য এডিট করতে ছোট কিন্তু মনে রাখার মতো কোড দিন — ডাকনাম, বিশেষ শব্দ বা সংখ্যা+অক্ষরের মিশ্রণ।
+            </p>
+
             <div className="space-y-2">
               <Label htmlFor="secretCode" className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> সিক্রেট কোড</Label>
               <Input id="secretCode" placeholder="আপনার গোপন কোড (যেমন: জন্মতারিখ, নিকনেম)" value={form.secretCode} onChange={(e) => updateForm("secretCode", e.target.value)} className="bg-card" />
