@@ -2,9 +2,9 @@ import { useEffect, useId, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
- Pencil, MessageCircleHeart, MessageCircle, LogOut, Phone, Mail, MapPin, Droplets, Calendar,
+  Pencil, MessageCircleHeart, MessageCircle, LogOut, Phone, Mail, MapPin, Droplets, Calendar,
   Facebook, Save, X, ShieldAlert, Copy, Video, Send, ExternalLink, FileText, KeyRound,
-  Monitor, ChevronDown,
+  Monitor, ChevronDown, ChevronRight, Settings as SettingsIcon,
 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -378,16 +378,22 @@ const MyInfo = () => {
 
 
             {/* ============ SETTINGS ============ */}
-            <div className="mt-10 mb-4 flex items-center gap-3">
-              <div className="h-px flex-1 bg-border" />
-              <h2 className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                সেটিংস
-              </h2>
-              <div className="h-px flex-1 bg-border" />
+            <div className="mt-12 mb-5">
+              <div className="flex items-center gap-3">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[hsl(var(--heirloom-gold)/0.45)]" />
+                <div className="flex items-center gap-2 text-[hsl(var(--heirloom-gold-deep))]">
+                  <SettingsIcon className="h-3.5 w-3.5" />
+                  <span className="text-[11px] font-medium uppercase tracking-[0.22em]">সেটিংস</span>
+                </div>
+                <div className="h-px flex-1 bg-gradient-to-l from-transparent to-[hsl(var(--heirloom-gold)/0.45)]" />
+              </div>
+              <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                আপনার নিরাপত্তা ও সাইন-ইন নিয়ন্ত্রণ
+              </p>
             </div>
 
             {/* Active chat device sessions — collapsible */}
-            <Collapsible open={sessionsOpen} onOpenChange={setSessionsOpen} className="mb-4 rounded-2xl border border-border bg-card overflow-hidden">
+            <Collapsible open={sessionsOpen} onOpenChange={setSessionsOpen} className="mb-4 rounded-2xl border border-border bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--heirloom-gold)/0.08)]">
               <CollapsibleTrigger className="flex w-full items-center gap-3 p-4 text-left transition hover:bg-muted/40">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <Monitor className="h-4 w-4" />
@@ -407,8 +413,9 @@ const MyInfo = () => {
               </CollapsibleContent>
             </Collapsible>
 
+
             {/* Secret code + Sign out — grouped list */}
-            <div className="rounded-2xl border border-border bg-card overflow-hidden">
+            <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--heirloom-gold)/0.08)]">
               {/* Secret code row */}
               <div className={secretOpen ? "border-l-2 border-destructive bg-destructive/[0.03]" : ""}>
                 <div className="flex items-start justify-between gap-3 p-4">
@@ -536,7 +543,7 @@ const MyInfo = () => {
                         </p>
                       </div>
                     </div>
-                    <span className="text-[11px] font-medium text-muted-foreground shrink-0">›</span>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                   </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
