@@ -340,6 +340,22 @@ export function ActiveSessionsCard() {
                     <dd className="text-foreground">{formatDateTime(r.expires_at)}</dd>
                     <dt className="text-muted-foreground">IP ঠিকানা</dt>
                     <dd className="font-mono text-foreground break-all">{r.ip_address || "—"}</dd>
+                    {r.ip_address && (() => {
+                      const geo = geoMap[r.ip_address];
+                      const loc = formatIpGeoShort(geo);
+                      if (!loc) return null;
+                      return (
+                        <>
+                          <dt className="text-muted-foreground">অবস্থান</dt>
+                          <dd className="text-foreground">
+                            {geo?.country_code && (
+                              <span aria-hidden className="mr-1">{countryFlag(geo.country_code)}</span>
+                            )}
+                            {loc}
+                          </dd>
+                        </>
+                      );
+                    })()}
                     <dt className="text-muted-foreground">User agent</dt>
                     <dd className="text-foreground break-all" title={r.user_agent || undefined}>
                       {shortUA || "—"}
