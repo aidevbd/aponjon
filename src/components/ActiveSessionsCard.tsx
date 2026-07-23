@@ -19,6 +19,7 @@ import {
   getDeviceLabel,
   type ActiveChatSession,
 } from "@/lib/chatSession";
+import { lookupIpGeo, countryFlag, formatIpGeoShort, type IpGeo } from "@/lib/ipGeo";
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
