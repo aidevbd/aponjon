@@ -389,8 +389,9 @@ const MyInfo = () => {
                 <div className="h-px flex-1 bg-gradient-to-l from-transparent via-[hsl(var(--heirloom-gold)/0.35)] to-[hsl(var(--heirloom-gold)/0.6)]" />
               </div>
               <p className="mt-3 text-center text-xs text-muted-foreground/90 italic">
-                নিজের চিঠির বাক্সটি সাজিয়ে রাখুন
+                নিরাপত্তা ও সাইন-ইন ব্যবস্থাপনা
               </p>
+
             </div>
 
             {/* ---- Tier 1: Everyday — Active devices ---- */}
