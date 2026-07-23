@@ -83,6 +83,7 @@ export function ActiveSessionsCard() {
   const [trusting, setTrusting] = useState(false);
   const [trustOpen, setTrustOpen] = useState(false);
   const [labelInput, setLabelInput] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const load = async () => {
     if (!session) return;
