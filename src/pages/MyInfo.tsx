@@ -452,36 +452,35 @@ const MyInfo = () => {
                 </p>
               </div>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor={fid("new-secret")}>নতুন সিক্রেট কোড</Label>
+            <div className="space-y-2">
+              <Label htmlFor={fid("new-secret")}>নতুন সিক্রেট কোড</Label>
+              <div className="relative">
                 <Input
                   id={fid("new-secret")}
-                  type="password"
+                  type={showSecret ? "text" : "password"}
                   value={newSecret}
                   onChange={(e) => setNewSecret(e.target.value)}
-                  className="bg-background"
+                  className="bg-background pr-20"
                   placeholder="কমপক্ষে ৪ অক্ষর"
                   autoComplete="new-password"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowSecret((v) => !v)}
+                  className="absolute inset-y-0 right-2 my-auto h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                  tabIndex={-1}
+                >
+                  {showSecret ? "লুকান" : "দেখুন"}
+                </button>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor={fid("confirm-secret")}>আবার লিখুন</Label>
-                <Input
-                  id={fid("confirm-secret")}
-                  type="password"
-                  value={confirmSecret}
-                  onChange={(e) => setConfirmSecret(e.target.value)}
-                  className="bg-background"
-                  placeholder="মিলিয়ে নিন"
-                  autoComplete="new-password"
-                />
-              </div>
+              <p className="text-[11px] text-muted-foreground">
+                টাইপ করে "দেখুন" চেপে নিশ্চিত হয়ে নিন — কোডটা মনে রাখতে হবে।
+              </p>
             </div>
             <Button
               type="button"
               onClick={handleSetSecret}
-              disabled={settingSecret || !newSecret || !confirmSecret}
+              disabled={settingSecret || !newSecret}
               variant="outline"
               className="w-full sm:w-auto gap-2 rounded-xl"
             >
