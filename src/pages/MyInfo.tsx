@@ -141,19 +141,20 @@ const MyInfo = () => {
     setSettingSecret(true);
     const loadingId = toast.loading("সিক্রেট কোড সংরক্ষণ হচ্ছে…");
     try {
-      const isChange = session.auth.type === "secret";
-      if (isChange) {
-        const ok = await setSecretViaSecret(session.auth.phone, session.auth.secretCode, s);
+      const auth = session.auth;
+      const isChange = auth.type === "secret";
+      if (auth.type === "secret") {
+        const ok = await setSecretViaSecret(auth.phone, auth.secretCode, s);
         if (!ok) throw new Error("FAIL");
         const { saveMeSession } = await import("@/lib/userSession");
-        saveMeSession({ type: "secret", phone: session.auth.phone, secretCode: s }, contact);
+        saveMeSession({ type: "secret", phone: auth.phone, secretCode: s }, contact);
         setSession(getMeSession());
         toast.success("সিক্রেট কোড বদলানো হয়েছে 🔐", {
           id: loadingId,
           description: "পুরনো কোডটি আর কাজ করবে না — নতুন কোডটি নিরাপদে মনে রাখুন।",
         });
       } else {
-        const ok = await setSecretViaOtpSession(session.auth.sessionToken, s);
+        const ok = await setSecretViaOtpSession(auth.sessionToken, s);
         if (!ok) throw new Error("FAIL");
         const { saveMeSession } = await import("@/lib/userSession");
         saveMeSession({ type: "secret", phone: contact.phone, secretCode: s }, contact);
