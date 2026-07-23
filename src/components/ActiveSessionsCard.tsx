@@ -54,6 +54,41 @@ function shortenUA(ua: string | null): string {
     .trim();
 }
 
+/**
+ * Parse a User-Agent string into a friendly label like
+ * "iPhone · Safari" / "Windows PC · Chrome" / "Android মোবাইল · Chrome"
+ * Returns null if UA is empty.
+ */
+function parseUAFriendly(ua: string | null): { device: string; browser: string; label: string } | null {
+  if (!ua) return null;
+
+  // Browser (order matters)
+  const browser =
+    /Edg\//i.test(ua) ? "Edge" :
+    /OPR\/|Opera\//i.test(ua) ? "Opera" :
+    /SamsungBrowser\//i.test(ua) ? "Samsung Internet" :
+    /FxiOS\//i.test(ua) ? "Firefox" :
+    /CriOS\//i.test(ua) ? "Chrome" :
+    /Firefox\//i.test(ua) ? "Firefox" :
+    /Chrome\//i.test(ua) ? "Chrome" :
+    /Safari\//i.test(ua) ? "Safari" :
+    "ব্রাউজার";
+
+  // Device
+  let device = "ডিভাইস";
+  if (/iPhone/i.test(ua)) device = "iPhone";
+  else if (/iPad/i.test(ua)) device = "iPad";
+  else if (/iPod/i.test(ua)) device = "iPod";
+  else if (/Android/i.test(ua)) {
+    device = /Mobile/i.test(ua) ? "Android মোবাইল" : "Android ট্যাবলেট";
+  } else if (/Windows/i.test(ua)) device = "Windows PC";
+  else if (/Macintosh|Mac OS X/i.test(ua)) device = "Mac";
+  else if (/CrOS/i.test(ua)) device = "Chromebook";
+  else if (/Linux/i.test(ua)) device = "Linux";
+
+  return { device, browser, label: `${device} · ${browser}` };
+}
+
 
 /** Parse a device label (either "Chrome · Android মোবাইল" or free-form) into a device icon. */
 function pickDeviceIcon(label: string | null) {
