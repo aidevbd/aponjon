@@ -67,6 +67,8 @@ const App = () => (
           </ErrorBoundary>
           <ChatFloatingButton />
           <MobileBottomNav />
+          <AppShell />
+
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
