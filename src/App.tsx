@@ -24,10 +24,17 @@ const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 import { HeirloomPageSkeleton } from "./components/skeletons/LoadingSkeletons";
+import { useGlobalPresenceHeartbeat } from "./hooks/useGlobalPresenceHeartbeat";
 
 const queryClient = new QueryClient();
 
+const AppShell = () => {
+  useGlobalPresenceHeartbeat();
+  return null;
+};
+
 const App = () => (
+
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
