@@ -19,6 +19,7 @@ import {
   getDeviceLabel,
   type ActiveChatSession,
 } from "@/lib/chatSession";
+import { lookupIpGeo, countryFlag, formatIpGeoShort, type IpGeo } from "@/lib/ipGeo";
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -84,6 +85,7 @@ export function ActiveSessionsCard() {
   const [trustOpen, setTrustOpen] = useState(false);
   const [labelInput, setLabelInput] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [geoMap, setGeoMap] = useState<Record<string, IpGeo | null>>({});
 
   const load = async () => {
     if (!session) return;
@@ -99,6 +101,29 @@ export function ActiveSessionsCard() {
   };
 
   useEffect(() => { void load(); /* eslint-disable-next-line */ }, []);
+
+  // Resolve city/country for each unique IP in the list.
+  useEffect(() => {
+    if (!rows) return;
+    const ips = Array.from(new Set(rows.map((r) => r.ip_address).filter((x): x is string => !!x)));
+    const missing = ips.filter((ip) => !(ip in geoMap));
+    if (missing.length === 0) return;
+    let cancelled = false;
+    void Promise.all(
+      missing.map(async (ip) => {
+        const g = await lookupIpGeo(ip);
+        return [ip, g] as const;
+      }),
+    ).then((pairs) => {
+      if (cancelled) return;
+      setGeoMap((prev) => {
+        const next = { ...prev };
+        for (const [ip, g] of pairs) next[ip] = g;
+        return next;
+      });
+    });
+    return () => { cancelled = true; };
+  }, [rows]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openTrustDialog = () => {
     const current = rows?.find((r) => r.is_current);
@@ -238,11 +263,27 @@ export function ActiveSessionsCard() {
                       <span className="inline-flex items-center gap-1">
                         <Clock className="h-3 w-3" /> {timeAgo(r.last_used_at)}
                       </span>
-                      {r.ip_address && (
-                        <span className="inline-flex items-center gap-1">
-                          <MapPin className="h-3 w-3" /> {r.ip_address}
-                        </span>
-                      )}
+                      {r.ip_address && (() => {
+                        const geo = geoMap[r.ip_address];
+                        const loc = formatIpGeoShort(geo);
+                        return (
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {loc ? (
+                              <>
+                                {geo?.country_code && (
+                                  <span aria-hidden className="text-sm leading-none">
+                                    {countryFlag(geo.country_code)}
+                                  </span>
+                                )}
+                                <span>{loc}</span>
+                              </>
+                            ) : (
+                              <span className="font-mono">{r.ip_address}</span>
+                            )}
+                          </span>
+                        );
+                      })()}
                     </div>
                     <button
                       type="button"
@@ -299,6 +340,22 @@ export function ActiveSessionsCard() {
                     <dd className="text-foreground">{formatDateTime(r.expires_at)}</dd>
                     <dt className="text-muted-foreground">IP ঠিকানা</dt>
                     <dd className="font-mono text-foreground break-all">{r.ip_address || "—"}</dd>
+                    {r.ip_address && (() => {
+                      const geo = geoMap[r.ip_address];
+                      const loc = formatIpGeoShort(geo);
+                      if (!loc) return null;
+                      return (
+                        <>
+                          <dt className="text-muted-foreground">অবস্থান</dt>
+                          <dd className="text-foreground">
+                            {geo?.country_code && (
+                              <span aria-hidden className="mr-1">{countryFlag(geo.country_code)}</span>
+                            )}
+                            {loc}
+                          </dd>
+                        </>
+                      );
+                    })()}
                     <dt className="text-muted-foreground">User agent</dt>
                     <dd className="text-foreground break-all" title={r.user_agent || undefined}>
                       {shortUA || "—"}
