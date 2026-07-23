@@ -41,6 +41,9 @@ const MyInfo = () => {
             : [{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }],
   );
   const [saving, setSaving] = useState(false);
+  const [newSecret, setNewSecret] = useState("");
+  const [confirmSecret, setConfirmSecret] = useState("");
+  const [settingSecret, setSettingSecret] = useState(false);
 
   const [chatSession, setChatSession] = useState(getChatSession);
   const [openingChat, setOpeningChat] = useState(false);
