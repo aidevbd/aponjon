@@ -51,6 +51,8 @@ function shortenUA(ua: string | null): string {
     .replace(/AppleWebKit\/[\d.]+\s*/i, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
 
 /** Parse a device label (either "Chrome · Android মোবাইল" or free-form) into a device icon. */
 function pickDeviceIcon(label: string | null) {
