@@ -43,16 +43,8 @@ function formatDateTime(iso: string): string {
   }
 }
 
-/** Compact user-agent string — trims common noise so it fits in one line. */
-function shortenUA(ua: string | null): string {
-  if (!ua) return "";
-  return ua
-    .replace(/Mozilla\/[\d.]+\s*/i, "")
-    .replace(/\(KHTML,\s*like Gecko\)\s*/i, "")
-    .replace(/AppleWebKit\/[\d.]+\s*/i, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+
+
 
 /**
  * Parse a User-Agent string into a friendly label like
