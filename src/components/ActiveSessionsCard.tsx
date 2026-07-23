@@ -102,6 +102,29 @@ export function ActiveSessionsCard() {
 
   useEffect(() => { void load(); /* eslint-disable-next-line */ }, []);
 
+  // Resolve city/country for each unique IP in the list.
+  useEffect(() => {
+    if (!rows) return;
+    const ips = Array.from(new Set(rows.map((r) => r.ip_address).filter((x): x is string => !!x)));
+    const missing = ips.filter((ip) => !(ip in geoMap));
+    if (missing.length === 0) return;
+    let cancelled = false;
+    void Promise.all(
+      missing.map(async (ip) => {
+        const g = await lookupIpGeo(ip);
+        return [ip, g] as const;
+      }),
+    ).then((pairs) => {
+      if (cancelled) return;
+      setGeoMap((prev) => {
+        const next = { ...prev };
+        for (const [ip, g] of pairs) next[ip] = g;
+        return next;
+      });
+    });
+    return () => { cancelled = true; };
+  }, [rows]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const openTrustDialog = () => {
     const current = rows?.find((r) => r.is_current);
     setLabelInput(current?.device_label || getDeviceLabel());
