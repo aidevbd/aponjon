@@ -426,9 +426,10 @@ const MyInfo = () => {
               <div className="h-px flex-1 bg-destructive/20" />
             </div>
 
-            <div className={`mb-8 rounded-2xl overflow-hidden transition-colors ${secretOpen
-              ? "border-2 border-destructive/50 bg-destructive/[0.04] shadow-[0_8px_28px_-16px_hsl(var(--destructive)/0.35)]"
-              : "border border-border/70 bg-card shadow-[0_1px_0_hsl(var(--heirloom-gold)/0.1),0_8px_24px_-16px_hsl(var(--heirloom-gold)/0.2)]"}`}>
+            <div className={`mb-8 rounded-2xl border border-border/70 overflow-hidden transition-all ${secretOpen
+              ? "bg-destructive/[0.04] ring-1 ring-destructive/40 shadow-[0_8px_28px_-16px_hsl(var(--destructive)/0.35)]"
+              : "bg-card shadow-[0_1px_0_hsl(var(--heirloom-gold)/0.1),0_8px_24px_-16px_hsl(var(--heirloom-gold)/0.2)]"}`}>
+
               <div className="flex items-start justify-between gap-3 p-4">
                 <div className="flex items-start gap-3 min-w-0">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ring-1 ${secretOpen
