@@ -145,7 +145,6 @@ const MyInfo = () => {
         toast.success("সিক্রেট কোড সেট হয়েছে 🔐");
       }
       setNewSecret("");
-      setConfirmSecret("");
     } catch (err: any) {
       if (String(err?.message || "").includes("SECRET_TOO_SHORT")) {
         toast.error("সিক্রেট কোড কমপক্ষে ৪ অক্ষরের হতে হবে");
