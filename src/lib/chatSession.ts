@@ -135,6 +135,7 @@ export async function createChatSession(
     p_secret_code: secretCode,
     p_trusted: trusted,
     p_device_label: getDeviceLabel(),
+    p_user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
   } as any);
   if (error) throw error;
   const result = data as any;
