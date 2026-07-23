@@ -518,57 +518,7 @@ const MyInfo = () => {
             </div>
           </div>
 
-          {/* Secret code set / change */}
-          <div className="mt-5 rounded-xl border border-border bg-card p-4 sm:p-5 space-y-4">
-            <div className="flex items-start gap-2">
-              <KeyRound className="h-4 w-4 mt-0.5 text-[hsl(var(--heirloom-gold-deep))]" />
-              <div>
-                <h3 className="text-sm font-medium text-foreground">
-                  {isOtpAuth ? "সিক্রেট কোড সেট করুন" : "সিক্রেট কোড পরিবর্তন"}
-                </h3>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {isOtpAuth
-                    ? "একটি সহজে মনে রাখার মতো কোড দিন — অন্য ডিভাইস থেকে সাইন-ইন করতে লাগবে।"
-                    : "মনে রাখার মতো নতুন কোড দিতে পারেন। পুরনো কোড আর কাজ করবে না।"}
-                </p>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor={fid("new-secret")}>নতুন সিক্রেট কোড</Label>
-              <div className="relative">
-                <Input
-                  id={fid("new-secret")}
-                  type={showSecret ? "text" : "password"}
-                  value={newSecret}
-                  onChange={(e) => setNewSecret(e.target.value)}
-                  className="bg-background pr-20"
-                  placeholder="কমপক্ষে ৪ অক্ষর"
-                  autoComplete="new-password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowSecret((v) => !v)}
-                  className="absolute inset-y-0 right-2 my-auto h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-                  tabIndex={-1}
-                >
-                  {showSecret ? "লুকান" : "দেখুন"}
-                </button>
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                টাইপ করে "দেখুন" চেপে নিশ্চিত হয়ে নিন — কোডটা মনে রাখতে হবে।
-              </p>
-            </div>
-            <Button
-              type="button"
-              onClick={handleSetSecret}
-              disabled={settingSecret || !newSecret}
-              variant="outline"
-              className="w-full sm:w-auto gap-2 rounded-xl"
-            >
-              <KeyRound className="h-4 w-4" />
-              {settingSecret ? "সেভ হচ্ছে..." : isOtpAuth ? "সিক্রেট সেট করুন" : "সিক্রেট বদলান"}
-            </Button>
-          </div>
+
 
 
 
