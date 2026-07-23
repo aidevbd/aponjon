@@ -398,6 +398,14 @@ export function ActiveSessionsCard() {
                         </>
                       );
                     })()}
+                    {uaFriendly && (
+                      <>
+                        <dt className="text-muted-foreground">ডিভাইস</dt>
+                        <dd className="text-foreground">{uaFriendly.device}</dd>
+                        <dt className="text-muted-foreground">ব্রাউজার</dt>
+                        <dd className="text-foreground">{uaFriendly.browser}</dd>
+                      </>
+                    )}
                     <dt className="text-muted-foreground">User agent</dt>
                     <dd className="text-foreground break-all" title={r.user_agent || undefined}>
                       {shortUA || "—"}
