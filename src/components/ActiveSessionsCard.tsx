@@ -296,6 +296,11 @@ export function ActiveSessionsCard() {
                         </span>
                       )}
                     </div>
+                    {uaFriendly && (
+                      <div className="mt-0.5 text-[11px] text-muted-foreground truncate" title={r.user_agent || undefined}>
+                        {uaFriendly.label}
+                      </div>
+                    )}
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
                       <span className="inline-flex items-center gap-1">
                         <Clock className="h-3 w-3" /> {timeAgo(r.last_used_at)}
