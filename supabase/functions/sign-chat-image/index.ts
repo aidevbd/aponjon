@@ -78,8 +78,11 @@ Deno.serve(async (req) => {
       .createSignedUrl(path, 60 * 60); // 1 hour
 
     if (error || !signed) {
-      return new Response(JSON.stringify({ error: error?.message || "Sign failed" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      const msg = error?.message || "Sign failed";
+      const isMissing = /not.?found|does not exist|object not found/i.test(msg);
+      return new Response(JSON.stringify({ error: msg, signedUrl: null }), {
+        status: isMissing ? 404 : 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
