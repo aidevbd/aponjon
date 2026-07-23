@@ -82,7 +82,7 @@ export function Header() {
                 তথ্য যোগ
               </Link>
               <Link
-                to="/verify?next=view"
+                to={hasMe ? "/me" : "/verify?next=view"}
                 className="rounded-lg px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-foreground hover:bg-accent transition-colors whitespace-nowrap"
               >
                 আমার তথ্য
