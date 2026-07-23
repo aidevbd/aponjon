@@ -394,13 +394,8 @@ const MyInfo = () => {
 
             </div>
 
-            {/* ---- Tier 1: Everyday — Active devices ---- */}
-            <div className="mb-3 flex items-center gap-2 px-1">
-              <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground/70">
-                দৈনন্দিন
-              </span>
-              <div className="h-px flex-1 bg-border/60" />
-            </div>
+            {/* Active devices */}
+
 
             <Collapsible open={sessionsOpen} onOpenChange={setSessionsOpen} className="mb-8 rounded-2xl border border-border/70 bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--heirloom-gold)/0.1),0_8px_24px_-16px_hsl(var(--heirloom-gold)/0.25)]">
               <CollapsibleTrigger className="flex w-full items-center gap-3 p-4 text-left transition hover:bg-muted/40">
