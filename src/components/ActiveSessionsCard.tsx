@@ -31,6 +31,27 @@ function timeAgo(iso: string): string {
   return `${d} দিন আগে`;
 }
 
+function formatDateTime(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString("bn-BD", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+  } catch {
+    return iso;
+  }
+}
+
+/** Compact user-agent string — trims common noise so it fits in one line. */
+function shortenUA(ua: string | null): string {
+  if (!ua) return "";
+  return ua
+    .replace(/Mozilla\/[\d.]+\s*/i, "")
+    .replace(/\(KHTML,\s*like Gecko\)\s*/i, "")
+    .replace(/AppleWebKit\/[\d.]+\s*/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
 /** Parse a device label (either "Chrome · Android মোবাইল" or free-form) into a device icon. */
 function pickDeviceIcon(label: string | null) {
   const l = (label || "").toLowerCase();
