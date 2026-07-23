@@ -42,7 +42,7 @@ const MyInfo = () => {
   );
   const [saving, setSaving] = useState(false);
   const [newSecret, setNewSecret] = useState("");
-  const [confirmSecret, setConfirmSecret] = useState("");
+  const [showSecret, setShowSecret] = useState(false);
   const [settingSecret, setSettingSecret] = useState(false);
 
   const [chatSession, setChatSession] = useState(getChatSession);
