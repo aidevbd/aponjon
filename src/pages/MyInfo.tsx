@@ -343,11 +343,17 @@ const MyInfo = () => {
             </div>
 
             <div className="rounded-2xl border border-border bg-card/50 p-2 space-y-2">
-              {/* Secret code — dormant by default, expands on tap */}
-              <div className="rounded-xl bg-card p-4">
+              {/* Secret code — dangerous zone, expands on tap */}
+              <div
+                className={
+                  secretOpen
+                    ? "rounded-xl border-2 border-destructive/40 bg-destructive/[0.04] p-4"
+                    : "rounded-xl bg-card p-4"
+                }
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-2 min-w-0">
-                    <KeyRound className="h-4 w-4 mt-0.5 text-[hsl(var(--heirloom-gold-deep))] shrink-0" />
+                    <KeyRound className={`h-4 w-4 mt-0.5 shrink-0 ${secretOpen ? "text-destructive" : "text-[hsl(var(--heirloom-gold-deep))]"}`} />
                     <div className="min-w-0">
                       <h3 className="text-sm font-medium text-foreground">সিক্রেট কোড</h3>
                       <p className="mt-0.5 text-xs text-muted-foreground">
@@ -371,7 +377,22 @@ const MyInfo = () => {
                 </div>
 
                 {secretOpen && (
-                  <div className="mt-4 space-y-3">
+                  <div className="mt-4 space-y-4">
+                    {/* Danger callout */}
+                    <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3">
+                      <div className="flex items-start gap-2">
+                        <ShieldAlert className="h-4 w-4 mt-0.5 shrink-0 text-destructive" />
+                        <div className="text-[12px] leading-relaxed text-destructive">
+                          <p className="font-semibold">সতর্কতা — সংবেদনশীল পরিবর্তন</p>
+                          <ul className="mt-1.5 list-disc pl-4 space-y-0.5 text-destructive/90">
+                            <li>নতুন কোড ভুলে গেলে অ্যাকাউন্ট ফিরে পাওয়া কঠিন হবে।</li>
+                            <li>পুরনো কোড আর কাজ করবে না — অন্য ডিভাইসে নতুন কোড দিয়েই সাইন-ইন করতে হবে।</li>
+                            <li>কোডটি কারো সাথে শেয়ার করবেন না।</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="space-y-2">
                       <Label htmlFor={fid("new-secret")} className="text-xs">নতুন কোড</Label>
                       <div className="relative">
@@ -397,29 +418,44 @@ const MyInfo = () => {
                         টাইপ করে "দেখুন" চেপে নিশ্চিত হয়ে নিন — কোডটা মনে রাখতে হবে।
                       </p>
                     </div>
+
+                    <label className="flex items-start gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={ackDanger}
+                        onChange={(e) => setAckDanger(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 accent-destructive"
+                      />
+                      <span className="text-[12px] leading-relaxed text-foreground/85">
+                        আমি বুঝেছি — কোড ভুলে গেলে আমার দায়িত্ব, এবং পুরনো কোড আর চলবে না।
+                      </span>
+                    </label>
+
                     <div className="flex gap-2">
                       <Button
                         type="button"
                         variant="outline"
                         className="flex-1 rounded-lg"
-                        onClick={() => { setSecretOpen(false); setNewSecret(""); setShowSecret(false); }}
+                        onClick={() => { setSecretOpen(false); setNewSecret(""); setShowSecret(false); setAckDanger(false); }}
                         disabled={settingSecret}
                       >
                         বাতিল
                       </Button>
                       <Button
                         type="button"
+                        variant="destructive"
                         className="flex-1 rounded-lg gap-2"
                         onClick={handleSetSecret}
-                        disabled={settingSecret || !newSecret}
+                        disabled={settingSecret || !newSecret || !ackDanger}
                       >
                         <KeyRound className="h-4 w-4" />
-                        {settingSecret ? "রাখা হচ্ছে..." : "কোডটি রেখে দিন"}
+                        {settingSecret ? "রাখা হচ্ছে..." : (isOtpAuth ? "কোডটি সেট করুন" : "কোডটি বদলান")}
                       </Button>
                     </div>
                   </div>
                 )}
               </div>
+
 
               {/* Active chat device sessions */}
               <div className="rounded-xl bg-card p-4">
