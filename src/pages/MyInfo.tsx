@@ -543,7 +543,7 @@ const MyInfo = () => {
                         </p>
                       </div>
                     </div>
-                    <span className="text-[11px] font-medium text-muted-foreground shrink-0">›</span>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                   </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
