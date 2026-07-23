@@ -48,6 +48,7 @@ const MyInfo = () => {
   const [settingSecret, setSettingSecret] = useState(false);
   const [secretOpen, setSecretOpen] = useState(false);
   const [ackDanger, setAckDanger] = useState(false);
+  const [sessionsOpen, setSessionsOpen] = useState(false);
 
   const [chatSession, setChatSession] = useState(getChatSession);
   const [openingChat, setOpeningChat] = useState(false);
