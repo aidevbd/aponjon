@@ -263,11 +263,27 @@ export function ActiveSessionsCard() {
                       <span className="inline-flex items-center gap-1">
                         <Clock className="h-3 w-3" /> {timeAgo(r.last_used_at)}
                       </span>
-                      {r.ip_address && (
-                        <span className="inline-flex items-center gap-1">
-                          <MapPin className="h-3 w-3" /> {r.ip_address}
-                        </span>
-                      )}
+                      {r.ip_address && (() => {
+                        const geo = geoMap[r.ip_address];
+                        const loc = formatIpGeoShort(geo);
+                        return (
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {loc ? (
+                              <>
+                                {geo?.country_code && (
+                                  <span aria-hidden className="text-sm leading-none">
+                                    {countryFlag(geo.country_code)}
+                                  </span>
+                                )}
+                                <span>{loc}</span>
+                              </>
+                            ) : (
+                              <span className="font-mono">{r.ip_address}</span>
+                            )}
+                          </span>
+                        );
+                      })()}
                     </div>
                     <button
                       type="button"
