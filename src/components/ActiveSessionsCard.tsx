@@ -273,6 +273,8 @@ export function ActiveSessionsCard() {
             const BrowserIcon = pickBrowserIcon(r.device_label);
             const isOpen = expandedId === r.id;
             const shortUA = shortenUA(r.user_agent);
+            const uaFriendly = parseUAFriendly(r.user_agent);
+
             return (
               <li key={r.id} className="rounded-lg border border-border/60 bg-background/60">
                 <div className="flex items-start gap-3 p-3">
