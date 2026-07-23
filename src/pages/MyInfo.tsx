@@ -126,38 +126,69 @@ const MyInfo = () => {
   const handleSetSecret = async () => {
     const s = newSecret.trim();
     if (s.length < 4) {
-      toast.error("সিক্রেট কোড কমপক্ষে ৪ অক্ষরের হতে হবে");
+      toast.error("সিক্রেট কোড খুব ছোট", {
+        description: "কমপক্ষে ৪ অক্ষরের একটি কোড দিন।",
+      });
       return;
     }
-    
+    if (session.auth.type === "secret" && s === session.auth.secretCode) {
+      toast.error("এই কোডটি ইতিমধ্যে ব্যবহৃত", {
+        description: "নতুন একটি ভিন্ন কোড দিন।",
+      });
+      return;
+    }
+
     setSettingSecret(true);
+    const loadingId = toast.loading("সিক্রেট কোড সংরক্ষণ হচ্ছে…");
     try {
-      if (session.auth.type === "secret") {
+      const isChange = session.auth.type === "secret";
+      if (isChange) {
         const ok = await setSecretViaSecret(session.auth.phone, session.auth.secretCode, s);
         if (!ok) throw new Error("FAIL");
-        // Update MeSession with the new secret so future edits keep working
         const { saveMeSession } = await import("@/lib/userSession");
         saveMeSession({ type: "secret", phone: session.auth.phone, secretCode: s }, contact);
         setSession(getMeSession());
-        toast.success("সিক্রেট কোড পরিবর্তন হয়েছে 🔐");
+        toast.success("সিক্রেট কোড বদলানো হয়েছে 🔐", {
+          id: loadingId,
+          description: "পুরনো কোডটি আর কাজ করবে না — নতুন কোডটি নিরাপদে মনে রাখুন।",
+        });
       } else {
         const ok = await setSecretViaOtpSession(session.auth.sessionToken, s);
         if (!ok) throw new Error("FAIL");
-        // OTP session got consumed — promote to secret session with new code
         const { saveMeSession } = await import("@/lib/userSession");
         saveMeSession({ type: "secret", phone: contact.phone, secretCode: s }, contact);
         setSession(getMeSession());
-        toast.success("সিক্রেট কোড সেট হয়েছে 🔐");
+        toast.success("সিক্রেট কোড সেট হয়েছে 🔐", {
+          id: loadingId,
+          description: "এখন থেকে এই কোড দিয়েই যেকোনো ডিভাইসে সাইন-ইন করা যাবে।",
+        });
       }
       setNewSecret("");
       setShowSecret(false);
       setSecretOpen(false);
       setAckDanger(false);
     } catch (err: any) {
-      if (String(err?.message || "").includes("SECRET_TOO_SHORT")) {
-        toast.error("সিক্রেট কোড কমপক্ষে ৪ অক্ষরের হতে হবে");
+      const msg = String(err?.message || "");
+      if (msg.includes("SECRET_TOO_SHORT")) {
+        toast.error("সিক্রেট কোড খুব ছোট", {
+          id: loadingId,
+          description: "কমপক্ষে ৪ অক্ষরের একটি কোড দিন।",
+        });
+      } else if (msg.includes("OTP_SESSION_INVALID") || msg.includes("SESSION")) {
+        toast.error("সেশন শেষ হয়ে গেছে", {
+          id: loadingId,
+          description: "নিরাপত্তার জন্য আবার ভেরিফাই করতে হবে।",
+        });
+      } else if (msg.includes("RATE")) {
+        toast.error("অনেকবার চেষ্টা হয়েছে", {
+          id: loadingId,
+          description: "কিছুক্ষণ পর আবার চেষ্টা করুন।",
+        });
       } else {
-        toast.error("সিক্রেট কোড সেট করা যায়নি। আবার চেষ্টা করুন।");
+        toast.error("সিক্রেট কোড সংরক্ষণ করা যায়নি", {
+          id: loadingId,
+          description: "নেটওয়ার্ক পরীক্ষা করে আবার চেষ্টা করুন।",
+        });
       }
     } finally {
       setSettingSecret(false);
@@ -165,10 +196,18 @@ const MyInfo = () => {
   };
 
   const handleLogout = () => {
-    clearMeSession();
-    clearChatSession();
-    toast.success("সাইন-আউট হয়েছে");
-    navigate("/", { replace: true });
+    try {
+      clearMeSession();
+      clearChatSession();
+      toast.success("সাইন-আউট হয়েছে", {
+        description: "এই ডিভাইস থেকে বেরিয়ে এসেছেন। আবার আসতে ভেরিফাই করতে হবে।",
+      });
+      navigate("/", { replace: true });
+    } catch {
+      toast.error("সাইন-আউট করতে সমস্যা হয়েছে", {
+        description: "একটু পর আবার চেষ্টা করুন।",
+      });
+    }
   };
 
   const copyToClipboard = (text: string) => {
