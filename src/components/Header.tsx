@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useGlobalChatNotifier } from "@/hooks/useGlobalChatNotifier";
 import { ChatGateDialog } from "@/components/ChatGateDialog";
+import { getMeSession } from "@/lib/userSession";
 
 
 export function Header() {
@@ -19,6 +20,7 @@ export function Header() {
   const isChat = location.pathname.startsWith("/chat");
   const { totalUnread, hasSession } = useGlobalChatNotifier();
   const [gateOpen, setGateOpen] = useState(false);
+  const hasMe = !!getMeSession();
 
   // Where should the messenger icon take us?
   const adminOnChatTab = isAdminDashboard && searchParams.get("tab") === "chat";
@@ -80,7 +82,7 @@ export function Header() {
                 তথ্য যোগ
               </Link>
               <Link
-                to="/verify?next=view"
+                to={hasMe ? "/me" : "/verify?next=view"}
                 className="rounded-lg px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-foreground hover:bg-accent transition-colors whitespace-nowrap"
               >
                 আমার তথ্য
