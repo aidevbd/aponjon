@@ -244,7 +244,7 @@ export function ContactForm() {
             variant="heirloom"
             size="lg"
             className="w-full gap-2 h-12 rounded-sm"
-            disabled={chatLoading || (!hasSecret && !chatReady)}
+            disabled={chatLoading}
           >
             <MessageCircle className="h-4 w-4" />
             {chatLoading ? "চ্যাট খুলছে..." : "এডমিনকে মেসেজ করুন"}
@@ -267,7 +267,7 @@ export function ContactForm() {
           <div className="mt-4 flex items-start gap-2 rounded-xl border border-gold/30 bg-accent/50 p-3 text-left">
             <Shield className="h-4 w-4 shrink-0 mt-0.5 text-gold" />
             <p className="text-xs text-accent-foreground">
-              আপনি সিক্রেট কোড দেননি, তাই সরাসরি মেসেজ পাঠানো যাচ্ছে না। ভবিষ্যতে চ্যাট ও এডিটের জন্য 'আমার তথ্য' থেকে OTP দিয়ে সিক্রেট কোড যোগ করে নিন।
+              এই ডিভাইসে আপনি এখনই এডিট ও চ্যাট করতে পারবেন। অন্য ডিভাইস থেকে সহজে সাইন-ইন করতে 'আমার তথ্য' → এডিট থেকে একটি মনে রাখার মতো সিক্রেট কোড সেট করে নিন।
             </p>
           </div>
         )}
