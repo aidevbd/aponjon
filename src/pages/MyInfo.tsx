@@ -415,7 +415,7 @@ const MyInfo = () => {
 
 
             {/* Secret code + Sign out — grouped list */}
-            <div className="rounded-2xl border border-border bg-card overflow-hidden">
+            <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--heirloom-gold)/0.08)]">
               {/* Secret code row */}
               <div className={secretOpen ? "border-l-2 border-destructive bg-destructive/[0.03]" : ""}>
                 <div className="flex items-start justify-between gap-3 p-4">
