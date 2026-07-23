@@ -61,6 +61,16 @@ export function ContactForm() {
     try {
       const messengers = deriveMessengers(phones);
 
+      // Trust-on-first-use: if user didn't set a secret code, silently
+      // generate one so they can immediately view/edit/chat without OTP.
+      // They can replace it with a memorable one later from /me.
+      const userProvidedSecret = form.secretCode.trim();
+      const effectiveSecret =
+        userProvidedSecret ||
+        (typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID().replace(/-/g, "")
+          : Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2));
+
       await saveContact({
         name: form.name,
         phone: primaryPhone,
@@ -75,7 +85,7 @@ export function ContactForm() {
         address: form.address,
         blood_group: form.bloodGroup,
         birthday: form.birthday,
-        secret_code: form.secretCode,
+        secret_code: effectiveSecret,
         photo_url: form.photoUrl,
       });
 
@@ -90,39 +100,35 @@ export function ContactForm() {
         category: displayCategory,
       });
 
-      // Auto-create a chat session if the user set a secret code so messaging
-      // works with a single tap on the success screen. Also seed MeSession so
-      // /me works without re-verification.
-      if (form.secretCode && form.secretCode.trim()) {
-        try {
-          const session = await createChatSession(primaryPhone, form.secretCode.trim());
-          if (session) setChatReady(true);
-        } catch {
-          // Non-fatal
-        }
-        // Seed unified MeSession for view/edit on /me
-        try {
-          saveMeSession(
-            { type: "secret", phone: primaryPhone, secretCode: form.secretCode.trim() },
-            {
-              name: form.name,
-              phone: primaryPhone,
-              whatsapp: messengers.whatsapp,
-              imo: messengers.imo,
-              telegram: messengers.telegram,
-              facebook: form.facebook,
-              email: form.email,
-              category: form.category || "অন্যান্য",
-              custom_category: form.customCategory,
-              note: form.note,
-              address: form.address,
-              blood_group: form.bloodGroup,
-              birthday: form.birthday,
-              photo_url: form.photoUrl,
-            },
-          );
-        } catch { /* non-fatal */ }
+      // Auto-create chat session + seed MeSession so /me works immediately
+      // for view, edit, and chat — no re-verification needed.
+      try {
+        const session = await createChatSession(primaryPhone, effectiveSecret);
+        if (session) setChatReady(true);
+      } catch {
+        // Non-fatal
       }
+      try {
+        saveMeSession(
+          { type: "secret", phone: primaryPhone, secretCode: effectiveSecret },
+          {
+            name: form.name,
+            phone: primaryPhone,
+            whatsapp: messengers.whatsapp,
+            imo: messengers.imo,
+            telegram: messengers.telegram,
+            facebook: form.facebook,
+            email: form.email,
+            category: form.category || "অন্যান্য",
+            custom_category: form.customCategory,
+            note: form.note,
+            address: form.address,
+            blood_group: form.bloodGroup,
+            birthday: form.birthday,
+            photo_url: form.photoUrl,
+          },
+        );
+      } catch { /* non-fatal */ }
 
       setSubmitted(true);
       toast.success("আপনার তথ্য সফলভাবে সেভ হয়েছে! 💕");
