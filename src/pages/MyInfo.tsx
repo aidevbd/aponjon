@@ -118,6 +118,48 @@ const MyInfo = () => {
     }
   };
 
+  const handleSetSecret = async () => {
+    const s = newSecret.trim();
+    if (s.length < 4) {
+      toast.error("সিক্রেট কোড কমপক্ষে ৪ অক্ষরের হতে হবে");
+      return;
+    }
+    if (s !== confirmSecret.trim()) {
+      toast.error("দুটি সিক্রেট কোড মিলছে না");
+      return;
+    }
+    setSettingSecret(true);
+    try {
+      if (session.auth.type === "secret") {
+        const ok = await setSecretViaSecret(session.auth.phone, session.auth.secretCode, s);
+        if (!ok) throw new Error("FAIL");
+        // Update MeSession with the new secret so future edits keep working
+        const { saveMeSession } = await import("@/lib/userSession");
+        saveMeSession({ type: "secret", phone: session.auth.phone, secretCode: s }, contact);
+        setSession(getMeSession());
+        toast.success("সিক্রেট কোড পরিবর্তন হয়েছে 🔐");
+      } else {
+        const ok = await setSecretViaOtpSession(session.auth.sessionToken, s);
+        if (!ok) throw new Error("FAIL");
+        // OTP session got consumed — promote to secret session with new code
+        const { saveMeSession } = await import("@/lib/userSession");
+        saveMeSession({ type: "secret", phone: contact.phone, secretCode: s }, contact);
+        setSession(getMeSession());
+        toast.success("সিক্রেট কোড সেট হয়েছে 🔐");
+      }
+      setNewSecret("");
+      setConfirmSecret("");
+    } catch (err: any) {
+      if (String(err?.message || "").includes("SECRET_TOO_SHORT")) {
+        toast.error("সিক্রেট কোড কমপক্ষে ৪ অক্ষরের হতে হবে");
+      } else {
+        toast.error("সিক্রেট কোড সেট করা যায়নি। আবার চেষ্টা করুন।");
+      }
+    } finally {
+      setSettingSecret(false);
+    }
+  };
+
   const handleLogout = () => {
     clearMeSession();
     clearChatSession();
