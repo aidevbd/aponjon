@@ -54,6 +54,41 @@ function shortenUA(ua: string | null): string {
     .trim();
 }
 
+/**
+ * Parse a User-Agent string into a friendly label like
+ * "iPhone · Safari" / "Windows PC · Chrome" / "Android মোবাইল · Chrome"
+ * Returns null if UA is empty.
+ */
+function parseUAFriendly(ua: string | null): { device: string; browser: string; label: string } | null {
+  if (!ua) return null;
+
+  // Browser (order matters)
+  const browser =
+    /Edg\//i.test(ua) ? "Edge" :
+    /OPR\/|Opera\//i.test(ua) ? "Opera" :
+    /SamsungBrowser\//i.test(ua) ? "Samsung Internet" :
+    /FxiOS\//i.test(ua) ? "Firefox" :
+    /CriOS\//i.test(ua) ? "Chrome" :
+    /Firefox\//i.test(ua) ? "Firefox" :
+    /Chrome\//i.test(ua) ? "Chrome" :
+    /Safari\//i.test(ua) ? "Safari" :
+    "ব্রাউজার";
+
+  // Device
+  let device = "ডিভাইস";
+  if (/iPhone/i.test(ua)) device = "iPhone";
+  else if (/iPad/i.test(ua)) device = "iPad";
+  else if (/iPod/i.test(ua)) device = "iPod";
+  else if (/Android/i.test(ua)) {
+    device = /Mobile/i.test(ua) ? "Android মোবাইল" : "Android ট্যাবলেট";
+  } else if (/Windows/i.test(ua)) device = "Windows PC";
+  else if (/Macintosh|Mac OS X/i.test(ua)) device = "Mac";
+  else if (/CrOS/i.test(ua)) device = "Chromebook";
+  else if (/Linux/i.test(ua)) device = "Linux";
+
+  return { device, browser, label: `${device} · ${browser}` };
+}
+
 
 /** Parse a device label (either "Chrome · Android মোবাইল" or free-form) into a device icon. */
 function pickDeviceIcon(label: string | null) {
@@ -238,6 +273,8 @@ export function ActiveSessionsCard() {
             const BrowserIcon = pickBrowserIcon(r.device_label);
             const isOpen = expandedId === r.id;
             const shortUA = shortenUA(r.user_agent);
+            const uaFriendly = parseUAFriendly(r.user_agent);
+
             return (
               <li key={r.id} className="rounded-lg border border-border/60 bg-background/60">
                 <div className="flex items-start gap-3 p-3">
@@ -259,6 +296,11 @@ export function ActiveSessionsCard() {
                         </span>
                       )}
                     </div>
+                    {uaFriendly && (
+                      <div className="mt-0.5 text-[11px] text-muted-foreground truncate" title={r.user_agent || undefined}>
+                        {uaFriendly.label}
+                      </div>
+                    )}
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
                       <span className="inline-flex items-center gap-1">
                         <Clock className="h-3 w-3" /> {timeAgo(r.last_used_at)}
@@ -356,6 +398,14 @@ export function ActiveSessionsCard() {
                         </>
                       );
                     })()}
+                    {uaFriendly && (
+                      <>
+                        <dt className="text-muted-foreground">ডিভাইস</dt>
+                        <dd className="text-foreground">{uaFriendly.device}</dd>
+                        <dt className="text-muted-foreground">ব্রাউজার</dt>
+                        <dd className="text-foreground">{uaFriendly.browser}</dd>
+                      </>
+                    )}
                     <dt className="text-muted-foreground">User agent</dt>
                     <dd className="text-foreground break-all" title={r.user_agent || undefined}>
                       {shortUA || "—"}
