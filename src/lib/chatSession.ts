@@ -200,6 +200,8 @@ export type ActiveChatSession = {
   created_at: string;
   last_used_at: string;
   expires_at: string;
+  ip_address: string | null;
+  user_agent: string | null;
 };
 
 export async function listChatSessions(token: string): Promise<ActiveChatSession[]> {
