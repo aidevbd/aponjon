@@ -20,7 +20,7 @@ import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhoneWithMessengers, PhoneEntry, deriveMessengers, parseMessengersToPhones } from "@/components/PhoneWithMessengers";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
 import { CategoryIcon } from "@/lib/categoryIcons";
-import { updateVerifiedContact, updateContactViaOtpSession } from "@/lib/store";
+import { updateVerifiedContact, updateContactViaOtpSession, setSecretViaSecret, setSecretViaOtpSession } from "@/lib/store";
 import { getMeSession, clearMeSession, updateMeContactSnapshot } from "@/lib/userSession";
 import { getChatSession, clearChatSession, createChatSession } from "@/lib/chatSession";
 import { ActiveSessionsCard } from "@/components/ActiveSessionsCard";
