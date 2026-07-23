@@ -105,8 +105,7 @@ export function ActiveSessionsCard() {
 
   if (!session) {
     return (
-      <div className="rounded-xl border border-border bg-card p-4 mb-4">
-        <h3 className="text-sm font-medium text-muted-foreground mb-2">সক্রিয় ডিভাইস</h3>
+      <div className="pb-3">
         <p className="text-xs text-muted-foreground">
           চ্যাট সেশন সক্রিয় নেই। চ্যাটে ঢুকলে এখানে ডিভাইসের তালিকা দেখা যাবে।
         </p>
