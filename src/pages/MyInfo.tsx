@@ -538,13 +538,8 @@ const MyInfo = () => {
               )}
             </div>
 
-            {/* ---- Tier 3: Exit — Sign out ---- */}
-            <div className="mb-3 flex items-center gap-2 px-1">
-              <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground/70">
-                বিদায়
-              </span>
-              <div className="h-px flex-1 bg-border/60" />
-            </div>
+            {/* Sign out */}
+
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
