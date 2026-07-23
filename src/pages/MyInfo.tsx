@@ -4,7 +4,9 @@ import { motion } from "framer-motion";
 import {
  Pencil, MessageCircleHeart, MessageCircle, LogOut, Phone, Mail, MapPin, Droplets, Calendar,
   Facebook, Save, X, ShieldAlert, Copy, Video, Send, ExternalLink, FileText, KeyRound,
+  Monitor, ChevronDown,
 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -46,6 +48,7 @@ const MyInfo = () => {
   const [settingSecret, setSettingSecret] = useState(false);
   const [secretOpen, setSecretOpen] = useState(false);
   const [ackDanger, setAckDanger] = useState(false);
+  const [sessionsOpen, setSessionsOpen] = useState(false);
 
   const [chatSession, setChatSession] = useState(getChatSession);
   const [openingChat, setOpeningChat] = useState(false);
@@ -343,8 +346,26 @@ const MyInfo = () => {
               <div className="h-px flex-1 bg-border" />
             </div>
 
-            {/* Active chat device sessions — self-contained card */}
-            <ActiveSessionsCard />
+            {/* Active chat device sessions — collapsible */}
+            <Collapsible open={sessionsOpen} onOpenChange={setSessionsOpen} className="mb-4 rounded-2xl border border-border bg-card overflow-hidden">
+              <CollapsibleTrigger className="flex w-full items-center gap-3 p-4 text-left transition hover:bg-muted/40">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Monitor className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-medium text-foreground">সক্রিয় ডিভাইস</h3>
+                  <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
+                    কোন কোন ডিভাইসে সাইন-ইন আছে দেখুন ও ম্যানেজ করুন।
+                  </p>
+                </div>
+                <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${sessionsOpen ? "rotate-180" : ""}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="border-t border-border px-4 pt-3 pb-1">
+                  <ActiveSessionsCard />
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Secret code + Sign out — grouped list */}
             <div className="rounded-2xl border border-border bg-card overflow-hidden">
