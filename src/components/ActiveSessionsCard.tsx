@@ -85,6 +85,7 @@ export function ActiveSessionsCard() {
   const [trustOpen, setTrustOpen] = useState(false);
   const [labelInput, setLabelInput] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [geoMap, setGeoMap] = useState<Record<string, IpGeo | null>>({});
 
   const load = async () => {
     if (!session) return;
