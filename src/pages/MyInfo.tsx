@@ -4,7 +4,9 @@ import { motion } from "framer-motion";
 import {
  Pencil, MessageCircleHeart, MessageCircle, LogOut, Phone, Mail, MapPin, Droplets, Calendar,
   Facebook, Save, X, ShieldAlert, Copy, Video, Send, ExternalLink, FileText, KeyRound,
+  Monitor, ChevronDown,
 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
