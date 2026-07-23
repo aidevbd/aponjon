@@ -332,114 +332,142 @@ const MyInfo = () => {
             )}
 
 
-            {/* Secret code — dormant by default, expands on tap */}
-            <div className="rounded-xl border border-border bg-card p-4 mb-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-2 min-w-0">
-                  <KeyRound className="h-4 w-4 mt-0.5 text-[hsl(var(--heirloom-gold-deep))] shrink-0" />
-                  <div className="min-w-0">
-                    <h2 className="text-sm font-medium text-foreground">সিক্রেট কোড</h2>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {isOtpAuth
-                        ? "অন্য ডিভাইসে সাইন-ইনের জন্য একটি কোড সেট করুন।"
-                        : "অন্য ডিভাইসে সাইন-ইনের সময় এই কোডটি লাগবে।"}
-                    </p>
+            {/* ============ SETTINGS ============ */}
+            <div className="mt-10 mb-4 flex items-center gap-3">
+              <div className="h-px flex-1 bg-border" />
+              <h2 className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                সেটিংস
+              </h2>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card/50 p-2 space-y-2">
+              {/* Secret code — dormant by default, expands on tap */}
+              <div className="rounded-xl bg-card p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-2 min-w-0">
+                    <KeyRound className="h-4 w-4 mt-0.5 text-[hsl(var(--heirloom-gold-deep))] shrink-0" />
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-medium text-foreground">সিক্রেট কোড</h3>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {isOtpAuth
+                          ? "অন্য ডিভাইসে সাইন-ইনের জন্য একটি কোড সেট করুন।"
+                          : "অন্য ডিভাইসে সাইন-ইনের সময় এই কোডটি লাগবে।"}
+                      </p>
+                    </div>
                   </div>
+                  {!secretOpen && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setSecretOpen(true)}
+                      className="rounded-lg shrink-0"
+                    >
+                      {isOtpAuth ? "সেট করুন" : "বদলান"}
+                    </Button>
+                  )}
                 </div>
-                {!secretOpen && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setSecretOpen(true)}
-                    className="rounded-lg shrink-0"
-                  >
-                    {isOtpAuth ? "সেট করুন" : "বদলান"}
-                  </Button>
+
+                {secretOpen && (
+                  <div className="mt-4 space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor={fid("new-secret")} className="text-xs">নতুন কোড</Label>
+                      <div className="relative">
+                        <Input
+                          id={fid("new-secret")}
+                          type={showSecret ? "text" : "password"}
+                          value={newSecret}
+                          onChange={(e) => setNewSecret(e.target.value)}
+                          className="bg-background pr-20 font-mono"
+                          placeholder="কমপক্ষে ৪ অক্ষর"
+                          autoComplete="new-password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowSecret((v) => !v)}
+                          className="absolute inset-y-0 right-2 my-auto h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                          tabIndex={-1}
+                        >
+                          {showSecret ? "লুকান" : "দেখুন"}
+                        </button>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">
+                        টাইপ করে "দেখুন" চেপে নিশ্চিত হয়ে নিন — কোডটা মনে রাখতে হবে।
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1 rounded-lg"
+                        onClick={() => { setSecretOpen(false); setNewSecret(""); setShowSecret(false); }}
+                        disabled={settingSecret}
+                      >
+                        বাতিল
+                      </Button>
+                      <Button
+                        type="button"
+                        className="flex-1 rounded-lg gap-2"
+                        onClick={handleSetSecret}
+                        disabled={settingSecret || !newSecret}
+                      >
+                        <KeyRound className="h-4 w-4" />
+                        {settingSecret ? "রাখা হচ্ছে..." : "কোডটি রেখে দিন"}
+                      </Button>
+                    </div>
+                  </div>
                 )}
               </div>
 
-              {secretOpen && (
-                <div className="mt-4 space-y-3">
-                  <div className="space-y-2">
-                    <Label htmlFor={fid("new-secret")} className="text-xs">নতুন কোড</Label>
-                    <div className="relative">
-                      <Input
-                        id={fid("new-secret")}
-                        type={showSecret ? "text" : "password"}
-                        value={newSecret}
-                        onChange={(e) => setNewSecret(e.target.value)}
-                        className="bg-background pr-20 font-mono"
-                        placeholder="কমপক্ষে ৪ অক্ষর"
-                        autoComplete="new-password"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowSecret((v) => !v)}
-                        className="absolute inset-y-0 right-2 my-auto h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-                        tabIndex={-1}
+              {/* Active chat device sessions */}
+              <div className="rounded-xl bg-card p-4">
+                <ActiveSessionsCard />
+              </div>
+
+              {/* Sign out */}
+              <div className="rounded-xl bg-card p-4">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button className="flex w-full items-center justify-between gap-3 text-left">
+                      <div className="flex items-start gap-2 min-w-0">
+                        <LogOut className="h-4 w-4 mt-0.5 text-destructive shrink-0" />
+                        <div className="min-w-0">
+                          <h3 className="text-sm font-medium text-foreground">সাইন-আউট</h3>
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            এই ডিভাইস থেকে বেরিয়ে যান।
+                          </p>
+                        </div>
+                      </div>
+                      <span className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground shrink-0">
+                        বেরিয়ে যাই
+                      </span>
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <div className="mx-auto mb-1 flex h-11 w-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                        <LogOut className="h-5 w-5" />
+                      </div>
+                      <AlertDialogTitle className="text-center">সাইন-আউট করবেন?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-center">
+                        এই ডিভাইস থেকে সাইন-আউট হবেন। আবার ঢুকতে ভেরিফাই করতে হবে।
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>বাতিল</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleLogout}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       >
-                        {showSecret ? "লুকান" : "দেখুন"}
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground">
-                      টাইপ করে "দেখুন" চেপে নিশ্চিত হয়ে নিন — কোডটা মনে রাখতে হবে।
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="flex-1 rounded-lg"
-                      onClick={() => { setSecretOpen(false); setNewSecret(""); setShowSecret(false); }}
-                      disabled={settingSecret}
-                    >
-                      বাতিল
-                    </Button>
-                    <Button
-                      type="button"
-                      className="flex-1 rounded-lg gap-2"
-                      onClick={handleSetSecret}
-                      disabled={settingSecret || !newSecret}
-                    >
-                      <KeyRound className="h-4 w-4" />
-                      {settingSecret ? "রাখা হচ্ছে..." : "কোডটি রেখে দিন"}
-                    </Button>
-                  </div>
-                </div>
-              )}
+                        সাইন-আউট
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
 
-            {/* Active chat device sessions */}
-            <ActiveSessionsCard />
-
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <button className="mx-auto mt-8 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
-                  <LogOut className="h-3.5 w-3.5" /> সাইন-আউট
-                </button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <div className="mx-auto mb-1 flex h-11 w-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-                    <LogOut className="h-5 w-5" />
-                  </div>
-                  <AlertDialogTitle className="text-center">সাইন-আউট করবেন?</AlertDialogTitle>
-                  <AlertDialogDescription className="text-center">
-                    এই ডিভাইস থেকে সাইন-আউট হবেন। আবার ঢুকতে ভেরিফাই করতে হবে।
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>বাতিল</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleLogout}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    সাইন-আউট
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
 
           </motion.div>
         </main>
