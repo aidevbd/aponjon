@@ -374,7 +374,7 @@ export function ActiveSessionsCard() {
                   )}
                 </div>
                 {isOpen && (
-                  <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 border-t border-border/60 bg-muted/20 px-3 py-2.5 text-[11px]">
+                  <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 border-t border-[hsl(var(--heirloom-gold)/0.2)] bg-[hsl(var(--heirloom-gold)/0.04)] px-3.5 py-3 text-[11px]">
                     <dt className="text-muted-foreground">প্রথম সাইন-ইন</dt>
                     <dd className="text-foreground">{formatDateTime(r.created_at)}</dd>
                     <dt className="text-muted-foreground">শেষ সক্রিয়</dt>
@@ -408,11 +408,12 @@ export function ActiveSessionsCard() {
                       </>
                     )}
                     <dt className="text-muted-foreground">User agent</dt>
-                    <dd className="text-foreground break-all" title={r.user_agent || undefined}>
+                    <dd className="text-foreground/70 break-all leading-relaxed" title={r.user_agent || undefined}>
                       {shortUA || "—"}
                     </dd>
                   </dl>
                 )}
+
               </li>
             );
           })}
