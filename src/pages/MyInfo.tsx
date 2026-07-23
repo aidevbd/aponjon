@@ -124,10 +124,7 @@ const MyInfo = () => {
       toast.error("সিক্রেট কোড কমপক্ষে ৪ অক্ষরের হতে হবে");
       return;
     }
-    if (s !== confirmSecret.trim()) {
-      toast.error("দুটি সিক্রেট কোড মিলছে না");
-      return;
-    }
+    
     setSettingSecret(true);
     try {
       if (session.auth.type === "secret") {
