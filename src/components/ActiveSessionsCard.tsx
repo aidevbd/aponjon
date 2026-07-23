@@ -211,63 +211,99 @@ export function ActiveSessionsCard() {
           {rows.map((r) => {
             const DeviceIcon = pickDeviceIcon(r.device_label);
             const BrowserIcon = pickBrowserIcon(r.device_label);
+            const isOpen = expandedId === r.id;
+            const shortUA = shortenUA(r.user_agent);
             return (
-              <li key={r.id} className="flex items-start gap-3 rounded-lg border border-border/60 bg-background/60 p-3">
-                <div className="relative mt-0.5 shrink-0">
-                  <DeviceIcon className="h-6 w-6 text-primary" />
-                  <BrowserIcon className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-card p-[1px] text-muted-foreground ring-1 ring-border" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-sm font-medium truncate">{r.device_label || "অজানা ডিভাইস"}</span>
-                    {r.is_current && (
-                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                        এই ডিভাইস
-                      </span>
-                    )}
-                    {r.trusted_device && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-400">
-                        <ShieldCheck className="h-2.5 w-2.5" /> ৩০ দিন
-                      </span>
-                    )}
+              <li key={r.id} className="rounded-lg border border-border/60 bg-background/60">
+                <div className="flex items-start gap-3 p-3">
+                  <div className="relative mt-0.5 shrink-0">
+                    <DeviceIcon className="h-6 w-6 text-primary" />
+                    <BrowserIcon className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-card p-[1px] text-muted-foreground ring-1 ring-border" />
                   </div>
-                  <div className="mt-0.5 text-xs text-muted-foreground">
-                    শেষ সক্রিয়: {timeAgo(r.last_used_at)}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-sm font-medium truncate">{r.device_label || "অজানা ডিভাইস"}</span>
+                      {r.is_current && (
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                          এই ডিভাইস
+                        </span>
+                      )}
+                      {r.trusted_device && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-400">
+                          <ShieldCheck className="h-2.5 w-2.5" /> ৩০ দিন
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> {timeAgo(r.last_used_at)}
+                      </span>
+                      {r.ip_address && (
+                        <span className="inline-flex items-center gap-1">
+                          <MapPin className="h-3 w-3" /> {r.ip_address}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedId(isOpen ? null : r.id)}
+                      className="mt-1 inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+                      aria-expanded={isOpen}
+                    >
+                      <ChevronDown className={`h-3 w-3 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                      {isOpen ? "কম দেখুন" : "বিস্তারিত"}
+                    </button>
                   </div>
-                </div>
-                {!r.is_current && (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        disabled={busyId === r.id}
-                        className="h-8 shrink-0 text-xs text-destructive hover:text-destructive"
-                      >
-                        {busyId === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "সাইন-আউট"}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <div className="mx-auto mb-1 flex h-11 w-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-                          <LogOut className="h-5 w-5" />
-                        </div>
-                        <AlertDialogTitle className="text-center">এই ডিভাইস সাইন-আউট করবেন?</AlertDialogTitle>
-                        <AlertDialogDescription className="text-center">
-                          "{r.device_label || "অজানা ডিভাইস"}" থেকে তৎক্ষণাৎ সাইন-আউট হবে। আবার ঢুকতে সিক্রেট কোড দিতে হবে।
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>বাতিল</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleRevoke(r.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  {!r.is_current && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={busyId === r.id}
+                          className="h-8 shrink-0 text-xs text-destructive hover:text-destructive"
                         >
-                          সাইন-আউট
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                          {busyId === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "সাইন-আউট"}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <div className="mx-auto mb-1 flex h-11 w-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                            <LogOut className="h-5 w-5" />
+                          </div>
+                          <AlertDialogTitle className="text-center">এই ডিভাইস সাইন-আউট করবেন?</AlertDialogTitle>
+                          <AlertDialogDescription className="text-center">
+                            "{r.device_label || "অজানা ডিভাইস"}" থেকে তৎক্ষণাৎ সাইন-আউট হবে। আবার ঢুকতে সিক্রেট কোড দিতে হবে।
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>বাতিল</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleRevoke(r.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            সাইন-আউট
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </div>
+                {isOpen && (
+                  <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 border-t border-border/60 bg-muted/20 px-3 py-2.5 text-[11px]">
+                    <dt className="text-muted-foreground">প্রথম সাইন-ইন</dt>
+                    <dd className="text-foreground">{formatDateTime(r.created_at)}</dd>
+                    <dt className="text-muted-foreground">শেষ সক্রিয়</dt>
+                    <dd className="text-foreground">{formatDateTime(r.last_used_at)}</dd>
+                    <dt className="text-muted-foreground">সেশন শেষ</dt>
+                    <dd className="text-foreground">{formatDateTime(r.expires_at)}</dd>
+                    <dt className="text-muted-foreground">IP ঠিকানা</dt>
+                    <dd className="font-mono text-foreground break-all">{r.ip_address || "—"}</dd>
+                    <dt className="text-muted-foreground">User agent</dt>
+                    <dd className="text-foreground break-all" title={r.user_agent || undefined}>
+                      {shortUA || "—"}
+                    </dd>
+                  </dl>
                 )}
               </li>
             );
