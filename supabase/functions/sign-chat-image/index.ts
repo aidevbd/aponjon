@@ -80,11 +80,20 @@ Deno.serve(async (req) => {
     if (error || !signed) {
       const msg = error?.message || "Sign failed";
       const isMissing = /not.?found|does not exist|object not found/i.test(msg);
+      // Missing objects are expected (deleted / expired uploads); return 200 with
+      // signedUrl:null so callers degrade gracefully and no error is surfaced.
+      if (isMissing) {
+        return new Response(JSON.stringify({ signedUrl: null, missing: true }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       return new Response(JSON.stringify({ error: msg, signedUrl: null }), {
-        status: isMissing ? 404 : 500,
+        status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     return new Response(JSON.stringify({ signedUrl: signed.signedUrl, path }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
