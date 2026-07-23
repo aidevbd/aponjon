@@ -343,21 +343,21 @@ const MyInfo = () => {
               <div className="h-px flex-1 bg-border" />
             </div>
 
-            <div className="rounded-2xl border border-border bg-card/50 p-2 space-y-2">
-              {/* Secret code — dangerous zone, expands on tap */}
-              <div
-                className={
-                  secretOpen
-                    ? "rounded-xl border-2 border-destructive/40 bg-destructive/[0.04] p-4"
-                    : "rounded-xl bg-card p-4"
-                }
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-2 min-w-0">
-                    <KeyRound className={`h-4 w-4 mt-0.5 shrink-0 ${secretOpen ? "text-destructive" : "text-[hsl(var(--heirloom-gold-deep))]"}`} />
+            {/* Active chat device sessions — self-contained card */}
+            <ActiveSessionsCard />
+
+            {/* Secret code + Sign out — grouped list */}
+            <div className="rounded-2xl border border-border bg-card overflow-hidden">
+              {/* Secret code row */}
+              <div className={secretOpen ? "border-l-2 border-destructive bg-destructive/[0.03]" : ""}>
+                <div className="flex items-start justify-between gap-3 p-4">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${secretOpen ? "bg-destructive/10 text-destructive" : "bg-[hsl(var(--heirloom-gold-deep))]/10 text-[hsl(var(--heirloom-gold-deep))]"}`}>
+                      <KeyRound className="h-4 w-4" />
+                    </div>
                     <div className="min-w-0">
                       <h3 className="text-sm font-medium text-foreground">সিক্রেট কোড</h3>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
+                      <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
                         {isOtpAuth
                           ? "অন্য ডিভাইসে সাইন-ইনের জন্য একটি কোড সেট করুন।"
                           : "অন্য ডিভাইসে সাইন-ইনের সময় এই কোডটি লাগবে।"}
@@ -378,7 +378,7 @@ const MyInfo = () => {
                 </div>
 
                 {secretOpen && (
-                  <div className="mt-4 space-y-4">
+                  <div className="px-4 pb-4 space-y-4">
                     {/* Danger callout */}
                     <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3">
                       <div className="flex items-start gap-2">
@@ -457,53 +457,48 @@ const MyInfo = () => {
                 )}
               </div>
 
+              {/* Divider */}
+              <div className="h-px bg-border" />
 
-              {/* Active chat device sessions */}
-              <div className="rounded-xl bg-card p-4">
-                <ActiveSessionsCard />
-              </div>
-
-              {/* Sign out */}
-              <div className="rounded-xl bg-card p-4">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <button className="flex w-full items-center justify-between gap-3 text-left">
-                      <div className="flex items-start gap-2 min-w-0">
-                        <LogOut className="h-4 w-4 mt-0.5 text-destructive shrink-0" />
-                        <div className="min-w-0">
-                          <h3 className="text-sm font-medium text-foreground">সাইন-আউট</h3>
-                          <p className="mt-0.5 text-xs text-muted-foreground">
-                            এই ডিভাইস থেকে বেরিয়ে যান।
-                          </p>
-                        </div>
+              {/* Sign out row */}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="flex w-full items-center justify-between gap-3 p-4 text-left transition hover:bg-destructive/5">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                        <LogOut className="h-4 w-4" />
                       </div>
-                      <span className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground shrink-0">
-                        বেরিয়ে যাই
-                      </span>
-                    </button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <div className="mx-auto mb-1 flex h-11 w-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-                        <LogOut className="h-5 w-5" />
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-medium text-foreground">সাইন-আউট</h3>
+                        <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
+                          এই ডিভাইস থেকে বেরিয়ে যান।
+                        </p>
                       </div>
-                      <AlertDialogTitle className="text-center">সাইন-আউট করবেন?</AlertDialogTitle>
-                      <AlertDialogDescription className="text-center">
-                        এই ডিভাইস থেকে সাইন-আউট হবেন। আবার ঢুকতে ভেরিফাই করতে হবে।
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>বাতিল</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleLogout}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        সাইন-আউট
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
+                    </div>
+                    <span className="text-[11px] font-medium text-muted-foreground shrink-0">›</span>
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <div className="mx-auto mb-1 flex h-11 w-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                      <LogOut className="h-5 w-5" />
+                    </div>
+                    <AlertDialogTitle className="text-center">সাইন-আউট করবেন?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-center">
+                      এই ডিভাইস থেকে সাইন-আউট হবেন। আবার ঢুকতে ভেরিফাই করতে হবে।
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>বাতিল</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleLogout}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      সাইন-আউট
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
 
 
