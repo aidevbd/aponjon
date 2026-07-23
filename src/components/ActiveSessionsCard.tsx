@@ -374,45 +374,68 @@ export function ActiveSessionsCard() {
                   )}
                 </div>
                 {isOpen && (
-                  <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 border-t border-[hsl(var(--heirloom-gold)/0.2)] bg-[hsl(var(--heirloom-gold)/0.04)] px-3.5 py-3 text-[11px]">
-                    <dt className="text-muted-foreground">প্রথম সাইন-ইন</dt>
-                    <dd className="text-foreground">{formatDateTime(r.created_at)}</dd>
-                    <dt className="text-muted-foreground">শেষ সক্রিয়</dt>
-                    <dd className="text-foreground">{formatDateTime(r.last_used_at)}</dd>
-                    <dt className="text-muted-foreground">সেশন শেষ</dt>
-                    <dd className="text-foreground">{formatDateTime(r.expires_at)}</dd>
-                    <dt className="text-muted-foreground">IP ঠিকানা</dt>
-                    <dd className="font-mono text-foreground break-all">{r.ip_address || "—"}</dd>
-                    {r.ip_address && (() => {
-                      const geo = geoMap[r.ip_address];
-                      const loc = formatIpGeoShort(geo);
-                      if (!loc) return null;
-                      return (
-                        <>
-                          <dt className="text-muted-foreground">অবস্থান</dt>
-                          <dd className="text-foreground">
-                            {geo?.country_code && (
-                              <span aria-hidden className="mr-1">{countryFlag(geo.country_code)}</span>
-                            )}
-                            {loc}
-                          </dd>
-                        </>
-                      );
-                    })()}
-                    {uaFriendly && (
-                      <>
-                        <dt className="text-muted-foreground">ডিভাইস</dt>
-                        <dd className="text-foreground">{uaFriendly.device}</dd>
-                        <dt className="text-muted-foreground">ব্রাউজার</dt>
-                        <dd className="text-foreground">{uaFriendly.browser}</dd>
-                      </>
+                  <div className="space-y-3 border-t border-[hsl(var(--heirloom-gold)/0.2)] bg-[hsl(var(--heirloom-gold)/0.04)] px-3.5 py-3">
+                    {/* Time */}
+                    <div>
+                      <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[hsl(var(--heirloom-gold-deep))]/80">
+                        <Clock className="h-2.5 w-2.5" />
+                        <span>সময়</span>
+                      </div>
+                      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[11px]">
+                        <dt className="text-muted-foreground">প্রথম সাইন-ইন</dt>
+                        <dd className="text-foreground text-right sm:text-left">{formatDateTime(r.created_at)}</dd>
+                        <dt className="text-muted-foreground">সেশন শেষ হবে</dt>
+                        <dd className="text-foreground text-right sm:text-left">{formatDateTime(r.expires_at)}</dd>
+                      </dl>
+                    </div>
+
+                    {/* Network */}
+                    {r.ip_address && (
+                      <div>
+                        <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[hsl(var(--heirloom-gold-deep))]/80">
+                          <MapPin className="h-2.5 w-2.5" />
+                          <span>নেটওয়ার্ক</span>
+                        </div>
+                        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[11px]">
+                          {(() => {
+                            const geo = geoMap[r.ip_address];
+                            const loc = formatIpGeoShort(geo);
+                            return loc ? (
+                              <>
+                                <dt className="text-muted-foreground">অবস্থান</dt>
+                                <dd className="text-foreground text-right sm:text-left">
+                                  {geo?.country_code && (
+                                    <span aria-hidden className="mr-1">{countryFlag(geo.country_code)}</span>
+                                  )}
+                                  {loc}
+                                </dd>
+                              </>
+                            ) : null;
+                          })()}
+                          <dt className="text-muted-foreground">IP</dt>
+                          <dd className="font-mono text-foreground/80 text-right sm:text-left break-all">{r.ip_address}</dd>
+                        </dl>
+                      </div>
                     )}
-                    <dt className="text-muted-foreground">User agent</dt>
-                    <dd className="text-foreground/70 break-all leading-relaxed" title={r.user_agent || undefined}>
-                      {shortUA || "—"}
-                    </dd>
-                  </dl>
+
+                    {/* Device */}
+                    {uaFriendly && (
+                      <div>
+                        <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[hsl(var(--heirloom-gold-deep))]/80">
+                          <Monitor className="h-2.5 w-2.5" />
+                          <span>ডিভাইস</span>
+                        </div>
+                        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[11px]">
+                          <dt className="text-muted-foreground">সিস্টেম</dt>
+                          <dd className="text-foreground text-right sm:text-left">{uaFriendly.device}</dd>
+                          <dt className="text-muted-foreground">ব্রাউজার</dt>
+                          <dd className="text-foreground text-right sm:text-left">{uaFriendly.browser}</dd>
+                        </dl>
+                      </div>
+                    )}
+                  </div>
                 )}
+
 
               </li>
             );
