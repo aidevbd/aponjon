@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
  Pencil, MessageCircleHeart, MessageCircle, LogOut, Phone, Mail, MapPin, Droplets, Calendar,
-  Facebook, Save, X, ShieldAlert, Copy, Video, Send, ExternalLink, FileText,
+  Facebook, Save, X, ShieldAlert, Copy, Video, Send, ExternalLink, FileText, KeyRound,
 } from "lucide-react";
 
 import { Header } from "@/components/Header";
