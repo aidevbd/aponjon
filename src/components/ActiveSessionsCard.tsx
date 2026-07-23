@@ -149,9 +149,8 @@ export function ActiveSessionsCard() {
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 mb-4">
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-medium text-muted-foreground">সক্রিয় ডিভাইস</h3>
+    <div className="pb-3">
+      <div className="mb-3 flex items-center justify-end">
         <button
           onClick={load}
           className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
