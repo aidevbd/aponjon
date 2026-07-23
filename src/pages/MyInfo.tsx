@@ -149,6 +149,7 @@ const MyInfo = () => {
       setNewSecret("");
       setShowSecret(false);
       setSecretOpen(false);
+      setAckDanger(false);
     } catch (err: any) {
       if (String(err?.message || "").includes("SECRET_TOO_SHORT")) {
         toast.error("সিক্রেট কোড কমপক্ষে ৪ অক্ষরের হতে হবে");
