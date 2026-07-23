@@ -148,13 +148,16 @@ export function ContactForm() {
       navigate("/chat");
       return;
     }
-    if (!savedProfile || !form.secretCode.trim()) {
+    // Fallback: MeSession has the effective secret we just used to save.
+    const me = typeof window !== "undefined" ? window.sessionStorage.getItem("aponjon_me_session") : null;
+    const effectiveSecret = me ? (JSON.parse(me)?.auth?.secretCode ?? "") : "";
+    if (!savedProfile || !effectiveSecret) {
       navigate("/me");
       return;
     }
     setChatLoading(true);
     try {
-      const session = await createChatSession(savedProfile.phone, form.secretCode.trim());
+      const session = await createChatSession(savedProfile.phone, effectiveSecret);
       if (session) {
         setChatReady(true);
         navigate("/chat");
