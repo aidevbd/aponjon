@@ -244,10 +244,10 @@ export function ActiveSessionsCard() {
       </div>
 
       {session && !session.trusted && (
-        <div className="mb-3 flex flex-col gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-3 flex flex-col gap-2 rounded-xl border border-[hsl(var(--heirloom-gold)/0.35)] bg-[hsl(var(--heirloom-gold)/0.08)] p-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-2">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-            <p className="text-xs leading-relaxed text-foreground/80">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--heirloom-gold-deep))]" />
+            <p className="text-xs leading-relaxed text-[hsl(var(--heirloom-ink-soft))]">
               এই ডিভাইসে সাইন-ইন থাকা শেষ হবে ২৪ ঘণ্টায়। চাইলে ৩০ দিনের জন্য মনে রাখতে পারেন।
             </p>
           </div>
@@ -256,12 +256,13 @@ export function ActiveSessionsCard() {
             variant="outline"
             disabled={trusting}
             onClick={openTrustDialog}
-            className="shrink-0 text-xs"
+            className="shrink-0 text-xs border-[hsl(var(--heirloom-gold)/0.4)] text-[hsl(var(--heirloom-gold-deep))] hover:bg-[hsl(var(--heirloom-gold)/0.12)]"
           >
             ৩০ দিন মনে রাখুন
           </Button>
         </div>
       )}
+
 
 
       {loading && !rows ? (
