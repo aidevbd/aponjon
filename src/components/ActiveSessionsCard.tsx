@@ -273,7 +273,7 @@ export function ActiveSessionsCard() {
             const DeviceIcon = pickDeviceIcon(r.device_label);
             const BrowserIcon = pickBrowserIcon(r.device_label);
             const isOpen = expandedId === r.id;
-            const shortUA = shortenUA(r.user_agent);
+            
             const uaFriendly = parseUAFriendly(r.user_agent);
 
             return (
