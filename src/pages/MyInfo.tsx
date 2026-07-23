@@ -389,17 +389,13 @@ const MyInfo = () => {
                 <div className="h-px flex-1 bg-gradient-to-l from-transparent via-[hsl(var(--heirloom-gold)/0.35)] to-[hsl(var(--heirloom-gold)/0.6)]" />
               </div>
               <p className="mt-3 text-center text-xs text-muted-foreground/90 italic">
-                নিজের চিঠির বাক্সটি সাজিয়ে রাখুন
+                নিরাপত্তা ও সাইন-ইন ব্যবস্থাপনা
               </p>
+
             </div>
 
-            {/* ---- Tier 1: Everyday — Active devices ---- */}
-            <div className="mb-3 flex items-center gap-2 px-1">
-              <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground/70">
-                দৈনন্দিন
-              </span>
-              <div className="h-px flex-1 bg-border/60" />
-            </div>
+            {/* Active devices */}
+
 
             <Collapsible open={sessionsOpen} onOpenChange={setSessionsOpen} className="mb-8 rounded-2xl border border-border/70 bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--heirloom-gold)/0.1),0_8px_24px_-16px_hsl(var(--heirloom-gold)/0.25)]">
               <CollapsibleTrigger className="flex w-full items-center gap-3 p-4 text-left transition hover:bg-muted/40">
@@ -430,9 +426,10 @@ const MyInfo = () => {
               <div className="h-px flex-1 bg-destructive/20" />
             </div>
 
-            <div className={`mb-8 rounded-2xl overflow-hidden transition-colors ${secretOpen
-              ? "border-2 border-destructive/50 bg-destructive/[0.04] shadow-[0_8px_28px_-16px_hsl(var(--destructive)/0.35)]"
-              : "border border-border/70 bg-card shadow-[0_1px_0_hsl(var(--heirloom-gold)/0.1),0_8px_24px_-16px_hsl(var(--heirloom-gold)/0.2)]"}`}>
+            <div className={`mb-8 rounded-2xl border border-border/70 overflow-hidden transition-all ${secretOpen
+              ? "bg-destructive/[0.04] ring-1 ring-destructive/40 shadow-[0_8px_28px_-16px_hsl(var(--destructive)/0.35)]"
+              : "bg-card shadow-[0_1px_0_hsl(var(--heirloom-gold)/0.1),0_8px_24px_-16px_hsl(var(--heirloom-gold)/0.2)]"}`}>
+
               <div className="flex items-start justify-between gap-3 p-4">
                 <div className="flex items-start gap-3 min-w-0">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ring-1 ${secretOpen
@@ -541,13 +538,8 @@ const MyInfo = () => {
               )}
             </div>
 
-            {/* ---- Tier 3: Exit — Sign out ---- */}
-            <div className="mb-3 flex items-center gap-2 px-1">
-              <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground/70">
-                বিদায়
-              </span>
-              <div className="h-px flex-1 bg-border/60" />
-            </div>
+            {/* Sign out */}
+
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
