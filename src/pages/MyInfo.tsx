@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
  Pencil, MessageCircleHeart, MessageCircle, LogOut, Phone, Mail, MapPin, Droplets, Calendar,
-  Facebook, Save, X, ShieldAlert, Copy, Video, Send, ExternalLink, FileText,
+  Facebook, Save, X, ShieldAlert, Copy, Video, Send, ExternalLink, FileText, KeyRound,
 } from "lucide-react";
 
 import { Header } from "@/components/Header";
@@ -20,7 +20,7 @@ import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhoneWithMessengers, PhoneEntry, deriveMessengers, parseMessengersToPhones } from "@/components/PhoneWithMessengers";
 import { CATEGORIES, BLOOD_GROUPS } from "@/lib/types";
 import { CategoryIcon } from "@/lib/categoryIcons";
-import { updateVerifiedContact, updateContactViaOtpSession } from "@/lib/store";
+import { updateVerifiedContact, updateContactViaOtpSession, setSecretViaSecret, setSecretViaOtpSession } from "@/lib/store";
 import { getMeSession, clearMeSession, updateMeContactSnapshot } from "@/lib/userSession";
 import { getChatSession, clearChatSession, createChatSession } from "@/lib/chatSession";
 import { ActiveSessionsCard } from "@/components/ActiveSessionsCard";
@@ -41,6 +41,9 @@ const MyInfo = () => {
             : [{ number: "", hasWhatsApp: false, hasIMO: false, hasTelegram: false }],
   );
   const [saving, setSaving] = useState(false);
+  const [newSecret, setNewSecret] = useState("");
+  const [confirmSecret, setConfirmSecret] = useState("");
+  const [settingSecret, setSettingSecret] = useState(false);
 
   const [chatSession, setChatSession] = useState(getChatSession);
   const [openingChat, setOpeningChat] = useState(false);
@@ -112,6 +115,48 @@ const MyInfo = () => {
       }
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSetSecret = async () => {
+    const s = newSecret.trim();
+    if (s.length < 4) {
+      toast.error("সিক্রেট কোড কমপক্ষে ৪ অক্ষরের হতে হবে");
+      return;
+    }
+    if (s !== confirmSecret.trim()) {
+      toast.error("দুটি সিক্রেট কোড মিলছে না");
+      return;
+    }
+    setSettingSecret(true);
+    try {
+      if (session.auth.type === "secret") {
+        const ok = await setSecretViaSecret(session.auth.phone, session.auth.secretCode, s);
+        if (!ok) throw new Error("FAIL");
+        // Update MeSession with the new secret so future edits keep working
+        const { saveMeSession } = await import("@/lib/userSession");
+        saveMeSession({ type: "secret", phone: session.auth.phone, secretCode: s }, contact);
+        setSession(getMeSession());
+        toast.success("সিক্রেট কোড পরিবর্তন হয়েছে 🔐");
+      } else {
+        const ok = await setSecretViaOtpSession(session.auth.sessionToken, s);
+        if (!ok) throw new Error("FAIL");
+        // OTP session got consumed — promote to secret session with new code
+        const { saveMeSession } = await import("@/lib/userSession");
+        saveMeSession({ type: "secret", phone: contact.phone, secretCode: s }, contact);
+        setSession(getMeSession());
+        toast.success("সিক্রেট কোড সেট হয়েছে 🔐");
+      }
+      setNewSecret("");
+      setConfirmSecret("");
+    } catch (err: any) {
+      if (String(err?.message || "").includes("SECRET_TOO_SHORT")) {
+        toast.error("সিক্রেট কোড কমপক্ষে ৪ অক্ষরের হতে হবে");
+      } else {
+        toast.error("সিক্রেট কোড সেট করা যায়নি। আবার চেষ্টা করুন।");
+      }
+    } finally {
+      setSettingSecret(false);
     }
   };
 
@@ -395,6 +440,61 @@ const MyInfo = () => {
               <Textarea id={fid("note")} value={form.note || ""} onChange={(e) => setForm({ ...form, note: e.target.value })} className="bg-background min-h-[80px]" />
             </div>
           </div>
+
+          {/* Secret code set / change */}
+          <div className="mt-5 rounded-xl border border-border bg-card p-4 sm:p-5 space-y-4">
+            <div className="flex items-start gap-2">
+              <KeyRound className="h-4 w-4 mt-0.5 text-[hsl(var(--heirloom-gold-deep))]" />
+              <div>
+                <h3 className="text-sm font-medium text-foreground">
+                  {isOtpAuth ? "সিক্রেট কোড সেট করুন" : "সিক্রেট কোড পরিবর্তন"}
+                </h3>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {isOtpAuth
+                    ? "একটি সহজে মনে রাখার মতো কোড দিন — অন্য ডিভাইস থেকে সাইন-ইন করতে লাগবে।"
+                    : "মনে রাখার মতো নতুন কোড দিতে পারেন। পুরনো কোড আর কাজ করবে না।"}
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor={fid("new-secret")}>নতুন সিক্রেট কোড</Label>
+                <Input
+                  id={fid("new-secret")}
+                  type="password"
+                  value={newSecret}
+                  onChange={(e) => setNewSecret(e.target.value)}
+                  className="bg-background"
+                  placeholder="কমপক্ষে ৪ অক্ষর"
+                  autoComplete="new-password"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor={fid("confirm-secret")}>আবার লিখুন</Label>
+                <Input
+                  id={fid("confirm-secret")}
+                  type="password"
+                  value={confirmSecret}
+                  onChange={(e) => setConfirmSecret(e.target.value)}
+                  className="bg-background"
+                  placeholder="মিলিয়ে নিন"
+                  autoComplete="new-password"
+                />
+              </div>
+            </div>
+            <Button
+              type="button"
+              onClick={handleSetSecret}
+              disabled={settingSecret || !newSecret || !confirmSecret}
+              variant="outline"
+              className="w-full sm:w-auto gap-2 rounded-xl"
+            >
+              <KeyRound className="h-4 w-4" />
+              {settingSecret ? "সেভ হচ্ছে..." : isOtpAuth ? "সিক্রেট সেট করুন" : "সিক্রেট বদলান"}
+            </Button>
+          </div>
+
+
 
           <div className="mt-6 flex gap-3">
             <Button onClick={cancelEdit} variant="outline" className="flex-1 h-12 rounded-xl">বাতিল</Button>

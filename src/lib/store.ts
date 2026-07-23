@@ -235,3 +235,24 @@ export function maskPhone(phone: string): string {
   if (phone.length <= 4) return "****";
   return phone.slice(0, 3) + "****" + phone.slice(-2);
 }
+
+// ---------- Set / change secret code ----------
+export async function setSecretViaSecret(phone: string, currentSecret: string, newSecret: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc("set_secret_via_secret" as any, {
+    p_phone: phone,
+    p_current_secret: currentSecret,
+    p_new_secret: newSecret,
+  });
+  if (error) throw error;
+  return !!data;
+}
+
+export async function setSecretViaOtpSession(sessionToken: string, newSecret: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc("set_secret_via_otp_session" as any, {
+    p_session_token: sessionToken,
+    p_new_secret: newSecret,
+  });
+  if (error) throw error;
+  return !!data;
+}
+

@@ -761,6 +761,18 @@ export type Database = {
             }
             Returns: string
           }
+      set_secret_via_otp_session: {
+        Args: { p_new_secret: string; p_session_token: string }
+        Returns: boolean
+      }
+      set_secret_via_secret: {
+        Args: {
+          p_current_secret: string
+          p_new_secret: string
+          p_phone: string
+        }
+        Returns: boolean
+      }
       setup_admin_contact: {
         Args: { p_name: string; p_phone?: string }
         Returns: string
