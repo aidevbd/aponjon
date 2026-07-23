@@ -441,6 +441,61 @@ const MyInfo = () => {
             </div>
           </div>
 
+          {/* Secret code set / change */}
+          <div className="mt-5 rounded-xl border border-border bg-card p-4 sm:p-5 space-y-4">
+            <div className="flex items-start gap-2">
+              <KeyRound className="h-4 w-4 mt-0.5 text-[hsl(var(--heirloom-gold-deep))]" />
+              <div>
+                <h3 className="text-sm font-medium text-foreground">
+                  {isOtpAuth ? "সিক্রেট কোড সেট করুন" : "সিক্রেট কোড পরিবর্তন"}
+                </h3>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {isOtpAuth
+                    ? "একটি সহজে মনে রাখার মতো কোড দিন — অন্য ডিভাইস থেকে সাইন-ইন করতে লাগবে।"
+                    : "মনে রাখার মতো নতুন কোড দিতে পারেন। পুরনো কোড আর কাজ করবে না।"}
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor={fid("new-secret")}>নতুন সিক্রেট কোড</Label>
+                <Input
+                  id={fid("new-secret")}
+                  type="password"
+                  value={newSecret}
+                  onChange={(e) => setNewSecret(e.target.value)}
+                  className="bg-background"
+                  placeholder="কমপক্ষে ৪ অক্ষর"
+                  autoComplete="new-password"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor={fid("confirm-secret")}>আবার লিখুন</Label>
+                <Input
+                  id={fid("confirm-secret")}
+                  type="password"
+                  value={confirmSecret}
+                  onChange={(e) => setConfirmSecret(e.target.value)}
+                  className="bg-background"
+                  placeholder="মিলিয়ে নিন"
+                  autoComplete="new-password"
+                />
+              </div>
+            </div>
+            <Button
+              type="button"
+              onClick={handleSetSecret}
+              disabled={settingSecret || !newSecret || !confirmSecret}
+              variant="outline"
+              className="w-full sm:w-auto gap-2 rounded-xl"
+            >
+              <KeyRound className="h-4 w-4" />
+              {settingSecret ? "সেভ হচ্ছে..." : isOtpAuth ? "সিক্রেট সেট করুন" : "সিক্রেট বদলান"}
+            </Button>
+          </div>
+
+
+
           <div className="mt-6 flex gap-3">
             <Button onClick={cancelEdit} variant="outline" className="flex-1 h-12 rounded-xl">বাতিল</Button>
             <Button onClick={handleSave} className="flex-1 gap-2 h-12 rounded-xl" disabled={saving}>
