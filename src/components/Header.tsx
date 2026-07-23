@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useGlobalChatNotifier } from "@/hooks/useGlobalChatNotifier";
 import { ChatGateDialog } from "@/components/ChatGateDialog";
+import { getMeSession } from "@/lib/userSession";
 
 
 export function Header() {
