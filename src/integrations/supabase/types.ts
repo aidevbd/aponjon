@@ -54,9 +54,11 @@ export type Database = {
           device_label: string | null
           expires_at: string
           id: string
+          ip_address: unknown
           last_used_at: string
           session_token: string
           trusted_device: boolean
+          user_agent: string | null
         }
         Insert: {
           contact_id: string
@@ -64,9 +66,11 @@ export type Database = {
           device_label?: string | null
           expires_at?: string
           id?: string
+          ip_address?: unknown
           last_used_at?: string
           session_token: string
           trusted_device?: boolean
+          user_agent?: string | null
         }
         Update: {
           contact_id?: string
@@ -74,9 +78,11 @@ export type Database = {
           device_label?: string | null
           expires_at?: string
           id?: string
+          ip_address?: unknown
           last_used_at?: string
           session_token?: string
           trusted_device?: boolean
+          user_agent?: string | null
         }
         Relationships: [
           {
@@ -476,6 +482,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      _current_request_ip: { Args: never; Returns: unknown }
       check_rate_limit: {
         Args: { p_action_type: string; p_key: string }
         Returns: boolean
@@ -488,6 +495,16 @@ export type Database = {
               p_phone: string
               p_secret_code: string
               p_trusted?: boolean
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_device_label?: string
+              p_phone: string
+              p_secret_code: string
+              p_trusted?: boolean
+              p_user_agent?: string
             }
             Returns: Json
           }
@@ -629,9 +646,11 @@ export type Database = {
           device_label: string
           expires_at: string
           id: string
+          ip_address: string
           is_current: boolean
           last_used_at: string
           trusted_device: boolean
+          user_agent: string
         }[]
       }
       log_admin_activity: {
