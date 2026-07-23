@@ -20,6 +20,7 @@ export function Header() {
   const isChat = location.pathname.startsWith("/chat");
   const { totalUnread, hasSession } = useGlobalChatNotifier();
   const [gateOpen, setGateOpen] = useState(false);
+  const hasMe = !!getMeSession();
 
   // Where should the messenger icon take us?
   const adminOnChatTab = isAdminDashboard && searchParams.get("tab") === "chat";
