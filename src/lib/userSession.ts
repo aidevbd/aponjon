@@ -12,12 +12,24 @@
  */
 
 const ME_KEY = "aponjon_me_session";
-const EXPIRY_HOURS = 24;
+const LEGACY_KEY = "aponjon_me_session";
+const EXPIRY_HOURS = 24 * 30; // 30 days — mirrors trusted chat session
 
 const store: Storage | null =
-  typeof window !== "undefined" && typeof window.sessionStorage !== "undefined"
-    ? window.sessionStorage
+  typeof window !== "undefined" && typeof window.localStorage !== "undefined"
+    ? window.localStorage
     : null;
+
+// One-time migration: pull an existing tab-scoped session into localStorage
+if (typeof window !== "undefined" && store) {
+  try {
+    if (!store.getItem(ME_KEY)) {
+      const legacy = window.sessionStorage?.getItem(LEGACY_KEY);
+      if (legacy) store.setItem(ME_KEY, legacy);
+    }
+    window.sessionStorage?.removeItem(LEGACY_KEY);
+  } catch { /* ignore */ }
+}
 
 export type MeAuth =
   | { type: "secret"; phone: string; secretCode: string }
