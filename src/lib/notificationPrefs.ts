@@ -89,7 +89,8 @@ if (typeof window !== "undefined") ensureAudioUnlockBinding();
 let vibrationUnlockBound = false;
 let vibrationUnlocked = false;
 
-const VIBRATION_PATTERN = [90, 35, 140, 35, 90];
+// A single soft "knock" — like a gentle tap on a wooden door.
+const VIBRATION_PATTERN = [45];
 
 function ensureVibrationUnlockBinding() {
   if (vibrationUnlockBound || typeof window === "undefined") return;
@@ -98,7 +99,7 @@ function ensureVibrationUnlockBinding() {
   const unlock = () => {
     vibrationUnlocked = true;
     try {
-      navigator.vibrate(0); // cancel any stale buzz; the gesture itself activates the document
+      navigator.vibrate(0);
     } catch {}
     removeListeners();
   };
@@ -116,8 +117,6 @@ function doVibrate(pattern: number | number[]): boolean {
   if (typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return false;
   ensureVibrationUnlockBinding();
   try {
-    // Cancel an in-flight vibration first; several Android devices ignore a
-    // new pattern while the previous one is still settling.
     navigator.vibrate(0);
     const ok = navigator.vibrate(pattern);
     return ok !== false;
@@ -134,6 +133,11 @@ export function triggerVibration(pattern: number | number[] = VIBRATION_PATTERN)
   return ok;
 }
 
+/**
+ * A warm, soft "envelope arrival" tone — a single bell-like pluck
+ * with a gentle harmonic, decaying quickly. Replaces the older 2-note beep
+ * so the app feels like a letter arriving, not a device alert.
+ */
 export async function playChime() {
   const ctx = createCtx();
   if (!ctx) return;
@@ -142,29 +146,51 @@ export async function playChime() {
   } catch {}
   if (ctx.state !== "running") return;
   const now = ctx.currentTime + 0.02;
-  const notes = [880, 1175];
-  notes.forEach((freq, i) => {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, now + i * 0.08);
-    gain.gain.setValueAtTime(0.0001, now + i * 0.08);
-    gain.gain.exponentialRampToValueAtTime(0.18, now + i * 0.08 + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.08 + 0.22);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start(now + i * 0.08);
-    osc.stop(now + i * 0.08 + 0.24);
-  });
+
+  // Fundamental — a warm mid tone (E5 ≈ 659Hz)
+  const fundamental = ctx.createOscillator();
+  const fGain = ctx.createGain();
+  fundamental.type = "sine";
+  fundamental.frequency.setValueAtTime(659, now);
+  fGain.gain.setValueAtTime(0.0001, now);
+  fGain.gain.exponentialRampToValueAtTime(0.14, now + 0.015);
+  fGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+  fundamental.connect(fGain).connect(ctx.destination);
+  fundamental.start(now);
+  fundamental.stop(now + 0.6);
+
+  // Soft harmonic shimmer (octave, very quiet)
+  const harmonic = ctx.createOscillator();
+  const hGain = ctx.createGain();
+  harmonic.type = "sine";
+  harmonic.frequency.setValueAtTime(1318, now);
+  hGain.gain.setValueAtTime(0.0001, now);
+  hGain.gain.exponentialRampToValueAtTime(0.05, now + 0.02);
+  hGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+  harmonic.connect(hGain).connect(ctx.destination);
+  harmonic.start(now);
+  harmonic.stop(now + 0.4);
+}
+
+// Shared timestamp so poll + realtime don't double-chime.
+let lastNotifyAt = 0;
+export function getLastNotifyAt() {
+  return lastNotifyAt;
 }
 
 /** Fire audio + haptic notification for a new incoming chat message, respecting prefs. */
 export function notifyNewMessage() {
+  const now = Date.now();
+  // Debounce: skip if we chimed within the last 4s (realtime + poll dedup).
+  if (now - lastNotifyAt < 4000) return;
+  lastNotifyAt = now;
+
   const prefs = getNotificationPrefs();
   if (prefs.sound) {
     void playChime().catch(() => {});
   }
   if (prefs.vibration) {
-    triggerVibration(vibrationUnlocked ? VIBRATION_PATTERN : [120, 45, 160, 45, 120]);
+    triggerVibration(VIBRATION_PATTERN);
   }
 }
 
