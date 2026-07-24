@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { CHAT_SESSION_CHANGED_EVENT, getChatSession, getUnreadCounts } from "@/lib/chatSession";
 import { notifyNewMessage } from "@/lib/notificationPrefs";
 import { toast } from "sonner";
+import { LetterArrivedToast } from "@/components/chat/LetterArrivedToast";
 
 const POLL_MS = 15000;
 const SEEN_KEY = "aponjon.lastSeenUnread.v1";
@@ -17,9 +18,10 @@ function saveSeen(map: Record<string, number>) {
 /**
  * Site-wide unread poller for logged-in chat users.
  * - Polls unread counts every 15s (only when tab is visible)
- * - Fires sound/vibration + toast + browser Notification when new messages arrive
- * - Returns total unread count for badges
+ * - Fires sound/vibration + heirloom letter toast when new messages arrive
+ * - Sends browser Notification only when the tab is hidden (no duplicates)
  * - Suppresses alerts while the user is actively on /chat
+ * - Returns total unread count for badges
  */
 export function useGlobalChatNotifier() {
   const [totalUnread, setTotalUnread] = useState<number>(() =>
@@ -27,13 +29,9 @@ export function useGlobalChatNotifier() {
   );
   const [hasSession, setHasSession] = useState<boolean>(() => !!getChatSession());
   const seenRef = useRef<Record<string, number>>(loadSeen());
-  // If we have a persisted baseline from a previous session, treat the first
-  // poll as a real diff so messages that arrived while the tab was closed
-  // still trigger a notification.
   const firstRunRef = useRef(Object.keys(loadSeen()).length === 0);
 
   useEffect(() => {
-    // Re-check session on focus / storage changes
     const refreshSession = () => setHasSession(!!getChatSession());
     window.addEventListener("focus", refreshSession);
     window.addEventListener("storage", refreshSession);
@@ -51,7 +49,6 @@ export function useGlobalChatNotifier() {
       return;
     }
 
-    // Ask for browser notification permission once (best-effort)
     if (typeof Notification !== "undefined" && Notification.permission === "default") {
       try { Notification.requestPermission().catch(() => {}); } catch {}
     }
@@ -76,28 +73,40 @@ export function useGlobalChatNotifier() {
         const onChatPage = window.location.pathname.startsWith("/chat");
         const prev = seenRef.current;
 
-        // Detect newly-arrived unread messages (any sender whose count increased)
-        let hasNew = false;
+        // Count newly-arrived messages across all senders (batched).
+        let newCount = 0;
         for (const [sid, count] of Object.entries(nextMap)) {
-          if (count > (prev[sid] || 0)) hasNew = true;
+          const delta = count - (prev[sid] || 0);
+          if (delta > 0) newCount += delta;
         }
 
-        // Skip the very first poll (baseline) and while user is on chat page
-        if (hasNew && !firstRunRef.current && !onChatPage) {
+        if (newCount > 0 && !firstRunRef.current && !onChatPage) {
           notifyNewMessage();
-          toast.message("নতুন মেসেজ এসেছে 💌", {
-            description: "চ্যাট খুলে দেখুন",
-            action: {
-              label: "খুলুন",
-              onClick: () => { window.location.href = "/chat"; },
-            },
-          });
-          if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+
+          // Heirloom letter card — replaces the generic sonner toast style.
+          toast.custom(
+            (id) => (
+              <LetterArrivedToast
+                toastId={id}
+                count={newCount}
+                onOpen={() => { window.location.href = "/chat"; }}
+              />
+            ),
+            { duration: 5000, position: "top-center" },
+          );
+
+          // OS-level notification — only when tab is hidden (avoid duplicate).
+          if (
+            typeof Notification !== "undefined" &&
+            Notification.permission === "granted" &&
+            document.visibilityState === "hidden"
+          ) {
             try {
-              const n = new Notification("আপনজন — নতুন মেসেজ", {
-                body: "চ্যাটে নতুন মেসেজ এসেছে",
+              const n = new Notification("আপনজন — নতুন চিঠি", {
+                body: newCount > 1 ? `${newCount}টি নতুন মেসেজ এসেছে` : "চ্যাটে নতুন মেসেজ এসেছে",
                 icon: "/favicon.ico",
                 tag: "aponjon-chat",
+                silent: true,
               });
               n.onclick = () => { window.focus(); window.location.href = "/chat"; };
             } catch {}
@@ -112,7 +121,6 @@ export function useGlobalChatNotifier() {
       }
     };
 
-    // Run immediately, then on interval — only when tab is visible
     let interval: number | null = null;
     const start = () => {
       if (interval != null) return;
@@ -138,3 +146,4 @@ export function useGlobalChatNotifier() {
 
   return { totalUnread, hasSession };
 }
+
