@@ -3,6 +3,7 @@ import { ArrowRight, PlusCircle, ShieldCheck, Pencil } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { getMeSession } from "@/lib/userSession";
+import { getChatSession } from "@/lib/chatSession";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -15,8 +16,9 @@ function getGreeting() {
 
 const Index = () => {
   const me = getMeSession();
-  const hasMe = !!me;
-  const displayName: string | null = me?.contact?.name ?? null;
+  const chat = getChatSession();
+  const hasMe = !!me || !!chat;
+  const displayName: string | null = me?.contact?.name ?? chat?.name ?? null;
 
   return (
     <div className="flex min-h-app flex-col bg-[hsl(var(--heirloom-bg))]">
