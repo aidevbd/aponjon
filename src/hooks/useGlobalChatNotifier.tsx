@@ -4,8 +4,9 @@ import { notifyNewMessage } from "@/lib/notificationPrefs";
 import { toast } from "sonner";
 import { LetterArrivedToast } from "@/components/chat/LetterArrivedToast";
 
-const POLL_MS = 15000;
+const POLL_MS = 5000;
 const SEEN_KEY = "aponjon.lastSeenUnread.v1";
+const LETTER_TOAST_ID = "aponjon-letter-toast";
 
 function loadSeen(): Record<string, number> {
   try { return JSON.parse(localStorage.getItem(SEEN_KEY) || "{}") || {}; }
