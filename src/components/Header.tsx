@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useGlobalChatNotifier } from "@/hooks/useGlobalChatNotifier";
 import { ChatGateDialog } from "@/components/ChatGateDialog";
 import { getMeSession } from "@/lib/userSession";
+import { getChatSession } from "@/lib/chatSession";
 
 
 export function Header() {
