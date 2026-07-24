@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useGlobalChatNotifier } from "@/hooks/useGlobalChatNotifier";
 import { ChatGateDialog } from "@/components/ChatGateDialog";
 import { getMeSession } from "@/lib/userSession";
+import { getChatSession } from "@/lib/chatSession";
 
 
 export function Header() {
@@ -20,7 +21,7 @@ export function Header() {
   const isChat = location.pathname.startsWith("/chat");
   const { totalUnread, hasSession } = useGlobalChatNotifier();
   const [gateOpen, setGateOpen] = useState(false);
-  const hasMe = !!getMeSession();
+  const hasMe = !!getMeSession() || !!getChatSession();
 
   // Where should the messenger icon take us?
   const adminOnChatTab = isAdminDashboard && searchParams.get("tab") === "chat";
