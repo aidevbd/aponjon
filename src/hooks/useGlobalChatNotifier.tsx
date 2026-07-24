@@ -4,8 +4,9 @@ import { notifyNewMessage } from "@/lib/notificationPrefs";
 import { toast } from "sonner";
 import { LetterArrivedToast } from "@/components/chat/LetterArrivedToast";
 
-const POLL_MS = 15000;
+const POLL_MS = 5000;
 const SEEN_KEY = "aponjon.lastSeenUnread.v1";
+const LETTER_TOAST_ID = "aponjon-letter-toast";
 
 function loadSeen(): Record<string, number> {
   try { return JSON.parse(localStorage.getItem(SEEN_KEY) || "{}") || {}; }
@@ -83,7 +84,8 @@ export function useGlobalChatNotifier() {
         if (newCount > 0 && !firstRunRef.current && !onChatPage) {
           notifyNewMessage();
 
-          // Heirloom letter card — replaces the generic sonner toast style.
+          // Heirloom letter card — single stable id so repeat arrivals
+          // update the same card instead of stacking new ones.
           toast.custom(
             (id) => (
               <LetterArrivedToast
@@ -92,7 +94,7 @@ export function useGlobalChatNotifier() {
                 onOpen={() => { window.location.href = "/chat"; }}
               />
             ),
-            { duration: 5000, position: "top-center" },
+            { id: LETTER_TOAST_ID, duration: 4000, position: "top-center" },
           );
 
           // OS-level notification — only when tab is hidden (avoid duplicate).
