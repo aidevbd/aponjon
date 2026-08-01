@@ -1,19 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  MessageCircle, ChevronLeft, Loader2, Search, Pin, Settings2, Home, LogOut,
-  WifiOff, Clock3, Bell, ArrowDownToLine, RefreshCw, X,
-} from "lucide-react";
+import { Loader2, Pin, WifiOff, Clock3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   getChatSession, getChatContacts,
   getMessages, getUnreadCounts,
@@ -44,7 +36,10 @@ import { useJumpToMessage } from "@/hooks/useJumpToMessage";
 import { ChatContactList } from "@/components/chat/ChatContactList";
 import { ChatMessageList } from "@/components/chat/ChatMessageList";
 import { ChatComposer } from "@/components/chat/ChatComposer";
-import { formatLastSeen } from "@/lib/chatFormatters";
+import { ChatHeader } from "@/components/chat/ChatHeader";
+import { ChatSearchBar } from "@/components/chat/ChatSearchBar";
+import { ChatEmptyState } from "@/components/chat/ChatEmptyState";
+import { useChatSearch } from "@/hooks/useChatSearch";
 import { swallow } from "@/lib/devLog";
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
@@ -73,8 +68,6 @@ const Chat = () => {
   const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [contactPreviews, setContactPreviews] = useState<Record<string, ContactPreview>>({});
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -85,6 +78,8 @@ const Chat = () => {
   const { isOffline, queuedCount, setQueuedCount } = useChatConnectivity(selectedContact?.id);
   const presenceMap = useChatPresence(!!session, contacts.map(c => c.id));
   const { isOtherTyping, emitTyping } = useChatTyping(session?.contactId, selectedContact?.id);
+  const { searchOpen, searchQuery, setSearchQuery, toggleSearch, closeSearch, filteredMessages } =
+    useChatSearch(messages);
 
   const restoreInputFocus = useCallback((force = false) => {
     const focusInput = () => {
@@ -306,9 +301,6 @@ const Chat = () => {
   };
 
   const pinnedMessages = messages.filter(m => m.is_pinned);
-  const filteredMessages = searchQuery
-    ? messages.filter(m => m.content?.toLowerCase().includes(searchQuery.toLowerCase()))
-    : messages;
   const statusTone = actions.sending ? "text-primary" : isOffline ? "text-destructive" : queuedCount > 0 ? "text-foreground" : "text-muted-foreground";
   const statusLabel = actions.sending
     ? "মেসেজ পাঠানো হচ্ছে..."
