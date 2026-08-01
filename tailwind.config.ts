@@ -55,7 +55,20 @@ export default {
           soft: "hsl(var(--rose-soft))",
           glow: "hsl(var(--rose-glow))",
         },
+        heirloom: {
+          bg: "hsl(var(--heirloom-bg))",
+          paper: "hsl(var(--heirloom-paper))",
+          cream: "hsl(var(--heirloom-cream))",
+          ink: "hsl(var(--heirloom-ink))",
+          "ink-soft": "hsl(var(--heirloom-ink-soft))",
+          "ink-mute": "hsl(var(--heirloom-ink-mute))",
+          line: "hsl(var(--heirloom-line))",
+          gold: "hsl(var(--heirloom-gold))",
+          "gold-deep": "hsl(var(--heirloom-gold-deep))",
+          seal: "hsl(var(--heirloom-seal))",
+        },
         coral: "hsl(var(--coral))",
+
         peach: "hsl(var(--peach))",
         gold: "hsl(var(--gold))",
         sidebar: {
