@@ -375,19 +375,8 @@ const Chat = () => {
                   <div className="px-4 pb-1"><TypingIndicator /></div>
                 )}
 
-                {(actions.sending || isOffline || queuedCount > 0) && (
-                  <div className="px-4 pt-1.5">
-                    <div className={`flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-muted/60 px-3 py-1.5 text-xs ${statusTone}`} role="status" aria-live="polite">
-                      <div className="flex items-center gap-2 min-w-0">
-                        {actions.sending ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" aria-hidden="true" /> : isOffline ? <WifiOff className="h-3.5 w-3.5 shrink-0" aria-hidden="true" /> : <Clock3 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
-                        <span className="truncate">{statusLabel}</span>
-                      </div>
-                      {queuedCount > 0 && (
-                        <span className="rounded-full bg-card px-2 py-0.5 text-foreground shrink-0">{queuedCount}টি অপেক্ষায়</span>
-                      )}
-                    </div>
-                  </div>
-                )}
+                <ChatStatusBar sending={actions.sending} isOffline={isOffline} queuedCount={queuedCount} />
+
 
                 <FailedMessagesList items={actions.failedMessages} onResend={actions.handleResendFailed} onDelete={actions.handleDeleteFailed} />
 
