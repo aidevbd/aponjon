@@ -1,14 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import { Loader2, Pin, WifiOff, Clock3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  getChatSession, getChatContacts,
-  getMessages, getUnreadCounts,
+  getChatSession,
+  getMessages,
   clearChatSession, signMessagesImages,
   type ChatSession,
 } from "@/lib/chatSession";
@@ -39,11 +38,12 @@ import { ChatComposer } from "@/components/chat/ChatComposer";
 import { ChatHeader } from "@/components/chat/ChatHeader";
 import { ChatSearchBar } from "@/components/chat/ChatSearchBar";
 import { ChatEmptyState } from "@/components/chat/ChatEmptyState";
+import { PinnedMessagesBar } from "@/components/chat/PinnedMessagesBar";
+import { ChatStatusBar } from "@/components/chat/ChatStatusBar";
 import { useChatSearch } from "@/hooks/useChatSearch";
+import { useChatContacts, type ChatContact } from "@/hooks/useChatContacts";
 import { swallow } from "@/lib/devLog";
 
-type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
-type ContactPreview = { preview: string; time: string | null };
 
 const Chat = () => {
   const navigate = useNavigate();
