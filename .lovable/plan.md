@@ -1,94 +1,54 @@
-## /chat পুরো Refactor — P1 থেকে P5
+## আপনজন — বাকি কাজের নোট (Backlog)
 
-### লক্ষ্য
-Chat.tsx (1235 lines, 58 hooks) কে ছোট ছোট, testable module-এ ভাঙা এবং একই সময়ে UX/design সমস্যাগুলো ঠিক করা। কোনো feature বাদ যাবে না — সব behavior preserve হবে।
-
----
-
-### Phase 1 — Custom hooks-এ logic বের করা (কোন UI change নেই)
-Chat.tsx থেকে business logic আলাদা hook-এ:
-
-- `hooks/useChatContacts.ts` — contacts fetch, unread map, previews, presence subscribe
-- `hooks/useChatMessages.ts` — messages fetch, realtime subscribe, reconcile, signing
-- `hooks/useChatComposer.ts` — msgInput, send, edit, reply, image upload, offline queue
-- `hooks/useChatTyping.ts` — typing indicator broadcast + receive
-- `hooks/useChatSearch.ts` — search state + filter
-- `hooks/useChatActions.ts` — react, unsend, remove-for-me, edit history, pin
-
-Chat.tsx এখন এই hook-গুলো compose করবে মাত্র।
+সর্বশেষ অডিট অনুযায়ী কোডবেসে যা এখনো বাকি।
 
 ---
 
-### Phase 2 — UI components-এ break করা
-- `components/chat/ChatHeader.tsx` — avatar, name, "আপনার আপনজন" badge, presence, actions menu
-- `components/chat/ChatContactList.tsx` — sidebar list (desktop) + fallback
-- `components/chat/ChatThread.tsx` — message list, grouping, auto-scroll
-- `components/chat/ChatComposer.tsx` — textarea, image, emoji, reply/edit preview, send
-- `components/chat/ChatSearchBar.tsx` — search overlay
-- `components/chat/ChatEmptyState.tsx` — "এখনো কথা শুরু হয়নি" heirloom empty state
+### A. /chat রিফ্যাক্টর — অর্ধসমাপ্ত
+
+Chat.tsx এখন **605 লাইন** (আগে 1235)। টার্গেট ছিল <200।
+
+হয়েছে: `useChatTyping`, `useChatActions`, `useChatPresence`, `useChatRealtime`, `useChatConnectivity`, `useChatSessionKeepalive`, `ChatComposer`, `ChatContactList`, `ChatMessageList`
+
+বাকি (এখনো Chat.tsx-এর ভেতরে inline):
+- `components/chat/ChatHeader.tsx` — avatar, নাম, "আপনার আপনজন" badge, actions menu (Chat.tsx ~390-477)
+- `components/chat/ChatSearchBar.tsx` — search overlay (Chat.tsx 473-477)
+- `components/chat/ChatEmptyState.tsx` — "এখনো কথা শুরু হয়নি"
 - `components/chat/ChatLoginForm.tsx` — session bootstrap form
-
-Chat.tsx target: <200 lines।
-
----
-
-### Phase 3 — Desktop split layout (P1 fix)
-- ≥768px-এ two-pane: বাম দিকে contact list (280px), ডান দিকে thread
-- একটাই contact থাকলে সরাসরি thread খোলা (P3 fix)
-- <768px-এ current fixed-viewport mobile behavior অক্ষুণ্ণ
+- `hooks/useChatSearch.ts` — search state এখনো Chat.tsx-এ
+- `hooks/useChatContacts.ts` — contacts fetch + unread map
+- Desktop two-pane split (Phase 3) নিশ্চিতভাবে হয়নি — verify দরকার
 
 ---
 
-### Phase 4 — Header simplify (P3 fix)
-- Mobile header: Avatar + Name + overflow menu (Search/Settings/Notif/Home/Logout DropdownMenu-তে)
-- Desktop header: full spread, কিন্তু breathing room বেশি
+### B. EmbeddedAdminChat.tsx — 1232 লাইন (সবচেয়ে বড় ফাইল)
+
+অ্যাডমিন সাইডে সমান্তরাল আরেকটা চ্যাট implementation, কখনো রিফ্যাক্টর হয়নি। /chat-এর hook-গুলো এখানে reuse করা যায় — ডুপ্লিকেট লজিক কমবে।
 
 ---
 
-### Phase 5 — Design token cleanup (P4 fix)
-- Hardcoded color (`text-white`, `bg-black`, hex) → semantic token
-- `text-[10px]` মত tiny font → `text-xs` বা proper scale
-- MessageBubble-এ heirloom rose/gold tokens verify
+### C. Design token cleanup (Phase 5)
+
+- `text-[10px]` — ~40 জায়গায়। AdminDashboard (9), ContactFilters (6), ActiveSessionsCard (5), MyInfo (3), MessageBubble (3), JumpToLatest, EditHistoryDialog → `text-xs` বা proper scale
+- `text-white` / `bg-black` — `ImageLightbox.tsx` (3), `MessageActionSheet.tsx:203` → semantic token
+  (shadcn ui/ ফাইলের overlay গুলো intentional, বাদ)
+- raw hex: ✅ ক্লিন, কিছু নেই
 
 ---
 
-### Technical Details
+### D. কোড হেলথ
 
-**File structure after refactor:**
-```text
-src/pages/Chat.tsx                 (~180 lines, composition only)
-src/hooks/
-  useChatContacts.ts
-  useChatMessages.ts
-  useChatComposer.ts
-  useChatTyping.ts
-  useChatSearch.ts
-  useChatActions.ts
-src/components/chat/
-  ChatHeader.tsx
-  ChatContactList.tsx
-  ChatThread.tsx
-  ChatComposer.tsx
-  ChatSearchBar.tsx
-  ChatEmptyState.tsx
-  ChatLoginForm.tsx
-  (existing: MessageBubble, MessageActionSheet, etc.)
-```
-
-**Preservation guarantees:**
-- সব realtime subscription (messages, typing, presence, reactions) same
-- Offline queue behavior same
-- Session/keepalive/trust-device same
-- MessageBubble, ActionSheet, ImageLightbox unchanged
-- Chat RPCs (create_chat_session, mark_conversation_read_admin, ইত্যাদি) same
-
-**Risk mitigation:**
-- Phase-by-phase commit-able state
-- প্রতি phase-এর পর manually verify: login → contact select → send text → send image → reply → edit → react → unsend → search → offline queue
+- **Silent catch** — 20টা `catch {}` error গিলে ফেলছে। বিশেষ করে `Chat.tsx:95,135,162,248` (`mark_conversation_delivered`, `update_presence` RPC ফেল করলে কোনো লগ নেই), `useGlobalChatNotifier` (3), `EmbeddedAdminChat` (7)। অন্তত dev-mode লগ দরকার।
+- **`any` টাইপ** — `useChatActions.ts:37,40,141,174`, `useChatPresence.ts:24,40`, `Chat.tsx:135,162` (`as any` on RPC — generated types-এ RPC নাম নেই)
+- **400+ লাইনের ফাইল** — EmbeddedAdminChat (1232), AdminDashboard (817), MyInfo (695), Chat (605), ActiveSessionsCard (531), chatSession (461), ContactForm (420), ContactFilters (420)
+- Accessibility: ✅ চ্যাট surface-এ icon button গুলোতে aria-label আছে
+- TODO/FIXME: ✅ কিছু নেই
 
 ---
 
-### সময়/scope estimate
-৫টা phase একসাথে করলে file count বাড়বে ~13টা, কিন্তু কোনো file 300 লাইনের বেশি না। এক turn-এ পুরোটা করব — শেষে build check + `/chat` flow verify।
+### অগ্রাধিকার সাজেশন
 
-শুরু করি?
+1. **D — silent catch ফিক্স** (বাগ ধরা পড়বে, দ্রুত কাজ)
+2. **A — ChatHeader + SearchBar + EmptyState extract** (Chat.tsx ~300 লাইনে নামবে)
+3. **C — text-[10px] cleanup** (মোবাইলে readability বাড়বে)
+4. **B — EmbeddedAdminChat রিফ্যাক্টর** (সবচেয়ে বড়, সবচেয়ে ঝুঁকিপূর্ণ — শেষে)
