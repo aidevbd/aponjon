@@ -45,6 +45,7 @@ import { ChatContactList } from "@/components/chat/ChatContactList";
 import { ChatMessageList } from "@/components/chat/ChatMessageList";
 import { ChatComposer } from "@/components/chat/ChatComposer";
 import { formatLastSeen } from "@/lib/chatFormatters";
+import { swallow } from "@/lib/devLog";
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
 type ContactPreview = { preview: string; time: string | null };
@@ -92,7 +93,7 @@ const Chat = () => {
       if (force || document.activeElement !== input) {
         input.focus({ preventScroll: true });
         const caret = input.value.length;
-        try { input.setSelectionRange(caret, caret); } catch {}
+        try { input.setSelectionRange(caret, caret); } catch (e) { swallow("Chat.focusInput.setSelectionRange", e); }
       }
     };
     requestAnimationFrame(() => {
@@ -132,7 +133,7 @@ const Chat = () => {
         },
       }));
       setUnreadMap((prev) => { const n = { ...prev }; delete n[contact.id]; return n; });
-      void (async () => { try { await supabase.rpc("mark_conversation_delivered", { p_token: session.token, p_other_id: contact.id } as any); } catch {} })();
+      void (async () => { try { await supabase.rpc("mark_conversation_delivered", { p_token: session.token, p_other_id: contact.id } as any); } catch (e) { swallow("Chat.mark_conversation_delivered", e); } })();
     } catch (err) {
       console.error("[catch]", err);
       toast.error("মেসেজ লোড করতে সমস্যা");
@@ -159,7 +160,7 @@ const Chat = () => {
     loadContacts();
     loadUnread();
     const sendHeartbeat = async () => {
-      try { await supabase.rpc("update_presence", { p_token: session.token, p_contact_id: session.contactId } as any); } catch {}
+      try { await supabase.rpc("update_presence", { p_token: session.token, p_contact_id: session.contactId } as any); } catch (e) { swallow("Chat.update_presence", e); }
     };
     sendHeartbeat();
     const heartbeat = setInterval(sendHeartbeat, 30000);
@@ -245,7 +246,7 @@ const Chat = () => {
       const map: Record<string, number> = {};
       data.forEach((d) => { map[d.sender_id] = d.unread_count; });
       setUnreadMap(map);
-    } catch {}
+    } catch (e) { swallow("Chat.loadUnread", e); }
   };
 
   const handleSelectContact = useCallback((contact: ChatContact) => {
