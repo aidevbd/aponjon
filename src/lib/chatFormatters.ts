@@ -36,3 +36,9 @@ export const formatLastSeen = (presence?: { is_online: boolean; last_seen_at: st
   const days = Math.floor(hours / 24);
   return `${days} দিন আগে`;
 };
+
+/** Same label, for the admin presence map shape ({ lastSeen, isOnline }). */
+export const formatPresenceLabel = (presence?: { lastSeen: string; isOnline: boolean }) => {
+  if (!presence) return null;
+  return formatLastSeen({ is_online: presence.isOnline, last_seen_at: presence.lastSeen });
+};
