@@ -255,19 +255,12 @@ const Chat = () => {
     setSession(null);
     setSelectedContact(null);
     setMessages([]);
-    setContacts([]);
+    resetContacts();
     toast.info("লগআউট হয়েছে");
   };
 
   const pinnedMessages = messages.filter(m => m.is_pinned);
-  const statusTone = actions.sending ? "text-primary" : isOffline ? "text-destructive" : queuedCount > 0 ? "text-foreground" : "text-muted-foreground";
-  const statusLabel = actions.sending
-    ? "মেসেজ পাঠানো হচ্ছে..."
-    : isOffline
-      ? "নেটওয়ার্ক নেই — মেসেজটা অপেক্ষায় থাকবে"
-      : queuedCount > 0
-        ? `${queuedCount}টি মেসেজ অপেক্ষায় আছে`
-        : "অনলাইন — এখনই মেসেজ যাবে";
+
 
   if (!session) return <Navigate to="/verify?next=chat" replace />;
 
