@@ -1,26 +1,20 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ChevronLeft, Send, Image as ImageIcon, Heart, Loader2, Settings, Pencil, Reply, Search, X, Settings2, Bell, ArrowDownToLine, RefreshCw } from "lucide-react";
+import { MessageCircle, Settings, Pencil, Reply, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { NotificationPreferencesDialog } from "@/components/chat/NotificationPreferencesDialog";
 import { Input } from "@/components/ui/input";
-import { AutoResizeTextarea } from "@/components/chat/AutoResizeTextarea";
 import { useIsTouchDevice } from "@/hooks/useIsTouchDevice";
-import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadChatImage, signMessagesImages } from "@/lib/chatSession";
 import { notifyNewMessage } from "@/lib/notificationPrefs";
 import { toast } from "sonner";
-import { EmojiPicker } from "@/components/EmojiPicker";
 import { logAdminActivity } from "@/lib/adminLog";
-import { MessageBubble } from "@/components/chat/MessageBubble";
 import { MessageActionSheet } from "@/components/chat/MessageActionSheet";
 import { EditHistoryDialog } from "@/components/chat/EditHistoryDialog";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { ChatUserListSkeleton } from "@/components/skeletons/LoadingSkeletons";
-import { ChatMessagesSkeleton } from "@/components/chat/ChatMessagesSkeleton";
 import { FailedMessagesList, type FailedChatMessage } from "@/components/chat/FailedMessagesList";
 import { upsertMessage, reconcileMessages } from "@/lib/chatMessageUtils";
 import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
@@ -28,21 +22,14 @@ import { JumpToLatest } from "@/components/chat/JumpToLatest";
 import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { swallow } from "@/lib/devLog";
-
-type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
-type Message = {
-  id: string; sender_id: string; receiver_id: string; content: string | null;
-  image_url: string | null; is_read: boolean; created_at: string;
-  delivered_at?: string | null;
-  read_at?: string | null;
-
-  deleted_by_sender?: boolean; edited_at?: string | null; original_content?: string | null;
-  reply_to_id?: string | null; reply_content?: string | null; reply_sender_id?: string | null;
-  is_pinned?: boolean;
-  unsent_at?: string | null;
-  has_edit_history?: boolean;
-  reactions?: { emoji: string; reactor_id: string }[];
-};
+import { AdminChatUserList } from "@/components/admin/AdminChatUserList";
+import { AdminChatThreadHeader } from "@/components/admin/AdminChatThreadHeader";
+import { AdminChatMessageList } from "@/components/admin/AdminChatMessageList";
+import { AdminChatComposer } from "@/components/admin/AdminChatComposer";
+import type { AdminChatMessage as Message, AdminChatUser as ChatUser, PresenceMap } from "@/components/admin/adminChatTypes";
+import { useAdminChatShell } from "@/hooks/admin/useAdminChatShell";
+import { useAdminChatPresence } from "@/hooks/admin/useAdminChatPresence";
+import { useAdminChatDrafts } from "@/hooks/admin/useAdminChatDrafts";
 
 interface EmbeddedAdminChatProps {
   onUnreadChange?: (count: number) => void;
@@ -54,7 +41,6 @@ interface EmbeddedAdminChatProps {
 }
 
 export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeight, onOpenProfile }: EmbeddedAdminChatProps) {
-
   const isTouch = useIsTouchDevice();
   const isMobile = useIsMobile();
   const viewportHeight = useVisualViewportHeight();
@@ -62,90 +48,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
   const selectedUserRef = useRef<ChatUser | null>(null);
   const isTouchRef = useRef(isTouch);
   useEffect(() => { isTouchRef.current = isTouch; }, [isTouch]);
-  const [shellTop, setShellTop] = useState(0);
-  const [visualViewportOffsetTop, setVisualViewportOffsetTop] = useState(0);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const update = () => setVisualViewportOffsetTop(window.visualViewport?.offsetTop ?? 0);
-    update();
-    window.visualViewport?.addEventListener("resize", update);
-    window.visualViewport?.addEventListener("scroll", update);
-    window.addEventListener("resize", update);
-    return () => {
-      window.visualViewport?.removeEventListener("resize", update);
-      window.visualViewport?.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, []);
-
-  useEffect(() => {
-    const measure = () => {
-      const el = shellRef.current;
-      if (!el) return;
-      // When a chat thread is open the dashboard enters immersive mode
-      // (header + tabs hidden), so the shell should own the full viewport.
-      if (selectedUserRef.current) {
-        setShellTop(0);
-        return;
-      }
-      const rect = el.getBoundingClientRect();
-      // Ignore stale zero-height measurements from hidden TabsContent —
-      // otherwise the shell overflows the viewport and hides the input.
-      if (rect.height === 0 && rect.top === 0) return;
-      setShellTop(Math.max(0, rect.top));
-    };
-
-    measure();
-    // Re-measure across a few animation frames so we catch the moment the
-    // Radix TabsContent flips from hidden -> visible.
-    const rafIds: number[] = [];
-    const scheduleRaf = () => {
-      const id = requestAnimationFrame(() => {
-        measure();
-        if (rafIds.length < 6) scheduleRaf();
-      });
-      rafIds.push(id);
-    };
-    scheduleRaf();
-    const timeouts = [50, 200, 500].map((ms) => window.setTimeout(measure, ms));
-    window.addEventListener("resize", measure);
-    window.addEventListener("scroll", measure, { passive: true });
-    let ro: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== "undefined" && shellRef.current) {
-      ro = new ResizeObserver(() => measure());
-      ro.observe(shellRef.current);
-      if (document.body) ro.observe(document.body);
-    }
-    let io: IntersectionObserver | null = null;
-    if (typeof IntersectionObserver !== "undefined" && shellRef.current) {
-      io = new IntersectionObserver((entries) => {
-        measure();
-        // When the chat shell becomes visible (e.g. after switching Tabs),
-        // auto-focus the input and pin scroll to the latest message.
-        for (const entry of entries) {
-          if (entry.isIntersecting && entry.intersectionRatio > 0) {
-            if (selectedUserRef.current && !isTouchRef.current) {
-              restoreInputFocus(true);
-            }
-            requestAnimationFrame(() => {
-              const list = messageListRef.current;
-              if (list) list.scrollTop = list.scrollHeight;
-            });
-          }
-        }
-      }, { threshold: [0, 0.1] });
-      io.observe(shellRef.current);
-    }
-    return () => {
-      rafIds.forEach((id) => cancelAnimationFrame(id));
-      timeouts.forEach((id) => window.clearTimeout(id));
-      window.removeEventListener("resize", measure);
-      window.removeEventListener("scroll", measure);
-      ro?.disconnect();
-      io?.disconnect();
-    };
-  }, [viewportHeight, isMobile]);
   const [adminContactId, setAdminContactId] = useState<string | null>(null);
   const [needsSetup, setNeedsSetup] = useState(false);
   const [setupName, setSetupName] = useState("");
@@ -154,7 +57,6 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
 
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
   const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
-  const [presenceMap, setPresenceMap] = useState<Record<string, { lastSeen: string; isOnline: boolean }>>({});
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
@@ -186,19 +88,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-  // Per-chat draft persistence (survives tab switch + refresh)
-  const DRAFTS_STORAGE_KEY = "admin-chat-drafts-v1";
-  const draftsRef = useRef<Record<string, string>>({});
-  useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(DRAFTS_STORAGE_KEY);
-      if (raw) draftsRef.current = JSON.parse(raw) || {};
-    } catch (e) { swallow("AdminChat.loadDrafts", e); }
-  }, []);
-  const persistDrafts = useCallback(() => {
-    try { sessionStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(draftsRef.current)); } catch (e) { swallow("AdminChat.persistDrafts", e); }
-  }, []);
-
+  const { getDraft, setDraft } = useAdminChatDrafts();
 
   const restoreInputFocus = useCallback((force = false) => {
     requestAnimationFrame(() => {
@@ -209,6 +99,22 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
       }
     });
   }, []);
+
+  const { shellTop, setShellTop, visualViewportOffsetTop } = useAdminChatShell({
+    shellRef,
+    messageListRef,
+    selectedUserRef,
+    isTouchRef,
+    restoreInputFocus,
+    isMobile,
+    viewportHeight,
+    hasSelectedUser: !!selectedUser,
+  });
+
+  const { presenceMap, setPresenceMap } = useAdminChatPresence(
+    adminContactId,
+    chatUsers.map((u) => u.id),
+  );
 
   const forceScrollToLatest = useCallback((smooth = false) => {
     const run = () => {
@@ -247,39 +153,8 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
     sendHeartbeat();
     const heartbeat = setInterval(sendHeartbeat, 30000);
     return () => clearInterval(heartbeat);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminContactId]);
-
-  // Live presence: poll periodically AND subscribe to user_presence realtime updates
-  useEffect(() => {
-    if (!adminContactId || chatUsers.length === 0) return;
-    let stopped = false;
-    const ids = chatUsers.map(u => u.id);
-    const refresh = async () => {
-      try {
-        const { data } = await supabase.rpc("get_user_presence", { p_contact_ids: ids });
-        if (stopped || !data) return;
-        const map: Record<string, { lastSeen: string; isOnline: boolean }> = {};
-        (data as any[]).forEach((p) => { map[p.contact_id] = { lastSeen: p.last_seen_at, isOnline: p.is_online }; });
-        setPresenceMap(map);
-      } catch (e) { swallow("AdminChat.fetchPresence", e); }
-    };
-    refresh();
-    const poll = setInterval(refresh, 15000);
-    const idSet = new Set(ids);
-    const channel = supabase
-      .channel(`presence-embed-${adminContactId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "user_presence" }, (payload) => {
-        const row: any = payload.new || payload.old;
-        if (!row || !idSet.has(row.contact_id)) return;
-        setPresenceMap(prev => ({
-          ...prev,
-          [row.contact_id]: { lastSeen: row.last_seen_at, isOnline: !!row.is_online },
-        }));
-      })
-      .subscribe();
-    return () => { stopped = true; clearInterval(poll); supabase.removeChannel(channel); };
-  }, [adminContactId, chatUsers]);
-
 
   useEffect(() => {
     if (!adminContactId) return;
@@ -291,7 +166,6 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
         if (msg.receiver_id === adminContactId && msg.sender_id !== adminContactId) {
           notifyNewMessage();
         }
-
 
         const isCurrentThread = !!selectedUser && (
           (msg.sender_id === selectedUser.id && msg.receiver_id === adminContactId) ||
@@ -373,7 +247,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
     };
   }, [adminContactId, selectedUser]);
 
-  const emitTyping = () => {
+  const emitTyping = useCallback(() => {
     if (!adminContactId || !selectedUser) return;
     const now = Date.now();
     if (now - lastTypingRef.current < 2000) return;
@@ -381,7 +255,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
     const channel = typingChannelRef.current;
     if (!channel) return;
     void channel.send({ type: "broadcast", event: "typing", payload: { sender_id: adminContactId } });
-  };
+  }, [adminContactId, selectedUser]);
 
   const { newBelowCount, scrollToBottom, resetForNewThread } = useSmartAutoScroll(
     messageListRef,
@@ -391,7 +265,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
 
   const [highlightedMsgId, setHighlightedMsgId] = useState<string | null>(null);
   const highlightTimerRef = useRef<number | null>(null);
-  const jumpToMessage = (id: string) => {
+  const jumpToMessage = useCallback((id: string) => {
     const container = messageListRef.current;
     if (!container) return;
     const el = container.querySelector<HTMLElement>(`[data-msg-id="${id}"]`);
@@ -400,14 +274,13 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
     setHighlightedMsgId(id);
     if (highlightTimerRef.current) window.clearTimeout(highlightTimerRef.current);
     highlightTimerRef.current = window.setTimeout(() => setHighlightedMsgId(null), 1800);
-  };
+  }, []);
 
   useEffect(() => {
     if (!selectedUser || messagesLoading || messages.length === 0 || !pendingInitialScrollRef.current) return;
     pendingInitialScrollRef.current = false;
     forceScrollToLatest(false);
   }, [selectedUser, messagesLoading, messages.length, forceScrollToLatest]);
-
 
   useEffect(() => {
     const total = Object.values(unreadMap).reduce((a, b) => a + b, 0);
@@ -419,25 +292,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
     // When a chat opens/closes the dashboard toggles immersive mode.
     // Reset shellTop so the shell height recalculates against the new layout.
     if (selectedUser) setShellTop(0);
-  }, [selectedUser, onActiveChatChange]);
-
-
-  useEffect(() => {
-    if (!isMobile || !selectedUser) return;
-    const body = document.body;
-    const html = document.documentElement;
-    const previousBodyOverflow = body.style.overflow;
-    const previousHtmlOverflow = html.style.overflow;
-    const previousBodyOverscroll = body.style.overscrollBehavior;
-    body.style.overflow = "hidden";
-    html.style.overflow = "hidden";
-    body.style.overscrollBehavior = "none";
-    return () => {
-      body.style.overflow = previousBodyOverflow;
-      html.style.overflow = previousHtmlOverflow;
-      body.style.overscrollBehavior = previousBodyOverscroll;
-    };
-  }, [isMobile, selectedUser]);
+  }, [selectedUser, onActiveChatChange, setShellTop]);
 
   const loadChatUsers = async () => {
     try {
@@ -449,7 +304,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
         const ids = users.map(u => u.id);
         const { data: pData } = await supabase.rpc("get_user_presence", { p_contact_ids: ids });
         if (pData) {
-          const pMap: Record<string, { lastSeen: string; isOnline: boolean }> = {};
+          const pMap: PresenceMap = {};
           (pData as any[]).forEach((p: any) => { pMap[p.contact_id] = { lastSeen: p.last_seen_at, isOnline: p.is_online }; });
           setPresenceMap(pMap);
         }
@@ -486,16 +341,10 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
   const loadMessagesRef = useRef(loadMessages);
   useEffect(() => { loadMessagesRef.current = loadMessages; }, [loadMessages]);
 
-
   const handleSelectUser = (user: ChatUser) => {
     // Save current draft for the previous chat before switching
     const prev = selectedUserRef.current;
-    if (prev && !editingMsg) {
-      const t = msgInput;
-      if (t && t.length > 0) draftsRef.current[prev.id] = t;
-      else delete draftsRef.current[prev.id];
-      persistDrafts();
-    }
+    if (prev && !editingMsg) setDraft(prev.id, msgInput);
     setSelectedUser(user);
     selectedUserRef.current = user;
     setFailedMessages([]);
@@ -503,7 +352,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
     pendingInitialScrollRef.current = true;
     setEditingMsg(null);
     setReplyingTo(null);
-    setMsgInput(draftsRef.current[user.id] || "");
+    setMsgInput(getDraft(user.id));
     resetForNewThread();
     loadMessages(user);
     forceScrollToLatest(false);
@@ -514,11 +363,8 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
   useEffect(() => {
     const user = selectedUserRef.current;
     if (!user || editingMsg) return;
-    if (msgInput && msgInput.length > 0) draftsRef.current[user.id] = msgInput;
-    else delete draftsRef.current[user.id];
-    persistDrafts();
-  }, [msgInput, editingMsg, persistDrafts]);
-
+    setDraft(user.id, msgInput);
+  }, [msgInput, editingMsg, setDraft]);
 
   // Consistency check: resync current thread on tab focus / online.
   useEffect(() => {
@@ -762,45 +608,6 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
     finally { setUploading(false); if (fileInputRef.current) fileInputRef.current.value = ""; }
   };
 
-  const formatTime = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return d.toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" });
-  };
-
-  const getDateLabel = (dateStr: string) => {
-    const d = new Date(dateStr);
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const msgDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const diffDays = Math.floor((today.getTime() - msgDate.getTime()) / 86400000);
-    if (diffDays === 0) return "আজ";
-    if (diffDays === 1) return "গতকাল";
-    if (diffDays < 7) return d.toLocaleDateString("bn-BD", { weekday: "long" });
-    return d.toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" });
-  };
-
-  const shouldShowDateHeader = (msgs: Message[], idx: number) => {
-    if (idx === 0) return true;
-    const prev = new Date(msgs[idx - 1].created_at).toDateString();
-    const curr = new Date(msgs[idx].created_at).toDateString();
-    return prev !== curr;
-  };
-
-  const formatLastSeen = (presence: { lastSeen: string; isOnline: boolean } | undefined) => {
-    if (!presence) return null;
-    if (presence.isOnline) return "এখন অনলাইন";
-    const d = new Date(presence.lastSeen);
-    const now = new Date();
-    const diffMs = now.getTime() - d.getTime();
-    const diffMin = Math.floor(diffMs / 60000);
-    if (diffMin < 1) return "এইমাত্র অ্যাক্টিভ ছিল";
-    if (diffMin < 60) return `${diffMin} মিনিট আগে`;
-    const diffHr = Math.floor(diffMin / 60);
-    if (diffHr < 24) return `${diffHr} ঘণ্টা আগে`;
-    const diffDay = Math.floor(diffHr / 24);
-    return `${diffDay} দিন আগে`;
-  };
-
   const pinnedMessages = messages.filter(m => m.is_pinned);
   const filteredMessages = searchQuery
     ? messages.filter(m => m.content?.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -813,7 +620,6 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
       : viewportHeight
         ? `${Math.max(320, viewportHeight - shellTop - (shellTop > 0 ? 16 : 0))}px`
         : "calc(100dvh - 220px)";
-
 
   if (loading) {
     return (
@@ -843,57 +649,14 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
     );
   }
 
-  const renderUsersListContent = () => (
-    chatUsers.length === 0 ? (
-      <div className="text-center py-16 text-muted-foreground">
-        <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
-        <p className="text-sm">এখনো কেউ মেসেজ করেনি</p>
-        <p className="text-xs mt-1">ইউজাররা চ্যাট পেজ থেকে আপনাকে মেসেজ করতে পারবে</p>
-      </div>
-    ) : (
-      <div className="space-y-1 p-1">
-        {chatUsers.map((u) => {
-          const presence = presenceMap[u.id];
-          const lastSeenText = formatLastSeen(presence);
-          const isActive = selectedUser?.id === u.id;
-          return (
-            <button
-              key={u.id}
-              onClick={() => handleSelectUser(u)}
-              className={`w-full flex items-center gap-3 rounded-xl p-3 text-left border transition-colors ${
-                isActive
-                  ? "bg-heirloom-cream/[0.6] border-heirloom-gold/[0.5]"
-                  : "border-transparent hover:bg-card/80 hover:border-border/50"
-              }`}
-            >
-              <div className="relative shrink-0">
-                {u.photo_url ? (
-                  <img src={u.photo_url} alt={u.name} className="h-10 w-10 rounded-full object-cover border border-primary/20" />
-                ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{u.name.charAt(0)}</div>
-                )}
-                {presence?.isOnline && (
-                  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-foreground text-sm truncate">{u.name}</div>
-                <div className="text-xs text-muted-foreground truncate">
-                  {lastSeenText ? (
-                    <span className={presence?.isOnline ? "text-green-600" : ""}>{lastSeenText}</span>
-                  ) : u.phone}
-                </div>
-              </div>
-              {unreadMap[u.id] && (
-                <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-micro font-bold px-1.5">
-                  {unreadMap[u.id]}
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    )
+  const usersList = (
+    <AdminChatUserList
+      users={chatUsers}
+      presenceMap={presenceMap}
+      unreadMap={unreadMap}
+      selectedUserId={selectedUser?.id ?? null}
+      onSelect={handleSelectUser}
+    />
   );
 
   return (
@@ -912,283 +675,156 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
           <div className="text-[11px] uppercase tracking-[0.15em] text-heirloom-ink-soft">চ্যাট</div>
           <div className="text-[13px] text-heirloom-ink mt-0.5">{chatUsers.length} জন কথোপকথন</div>
         </div>
-        {renderUsersListContent()}
+        {usersList}
       </aside>
 
       <div className="flex flex-col min-h-0 flex-1 lg:min-h-0">
-      <AnimatePresence mode="wait">
-        {!selectedUser ? (
-          <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 overflow-y-auto no-scrollbar lg:flex lg:items-center lg:justify-center">
-            <div className="lg:hidden">{renderUsersListContent()}</div>
-            <div className="hidden lg:flex lg:flex-col lg:items-center lg:text-center lg:gap-3 lg:max-w-sm lg:px-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full border border-heirloom-gold/[0.4] bg-heirloom-gold/[0.06]">
-                <MessageCircle className="h-7 w-7 text-heirloom-gold-deep" />
+        <AnimatePresence mode="wait">
+          {!selectedUser ? (
+            <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 overflow-y-auto no-scrollbar lg:flex lg:items-center lg:justify-center">
+              <div className="lg:hidden">{usersList}</div>
+              <div className="hidden lg:flex lg:flex-col lg:items-center lg:text-center lg:gap-3 lg:max-w-sm lg:px-6">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full border border-heirloom-gold/[0.4] bg-heirloom-gold/[0.06]">
+                  <MessageCircle className="h-7 w-7 text-heirloom-gold-deep" />
+                </div>
+                <div className="font-display text-xl text-heirloom-ink">কথোপকথন বেছে নিন</div>
+                <p className="text-sm text-heirloom-ink-soft leading-relaxed">
+                  বাম পাশ থেকে যেকোনো ইউজার সিলেক্ট করে চ্যাট শুরু করুন। রিয়েল-টাইম মেসেজ, অনলাইন স্ট্যাটাস ও আনরিড কাউন্ট এখানেই দেখা যাবে।
+                </p>
               </div>
-              <div className="font-display text-xl text-heirloom-ink">কথোপকথন বেছে নিন</div>
-              <p className="text-sm text-heirloom-ink-soft leading-relaxed">
-                বাম পাশ থেকে যেকোনো ইউজার সিলেক্ট করে চ্যাট শুরু করুন। রিয়েল-টাইম মেসেজ, অনলাইন স্ট্যাটাস ও আনরিড কাউন্ট এখানেই দেখা যাবে।
-              </p>
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
-            {/* Thread Header */}
-            <div className="sticky top-0 z-50 -mx-1 flex items-center gap-2 px-3 py-2.5 border-b border-heirloom-line bg-heirloom-bg pt-[max(0.625rem,env(safe-area-inset-top))] shadow-heirloom-sticky">
-              <button
-                onClick={() => { setSelectedUser(null); selectedUserRef.current = null; setSearchOpen(false); setSearchQuery(""); }}
-                className="lg:hidden flex items-center justify-center h-9 w-9 -ml-1 rounded-full text-foreground hover:bg-primary/10 hover:text-primary transition-colors shrink-0"
-                aria-label="ফিরে যান"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <div className="flex min-w-0 flex-1 items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => onOpenProfile?.(selectedUser.id)}
-                  className="relative shrink-0 rounded-full hover:ring-2 hover:ring-primary/20 active:scale-[0.97] transition cursor-pointer"
-                  aria-label={`${selectedUser.name} এর প্রোফাইল দেখুন`}
-                >
-                  {selectedUser.photo_url ? (
-                    <img src={selectedUser.photo_url} alt={selectedUser.name} className="h-9 w-9 rounded-full object-cover border border-primary/20" />
-                  ) : (
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</span>
+            </motion.div>
+          ) : (
+            <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
+              <AdminChatThreadHeader
+                user={selectedUser}
+                presence={presenceMap[selectedUser.id]}
+                settingsOpen={settingsOpen}
+                onSettingsOpenChange={setSettingsOpen}
+                onBack={() => { setSelectedUser(null); selectedUserRef.current = null; setSearchOpen(false); setSearchQuery(""); }}
+                onToggleSearch={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}
+                onOpenProfile={onOpenProfile}
+                onOpenNotifPrefs={() => setNotifPrefsOpen(true)}
+                onJumpToLatest={() => scrollToBottom(true)}
+                onRefresh={() => { if (selectedUser) void loadMessages(selectedUser); }}
+              />
+
+              {/* Search bar */}
+              {searchOpen && (
+                <div className="relative z-40 isolate shrink-0 -mx-1 bg-heirloom-bg px-2 pt-2 pb-2">
+                  <div className="group relative z-10 flex items-center">
+                    <Search className="pointer-events-none absolute left-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="মেসেজ খুঁজুন..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      autoFocus
+                      className="h-10 rounded-full border-border/60 bg-heirloom-paper pl-10 pr-10 text-sm shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-primary/40"
+                    />
+                    <button
+                      type="button"
+                      aria-label="সার্চ বন্ধ করুন"
+                      onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                      className="absolute right-2 inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                  {searchQuery && (
+                    <p className="text-micro text-muted-foreground mt-1 px-2">{filteredMessages.length} টি মেসেজ পাওয়া গেছে</p>
                   )}
-                  {presenceMap[selectedUser.id]?.isOnline && (
-                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-heirloom-paper" />
-                  )}
-                </button>
-                <div className="min-w-0 leading-tight flex flex-col items-start">
-                  <button
-                    type="button"
-                    onClick={() => onOpenProfile?.(selectedUser.id)}
-                    className="rounded-md px-1 -mx-1 font-semibold text-sm text-foreground whitespace-nowrap text-left hover:bg-primary/5 active:scale-[0.99] transition-colors cursor-pointer"
-                    aria-label={`${selectedUser.name} এর প্রোফাইল দেখুন`}
-                  >
-                    {selectedUser.name}
-                  </button>
-                  <span className="block text-[11px] text-muted-foreground whitespace-nowrap px-1 -mx-1">
-                    {(() => {
-                      const p = presenceMap[selectedUser.id];
-                      const txt = formatLastSeen(p);
-                      if (!txt) return selectedUser.phone;
-                      return <span className={p?.isOnline ? "text-emerald-600" : ""}>{txt}</span>;
-                    })()}
-                  </span>
-                </div>
-              </div>
-              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-full" aria-label="মেসেজ খুঁজুন" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
-                <Search className="h-4 w-4" />
-              </Button>
-              <DropdownMenu open={settingsOpen} onOpenChange={setSettingsOpen} modal={false}>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-full" aria-label="সেটিংস ও অপশন">
-                    <Settings2 className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={8} className="z-[70] w-52">
-                  <DropdownMenuItem onSelect={() => { setSettingsOpen(false); setNotifPrefsOpen(true); }} className="gap-2 text-sm">
-                    <Bell className="h-4 w-4" /> নোটিফিকেশন সেটিংস
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => { setSettingsOpen(false); scrollToBottom(true); }}
-                    className="gap-2 text-sm"
-                  >
-                    <ArrowDownToLine className="h-4 w-4" /> সর্বশেষ মেসেজে যান
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => { setSettingsOpen(false); if (selectedUser) void loadMessages(selectedUser); }}
-                    className="gap-2 text-sm"
-                  >
-                    <RefreshCw className="h-4 w-4" /> রিফ্রেশ
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-
-            {/* Search bar */}
-            {searchOpen && (
-              <div className="relative z-40 isolate shrink-0 -mx-1 bg-heirloom-bg px-2 pt-2 pb-2">
-                <div className="group relative z-10 flex items-center">
-                  <Search className="pointer-events-none absolute left-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="মেসেজ খুঁজুন..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    autoFocus
-                    className="h-10 rounded-full border-border/60 bg-heirloom-paper pl-10 pr-10 text-sm shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-primary/40"
-                  />
-                  <button
-                    type="button"
-                    aria-label="সার্চ বন্ধ করুন"
-                    onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
-                    className="absolute right-2 inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-                {searchQuery && (
-                  <p className="text-micro text-muted-foreground mt-1 px-2">{filteredMessages.length} টি মেসেজ পাওয়া গেছে</p>
-                )}
-              </div>
-            )}
-
-
-            {/* Pinned messages */}
-            {pinnedMessages.length > 0 && !searchOpen && (
-              <div className="pt-2 px-1">
-                <div className="bg-accent/50 rounded-lg p-2 border border-border/50">
-                  {pinnedMessages.slice(0, 2).map(pm => (
-                    <p key={pm.id} className="text-xs text-foreground truncate">📌 {pm.content || "ছবি"}</p>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Messages */}
-            <div className="relative z-0 flex-1 flex flex-col min-h-0 overflow-hidden">
-            <div ref={messageListRef} className={`chat-scroll flex-1 overflow-y-auto overflow-x-hidden px-3 sm:px-4 md:px-5 pb-3 ${searchOpen ? "pt-5" : "pt-3"} space-y-1`}>
-              {messagesLoading && messages.length === 0 && <ChatMessagesSkeleton />}
-              {!messagesLoading && filteredMessages.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground">
-                  <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                  <p className="text-xs">{searchQuery ? "কোনো মেসেজ পাওয়া যায়নি" : "এখনো কোনো মেসেজ নেই"}</p>
                 </div>
               )}
-              {(() => {
-                let lastMineId: string | null = null;
-                for (let i = filteredMessages.length - 1; i >= 0; i--) {
-                  if (filteredMessages[i].sender_id === adminContactId) { lastMineId = filteredMessages[i].id; break; }
-                }
-                return filteredMessages.map((msg, idx) => {
-                  const isMine = msg.sender_id === adminContactId;
-                  const showDateHeader = !searchQuery && shouldShowDateHeader(filteredMessages, idx);
-                  const prev = idx > 0 ? filteredMessages[idx - 1] : null;
-                  const next = idx < filteredMessages.length - 1 ? filteredMessages[idx + 1] : null;
-                  const sameAsNext = next && next.sender_id === msg.sender_id && (new Date(next.created_at).getTime() - new Date(msg.created_at).getTime() < 5 * 60 * 1000);
-                  const sameAsPrev = prev && prev.sender_id === msg.sender_id && (new Date(msg.created_at).getTime() - new Date(prev.created_at).getTime() < 5 * 60 * 1000);
-                  const showTail = !sameAsNext;
-                  const showAvatar = !isMine && !sameAsNext;
-                  return (
-                    <div key={msg.id}>
-                      {showDateHeader && (
-                        <div className="flex justify-center my-3">
-                          <span className="text-micro text-muted-foreground bg-muted/60 px-3 py-0.5 rounded-full">{getDateLabel(msg.created_at)}</span>
-                        </div>
-                      )}
-                      <MessageBubble
-                        msg={msg as any}
-                        isMine={isMine}
-                        myId={adminContactId!}
-                        otherName={selectedUser?.name || ""}
-                        showTail={!!showTail}
-                        showAvatar={!!showAvatar}
-                        avatarUrl={selectedUser?.photo_url || null}
-                        onOpenActions={(m, rect, el) => { setActionMessage(m as Message); setActionAnchor(rect); setActionAnchorEl(el ?? null); }}
-                        onQuickReact={(m, e) => handleReact(m as Message, e)}
-                        onStartReply={(m) => handleStartReply(m as Message)}
-                        onShowEditHistory={(m) => handleShowEditHistory(m as Message)}
-                        onJumpToReply={jumpToMessage}
-                        isDelivered={!!msg.delivered_at || !!msg.is_read}
-                        showReceipt={isMine && (!!showTail || msg.id === lastMineId)}
-                        highlightQuery={searchQuery}
-                        highlight={msg.id === highlightedMsgId}
-                      />
-                    </div>
-                  );
-                });
-              })()}
-              <div className="h-0" />
-            </div>
-            <JumpToLatest
-              show={newBelowCount > 0}
-              count={newBelowCount}
-              onClick={() => scrollToBottom(true)}
-              className="bottom-3"
-            />
-            </div>
 
-
-            {isOtherTyping && (
-              <div className="pb-1">
-                <TypingIndicator />
-              </div>
-            )}
-
-            {/* Edit/Reply bar */}
-            {(editingMsg || replyingTo) && (
-              <div className="pt-2 px-1">
-                <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-1.5 text-xs">
-                  {editingMsg && (
-                    <>
-                      <Pencil className="h-3 w-3 text-primary shrink-0" />
-                      <span className="truncate flex-1">এডিট করছেন: {editingMsg.content}</span>
-                    </>
-                  )}
-                  {replyingTo && (
-                    <>
-                      <Reply className="h-3 w-3 text-primary shrink-0" />
-                      <span className="truncate flex-1">রিপ্লাই: {replyingTo.content || "ছবি"}</span>
-                    </>
-                  )}
-                  <button onClick={() => { setEditingMsg(null); setReplyingTo(null); setMsgInput(""); }} className="shrink-0">
-                    <X className="h-3.5 w-3.5 text-muted-foreground" />
-                  </button>
+              {/* Pinned messages */}
+              {pinnedMessages.length > 0 && !searchOpen && (
+                <div className="pt-2 px-1">
+                  <div className="bg-accent/50 rounded-lg p-2 border border-border/50">
+                    {pinnedMessages.slice(0, 2).map(pm => (
+                      <p key={pm.id} className="text-xs text-foreground truncate">📌 {pm.content || "ছবি"}</p>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <FailedMessagesList
-              items={failedMessages}
-              onResend={handleResendFailed}
-              onDelete={handleDeleteFailed}
-            />
-
-            {/* Input */}
-            <div className="pt-2 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-              <div className="flex items-end gap-1.5 sm:gap-2 w-full">
-                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                <EmojiPicker inputRef={inputRef} onSelect={(emoji) => setMsgInput(prev => prev + emoji)} />
-                <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" aria-label="ছবি পাঠান" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4 text-primary" />}
-                </Button>
-                <AutoResizeTextarea
-                  ref={inputRef}
-                  placeholder={editingMsg ? "এডিট করুন..." : "উত্তর লিখুন..."}
-                  value={msgInput}
-                  onChange={(e) => { setMsgInput(e.target.value); emitTyping(); }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey && !isTouch) {
-                      e.preventDefault();
-                      void handleSend();
-                    }
-                  }}
-                  className="bg-card flex-1 min-w-0"
-                  maxHeight={120}
+              {/* Messages */}
+              <div className="relative z-0 flex-1 flex flex-col min-h-0 overflow-hidden">
+                <AdminChatMessageList
+                  ref={messageListRef}
+                  messages={filteredMessages}
+                  loading={messagesLoading}
+                  hasAnyMessage={messages.length > 0}
+                  myId={adminContactId!}
+                  otherUser={selectedUser}
+                  searchOpen={searchOpen}
+                  searchQuery={searchQuery}
+                  highlightedMsgId={highlightedMsgId}
+                  onOpenActions={(m, rect, el) => { setActionMessage(m); setActionAnchor(rect); setActionAnchorEl(el ?? null); }}
+                  onQuickReact={handleReact}
+                  onStartReply={handleStartReply}
+                  onShowEditHistory={handleShowEditHistory}
+                  onJumpToReply={jumpToMessage}
                 />
-                <Button
-                  type="button"
-                  tabIndex={-1}
-                  variant="hero"
-                  size="icon"
-                  className="h-9 w-9 shrink-0 rounded-full"
-                  aria-label="মেসেজ পাঠান"
-                  onMouseDown={(e) => { e.preventDefault(); restoreInputFocus(true); }}
-                  onTouchStart={(e) => { e.preventDefault(); restoreInputFocus(true); }}
-                  onPointerDown={(e) => { e.preventDefault(); restoreInputFocus(true); if (!sending) void handleSend(); }}
-                  onClick={(e) => e.preventDefault()}
-                  disabled={!msgInput.trim()}
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
+                <JumpToLatest
+                  show={newBelowCount > 0}
+                  count={newBelowCount}
+                  onClick={() => scrollToBottom(true)}
+                  className="bottom-3"
+                />
               </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+              {isOtherTyping && (
+                <div className="pb-1">
+                  <TypingIndicator />
+                </div>
+              )}
+
+              {/* Edit/Reply bar */}
+              {(editingMsg || replyingTo) && (
+                <div className="pt-2 px-1">
+                  <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-1.5 text-xs">
+                    {editingMsg && (
+                      <>
+                        <Pencil className="h-3 w-3 text-primary shrink-0" />
+                        <span className="truncate flex-1">এডিট করছেন: {editingMsg.content}</span>
+                      </>
+                    )}
+                    {replyingTo && (
+                      <>
+                        <Reply className="h-3 w-3 text-primary shrink-0" />
+                        <span className="truncate flex-1">রিপ্লাই: {replyingTo.content || "ছবি"}</span>
+                      </>
+                    )}
+                    <button onClick={() => { setEditingMsg(null); setReplyingTo(null); setMsgInput(""); }} className="shrink-0">
+                      <X className="h-3.5 w-3.5 text-muted-foreground" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <FailedMessagesList
+                items={failedMessages}
+                onResend={handleResendFailed}
+                onDelete={handleDeleteFailed}
+              />
+
+              <AdminChatComposer
+                value={msgInput}
+                onChange={setMsgInput}
+                onTyping={emitTyping}
+                onSend={() => void handleSend()}
+                sending={sending}
+                uploading={uploading}
+                isEditing={!!editingMsg}
+                isTouch={isTouch}
+                inputRef={inputRef}
+                fileInputRef={fileInputRef}
+                onPickImage={handleImageUpload}
+                restoreInputFocus={restoreInputFocus}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-
-
 
       <AlertDialog open={!!unsendTargetId} onOpenChange={(open) => !open && setUnsendTargetId(null)}>
         <AlertDialogContent>
