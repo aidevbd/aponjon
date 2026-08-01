@@ -82,11 +82,28 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      fontSize: {
+        micro: ["0.625rem", { lineHeight: "0.875rem" }],
+      },
+      boxShadow: {
+        "heirloom-card": "0 1px 0 hsl(var(--heirloom-gold) / 0.1), 0 8px 24px -16px hsl(var(--heirloom-gold) / 0.25)",
+        "heirloom-hairline": "0 1px 0 hsl(var(--heirloom-gold) / 0.08)",
+        "heirloom-sticky": "0 8px 18px -18px hsl(var(--heirloom-ink) / 0.35)",
+        "heirloom-sticky-soft": "0 4px 12px -8px hsl(var(--heirloom-ink) / 0.15)",
+        "heirloom-pop": "0 12px 30px -12px hsl(var(--heirloom-ink) / 0.3)",
+        "heirloom-sheet": "0 -12px 40px -12px hsl(var(--heirloom-ink) / 0.3)",
+        "heirloom-dialog": "0 20px 50px -15px hsl(var(--heirloom-ink) / 0.3)",
+        "heirloom-float": "0 10px 30px -10px hsl(var(--heirloom-gold-deep) / 0.4)",
+        "heirloom-chip": "0 2px 8px hsl(var(--heirloom-gold-deep) / 0.35)",
+        "heirloom-photo": "0 4px 12px hsl(var(--heirloom-gold-deep) / 0.15)",
+        "heirloom-toast": "0 6px 20px -10px hsl(var(--heirloom-ink) / 0.35)",
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
