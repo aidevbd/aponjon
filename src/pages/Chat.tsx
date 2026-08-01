@@ -175,7 +175,6 @@ const Chat = () => {
       bumpUnreadFor(senderId);
     }, [bumpUnreadFor]),
 
-    }, []),
   });
 
   const { newBelowCount, scrollToBottom, resetForNewThread } = useSmartAutoScroll(
