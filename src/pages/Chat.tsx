@@ -1,19 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  MessageCircle, ChevronLeft, Loader2, Search, Pin, Settings2, Home, LogOut,
-  WifiOff, Clock3, Bell, ArrowDownToLine, RefreshCw, X,
-} from "lucide-react";
+import { Loader2, Pin, WifiOff, Clock3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   getChatSession, getChatContacts,
   getMessages, getUnreadCounts,
@@ -44,7 +36,10 @@ import { useJumpToMessage } from "@/hooks/useJumpToMessage";
 import { ChatContactList } from "@/components/chat/ChatContactList";
 import { ChatMessageList } from "@/components/chat/ChatMessageList";
 import { ChatComposer } from "@/components/chat/ChatComposer";
-import { formatLastSeen } from "@/lib/chatFormatters";
+import { ChatHeader } from "@/components/chat/ChatHeader";
+import { ChatSearchBar } from "@/components/chat/ChatSearchBar";
+import { ChatEmptyState } from "@/components/chat/ChatEmptyState";
+import { useChatSearch } from "@/hooks/useChatSearch";
 import { swallow } from "@/lib/devLog";
 
 type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
@@ -73,8 +68,6 @@ const Chat = () => {
   const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [contactPreviews, setContactPreviews] = useState<Record<string, ContactPreview>>({});
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -85,6 +78,8 @@ const Chat = () => {
   const { isOffline, queuedCount, setQueuedCount } = useChatConnectivity(selectedContact?.id);
   const presenceMap = useChatPresence(!!session, contacts.map(c => c.id));
   const { isOtherTyping, emitTyping } = useChatTyping(session?.contactId, selectedContact?.id);
+  const { searchOpen, searchQuery, setSearchQuery, toggleSearch, closeSearch, filteredMessages } =
+    useChatSearch(messages);
 
   const restoreInputFocus = useCallback((force = false) => {
     const focusInput = () => {
@@ -306,9 +301,6 @@ const Chat = () => {
   };
 
   const pinnedMessages = messages.filter(m => m.is_pinned);
-  const filteredMessages = searchQuery
-    ? messages.filter(m => m.content?.toLowerCase().includes(searchQuery.toLowerCase()))
-    : messages;
   const statusTone = actions.sending ? "text-primary" : isOffline ? "text-destructive" : queuedCount > 0 ? "text-foreground" : "text-muted-foreground";
   const statusLabel = actions.sending
     ? "মেসেজ পাঠানো হচ্ছে..."
@@ -325,115 +317,23 @@ const Chat = () => {
 
   return (
     <div className="warm-gradient flex flex-col overflow-hidden fixed inset-0" style={{ height: viewportHeight ? `${viewportHeight}px` : "100dvh" }}>
-      {/* ============ HEADER ============ */}
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-background shrink-0 pt-[env(safe-area-inset-top)] shadow-[0_8px_18px_-18px_hsl(var(--heirloom-ink)/0.35)]">
-        <div className="container mx-auto max-w-5xl flex h-14 items-center justify-between px-4 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
-          <div className="flex items-center gap-2 min-w-0 flex-1 relative">
-            <AnimatePresence mode="wait" initial={false}>
-              {selectedContact ? (
-                <motion.div
-                  key={`hdr-thread-${selectedContact.id}`}
-                  initial={{ opacity: 0, x: 12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 12 }}
-                  transition={{ duration: 0.18, ease: "easeOut" }}
-                  className="flex items-center gap-2 min-w-0"
-                >
-                  {showBackButton ? (
-                    <button
-                      onClick={() => { setSelectedContact(null); setSearchOpen(false); setSearchQuery(""); }}
-                      className="text-foreground hover:text-primary transition-colors shrink-0 md:hidden"
-                      aria-label="ফিরে যান"
-                    >
-                      <ChevronLeft className="h-5 w-5" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => { if (window.history.length > 1) navigate(-1); else navigate("/"); }}
-                      className="text-foreground hover:text-primary transition-colors shrink-0"
-                      aria-label="পিছনে যান"
-                    >
-                      <ChevronLeft className="h-5 w-5" />
-                    </button>
-                  )}
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="relative shrink-0">
-                      {selectedContact.photo_url ? (
-                        <img src={selectedContact.photo_url} alt={selectedContact.name} className="h-8 w-8 rounded-full object-cover border border-primary/20" />
-                      ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedContact.name.charAt(0)}</div>
-                      )}
-                      {presenceMap[selectedContact.id]?.is_online && (
-                        <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-card" />
-                      )}
-                    </div>
-                    <div className="min-w-0 text-left">
-                      <span className="font-semibold text-sm truncate block">{selectedContact.name}</span>
-                      {presenceMap[selectedContact.id] && (
-                        <p className={`text-xs truncate ${presenceMap[selectedContact.id].is_online ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
-                          {formatLastSeen(presenceMap[selectedContact.id])}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="hdr-list"
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -12 }}
-                  transition={{ duration: 0.18, ease: "easeOut" }}
-                  className="flex items-center gap-2"
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full hero-gradient shadow-rose">
-                    <MessageCircle className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <span className="font-display font-semibold text-foreground text-sm">মেসেজ</span>
-                    <span className="ml-2 text-xs text-muted-foreground">{session.name}</span>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-          <div className="flex items-center gap-1 shrink-0">
-            {selectedContact && (
-              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="মেসেজ খুঁজুন" onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }}>
-                <Search className="h-4 w-4" />
-              </Button>
-            )}
-            <DropdownMenu open={settingsOpen} onOpenChange={setSettingsOpen} modal={false}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="সেটিংস ও অপশন">
-                  <Settings2 className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" sideOffset={8} className="z-[70] w-52">
-                <DropdownMenuItem onSelect={() => { setSettingsOpen(false); setNotifPrefsOpen(true); }} className="gap-2 text-sm">
-                  <Bell className="h-4 w-4" /> নোটিফিকেশন সেটিংস
-                </DropdownMenuItem>
-                {selectedContact && (
-                  <>
-                    <DropdownMenuItem onSelect={() => { setSettingsOpen(false); scrollToBottom(true); }} className="gap-2 text-sm">
-                      <ArrowDownToLine className="h-4 w-4" /> সর্বশেষ মেসেজে যান
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => { setSettingsOpen(false); if (selectedContact) void loadMessages(selectedContact); }} className="gap-2 text-sm">
-                      <RefreshCw className="h-4 w-4" /> রিফ্রেশ
-                    </DropdownMenuItem>
-                  </>
-                )}
-                <DropdownMenuItem onSelect={() => { setSettingsOpen(false); navigate("/"); }} className="gap-2 text-sm">
-                  <Home className="h-4 w-4" /> হোম
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => { setSettingsOpen(false); handleLogout(); }} className="gap-2 text-sm text-destructive focus:text-destructive">
-                  <LogOut className="h-4 w-4" /> লগআউট
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </header>
+      <ChatHeader
+        selectedContact={selectedContact}
+        presence={selectedContact ? presenceMap[selectedContact.id] : undefined}
+        myName={session.name}
+        showBackButton={showBackButton}
+        searchOpen={searchOpen}
+        settingsOpen={settingsOpen}
+        onSettingsOpenChange={setSettingsOpen}
+        onBackToList={() => { setSelectedContact(null); closeSearch(); }}
+        onNavigateBack={() => { if (window.history.length > 1) navigate(-1); else navigate("/"); }}
+        onToggleSearch={toggleSearch}
+        onOpenNotifPrefs={() => setNotifPrefsOpen(true)}
+        onScrollToLatest={() => scrollToBottom(true)}
+        onRefresh={() => { if (selectedContact) void loadMessages(selectedContact); }}
+        onGoHome={() => navigate("/")}
+        onLogout={handleLogout}
+      />
 
       {/* ============ BODY ============ */}
       <main id="main-content" className="flex-1 min-h-0 overflow-hidden container mx-auto max-w-5xl w-full px-0">
@@ -462,25 +362,16 @@ const Chat = () => {
             aria-label="চ্যাট থ্রেড"
           >
             {!selectedContact ? (
-              <div className="flex-1 flex items-center justify-center text-center px-6 text-muted-foreground">
-                <div>
-                  <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-30" aria-hidden="true" />
-                  <p className="text-sm">বাম দিকের তালিকা থেকে একজনকে বাছুন</p>
-                  <p className="text-xs mt-1">তারপর এখানে মনের কথা লেখা যাবে</p>
-                </div>
-              </div>
+              <ChatEmptyState />
             ) : (
               <>
                 {searchOpen && (
-                  <div className="relative z-40 isolate shrink-0 px-4 pt-2 pb-2 bg-background">
-                    <div className="flex items-center gap-2">
-                      <Input placeholder="মেসেজ খুঁজুন..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-card h-8 text-sm" autoFocus aria-label="মেসেজে খুঁজুন" />
-                      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="সার্চ বন্ধ করুন" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    {searchQuery && <p className="text-xs text-muted-foreground mt-1" aria-live="polite">{filteredMessages.length} টি মেসেজ পাওয়া গেছে</p>}
-                  </div>
+                  <ChatSearchBar
+                    query={searchQuery}
+                    onQueryChange={setSearchQuery}
+                    onClose={closeSearch}
+                    resultCount={filteredMessages.length}
+                  />
                 )}
 
                 {pinnedMessages.length > 0 && !searchOpen && (

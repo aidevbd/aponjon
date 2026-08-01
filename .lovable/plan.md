@@ -10,14 +10,12 @@ Chat.tsx এখন **605 লাইন** (আগে 1235)। টার্গে�
 
 হয়েছে: `useChatTyping`, `useChatActions`, `useChatPresence`, `useChatRealtime`, `useChatConnectivity`, `useChatSessionKeepalive`, `ChatComposer`, `ChatContactList`, `ChatMessageList`
 
+✅ **নতুন করে হলো** — `ChatHeader.tsx`, `ChatSearchBar.tsx`, `ChatEmptyState.tsx`, `hooks/useChatSearch.ts` extract। Chat.tsx: 606 → **498 লাইন**। Desktop two-pane split (Phase 3) কোডে আছে (`md:grid md:grid-cols-[300px_1fr]`) — ✅
+
 বাকি (এখনো Chat.tsx-এর ভেতরে inline):
-- `components/chat/ChatHeader.tsx` — avatar, নাম, "আপনার আপনজন" badge, actions menu (Chat.tsx ~390-477)
-- `components/chat/ChatSearchBar.tsx` — search overlay (Chat.tsx 473-477)
-- `components/chat/ChatEmptyState.tsx` — "এখনো কথা শুরু হয়নি"
 - `components/chat/ChatLoginForm.tsx` — session bootstrap form
-- `hooks/useChatSearch.ts` — search state এখনো Chat.tsx-এ
-- `hooks/useChatContacts.ts` — contacts fetch + unread map
-- Desktop two-pane split (Phase 3) নিশ্চিতভাবে হয়নি — verify দরকার
+- `hooks/useChatContacts.ts` — contacts fetch + preview + unread map
+- ছোট inline অংশ: pinned-message bar, connectivity status bar, dialog cluster
 
 ---
 
