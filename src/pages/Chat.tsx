@@ -1,14 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import { Loader2, Pin, WifiOff, Clock3 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  getChatSession, getChatContacts,
-  getMessages, getUnreadCounts,
+  getChatSession,
+  getMessages,
   clearChatSession, signMessagesImages,
   type ChatSession,
 } from "@/lib/chatSession";
@@ -39,11 +37,12 @@ import { ChatComposer } from "@/components/chat/ChatComposer";
 import { ChatHeader } from "@/components/chat/ChatHeader";
 import { ChatSearchBar } from "@/components/chat/ChatSearchBar";
 import { ChatEmptyState } from "@/components/chat/ChatEmptyState";
+import { PinnedMessagesBar } from "@/components/chat/PinnedMessagesBar";
+import { ChatStatusBar } from "@/components/chat/ChatStatusBar";
 import { useChatSearch } from "@/hooks/useChatSearch";
+import { useChatContacts, type ChatContact } from "@/hooks/useChatContacts";
 import { swallow } from "@/lib/devLog";
 
-type ChatContact = { id: string; name: string; phone: string; photo_url: string | null };
-type ContactPreview = { preview: string; time: string | null };
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -63,20 +62,24 @@ const Chat = () => {
   }, []);
 
   const [session, setSession] = useState<ChatSession | null>(() => getChatSession());
-  const [contacts, setContacts] = useState<ChatContact[]>([]);
-  const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
   const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
-  const [contactPreviews, setContactPreviews] = useState<Record<string, ContactPreview>>({});
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const messageListRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const autoSelectedRef = useRef(false);
 
+  const onSessionExpired = useCallback(() => setSession(null), []);
+  const {
+    contacts, unreadMap, contactPreviews,
+    loadContacts, loadUnread, clearUnreadFor, bumpUnreadFor, setPreviewFor, resetContacts,
+  } = useChatContacts({ session, onSessionExpired });
+
   const { isOffline, queuedCount, setQueuedCount } = useChatConnectivity(selectedContact?.id);
   const presenceMap = useChatPresence(!!session, contacts.map(c => c.id));
+
   const { isOtherTyping, emitTyping } = useChatTyping(session?.contactId, selectedContact?.id);
   const { searchOpen, searchQuery, setSearchQuery, toggleSearch, closeSearch, filteredMessages } =
     useChatSearch(messages);
@@ -120,14 +123,12 @@ const Chat = () => {
         return reconcileMessages([...(data as ChatMessage[]), ...survivors]);
       });
       const lastMessage = data[data.length - 1];
-      setContactPreviews((prev) => ({
-        ...prev,
-        [contact.id]: {
-          preview: lastMessage?.content || (lastMessage?.image_url ? "ছবি পাঠানো হয়েছে" : "এখনো কোনো মেসেজ নেই"),
-          time: lastMessage?.created_at || null,
-        },
-      }));
-      setUnreadMap((prev) => { const n = { ...prev }; delete n[contact.id]; return n; });
+      setPreviewFor(contact.id, {
+        preview: lastMessage?.content || (lastMessage?.image_url ? "ছবি পাঠানো হয়েছে" : "এখনো কোনো মেসেজ নেই"),
+        time: lastMessage?.created_at || null,
+      });
+      clearUnreadFor(contact.id);
+
       void (async () => { try { await supabase.rpc("mark_conversation_delivered", { p_token: session.token, p_other_id: contact.id } as any); } catch (e) { swallow("Chat.mark_conversation_delivered", e); } })();
     } catch (err) {
       console.error("[catch]", err);
@@ -170,8 +171,9 @@ const Chat = () => {
       if (selectedContact) void loadMessages(selectedContact);
     }, [selectedContact, loadMessages]),
     onIncomingFromOther: useCallback((senderId: string) => {
-      setUnreadMap((prev) => ({ ...prev, [senderId]: (prev[senderId] || 0) + 1 }));
-    }, []),
+      bumpUnreadFor(senderId);
+    }, [bumpUnreadFor]),
+
   });
 
   const { newBelowCount, scrollToBottom, resetForNewThread } = useSmartAutoScroll(
@@ -199,50 +201,6 @@ const Chat = () => {
     if (Date.now() - actions.recentSendAtRef.current < 1500) restoreInputFocus(true);
   }, [messages, restoreInputFocus, actions.recentSendAtRef]);
 
-  const loadContacts = async () => {
-    if (!session) return;
-    try {
-      const data = await getChatContacts(session.token);
-      if (data.length === 0) {
-        const { data: valid } = await supabase.rpc("validate_chat_session", { p_token: session.token });
-        if (!valid) {
-          clearChatSession();
-          setSession(null);
-          toast.error("সেশন শেষ হয়ে গেছে। আবার লগইন করুন। 🔒");
-          return;
-        }
-      }
-      setContacts(data);
-      const previewEntries = await Promise.all(
-        data.map(async (contact) => {
-          try {
-            const contactMessages = await getMessages(session.token, contact.id);
-            const lastMessage = contactMessages[contactMessages.length - 1];
-            return [contact.id, {
-              preview: lastMessage?.content || (lastMessage?.image_url ? "ছবি পাঠানো হয়েছে" : "ট্যাপ করে মেসেজ করুন"),
-              time: lastMessage?.created_at || null,
-            }] as const;
-          } catch {
-            return [contact.id, { preview: "ট্যাপ করে মেসেজ করুন", time: null }] as const;
-          }
-        }),
-      );
-      setContactPreviews(Object.fromEntries(previewEntries));
-    } catch (err) {
-      console.error("[catch]", err);
-      toast.error("কন্টাক্ট লোড করতে সমস্যা");
-    }
-  };
-
-  const loadUnread = async () => {
-    if (!session) return;
-    try {
-      const data = await getUnreadCounts(session.token);
-      const map: Record<string, number> = {};
-      data.forEach((d) => { map[d.sender_id] = d.unread_count; });
-      setUnreadMap(map);
-    } catch (e) { swallow("Chat.loadUnread", e); }
-  };
 
   const handleSelectContact = useCallback((contact: ChatContact) => {
     setSelectedContact(contact);
@@ -296,19 +254,12 @@ const Chat = () => {
     setSession(null);
     setSelectedContact(null);
     setMessages([]);
-    setContacts([]);
+    resetContacts();
     toast.info("লগআউট হয়েছে");
   };
 
   const pinnedMessages = messages.filter(m => m.is_pinned);
-  const statusTone = actions.sending ? "text-primary" : isOffline ? "text-destructive" : queuedCount > 0 ? "text-foreground" : "text-muted-foreground";
-  const statusLabel = actions.sending
-    ? "মেসেজ পাঠানো হচ্ছে..."
-    : isOffline
-      ? "নেটওয়ার্ক নেই — মেসেজটা অপেক্ষায় থাকবে"
-      : queuedCount > 0
-        ? `${queuedCount}টি মেসেজ অপেক্ষায় আছে`
-        : "অনলাইন — এখনই মেসেজ যাবে";
+
 
   if (!session) return <Navigate to="/verify?next=chat" replace />;
 
@@ -374,18 +325,8 @@ const Chat = () => {
                   />
                 )}
 
-                {pinnedMessages.length > 0 && !searchOpen && (
-                  <div className="px-4 pt-2 shrink-0">
-                    <div className="bg-accent/50 rounded-lg p-2 border border-border/50">
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
-                        <Pin className="h-3 w-3" aria-hidden="true" /> পিন করা মেসেজ
-                      </div>
-                      {pinnedMessages.slice(0, 2).map(pm => (
-                        <p key={pm.id} className="text-xs text-foreground truncate">📌 {pm.content || "ছবি"}</p>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {!searchOpen && <PinnedMessagesBar items={pinnedMessages} />}
+
 
                 <div className="relative z-0 flex-1 flex flex-col min-h-0 overflow-hidden">
                   <ChatMessageList
@@ -416,19 +357,8 @@ const Chat = () => {
                   <div className="px-4 pb-1"><TypingIndicator /></div>
                 )}
 
-                {(actions.sending || isOffline || queuedCount > 0) && (
-                  <div className="px-4 pt-1.5">
-                    <div className={`flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-muted/60 px-3 py-1.5 text-xs ${statusTone}`} role="status" aria-live="polite">
-                      <div className="flex items-center gap-2 min-w-0">
-                        {actions.sending ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" aria-hidden="true" /> : isOffline ? <WifiOff className="h-3.5 w-3.5 shrink-0" aria-hidden="true" /> : <Clock3 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
-                        <span className="truncate">{statusLabel}</span>
-                      </div>
-                      {queuedCount > 0 && (
-                        <span className="rounded-full bg-card px-2 py-0.5 text-foreground shrink-0">{queuedCount}টি অপেক্ষায়</span>
-                      )}
-                    </div>
-                  </div>
-                )}
+                <ChatStatusBar sending={actions.sending} isOffline={isOffline} queuedCount={queuedCount} />
+
 
                 <FailedMessagesList items={actions.failedMessages} onResend={actions.handleResendFailed} onDelete={actions.handleDeleteFailed} />
 
