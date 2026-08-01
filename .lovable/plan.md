@@ -38,7 +38,7 @@ Chat.tsx এখন **605 লাইন** (আগে 1235)। টার্গে�
 
 ### D. কোড হেলথ
 
-- **Silent catch** — 20টা `catch {}` error গিলে ফেলছে। বিশেষ করে `Chat.tsx:95,135,162,248` (`mark_conversation_delivered`, `update_presence` RPC ফেল করলে কোনো লগ নেই), `useGlobalChatNotifier` (3), `EmbeddedAdminChat` (7)। অন্তত dev-mode লগ দরকার।
+- ~~**Silent catch** — 21টা `catch {}`~~ ✅ **হয়ে গেছে** — `src/lib/devLog.ts`-এ `swallow(scope, error)` হেল্পার যুক্ত। সব bare `catch {}` এখন dev-mode-এ `[swallowed] <scope>` warning দেয়, production-এ চুপ থাকে। কভার: Chat.tsx (4), EmbeddedAdminChat (7), notificationPrefs (4), useGlobalChatNotifier (3), useGlobalPresenceHeartbeat, useChatPresence, EmojiPicker। এখন repo-তে bare `catch {}` = 0।
 - **`any` টাইপ** — `useChatActions.ts:37,40,141,174`, `useChatPresence.ts:24,40`, `Chat.tsx:135,162` (`as any` on RPC — generated types-এ RPC নাম নেই)
 - **400+ লাইনের ফাইল** — EmbeddedAdminChat (1232), AdminDashboard (817), MyInfo (695), Chat (605), ActiveSessionsCard (531), chatSession (461), ContactForm (420), ContactFilters (420)
 - Accessibility: ✅ চ্যাট surface-এ icon button গুলোতে aria-label আছে
