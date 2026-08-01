@@ -333,18 +333,8 @@ const Chat = () => {
                   />
                 )}
 
-                {pinnedMessages.length > 0 && !searchOpen && (
-                  <div className="px-4 pt-2 shrink-0">
-                    <div className="bg-accent/50 rounded-lg p-2 border border-border/50">
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
-                        <Pin className="h-3 w-3" aria-hidden="true" /> পিন করা মেসেজ
-                      </div>
-                      {pinnedMessages.slice(0, 2).map(pm => (
-                        <p key={pm.id} className="text-xs text-foreground truncate">📌 {pm.content || "ছবি"}</p>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {!searchOpen && <PinnedMessagesBar items={pinnedMessages} />}
+
 
                 <div className="relative z-0 flex-1 flex flex-col min-h-0 overflow-hidden">
                   <ChatMessageList
