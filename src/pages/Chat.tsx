@@ -172,7 +172,9 @@ const Chat = () => {
       if (selectedContact) void loadMessages(selectedContact);
     }, [selectedContact, loadMessages]),
     onIncomingFromOther: useCallback((senderId: string) => {
-      setUnreadMap((prev) => ({ ...prev, [senderId]: (prev[senderId] || 0) + 1 }));
+      bumpUnreadFor(senderId);
+    }, [bumpUnreadFor]),
+
     }, []),
   });
 
