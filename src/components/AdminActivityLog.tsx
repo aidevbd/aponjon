@@ -158,10 +158,10 @@ export function AdminActivityLog() {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${ACTION_COLORS[log.action_type] || "bg-muted text-muted-foreground"}`}>
+                <span className={`text-micro font-medium px-1.5 py-0.5 rounded-full ${ACTION_COLORS[log.action_type] || "bg-muted text-muted-foreground"}`}>
                   {ACTION_LABELS[log.action_type] || log.action_type}
                 </span>
-                <span className="text-[10px] text-muted-foreground" title={formatFullTime(log.created_at)}>
+                <span className="text-micro text-muted-foreground" title={formatFullTime(log.created_at)}>
                   {formatTime(log.created_at)}
                 </span>
               </div>

@@ -236,10 +236,10 @@ export function ActiveSessionsCard() {
       </div>
 
       {session && !session.trusted && (
-        <div className="mb-3 flex flex-col gap-2 rounded-xl border border-[hsl(var(--heirloom-gold)/0.35)] bg-[hsl(var(--heirloom-gold)/0.08)] p-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-3 flex flex-col gap-2 rounded-xl border border-heirloom-gold/[0.35] bg-heirloom-gold/[0.08] p-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-2">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--heirloom-gold-deep))]" />
-            <p className="text-xs leading-relaxed text-[hsl(var(--heirloom-ink-soft))]">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-heirloom-gold-deep" />
+            <p className="text-xs leading-relaxed text-heirloom-ink-soft">
               এই ডিভাইসে সাইন-ইন থাকা শেষ হবে ২৪ ঘণ্টায়। চাইলে ৩০ দিনের জন্য মনে রাখতে পারেন।
             </p>
           </div>
@@ -248,7 +248,7 @@ export function ActiveSessionsCard() {
             variant="outline"
             disabled={trusting}
             onClick={openTrustDialog}
-            className="shrink-0 text-xs border-[hsl(var(--heirloom-gold)/0.4)] text-[hsl(var(--heirloom-gold-deep))] hover:bg-[hsl(var(--heirloom-gold)/0.12)]"
+            className="shrink-0 text-xs border-heirloom-gold/[0.4] text-heirloom-gold-deep hover:bg-heirloom-gold/[0.12]"
           >
             ৩০ দিন মনে রাখুন
           </Button>
@@ -279,12 +279,12 @@ export function ActiveSessionsCard() {
                     <div className="flex flex-wrap items-center gap-1.5">
                       <span className="text-sm font-medium truncate">{r.device_label || "অজানা ডিভাইস"}</span>
                       {r.is_current && (
-                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-micro font-medium text-primary">
                           এই ডিভাইস
                         </span>
                       )}
                       {r.trusted_device && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-400">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-micro font-medium text-emerald-700 dark:text-emerald-400">
                           <ShieldCheck className="h-2.5 w-2.5" /> ৩০ দিন
                         </span>
                       )}
@@ -366,10 +366,10 @@ export function ActiveSessionsCard() {
                   )}
                 </div>
                 {isOpen && (
-                  <div className="space-y-3 border-t border-[hsl(var(--heirloom-gold)/0.2)] bg-[hsl(var(--heirloom-gold)/0.04)] px-3.5 py-3">
+                  <div className="space-y-3 border-t border-heirloom-gold/[0.2] bg-heirloom-gold/[0.04] px-3.5 py-3">
                     {/* Time */}
                     <div>
-                      <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[hsl(var(--heirloom-gold-deep))]/80">
+                      <div className="mb-1.5 flex items-center gap-1.5 text-micro font-medium uppercase tracking-[0.18em] text-heirloom-gold-deep/80">
                         <Clock className="h-2.5 w-2.5" />
                         <span>সময়</span>
                       </div>
@@ -384,7 +384,7 @@ export function ActiveSessionsCard() {
                     {/* Network */}
                     {r.ip_address && (
                       <div>
-                        <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[hsl(var(--heirloom-gold-deep))]/80">
+                        <div className="mb-1.5 flex items-center gap-1.5 text-micro font-medium uppercase tracking-[0.18em] text-heirloom-gold-deep/80">
                           <MapPin className="h-2.5 w-2.5" />
                           <span>নেটওয়ার্ক</span>
                         </div>
@@ -413,7 +413,7 @@ export function ActiveSessionsCard() {
                     {/* Device */}
                     {uaFriendly && (
                       <div>
-                        <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[hsl(var(--heirloom-gold-deep))]/80">
+                        <div className="mb-1.5 flex items-center gap-1.5 text-micro font-medium uppercase tracking-[0.18em] text-heirloom-gold-deep/80">
                           <Monitor className="h-2.5 w-2.5" />
                           <span>ডিভাইস</span>
                         </div>

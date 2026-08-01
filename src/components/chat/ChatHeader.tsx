@@ -36,7 +36,7 @@ export const ChatHeader = ({
   onSettingsOpenChange, onBackToList, onNavigateBack, onToggleSearch,
   onOpenNotifPrefs, onScrollToLatest, onRefresh, onGoHome, onLogout,
 }: ChatHeaderProps) => (
-  <header className="sticky top-0 z-50 border-b border-border/50 bg-background shrink-0 pt-[env(safe-area-inset-top)] shadow-[0_8px_18px_-18px_hsl(var(--heirloom-ink)/0.35)]">
+  <header className="sticky top-0 z-50 border-b border-border/50 bg-background shrink-0 pt-[env(safe-area-inset-top)] shadow-heirloom-sticky">
     <div className="container mx-auto max-w-5xl flex h-14 items-center justify-between px-4 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
       <div className="flex items-center gap-2 min-w-0 flex-1 relative">
         <AnimatePresence mode="wait" initial={false}>

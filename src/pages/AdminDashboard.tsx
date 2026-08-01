@@ -327,31 +327,31 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className={`bg-[hsl(var(--heirloom-bg))] relative ${chatFullscreen ? "h-dvh flex flex-col overflow-hidden" : "min-h-app"}`}>
+    <div className={`bg-heirloom-bg relative ${chatFullscreen ? "h-dvh flex flex-col overflow-hidden" : "min-h-app"}`}>
       {/* Header */}
-      <header className={`sticky top-0 z-50 shrink-0 border-b border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.85)] backdrop-blur ${immersive ? "hidden" : ""}`}>
+      <header className={`sticky top-0 z-50 shrink-0 border-b border-heirloom-line bg-heirloom-paper/[0.85] backdrop-blur ${immersive ? "hidden" : ""}`}>
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.5)] bg-[hsl(var(--heirloom-gold)/0.08)]">
-              <Heart className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))] fill-current" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-heirloom-gold/[0.5] bg-heirloom-gold/[0.08]">
+              <Heart className="h-3.5 w-3.5 text-heirloom-gold-deep fill-current" />
             </div>
-            <span className="font-display text-[17px] tracking-tight text-[hsl(var(--heirloom-ink))]">আপনজন</span>
-            <span className="hidden sm:inline text-[10px] tracking-[0.15em] uppercase text-[hsl(var(--heirloom-gold-deep))] border-l border-[hsl(var(--heirloom-line))] pl-2.5 ml-0.5">
+            <span className="font-display text-[17px] tracking-tight text-heirloom-ink">আপনজন</span>
+            <span className="hidden sm:inline text-micro tracking-[0.15em] uppercase text-heirloom-gold-deep border-l border-heirloom-line pl-2.5 ml-0.5">
               অ্যাডমিন
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 text-[12px] text-[hsl(var(--heirloom-ink-soft))]">
+            <div className="hidden md:flex items-center gap-2 text-[12px] text-heirloom-ink-soft">
               <span>{stats.total} কন্টাক্ট</span>
               {totalUnread > 0 && (
                 <>
-                  <span aria-hidden className="h-3 w-px bg-[hsl(var(--heirloom-line))]" />
-                  <span className="text-[hsl(var(--heirloom-gold-deep))]">{totalUnread} অপঠিত</span>
+                  <span aria-hidden className="h-3 w-px bg-heirloom-line" />
+                  <span className="text-heirloom-gold-deep">{totalUnread} অপঠিত</span>
                 </>
               )}
               {upcomingBirthdays.length > 0 && (
                 <>
-                  <span aria-hidden className="h-3 w-px bg-[hsl(var(--heirloom-line))]" />
+                  <span aria-hidden className="h-3 w-px bg-heirloom-line" />
                   <span>{upcomingBirthdays.length} আসন্ন জন্মদিন</span>
                 </>
               )}
@@ -361,12 +361,12 @@ const AdminDashboard = () => {
                 type="button"
                 onClick={() => setActiveTab("chat")}
                 aria-label={totalUnread > 0 ? `চ্যাট — ${totalUnread}টি অপঠিত` : "চ্যাট খুলুন"}
-                className="relative flex h-10 w-10 items-center justify-center rounded-full text-[hsl(var(--heirloom-ink))] hover:bg-[hsl(var(--heirloom-cream)/0.6)] active:scale-95 transition-transform duration-150 touch-manipulation"
+                className="relative flex h-10 w-10 items-center justify-center rounded-full text-heirloom-ink hover:bg-heirloom-cream/[0.6] active:scale-95 transition-transform duration-150 touch-manipulation"
                 style={{ WebkitTapHighlightColor: "transparent" }}
               >
                 <MessageCircle className="h-5 w-5" />
                 {totalUnread > 0 && (
-                  <span className="absolute top-1 right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[hsl(var(--heirloom-gold))] px-1 text-[10px] font-semibold text-[hsl(var(--heirloom-ink))] shadow">
+                  <span className="absolute top-1 right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-heirloom-gold px-1 text-micro font-semibold text-heirloom-ink shadow">
                     {totalUnread > 99 ? "99+" : totalUnread}
                   </span>
                 )}
@@ -384,13 +384,13 @@ const AdminDashboard = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className={chatFullscreen ? "flex-1 min-h-0 flex flex-col" : ""}>
 
         <TabsList
-          className={`w-full hidden sm:grid grid-cols-5 h-auto p-1 gap-0.5 bg-[hsl(var(--heirloom-paper)/0.7)] border border-[hsl(var(--heirloom-line))] rounded-sm transition-transform duration-300 ${immersive ? "sm:hidden" : ""} ${chatFullscreen ? "mb-3 shrink-0" : "mb-5 sm:sticky sm:top-14 sm:z-40"} ${tabsHidden ? "sm:-translate-y-[calc(100%+3.5rem)] sm:opacity-0 sm:pointer-events-none" : ""}`}
+          className={`w-full hidden sm:grid grid-cols-5 h-auto p-1 gap-0.5 bg-heirloom-paper/[0.7] border border-heirloom-line rounded-sm transition-transform duration-300 ${immersive ? "sm:hidden" : ""} ${chatFullscreen ? "mb-3 shrink-0" : "mb-5 sm:sticky sm:top-14 sm:z-40"} ${tabsHidden ? "sm:-translate-y-[calc(100%+3.5rem)] sm:opacity-0 sm:pointer-events-none" : ""}`}
         >
 
 
           <TabsTrigger
             value="dashboard"
-            className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-[10px] sm:text-[13px] px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-[hsl(var(--heirloom-cream)/0.8)] data-[state=active]:text-[hsl(var(--heirloom-gold-deep))] data-[state=active]:shadow-none text-[hsl(var(--heirloom-ink-soft))]"
+            className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-micro sm:text-[13px] px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-heirloom-cream/[0.8] data-[state=active]:text-heirloom-gold-deep data-[state=active]:shadow-none text-heirloom-ink-soft"
           >
             <LayoutDashboard className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">ড্যাশবোর্ড</span>
@@ -398,36 +398,36 @@ const AdminDashboard = () => {
           </TabsTrigger>
           <TabsTrigger
             value="contacts"
-            className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-[10px] sm:text-[13px] px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-[hsl(var(--heirloom-cream)/0.8)] data-[state=active]:text-[hsl(var(--heirloom-gold-deep))] data-[state=active]:shadow-none text-[hsl(var(--heirloom-ink-soft))]"
+            className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-micro sm:text-[13px] px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-heirloom-cream/[0.8] data-[state=active]:text-heirloom-gold-deep data-[state=active]:shadow-none text-heirloom-ink-soft"
           >
             <Users className="h-3.5 w-3.5" />
             <span className="inline-flex items-center gap-1">
               <span>কন্টাক্ট</span>
-              <span className="text-[10px] text-[hsl(var(--heirloom-ink-mute))]">{stats.total}</span>
+              <span className="text-micro text-heirloom-ink-mute">{stats.total}</span>
             </span>
           </TabsTrigger>
           <TabsTrigger
             value="chat"
-            className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-[10px] sm:text-[13px] relative px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-[hsl(var(--heirloom-cream)/0.8)] data-[state=active]:text-[hsl(var(--heirloom-gold-deep))] data-[state=active]:shadow-none text-[hsl(var(--heirloom-ink-soft))]"
+            className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-micro sm:text-[13px] relative px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-heirloom-cream/[0.8] data-[state=active]:text-heirloom-gold-deep data-[state=active]:shadow-none text-heirloom-ink-soft"
           >
             <MessageCircle className="h-3.5 w-3.5" />
             <span>চ্যাট</span>
             {totalUnread > 0 && (
-              <span className="absolute top-1 right-1 sm:static sm:ml-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[hsl(var(--heirloom-gold-deep))] text-[hsl(var(--heirloom-paper))] text-[9px] font-medium px-1">
+              <span className="absolute top-1 right-1 sm:static sm:ml-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-heirloom-gold-deep text-heirloom-paper text-[9px] font-medium px-1">
                 {totalUnread}
               </span>
             )}
           </TabsTrigger>
           <TabsTrigger
             value="logs"
-            className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-[10px] sm:text-[13px] px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-[hsl(var(--heirloom-cream)/0.8)] data-[state=active]:text-[hsl(var(--heirloom-gold-deep))] data-[state=active]:shadow-none text-[hsl(var(--heirloom-ink-soft))]"
+            className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-micro sm:text-[13px] px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-heirloom-cream/[0.8] data-[state=active]:text-heirloom-gold-deep data-[state=active]:shadow-none text-heirloom-ink-soft"
           >
             <Activity className="h-3.5 w-3.5" />
             <span>লগ</span>
           </TabsTrigger>
           <TabsTrigger
             value="settings"
-            className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-[10px] sm:text-[13px] px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-[hsl(var(--heirloom-cream)/0.8)] data-[state=active]:text-[hsl(var(--heirloom-gold-deep))] data-[state=active]:shadow-none text-[hsl(var(--heirloom-ink-soft))]"
+            className="flex-col sm:flex-row gap-0.5 sm:gap-1.5 text-micro sm:text-[13px] px-1 py-2 sm:py-1.5 rounded-sm data-[state=active]:bg-heirloom-cream/[0.8] data-[state=active]:text-heirloom-gold-deep data-[state=active]:shadow-none text-heirloom-ink-soft"
           >
             <Settings className="h-3.5 w-3.5" />
             <span>সেটিংস</span>
@@ -453,7 +453,7 @@ const AdminDashboard = () => {
           <div className="mx-auto w-full max-w-2xl space-y-3 sm:space-y-4">
 
             {/* Filters */}
-            <div className="sticky top-0 z-40 -mx-3 sm:mx-0 rounded-none sm:rounded-sm border-y sm:border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper))] px-3 py-2.5 shadow-[0_4px_12px_-8px_hsl(var(--heirloom-ink)/0.15)]">
+            <div className="sticky top-0 z-40 -mx-3 sm:mx-0 rounded-none sm:rounded-sm border-y sm:border border-heirloom-line bg-heirloom-paper px-3 py-2.5 shadow-heirloom-sticky-soft">
               <ContactFilters
                 search={search}
                 onSearchChange={setSearch}
@@ -470,8 +470,8 @@ const AdminDashboard = () => {
 
             {/* Filtered count */}
             {contacts.length > 0 && filtered.length !== contacts.length && (
-              <div className="px-1 text-[12px] text-[hsl(var(--heirloom-ink-soft))]">
-                <span className="text-[hsl(var(--heirloom-gold-deep))]">{filtered.length}</span>
+              <div className="px-1 text-[12px] text-heirloom-ink-soft">
+                <span className="text-heirloom-gold-deep">{filtered.length}</span>
                 {" / "}{contacts.length} জন মিলেছে
               </div>
             )}
@@ -483,14 +483,14 @@ const AdminDashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col items-center text-center py-16"
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.4)] bg-[hsl(var(--heirloom-gold)/0.08)]">
-                  <Users className="h-6 w-6 text-[hsl(var(--heirloom-gold-deep))]" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-heirloom-gold/[0.4] bg-heirloom-gold/[0.08]">
+                  <Users className="h-6 w-6 text-heirloom-gold-deep" />
                 </div>
-                <div aria-hidden className="mt-5 h-px w-24 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
-                <h3 className="mt-5 font-display text-2xl leading-[1.15] tracking-tight text-[hsl(var(--heirloom-ink))]">
+                <div aria-hidden className="mt-5 h-px w-24 bg-gradient-to-r from-transparent via-heirloom-gold to-transparent" />
+                <h3 className="mt-5 font-display text-2xl leading-[1.15] tracking-tight text-heirloom-ink">
                   কোনো কন্টাক্ট নেই
                 </h3>
-                <p className="mt-3 max-w-sm text-[14px] leading-[1.6] text-[hsl(var(--heirloom-ink-soft))]">
+                <p className="mt-3 max-w-sm text-[14px] leading-[1.6] text-heirloom-ink-soft">
                   আপনার প্রিয়জনদের তথ্য যোগ করা শুরু করুন।
                 </p>
                 <button
@@ -503,13 +503,13 @@ const AdminDashboard = () => {
               </motion.div>
             ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center text-center py-14">
-                <Search className="h-8 w-8 text-[hsl(var(--heirloom-ink-mute))] opacity-60" />
-                <p className="mt-4 text-[14px] text-[hsl(var(--heirloom-ink-soft))]">
+                <Search className="h-8 w-8 text-heirloom-ink-mute opacity-60" />
+                <p className="mt-4 text-[14px] text-heirloom-ink-soft">
                   কোনো কন্টাক্ট পাওয়া যায়নি
                 </p>
                 <button
                   onClick={() => { setSearch(""); setFilterCategory("all"); setFilterBloodGroup("all"); }}
-                  className="mt-3 text-[12px] text-[hsl(var(--heirloom-gold-deep))] underline-offset-4 hover:underline"
+                  className="mt-3 text-[12px] text-heirloom-gold-deep underline-offset-4 hover:underline"
                 >
                   ফিল্টার রিসেট করুন
                 </button>
@@ -552,29 +552,29 @@ const AdminDashboard = () => {
             {/* Section: Account */}
             <section>
               <div className="mb-3 px-1">
-                <h2 className="font-display text-[15px] tracking-tight text-[hsl(var(--heirloom-ink))]">অ্যাকাউন্ট</h2>
-                <p className="mt-0.5 text-[12px] text-[hsl(var(--heirloom-ink-soft))]">লগইন সেশন ও পরিচয়</p>
+                <h2 className="font-display text-[15px] tracking-tight text-heirloom-ink">অ্যাকাউন্ট</h2>
+                <p className="mt-0.5 text-[12px] text-heirloom-ink-soft">লগইন সেশন ও পরিচয়</p>
               </div>
-              <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.6)] divide-y divide-[hsl(var(--heirloom-line))]">
+              <div className="rounded-sm border border-heirloom-line bg-heirloom-paper/[0.6] divide-y divide-heirloom-line">
                 <div className="flex items-center justify-between gap-4 p-4 sm:px-5">
                   <div className="min-w-0">
-                    <div className="text-[13px] text-[hsl(var(--heirloom-ink))]">সাইন-ইন করা আছেন</div>
-                    <div className="mt-0.5 truncate text-[12px] text-[hsl(var(--heirloom-ink-soft))]">
+                    <div className="text-[13px] text-heirloom-ink">সাইন-ইন করা আছেন</div>
+                    <div className="mt-0.5 truncate text-[12px] text-heirloom-ink-soft">
                       {adminEmail || "—"}
                     </div>
                   </div>
-                  <span className="shrink-0 rounded-full border border-[hsl(var(--heirloom-gold)/0.4)] bg-[hsl(var(--heirloom-gold)/0.08)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[hsl(var(--heirloom-gold-deep))]">
+                  <span className="shrink-0 rounded-full border border-heirloom-gold/[0.4] bg-heirloom-gold/[0.08] px-2 py-0.5 text-micro uppercase tracking-[0.12em] text-heirloom-gold-deep">
                     অ্যাডমিন
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-4 p-4 sm:px-5">
                   <div className="min-w-0">
-                    <div className="text-[13px] text-[hsl(var(--heirloom-ink))]">লগআউট</div>
-                    <div className="mt-0.5 text-[12px] text-[hsl(var(--heirloom-ink-soft))]">এই ডিভাইস থেকে সেশন বন্ধ করুন</div>
+                    <div className="text-[13px] text-heirloom-ink">লগআউট</div>
+                    <div className="mt-0.5 text-[12px] text-heirloom-ink-soft">এই ডিভাইস থেকে সেশন বন্ধ করুন</div>
                   </div>
                   <button
                     onClick={() => setShowLogoutConfirm(true)}
-                    className="shrink-0 inline-flex items-center gap-1.5 rounded-sm border border-destructive/40 bg-[hsl(var(--heirloom-paper))] px-3 py-1.5 text-[13px] text-destructive transition-colors hover:bg-destructive/10"
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-sm border border-destructive/40 bg-heirloom-paper px-3 py-1.5 text-[13px] text-destructive transition-colors hover:bg-destructive/10"
                   >
                     <LogOut className="h-3.5 w-3.5" />
                     লগআউট
@@ -586,8 +586,8 @@ const AdminDashboard = () => {
             {/* Section: Security */}
             <section>
               <div className="mb-3 px-1">
-                <h2 className="font-display text-[15px] tracking-tight text-[hsl(var(--heirloom-ink))]">সিকিউরিটি</h2>
-                <p className="mt-0.5 text-[12px] text-[hsl(var(--heirloom-ink-soft))]">পাসওয়ার্ড পরিবর্তন করুন</p>
+                <h2 className="font-display text-[15px] tracking-tight text-heirloom-ink">সিকিউরিটি</h2>
+                <p className="mt-0.5 text-[12px] text-heirloom-ink-soft">পাসওয়ার্ড পরিবর্তন করুন</p>
               </div>
               <ChangePasswordForm />
             </section>
@@ -595,24 +595,24 @@ const AdminDashboard = () => {
             {/* Section: Data */}
             <section>
               <div className="mb-3 px-1">
-                <h2 className="font-display text-[15px] tracking-tight text-[hsl(var(--heirloom-ink))]">ডেটা</h2>
-                <p className="mt-0.5 text-[12px] text-[hsl(var(--heirloom-ink-soft))]">ব্যাকআপ ও এক্সপোর্ট</p>
+                <h2 className="font-display text-[15px] tracking-tight text-heirloom-ink">ডেটা</h2>
+                <p className="mt-0.5 text-[12px] text-heirloom-ink-soft">ব্যাকআপ ও এক্সপোর্ট</p>
               </div>
-              <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.6)] p-4 sm:p-5">
+              <div className="rounded-sm border border-heirloom-line bg-heirloom-paper/[0.6] p-4 sm:p-5">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-[13px] text-[hsl(var(--heirloom-ink))]">কন্টাক্ট CSV এক্সপোর্ট</div>
-                    <p className="mt-0.5 text-[12px] leading-[1.6] text-[hsl(var(--heirloom-ink-soft))]">
+                    <div className="text-[13px] text-heirloom-ink">কন্টাক্ট CSV এক্সপোর্ট</div>
+                    <p className="mt-0.5 text-[12px] leading-[1.6] text-heirloom-ink-soft">
                       সব কন্টাক্টের একটি CSV কপি ডাউনলোড করে নিরাপদে সংরক্ষণ করুন।
                     </p>
                   </div>
                   <button
                     onClick={handleExportCSV}
                     disabled={contacts.length === 0}
-                    className="shrink-0 inline-flex items-center justify-center gap-2 rounded-sm border border-[hsl(var(--heirloom-gold)/0.5)] bg-[hsl(var(--heirloom-paper))] px-4 py-2 text-[13px] text-[hsl(var(--heirloom-gold-deep))] transition-colors hover:bg-[hsl(var(--heirloom-cream)/0.6)] disabled:opacity-50"
+                    className="shrink-0 inline-flex items-center justify-center gap-2 rounded-sm border border-heirloom-gold/[0.5] bg-heirloom-paper px-4 py-2 text-[13px] text-heirloom-gold-deep transition-colors hover:bg-heirloom-cream/[0.6] disabled:opacity-50"
                   >
                     <Download className="h-4 w-4" />
-                    CSV ডাউনলোড {contacts.length > 0 && <span className="text-[hsl(var(--heirloom-ink-soft))]">({contacts.length})</span>}
+                    CSV ডাউনলোড {contacts.length > 0 && <span className="text-heirloom-ink-soft">({contacts.length})</span>}
                   </button>
                 </div>
               </div>
@@ -642,7 +642,7 @@ const AdminDashboard = () => {
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowAddModal(true)}
           style={{ bottom: "calc(var(--mobile-bottom-nav-h, 0px) + 1rem)", right: "max(1rem, env(safe-area-inset-right))" }}
-          className="fixed z-40 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.5)] bg-[hsl(var(--heirloom-paper))] text-[hsl(var(--heirloom-gold-deep))] shadow-[0_10px_30px_-10px_hsl(var(--heirloom-gold-deep)/0.4)] hover:bg-[hsl(var(--heirloom-cream)/0.9)] transition-colors sm:!bottom-6 sm:!right-6"
+          className="fixed z-40 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full border border-heirloom-gold/[0.5] bg-heirloom-paper text-heirloom-gold-deep shadow-heirloom-float hover:bg-heirloom-cream/[0.9] transition-colors sm:!bottom-6 sm:!right-6"
         >
           <Plus className="h-6 w-6" />
         </motion.button>

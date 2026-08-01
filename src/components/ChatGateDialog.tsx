@@ -34,7 +34,7 @@ export function ChatGateDialog({ open, onClose }: ChatGateDialogProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-[hsl(var(--heirloom-ink))]/40 backdrop-blur-sm px-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-heirloom-ink/40 backdrop-blur-sm px-4"
           onClick={onClose}
           role="dialog"
           aria-modal="true"
@@ -48,7 +48,7 @@ export function ChatGateDialog({ open, onClose }: ChatGateDialogProps) {
             onClick={(e) => e.stopPropagation()}
             className="heirloom-dialog relative w-full max-w-[22.5rem] rounded-sm border p-5 shadow-xl sm:max-w-md sm:p-8"
           >
-            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-sm bg-[hsl(var(--heirloom-paper))]" />
+            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-sm bg-heirloom-paper" />
 
             {/* Corner ornaments */}
             <div aria-hidden className="heirloom-corner pointer-events-none absolute left-0 top-0 h-8 w-8 border-l-2 border-t-2 rounded-tl-sm" />
@@ -60,26 +60,26 @@ export function ChatGateDialog({ open, onClose }: ChatGateDialogProps) {
               type="button"
               onClick={onClose}
               aria-label="বন্ধ করুন"
-              className="absolute right-3 top-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--heirloom-paper))]/70 text-[hsl(var(--heirloom-ink-soft))] hover:bg-[hsl(var(--heirloom-line))]/60 hover:text-[hsl(var(--heirloom-ink))] transition"
+              className="absolute right-3 top-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-heirloom-paper/70 text-heirloom-ink-soft hover:bg-heirloom-line/60 hover:text-heirloom-ink transition"
             >
               <X className="h-4 w-4" />
             </button>
 
             <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[hsl(var(--heirloom-gold))]/15 text-[hsl(var(--heirloom-gold))]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-heirloom-gold/15 text-heirloom-gold">
                 <MessageCircle className="h-6 w-6" />
               </div>
 
               <h2
                 id="chat-gate-title"
-                className="mt-4 font-display text-[1.45rem] leading-tight text-[hsl(var(--heirloom-ink))] sm:text-[26px]"
+                className="mt-4 font-display text-[1.45rem] leading-tight text-heirloom-ink sm:text-[26px]"
               >
                 একটু কথা বলবেন?
               </h2>
 
-              <div aria-hidden className="mt-4 h-px w-20 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
+              <div aria-hidden className="mt-4 h-px w-20 bg-gradient-to-r from-transparent via-heirloom-gold to-transparent" />
 
-              <p className="mt-4 max-w-sm text-[14.5px] leading-[1.75] text-[hsl(var(--heirloom-ink-soft))] sm:text-[15px]">
+              <p className="mt-4 max-w-sm text-[14.5px] leading-[1.75] text-heirloom-ink-soft sm:text-[15px]">
                 আপনজনদের সাথে সরাসরি মন খুলে কথা বলতে চাইলে আগে একটু পরিচয় দিতে হবে —
                 আপনার নাম-নম্বরটা আমাদের খাতায় আছে কি না দেখে নিই। তারপরই আমরা গল্প শুরু করতে পারব।
               </p>
@@ -106,7 +106,7 @@ export function ChatGateDialog({ open, onClose }: ChatGateDialogProps) {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="mt-1 text-[13px] italic text-[hsl(var(--heirloom-ink-soft))] hover:text-[hsl(var(--heirloom-ink))] transition"
+                  className="mt-1 text-[13px] italic text-heirloom-ink-soft hover:text-heirloom-ink transition"
                 >
                   পরে করব
                 </button>

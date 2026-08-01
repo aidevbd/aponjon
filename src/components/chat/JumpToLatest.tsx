@@ -44,7 +44,7 @@ export function JumpToLatest({ show, count = 0, onClick, className }: JumpToLate
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.4, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 500, damping: 24 }}
-                className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary-foreground/20 text-[10px] font-bold"
+                className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary-foreground/20 text-micro font-bold"
               >
                 {count}
               </motion.span>

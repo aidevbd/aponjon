@@ -188,7 +188,7 @@ const Verify = () => {
   };
 
   return (
-    <div className="flex min-h-app flex-col bg-[hsl(var(--heirloom-bg))]">
+    <div className="flex min-h-app flex-col bg-heirloom-bg">
       <Header />
       <main id="main-content" className="relative flex flex-1 items-center justify-center px-4 py-6 sm:px-6 sm:py-12">
         <div className="mx-auto w-full max-w-lg">
@@ -206,14 +206,14 @@ const Verify = () => {
 
             <div className="relative">
               <div className="mb-8 text-center">
-                <div aria-hidden className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.5)] bg-[hsl(var(--heirloom-gold)/0.08)]">
-                  <ShieldCheck className="h-5 w-5 text-[hsl(var(--heirloom-gold-deep))]" />
+                <div aria-hidden className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-heirloom-gold/[0.5] bg-heirloom-gold/[0.08]">
+                  <ShieldCheck className="h-5 w-5 text-heirloom-gold-deep" />
                 </div>
-                <h1 className="mt-4 font-display text-2xl leading-tight text-[hsl(var(--heirloom-ink))] sm:text-3xl">
+                <h1 className="mt-4 font-display text-2xl leading-tight text-heirloom-ink sm:text-3xl">
                   পরিচয় যাচাই
                 </h1>
-                <div aria-hidden className="mx-auto mt-4 h-px w-24 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
-                <p className="mt-4 text-[14px] leading-[1.7] text-[hsl(var(--heirloom-ink-soft))] sm:text-[15px]">
+                <div aria-hidden className="mx-auto mt-4 h-px w-24 bg-gradient-to-r from-transparent via-heirloom-gold to-transparent" />
+                <p className="mt-4 text-[14px] leading-[1.7] text-heirloom-ink-soft sm:text-[15px]">
                   {intentLabel} নিজেকে যাচাই করুন
                 </p>
               </div>
@@ -223,7 +223,7 @@ const Verify = () => {
                   <motion.div key="phone" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5">
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2">
-                        <Phone className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" />
+                        <Phone className="h-3.5 w-3.5 text-heirloom-gold-deep" />
                         আপনার ফোন নম্বর
                       </Label>
                       <Input
@@ -246,12 +246,12 @@ const Verify = () => {
 
                 {step === "secret" && (
                   <motion.div key="secret" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5">
-                    <button onClick={goBack} className="inline-flex items-center gap-1 text-xs text-[hsl(var(--heirloom-ink-soft))] hover:text-[hsl(var(--heirloom-ink))]">
+                    <button onClick={goBack} className="inline-flex items-center gap-1 text-xs text-heirloom-ink-soft hover:text-heirloom-ink">
                       <ArrowLeft className="h-3.5 w-3.5" /> নম্বর বদলাব
                     </button>
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2">
-                        <Lock className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" />
+                        <Lock className="h-3.5 w-3.5 text-heirloom-gold-deep" />
                         সিক্রেট কোড
                       </Label>
                       <Input
@@ -264,16 +264,16 @@ const Verify = () => {
                         autoFocus
                       />
                     </div>
-                    <label className="flex items-start gap-2.5 rounded-sm border border-[hsl(var(--heirloom-gold)/0.3)] bg-[hsl(var(--heirloom-gold)/0.05)] p-3 cursor-pointer select-none">
+                    <label className="flex items-start gap-2.5 rounded-sm border border-heirloom-gold/[0.3] bg-heirloom-gold/[0.05] p-3 cursor-pointer select-none">
                       <input
                         type="checkbox"
                         checked={trustDevice}
                         onChange={(e) => setTrustDevice(e.target.checked)}
-                        className="mt-0.5 h-4 w-4 rounded border-[hsl(var(--heirloom-gold-deep))] accent-[hsl(var(--heirloom-gold-deep))]"
+                        className="mt-0.5 h-4 w-4 rounded border-heirloom-gold-deep accent-heirloom-gold-deep"
                       />
                       <div className="text-xs leading-relaxed">
-                        <div className="font-medium text-[hsl(var(--heirloom-ink))]">এই ডিভাইসে ৩০ দিন মনে রাখুন</div>
-                        <div className="text-[hsl(var(--heirloom-ink-soft))] mt-0.5">শেয়ারড বা পাবলিক ডিভাইসে চেক করবেন না।</div>
+                        <div className="font-medium text-heirloom-ink">এই ডিভাইসে ৩০ দিন মনে রাখুন</div>
+                        <div className="text-heirloom-ink-soft mt-0.5">শেয়ারড বা পাবলিক ডিভাইসে চেক করবেন না।</div>
                       </div>
                     </label>
                     <Button onClick={handleSecretVerify} variant="heirloom" className="w-full" disabled={loading}>
@@ -284,12 +284,12 @@ const Verify = () => {
 
                 {step === "otp" && (
                   <motion.div key="otp" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5">
-                    <button onClick={goBack} className="inline-flex items-center gap-1 text-xs text-[hsl(var(--heirloom-ink-soft))] hover:text-[hsl(var(--heirloom-ink))]">
+                    <button onClick={goBack} className="inline-flex items-center gap-1 text-xs text-heirloom-ink-soft hover:text-heirloom-ink">
                       <ArrowLeft className="h-3.5 w-3.5" /> নম্বর বদলাব
                     </button>
                     <div className="heirloom-chip rounded-sm border p-4">
                       <div className="flex gap-2 items-start">
-                        <KeyRound className="h-5 w-5 text-[hsl(var(--heirloom-gold-deep))] shrink-0 mt-0.5" />
+                        <KeyRound className="h-5 w-5 text-heirloom-gold-deep shrink-0 mt-0.5" />
                         <div>
                           <p className="text-sm font-medium">OTP পাঠানো হয়েছে</p>
                           <p className="text-xs text-muted-foreground mt-1">আপনার ফোনে ৬ সংখ্যার কোড পাওয়া যাবে</p>
@@ -298,7 +298,7 @@ const Verify = () => {
                     </div>
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2">
-                        <KeyRound className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" />
+                        <KeyRound className="h-3.5 w-3.5 text-heirloom-gold-deep" />
                         OTP কোড
                       </Label>
                       <Input

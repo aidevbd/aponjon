@@ -49,7 +49,7 @@ export function ContactListItem({ contact, onClick, query = "", highlighted = fa
   return (
     <div
       onClick={() => onClick(contact)}
-      className={`group flex items-center gap-3 px-3.5 py-3 min-h-[72px] border-b border-[hsl(var(--heirloom-line)/0.7)] cursor-pointer transition-colors hover:bg-[hsl(var(--heirloom-cream)/0.45)] ${highlighted ? "bg-[hsl(var(--heirloom-gold)/0.10)]" : ""}`}
+      className={`group flex items-center gap-3 px-3.5 py-3 min-h-[72px] border-b border-heirloom-line/[0.7] cursor-pointer transition-colors hover:bg-heirloom-cream/[0.45] ${highlighted ? "bg-heirloom-gold/[0.10]" : ""}`}
     >
 
       {/* Avatar */}
@@ -57,34 +57,34 @@ export function ContactListItem({ contact, onClick, query = "", highlighted = fa
         <img
           src={contact.photo_url}
           alt={contact.name}
-          className="h-10 w-10 rounded-full object-cover border border-[hsl(var(--heirloom-gold)/0.35)] shrink-0"
+          className="h-10 w-10 rounded-full object-cover border border-heirloom-gold/[0.35] shrink-0"
         />
       ) : (
-        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.4)] bg-[hsl(var(--heirloom-gold)/0.08)] text-[hsl(var(--heirloom-gold-deep))] font-display text-[15px] shrink-0">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-heirloom-gold/[0.4] bg-heirloom-gold/[0.08] text-heirloom-gold-deep font-display text-[15px] shrink-0">
           {contact.name.charAt(0)}
         </div>
       )}
 
       {/* Name + meta */}
       <div className="flex-1 min-w-0">
-        <div className="text-[14px] text-[hsl(var(--heirloom-ink))] truncate">
+        <div className="text-[14px] text-heirloom-ink truncate">
           <Highlight text={contact.name} query={q} />
         </div>
 
         {matchCtx && (
-          <div className="mt-0.5 text-[11px] text-[hsl(var(--heirloom-ink-soft))] truncate">
-            <span className="text-[hsl(var(--heirloom-ink-mute))]">{matchCtx.label}: </span>
+          <div className="mt-0.5 text-[11px] text-heirloom-ink-soft truncate">
+            <span className="text-heirloom-ink-mute">{matchCtx.label}: </span>
             <Highlight text={matchCtx.value ?? ""} query={q} />
           </div>
         )}
 
-        <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[hsl(var(--heirloom-ink-soft))]">
+        <div className="flex items-center gap-1.5 mt-1 text-[11px] text-heirloom-ink-soft">
           {category && CategoryIcon && (
             <span
               className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border ${
                 isEmergency
                   ? "border-[hsl(var(--primary)/0.35)] bg-[hsl(var(--primary)/0.08)] text-[hsl(var(--primary))]"
-                  : "border-[hsl(var(--heirloom-gold)/0.3)] bg-[hsl(var(--heirloom-gold)/0.06)] text-[hsl(var(--heirloom-gold-deep))]"
+                  : "border-heirloom-gold/[0.3] bg-heirloom-gold/[0.06] text-heirloom-gold-deep"
               }`}
               title={category.value}
               aria-label={category.value}
@@ -104,7 +104,7 @@ export function ContactListItem({ contact, onClick, query = "", highlighted = fa
       {/* Call */}
       <button
         onClick={callPhone}
-        className="flex h-9 w-9 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.4)] bg-[hsl(var(--heirloom-gold)/0.06)] text-[hsl(var(--heirloom-gold-deep))] transition-colors hover:bg-[hsl(var(--heirloom-gold)/0.15)] shrink-0"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-heirloom-gold/[0.4] bg-heirloom-gold/[0.06] text-heirloom-gold-deep transition-colors hover:bg-heirloom-gold/[0.15] shrink-0"
         title="কল করুন"
         aria-label="কল করুন"
       >

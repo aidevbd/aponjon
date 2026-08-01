@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 const AddContact = () => {
   return (
-    <div className="flex min-h-app flex-col bg-[hsl(var(--heirloom-bg))]">
+    <div className="flex min-h-app flex-col bg-heirloom-bg">
       <Header />
 
       <main id="main-content" className="relative flex-1 px-4 py-5 sm:px-6 sm:py-10">
@@ -27,10 +27,10 @@ const AddContact = () => {
             <div className="relative">
               {/* Slim heading — no welcome hero, focus stays on the form */}
               <div className="flex flex-col items-center text-center">
-                <h1 className="font-display text-[1.35rem] leading-tight tracking-tight text-[hsl(var(--heirloom-ink))] sm:text-2xl">
+                <h1 className="font-display text-[1.35rem] leading-tight tracking-tight text-heirloom-ink sm:text-2xl">
                   নতুন আপনজন যোগ করুন
                 </h1>
-                <div aria-hidden className="mt-2 h-px w-16 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
+                <div aria-hidden className="mt-2 h-px w-16 bg-gradient-to-r from-transparent via-heirloom-gold to-transparent" />
               </div>
 
               {/* Form */}

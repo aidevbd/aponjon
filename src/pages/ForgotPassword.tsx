@@ -32,7 +32,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="flex min-h-app flex-col bg-[hsl(var(--heirloom-bg))]">
+    <div className="flex min-h-app flex-col bg-heirloom-bg">
       <Header />
 
       <main id="main-content" className="relative flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-10">
@@ -52,13 +52,13 @@ const ForgotPassword = () => {
 
             <div className="relative">
               <div className="flex flex-col items-center text-center">
-                <h1 className="mt-8 font-display text-3xl leading-[1.15] tracking-tight text-[hsl(var(--heirloom-ink))] sm:mt-10 sm:text-4xl md:text-5xl">
+                <h1 className="mt-8 font-display text-3xl leading-[1.15] tracking-tight text-heirloom-ink sm:mt-10 sm:text-4xl md:text-5xl">
                   পাসওয়ার্ড ভুলে গেছেন?
                 </h1>
 
-                <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
+                <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-heirloom-gold to-transparent" />
 
-                <p className="mt-5 max-w-md text-[15px] leading-[1.6] text-[hsl(var(--heirloom-ink-soft))] sm:text-base md:max-w-lg md:text-[17px]">
+                <p className="mt-5 max-w-md text-[15px] leading-[1.6] text-heirloom-ink-soft sm:text-base md:max-w-lg md:text-[17px]">
                   {sent
                     ? "ইনবক্স ও Spam ফোল্ডার একটু চেক করে নিন।"
                     : "ইমেইল দিন — রিসেট লিংক পাঠিয়ে দেব।"}
@@ -68,8 +68,8 @@ const ForgotPassword = () => {
               <div className="mx-auto mt-10 w-full max-w-[420px] space-y-5 sm:mt-8">
                 {sent ? (
                   <>
-                    <p className="rounded-sm border border-[hsl(var(--heirloom-gold)/0.3)] bg-[hsl(var(--heirloom-cream)/0.5)] px-4 py-4 text-center text-[15px] leading-[1.6] text-[hsl(var(--heirloom-ink))]">
-                      <strong className="text-[hsl(var(--heirloom-gold-deep))]">{email}</strong>
+                    <p className="rounded-sm border border-heirloom-gold/[0.3] bg-heirloom-cream/[0.5] px-4 py-4 text-center text-[15px] leading-[1.6] text-heirloom-ink">
+                      <strong className="text-heirloom-gold-deep">{email}</strong>
                       <br />
                       ঠিকানায় রিসেট লিংক পাঠানো হয়েছে।
                     </p>
@@ -84,7 +84,7 @@ const ForgotPassword = () => {
                 ) : (
                   <>
                     <div className="space-y-2">
-                      <label htmlFor="email" className="block text-sm text-[hsl(var(--heirloom-ink-soft))]">
+                      <label htmlFor="email" className="block text-sm text-heirloom-ink-soft">
                         ইমেইল
                       </label>
                       <input

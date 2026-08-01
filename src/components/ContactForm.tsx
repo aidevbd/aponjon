@@ -200,7 +200,7 @@ export function ContactForm() {
           className="heirloom-seal-outer mb-5 flex h-16 w-16 items-center justify-center rounded-full p-1"
         >
           <div className="heirloom-seal-inner flex h-full w-full items-center justify-center rounded-full">
-            <CheckCircle2 className="h-7 w-7 text-[hsl(var(--heirloom-gold-deep))]" />
+            <CheckCircle2 className="h-7 w-7 text-heirloom-gold-deep" />
           </div>
         </motion.div>
 
@@ -223,16 +223,16 @@ export function ContactForm() {
               <img
                 src={savedProfile.photoUrl}
                 alt={savedProfile.name}
-                className="h-14 w-14 rounded-full object-cover border-2 border-[hsl(var(--heirloom-gold))]/50"
+                className="h-14 w-14 rounded-full object-cover border-2 border-heirloom-gold/50"
               />
             ) : (
-              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold))]/40 bg-[hsl(var(--heirloom-bg))] font-display text-xl text-[hsl(var(--heirloom-ink))]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-heirloom-gold/40 bg-heirloom-bg font-display text-xl text-heirloom-ink">
                 {savedProfile.name.charAt(0)}
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="font-display font-semibold text-[hsl(var(--heirloom-ink))] truncate">{savedProfile.name}</p>
-              <p className="text-xs text-[hsl(var(--heirloom-ink-mute))] truncate">{maskedPhone} · {savedProfile.category}</p>
+              <p className="font-display font-semibold text-heirloom-ink truncate">{savedProfile.name}</p>
+              <p className="text-xs text-heirloom-ink-mute truncate">{maskedPhone} · {savedProfile.category}</p>
             </div>
           </div>
         </motion.div>
@@ -257,9 +257,9 @@ export function ContactForm() {
             size="lg"
             className="w-full gap-2 h-12 rounded-sm"
           >
-            <Pencil className="h-4 w-4 text-[hsl(var(--heirloom-gold-deep))]" />
+            <Pencil className="h-4 w-4 text-heirloom-gold-deep" />
             আমার তথ্য দেখুন ও এডিট করুন
-            <ArrowRight className="h-4 w-4 ml-auto text-[hsl(var(--heirloom-gold-deep))]" />
+            <ArrowRight className="h-4 w-4 ml-auto text-heirloom-gold-deep" />
           </Button>
         </div>
 
@@ -295,19 +295,19 @@ export function ContactForm() {
                 aria-label={`ধাপ ${s}`}
                 className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all ${
                   s === step
-                    ? "bg-[hsl(var(--heirloom-gold-deep))] text-[hsl(var(--heirloom-bg))] shadow-[0_2px_8px_hsl(var(--heirloom-gold-deep)/0.35)]"
+                    ? "bg-heirloom-gold-deep text-heirloom-bg shadow-heirloom-chip"
                     : s < step
-                    ? "bg-[hsl(var(--heirloom-gold))]/25 text-[hsl(var(--heirloom-gold-deep))]"
-                    : "bg-[hsl(var(--heirloom-line))]/40 text-[hsl(var(--heirloom-ink-mute))]"
+                    ? "bg-heirloom-gold/25 text-heirloom-gold-deep"
+                    : "bg-heirloom-line/40 text-heirloom-ink-mute"
                 }`}
               >
                 {s}
               </button>
-              {s < 3 && <div className={`h-0.5 w-8 rounded ${s < step ? "bg-[hsl(var(--heirloom-gold))]/60" : "bg-[hsl(var(--heirloom-line))]"}`} />}
+              {s < 3 && <div className={`h-0.5 w-8 rounded ${s < step ? "bg-heirloom-gold/60" : "bg-heirloom-line"}`} />}
             </div>
           ))}
         </div>
-        <p className="text-[11px] tracking-wide text-[hsl(var(--heirloom-ink-mute))]">
+        <p className="text-[11px] tracking-wide text-heirloom-ink-mute">
           ধাপ {step} / ৩ · {step === 1 ? "মূল তথ্য" : step === 2 ? "অতিরিক্ত তথ্য" : "সিক্রেট কোড"}
         </p>
       </div>
@@ -321,7 +321,7 @@ export function ContactForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="name" className="flex items-center gap-2"><Heart className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> আপনার নাম *</Label>
+              <Label htmlFor="name" className="flex items-center gap-2"><Heart className="h-3.5 w-3.5 text-heirloom-gold-deep" /> আপনার নাম *</Label>
               <Input id="name" placeholder="আপনার পূর্ণ নাম" value={form.name} onChange={(e) => updateForm("name", e.target.value)} className="bg-card" />
             </div>
 
@@ -332,7 +332,7 @@ export function ContactForm() {
               <Input id="facebook" placeholder="ফেসবুক প্রোফাইল লিংক বা ইউজারনেম" value={form.facebook} onChange={(e) => updateForm("facebook", e.target.value)} className="bg-card" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> ইমেইল</Label>
+              <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-heirloom-gold-deep" /> ইমেইল</Label>
               <Input id="email" type="email" placeholder="email@example.com" value={form.email} onChange={(e) => updateForm("email", e.target.value)} className="bg-card" />
             </div>
             <Button onClick={() => { if (!form.name.trim() || !phones[0]?.number.trim()) { toast.error("নাম এবং ফোন নম্বর আবশ্যক"); return; } setStep(2); }} className="w-full" variant="heirloom" size="lg">পরবর্তী ধাপ →</Button>
@@ -341,7 +341,7 @@ export function ContactForm() {
 
         {step === 2 && (
           <motion.div key="step2" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-5">
-            <p className="text-center text-xs italic text-[hsl(var(--heirloom-ink-mute))]">এই ধাপের সব তথ্য ঐচ্ছিক — যতটুকু দরকার ততটুকুই দিন।</p>
+            <p className="text-center text-xs italic text-heirloom-ink-mute">এই ধাপের সব তথ্য ঐচ্ছিক — যতটুকু দরকার ততটুকুই দিন।</p>
 
             <div className="space-y-2">
               <Label className="flex items-center gap-2">সম্পর্ক/ক্যাটাগরি</Label>
@@ -357,7 +357,7 @@ export function ContactForm() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="address" className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> ঠিকানা</Label>
+              <Label htmlFor="address" className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-heirloom-gold-deep" /> ঠিকানা</Label>
               <Input id="address" placeholder="আপনার ঠিকানা" value={form.address} onChange={(e) => updateForm("address", e.target.value)} className="bg-card" />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -369,7 +369,7 @@ export function ContactForm() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="flex items-center gap-2"><Calendar className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> জন্মদিন</Label>
+                <Label className="flex items-center gap-2"><Calendar className="h-3.5 w-3.5 text-heirloom-gold-deep" /> জন্মদিন</Label>
                 <Input type="date" value={form.birthday} onChange={(e) => updateForm("birthday", e.target.value)} className="bg-card" />
               </div>
             </div>
@@ -386,12 +386,12 @@ export function ContactForm() {
 
         {step === 3 && (
           <motion.div key="step3" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-5">
-            <p className="text-center text-xs italic text-[hsl(var(--heirloom-ink-mute))]">
+            <p className="text-center text-xs italic text-heirloom-ink-mute">
               ভবিষ্যতে নিজে তথ্য এডিট করতে ছোট কিন্তু মনে রাখার মতো কোড দিন — ডাকনাম, বিশেষ শব্দ বা সংখ্যা+অক্ষরের মিশ্রণ।
             </p>
 
             <div className="space-y-2">
-              <Label htmlFor="secretCode" className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]" /> সিক্রেট কোড</Label>
+              <Label htmlFor="secretCode" className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-heirloom-gold-deep" /> সিক্রেট কোড</Label>
               <Input id="secretCode" placeholder="আপনার গোপন কোড (যেমন: জন্মতারিখ, নিকনেম)" value={form.secretCode} onChange={(e) => updateForm("secretCode", e.target.value)} className="bg-card" />
             </div>
             <AnimatePresence>

@@ -11,7 +11,7 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-app flex-col bg-[hsl(var(--heirloom-bg))]">
+    <div className="flex min-h-app flex-col bg-heirloom-bg">
       <Header />
 
       <main id="main-content" className="relative flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-10">
@@ -31,17 +31,17 @@ const NotFound = () => {
 
             <div className="relative">
               <div className="flex flex-col items-center text-center">
-                <p className="mt-8 font-display text-6xl leading-none tracking-tight text-[hsl(var(--heirloom-gold-deep))] sm:mt-10 sm:text-7xl md:text-8xl">
+                <p className="mt-8 font-display text-6xl leading-none tracking-tight text-heirloom-gold-deep sm:mt-10 sm:text-7xl md:text-8xl">
                   404
                 </p>
 
-                <div aria-hidden className="mt-6 h-px w-28 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
+                <div aria-hidden className="mt-6 h-px w-28 bg-gradient-to-r from-transparent via-heirloom-gold to-transparent" />
 
-                <h1 className="mt-6 font-display text-2xl leading-[1.15] tracking-tight text-[hsl(var(--heirloom-ink))] sm:text-3xl md:text-4xl">
+                <h1 className="mt-6 font-display text-2xl leading-[1.15] tracking-tight text-heirloom-ink sm:text-3xl md:text-4xl">
                   পাতাটি খুঁজে পাওয়া যায়নি
                 </h1>
 
-                <p className="mt-5 max-w-md text-[15px] leading-[1.6] text-[hsl(var(--heirloom-ink-soft))] sm:text-base md:max-w-lg md:text-[17px]">
+                <p className="mt-5 max-w-md text-[15px] leading-[1.6] text-heirloom-ink-soft sm:text-base md:max-w-lg md:text-[17px]">
                   আপনি যে ঠিকানাটি খুঁজছেন সেটি হয়তো সরিয়ে ফেলা হয়েছে অথবা কখনো ছিল না।
                 </p>
               </div>

@@ -82,7 +82,7 @@ export default function OAuthConsent() {
 
   // Shared heirloom paper shell
   const Shell = ({ children }: { children: React.ReactNode }) => (
-    <div className="flex min-h-app flex-col bg-[hsl(var(--heirloom-bg))]">
+    <div className="flex min-h-app flex-col bg-heirloom-bg">
       <main id="main-content" className="relative flex flex-1 items-center justify-center px-4 py-6 sm:px-6 sm:py-12">
         <div className="mx-auto w-full max-w-lg">
           <motion.article
@@ -110,11 +110,11 @@ export default function OAuthConsent() {
           <div aria-hidden className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-destructive/30 bg-destructive/10">
             <AlertTriangle className="h-5 w-5 text-destructive" />
           </div>
-          <h1 className="mt-4 font-display text-2xl leading-tight text-[hsl(var(--heirloom-ink))] sm:text-3xl">
+          <h1 className="mt-4 font-display text-2xl leading-tight text-heirloom-ink sm:text-3xl">
             অনুমোদন সম্পন্ন হয়নি
           </h1>
-          <div aria-hidden className="mx-auto mt-4 h-px w-24 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
-          <p className="mt-4 text-[14px] leading-[1.7] text-[hsl(var(--heirloom-ink-soft))] sm:text-[15px]">
+          <div aria-hidden className="mx-auto mt-4 h-px w-24 bg-gradient-to-r from-transparent via-heirloom-gold to-transparent" />
+          <p className="mt-4 text-[14px] leading-[1.7] text-heirloom-ink-soft sm:text-[15px]">
             {error}
           </p>
         </div>
@@ -126,11 +126,11 @@ export default function OAuthConsent() {
     return (
       <Shell>
         <div className="space-y-3 py-6" aria-busy="true" aria-label="অনুরোধ পড়া হচ্ছে">
-          <div className="h-4 w-2/3 mx-auto rounded bg-[hsl(var(--heirloom-line))] animate-pulse" />
-          <div className="h-3 w-1/2 mx-auto rounded bg-[hsl(var(--heirloom-line))] animate-pulse" />
-          <div className="h-3 w-5/6 mx-auto rounded bg-[hsl(var(--heirloom-line))] animate-pulse" />
-          <div className="h-11 w-full max-w-[380px] mx-auto rounded-sm bg-[hsl(var(--heirloom-line))] animate-pulse mt-6" />
-          <div className="h-11 w-full max-w-[380px] mx-auto rounded-sm bg-[hsl(var(--heirloom-line))] animate-pulse" />
+          <div className="h-4 w-2/3 mx-auto rounded bg-heirloom-line animate-pulse" />
+          <div className="h-3 w-1/2 mx-auto rounded bg-heirloom-line animate-pulse" />
+          <div className="h-3 w-5/6 mx-auto rounded bg-heirloom-line animate-pulse" />
+          <div className="h-11 w-full max-w-[380px] mx-auto rounded-sm bg-heirloom-line animate-pulse mt-6" />
+          <div className="h-11 w-full max-w-[380px] mx-auto rounded-sm bg-heirloom-line animate-pulse" />
         </div>
       </Shell>
     );
@@ -147,35 +147,35 @@ export default function OAuthConsent() {
   return (
     <Shell>
       <div className="text-center">
-        <div aria-hidden className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.5)] bg-[hsl(var(--heirloom-gold)/0.08)]">
-          <ShieldCheck className="h-5 w-5 text-[hsl(var(--heirloom-gold-deep))]" />
+        <div aria-hidden className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-heirloom-gold/[0.5] bg-heirloom-gold/[0.08]">
+          <ShieldCheck className="h-5 w-5 text-heirloom-gold-deep" />
         </div>
-        <h1 className="mt-4 font-display text-2xl leading-tight text-[hsl(var(--heirloom-ink))] sm:text-3xl">
+        <h1 className="mt-4 font-display text-2xl leading-tight text-heirloom-ink sm:text-3xl">
           অনুমতি চাইছে
         </h1>
-        <div aria-hidden className="mx-auto mt-4 h-px w-24 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
-        <p className="mt-4 text-[14px] leading-[1.7] text-[hsl(var(--heirloom-ink-soft))] sm:text-[15px]">
-          <span className="font-medium text-[hsl(var(--heirloom-ink))]">{clientName}</span>{" "}
+        <div aria-hidden className="mx-auto mt-4 h-px w-24 bg-gradient-to-r from-transparent via-heirloom-gold to-transparent" />
+        <p className="mt-4 text-[14px] leading-[1.7] text-heirloom-ink-soft sm:text-[15px]">
+          <span className="font-medium text-heirloom-ink">{clientName}</span>{" "}
           আপনার আপনজন অ্যাকাউন্টের সাথে যুক্ত হতে চাইছে
         </p>
       </div>
 
-      <div className="mt-7 rounded-sm border border-[hsl(var(--heirloom-gold)/0.3)] bg-[hsl(var(--heirloom-gold)/0.05)] p-4 sm:p-5">
-        <p className="text-xs uppercase tracking-wider text-[hsl(var(--heirloom-ink-soft))]">
+      <div className="mt-7 rounded-sm border border-heirloom-gold/[0.3] bg-heirloom-gold/[0.05] p-4 sm:p-5">
+        <p className="text-xs uppercase tracking-wider text-heirloom-ink-soft">
           অনুমতি দিলে
         </p>
         <ul className="mt-3 space-y-2.5">
           {permissions.map((p) => (
-            <li key={p} className="flex items-start gap-2.5 text-[14px] leading-[1.6] text-[hsl(var(--heirloom-ink))]">
-              <Check className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--heirloom-gold-deep))]" />
+            <li key={p} className="flex items-start gap-2.5 text-[14px] leading-[1.6] text-heirloom-ink">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-heirloom-gold-deep" />
               <span>{p}</span>
             </li>
           ))}
         </ul>
       </div>
 
-      <p className="mt-5 flex items-start gap-1.5 text-xs leading-relaxed text-[hsl(var(--heirloom-ink-soft))]">
-        <Dot className="-ml-1 h-4 w-4 shrink-0 text-[hsl(var(--heirloom-gold-deep))]" />
+      <p className="mt-5 flex items-start gap-1.5 text-xs leading-relaxed text-heirloom-ink-soft">
+        <Dot className="-ml-1 h-4 w-4 shrink-0 text-heirloom-gold-deep" />
         অনুমোদন যেকোনো সময় প্রত্যাহার করা যাবে। আপনার অ্যাডমিন অনুমতির বাইরে কোনো তথ্য ভাগ হবে না।
       </p>
 

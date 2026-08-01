@@ -21,7 +21,7 @@ const Index = () => {
   const displayName: string | null = me?.contact?.name ?? chat?.name ?? null;
 
   return (
-    <div className="flex min-h-app flex-col bg-[hsl(var(--heirloom-bg))]">
+    <div className="flex min-h-app flex-col bg-heirloom-bg">
       <Header />
 
       <main id="main-content" className="relative flex flex-1 items-center justify-center px-4 py-6 sm:px-6 sm:py-12 lg:py-10">
@@ -43,16 +43,16 @@ const Index = () => {
               {hasMe ? (
                 <>
                   {/* Verified: personal welcome */}
-                  <p className="mt-10 text-xs uppercase tracking-[0.28em] text-[hsl(var(--heirloom-ink-mute))] sm:mt-8">
+                  <p className="mt-10 text-xs uppercase tracking-[0.28em] text-heirloom-ink-mute sm:mt-8">
                     {getGreeting()}
                   </p>
-                  <h1 className="mt-3 font-display text-3xl leading-[1.15] tracking-tight text-[hsl(var(--heirloom-ink))] sm:text-5xl">
+                  <h1 className="mt-3 font-display text-3xl leading-[1.15] tracking-tight text-heirloom-ink sm:text-5xl">
                     {displayName ? displayName : "আপনজন"}
                   </h1>
 
-                  <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
+                  <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-heirloom-gold to-transparent" />
 
-                  <p className="mt-5 max-w-md text-[15px] leading-[1.7] text-[hsl(var(--heirloom-ink-soft))] sm:text-base md:max-w-lg md:text-[17px]">
+                  <p className="mt-5 max-w-md text-[15px] leading-[1.7] text-heirloom-ink-soft sm:text-base md:max-w-lg md:text-[17px]">
                     আপনি এখন এই ডিভাইসে ভেরিফাইড। ইচ্ছে হলে নিজের তথ্য দেখুন, দরকারে এডিট করুন, অথবা এডমিনকে সরাসরি একটা মেসেজ পাঠান।
                   </p>
 
@@ -94,7 +94,7 @@ const Index = () => {
                           </svg>
                           <span
                             aria-hidden
-                            className="absolute -bottom-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-[hsl(var(--heirloom-gold))] ring-2 ring-[hsl(var(--heirloom-bg))]"
+                            className="absolute -bottom-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-heirloom-gold ring-2 ring-heirloom-bg"
                           />
                         </span>
 
@@ -107,13 +107,13 @@ const Index = () => {
               ) : (
                 <>
                   {/* Guest: invitation */}
-                  <h1 className="mt-10 font-display text-4xl leading-[1.1] tracking-tight text-[hsl(var(--heirloom-ink))] sm:mt-8 sm:text-5xl">
+                  <h1 className="mt-10 font-display text-4xl leading-[1.1] tracking-tight text-heirloom-ink sm:mt-8 sm:text-5xl">
                     আপনজন
                   </h1>
 
-                  <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
+                  <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-heirloom-gold to-transparent" />
 
-                  <p className="mt-5 max-w-md text-[15px] leading-[1.7] text-[hsl(var(--heirloom-ink-soft))] sm:text-base md:max-w-lg md:text-[17px] lg:text-[18px]">
+                  <p className="mt-5 max-w-md text-[15px] leading-[1.7] text-heirloom-ink-soft sm:text-base md:max-w-lg md:text-[17px] lg:text-[18px]">
                     বন্ধু, বেস্ট ফ্রেন্ড কিংবা ভালোবাসার মানুষ — আপনারা আমার জীবনের সবচেয়ে দামী অংশ। মোবাইল হারালে যেন আপনাদের হারিয়ে না ফেলি, তাই একটু কষ্ট করে নাম-নম্বরটা এখানে রেখে দেবেন? 🤍
                   </p>
 
@@ -139,8 +139,8 @@ const Index = () => {
               )}
 
               <footer className="mt-10 flex flex-col items-center">
-                <div aria-hidden className="h-px w-16 bg-[hsl(var(--heirloom-line))]" />
-                <p className="mt-6 font-display text-base italic text-[hsl(var(--heirloom-ink-soft))] sm:text-lg">
+                <div aria-hidden className="h-px w-16 bg-heirloom-line" />
+                <p className="mt-6 font-display text-base italic text-heirloom-ink-soft sm:text-lg">
                   ইতি, আপনারই একজন আপনজন
                 </p>
               </footer>

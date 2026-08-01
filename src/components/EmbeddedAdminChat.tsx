@@ -862,7 +862,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
               onClick={() => handleSelectUser(u)}
               className={`w-full flex items-center gap-3 rounded-xl p-3 text-left border transition-colors ${
                 isActive
-                  ? "bg-[hsl(var(--heirloom-cream)/0.6)] border-[hsl(var(--heirloom-gold)/0.5)]"
+                  ? "bg-heirloom-cream/[0.6] border-heirloom-gold/[0.5]"
                   : "border-transparent hover:bg-card/80 hover:border-border/50"
               }`}
             >
@@ -885,7 +885,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
                 </div>
               </div>
               {unreadMap[u.id] && (
-                <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-[10px] font-bold px-1.5">
+                <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full hero-gradient text-primary-foreground text-micro font-bold px-1.5">
                   {unreadMap[u.id]}
                 </div>
               )}
@@ -899,7 +899,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
   return (
     <div
       ref={shellRef}
-      className={`flex flex-col min-h-0 lg:grid lg:grid-cols-[320px_1fr] lg:gap-4 ${mobileThreadMode ? "fixed inset-x-0 z-[70] bg-[hsl(var(--heirloom-bg))]" : ""}`}
+      className={`flex flex-col min-h-0 lg:grid lg:grid-cols-[320px_1fr] lg:gap-4 ${mobileThreadMode ? "fixed inset-x-0 z-[70] bg-heirloom-bg" : ""}`}
       style={{
         height: shellHeight,
         minHeight: mobileThreadMode ? "0px" : "320px",
@@ -907,10 +907,10 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
       }}
     >
       {/* Desktop-only persistent sidebar */}
-      <aside className="hidden lg:flex lg:flex-col lg:min-h-0 lg:border-r lg:border-[hsl(var(--heirloom-line))] lg:pr-3 lg:overflow-y-auto no-scrollbar">
-        <div className="sticky top-0 z-10 bg-[hsl(var(--heirloom-bg))] px-2 pt-2 pb-3 border-b border-[hsl(var(--heirloom-line))]">
-          <div className="text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--heirloom-ink-soft))]">চ্যাট</div>
-          <div className="text-[13px] text-[hsl(var(--heirloom-ink))] mt-0.5">{chatUsers.length} জন কথোপকথন</div>
+      <aside className="hidden lg:flex lg:flex-col lg:min-h-0 lg:border-r lg:border-heirloom-line lg:pr-3 lg:overflow-y-auto no-scrollbar">
+        <div className="sticky top-0 z-10 bg-heirloom-bg px-2 pt-2 pb-3 border-b border-heirloom-line">
+          <div className="text-[11px] uppercase tracking-[0.15em] text-heirloom-ink-soft">চ্যাট</div>
+          <div className="text-[13px] text-heirloom-ink mt-0.5">{chatUsers.length} জন কথোপকথন</div>
         </div>
         {renderUsersListContent()}
       </aside>
@@ -921,11 +921,11 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
           <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 overflow-y-auto no-scrollbar lg:flex lg:items-center lg:justify-center">
             <div className="lg:hidden">{renderUsersListContent()}</div>
             <div className="hidden lg:flex lg:flex-col lg:items-center lg:text-center lg:gap-3 lg:max-w-sm lg:px-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.4)] bg-[hsl(var(--heirloom-gold)/0.06)]">
-                <MessageCircle className="h-7 w-7 text-[hsl(var(--heirloom-gold-deep))]" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full border border-heirloom-gold/[0.4] bg-heirloom-gold/[0.06]">
+                <MessageCircle className="h-7 w-7 text-heirloom-gold-deep" />
               </div>
-              <div className="font-display text-xl text-[hsl(var(--heirloom-ink))]">কথোপকথন বেছে নিন</div>
-              <p className="text-sm text-[hsl(var(--heirloom-ink-soft))] leading-relaxed">
+              <div className="font-display text-xl text-heirloom-ink">কথোপকথন বেছে নিন</div>
+              <p className="text-sm text-heirloom-ink-soft leading-relaxed">
                 বাম পাশ থেকে যেকোনো ইউজার সিলেক্ট করে চ্যাট শুরু করুন। রিয়েল-টাইম মেসেজ, অনলাইন স্ট্যাটাস ও আনরিড কাউন্ট এখানেই দেখা যাবে।
               </p>
             </div>
@@ -933,7 +933,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
         ) : (
           <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
             {/* Thread Header */}
-            <div className="sticky top-0 z-50 -mx-1 flex items-center gap-2 px-3 py-2.5 border-b border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-bg))] pt-[max(0.625rem,env(safe-area-inset-top))] shadow-[0_8px_18px_-18px_hsl(var(--heirloom-ink)/0.35)]">
+            <div className="sticky top-0 z-50 -mx-1 flex items-center gap-2 px-3 py-2.5 border-b border-heirloom-line bg-heirloom-bg pt-[max(0.625rem,env(safe-area-inset-top))] shadow-heirloom-sticky">
               <button
                 onClick={() => { setSelectedUser(null); selectedUserRef.current = null; setSearchOpen(false); setSearchQuery(""); }}
                 className="lg:hidden flex items-center justify-center h-9 w-9 -ml-1 rounded-full text-foreground hover:bg-primary/10 hover:text-primary transition-colors shrink-0"
@@ -954,7 +954,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
                     <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">{selectedUser.name.charAt(0)}</span>
                   )}
                   {presenceMap[selectedUser.id]?.isOnline && (
-                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-[hsl(var(--heirloom-paper))]" />
+                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-heirloom-paper" />
                   )}
                 </button>
                 <div className="min-w-0 leading-tight flex flex-col items-start">
@@ -1008,7 +1008,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
 
             {/* Search bar */}
             {searchOpen && (
-              <div className="relative z-40 isolate shrink-0 -mx-1 bg-[hsl(var(--heirloom-bg))] px-2 pt-2 pb-2">
+              <div className="relative z-40 isolate shrink-0 -mx-1 bg-heirloom-bg px-2 pt-2 pb-2">
                 <div className="group relative z-10 flex items-center">
                   <Search className="pointer-events-none absolute left-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -1016,7 +1016,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     autoFocus
-                    className="h-10 rounded-full border-border/60 bg-[hsl(var(--heirloom-paper))] pl-10 pr-10 text-sm shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-primary/40"
+                    className="h-10 rounded-full border-border/60 bg-heirloom-paper pl-10 pr-10 text-sm shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-primary/40"
                   />
                   <button
                     type="button"
@@ -1028,7 +1028,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
                   </button>
                 </div>
                 {searchQuery && (
-                  <p className="text-[10px] text-muted-foreground mt-1 px-2">{filteredMessages.length} টি মেসেজ পাওয়া গেছে</p>
+                  <p className="text-micro text-muted-foreground mt-1 px-2">{filteredMessages.length} টি মেসেজ পাওয়া গেছে</p>
                 )}
               </div>
             )}
@@ -1073,7 +1073,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
                     <div key={msg.id}>
                       {showDateHeader && (
                         <div className="flex justify-center my-3">
-                          <span className="text-[10px] text-muted-foreground bg-muted/60 px-3 py-0.5 rounded-full">{getDateLabel(msg.created_at)}</span>
+                          <span className="text-micro text-muted-foreground bg-muted/60 px-3 py-0.5 rounded-full">{getDateLabel(msg.created_at)}</span>
                         </div>
                       )}
                       <MessageBubble

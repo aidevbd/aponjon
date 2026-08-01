@@ -119,7 +119,7 @@ export function Header() {
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.4, opacity: 0 }}
                       transition={{ type: "spring", stiffness: 380, damping: 18 }}
-                      className="absolute top-1 right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[hsl(var(--heirloom-gold))] px-1 text-[10px] font-semibold text-[hsl(var(--heirloom-ink))] shadow"
+                      className="absolute top-1 right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-heirloom-gold px-1 text-micro font-semibold text-heirloom-ink shadow"
                     >
                       {totalUnread > 99 ? "99+" : totalUnread}
                     </motion.span>
