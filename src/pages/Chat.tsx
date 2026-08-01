@@ -63,20 +63,24 @@ const Chat = () => {
   }, []);
 
   const [session, setSession] = useState<ChatSession | null>(() => getChatSession());
-  const [contacts, setContacts] = useState<ChatContact[]>([]);
-  const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
   const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
-  const [contactPreviews, setContactPreviews] = useState<Record<string, ContactPreview>>({});
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const messageListRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const autoSelectedRef = useRef(false);
 
+  const onSessionExpired = useCallback(() => setSession(null), []);
+  const {
+    contacts, unreadMap, contactPreviews,
+    loadContacts, loadUnread, clearUnreadFor, bumpUnreadFor, setPreviewFor, resetContacts,
+  } = useChatContacts({ session, onSessionExpired });
+
   const { isOffline, queuedCount, setQueuedCount } = useChatConnectivity(selectedContact?.id);
   const presenceMap = useChatPresence(!!session, contacts.map(c => c.id));
+
   const { isOtherTyping, emitTyping } = useChatTyping(session?.contactId, selectedContact?.id);
   const { searchOpen, searchQuery, setSearchQuery, toggleSearch, closeSearch, filteredMessages } =
     useChatSearch(messages);
