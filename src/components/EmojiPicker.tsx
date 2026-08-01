@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Smile } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { swallow } from "@/lib/devLog";
 
 const EMOJI_CATEGORIES: { label: string; emojis: string[] }[] = [
   { label: "😀", emojis: ["😀","😃","😄","😁","😆","😅","🤣","😂","🙂","😊","😇","🥰","😍","🤩","😘","😗","😚","😋","😛","😜","🤪","😝","🤑","🤗","🤭","🫢","🤫","🤔","🫡","🤐","🤨","😐","😑","😶","🫥","😏","😒","🙄","😬","🤥","😌","😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🥵","🥶","🥴","😵","🤯","🤠","🥳","🥸","😎","🤓","🧐","😕","🫤","😟","🙁","😮","😯","😲","😳","🥺","🥹","😦","😧","😨","😰","😥","😢","😭","😱","😖","😣","😞","😓","😩","😫","🥱","😤","😡","😠","🤬","😈","👿","💀","☠️","💩","🤡","👹","👺","👻","👽","👾","🤖"] },
@@ -47,7 +48,7 @@ export function EmojiPicker({ onSelect, inputRef }: EmojiPickerProps) {
         try {
           const len = el.value.length;
           el.setSelectionRange(len, len);
-        } catch {}
+        } catch (e) { swallow("EmojiPicker.restoreCaret", e); }
       });
     }
   };

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getChatSession, CHAT_SESSION_CHANGED_EVENT } from "@/lib/chatSession";
+import { swallow } from "@/lib/devLog";
 
 /**
  * Sends a presence heartbeat every 30s whenever a chat session exists,
@@ -31,7 +32,7 @@ export function useGlobalPresenceHeartbeat() {
           p_token: session.token,
           p_contact_id: session.contactId,
         } as any);
-      } catch {}
+      } catch (e) { swallow("useGlobalPresenceHeartbeat.update_presence", e); }
     };
     beat();
     const interval = setInterval(beat, 30000);

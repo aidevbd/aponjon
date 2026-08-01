@@ -1,3 +1,5 @@
+import { swallow } from "@/lib/devLog";
+
 // Per-device notification preferences for new chat messages.
 // Persisted in localStorage; safe defaults if unset.
 
@@ -29,7 +31,7 @@ export function setNotificationPrefs(prefs: NotificationPrefs) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
     window.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: prefs }));
-  } catch {}
+  } catch (e) { swallow("notificationPrefs.setNotificationPrefs", e); }
 }
 
 export function subscribeNotificationPrefs(handler: (prefs: NotificationPrefs) => void) {
@@ -69,7 +71,7 @@ function ensureAudioUnlockBinding() {
       src.start(0);
       audioUnlocked = ctx.state === "running";
       if (audioUnlocked) removeListeners();
-    } catch {}
+    } catch (e) { swallow("notificationPrefs.unlockAudio", e); }
   };
   const opts = { capture: true, passive: true } as AddEventListenerOptions;
   const events = ["pointerdown", "touchstart", "keydown", "click", "mousedown"];
@@ -100,7 +102,7 @@ function ensureVibrationUnlockBinding() {
     vibrationUnlocked = true;
     try {
       navigator.vibrate(0);
-    } catch {}
+    } catch (e) { swallow("notificationPrefs.unlockVibration", e); }
     removeListeners();
   };
   const opts = { capture: true, passive: true } as AddEventListenerOptions;
@@ -143,7 +145,7 @@ export async function playChime() {
   if (!ctx) return;
   try {
     if (ctx.state === "suspended") await ctx.resume();
-  } catch {}
+  } catch (e) { swallow("notificationPrefs.playChime.resume", e); }
   if (ctx.state !== "running") return;
   const now = ctx.currentTime + 0.02;
 

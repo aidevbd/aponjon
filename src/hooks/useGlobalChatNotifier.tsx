@@ -4,6 +4,7 @@ import { notifyNewMessage } from "@/lib/notificationPrefs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { LetterArrivedToast } from "@/components/chat/LetterArrivedToast";
+import { swallow } from "@/lib/devLog";
 
 // Polling is now a slow fallback; realtime broadcast on user:<id> is the
 // primary trigger. 30s reconciles unread counts without draining the API.
@@ -16,7 +17,7 @@ function loadSeen(): Record<string, number> {
   catch { return {}; }
 }
 function saveSeen(map: Record<string, number>) {
-  try { localStorage.setItem(SEEN_KEY, JSON.stringify(map)); } catch {}
+  try { localStorage.setItem(SEEN_KEY, JSON.stringify(map)); } catch (e) { swallow("useGlobalChatNotifier.saveSeen", e); }
 }
 
 function showLetterToast(count: number) {
@@ -57,7 +58,7 @@ function showLetterToast(count: number) {
         silent: true,
       });
       n.onclick = () => { window.focus(); window.location.href = "/chat"; };
-    } catch {}
+    } catch (e) { swallow("useGlobalChatNotifier.browserNotification", e); }
   }
 }
 
@@ -96,7 +97,7 @@ export function useGlobalChatNotifier() {
     }
 
     if (typeof Notification !== "undefined" && Notification.permission === "default") {
-      try { Notification.requestPermission().catch(() => {}); } catch {}
+      try { Notification.requestPermission().catch((e) => swallow("useGlobalChatNotifier.requestPermission", e)); } catch (e) { swallow("useGlobalChatNotifier.requestPermission", e); }
     }
 
     let stopped = false;

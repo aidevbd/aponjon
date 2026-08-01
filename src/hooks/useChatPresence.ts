@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { swallow } from "@/lib/devLog";
 
 export type PresenceMap = Record<string, { is_online: boolean; last_seen_at: string }>;
 
@@ -26,7 +27,7 @@ export function useChatPresence(sessionActive: boolean, contactIds: string[]) {
           });
           setPresenceMap(map);
         }
-      } catch {}
+      } catch (e) { swallow("useChatPresence.fetchPresence", e); }
     };
     fetchPresence();
     const interval = setInterval(fetchPresence, 20000);
