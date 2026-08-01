@@ -180,7 +180,7 @@ export function ContactFilters({
           {showSuggest && (
             <div
               role="listbox"
-              className="absolute left-0 right-0 top-full z-40 mt-1.5 overflow-hidden rounded-md border border-heirloom-gold/[0.35] bg-heirloom-paper shadow-[0_12px_30px_-12px_hsl(var(--heirloom-ink)/0.3)] animate-in fade-in slide-in-from-top-1 duration-150"
+              className="absolute left-0 right-0 top-full z-40 mt-1.5 overflow-hidden rounded-md border border-heirloom-gold/[0.35] bg-heirloom-paper shadow-heirloom-pop animate-in fade-in slide-in-from-top-1 duration-150"
             >
               <ul className="max-h-[320px] overflow-y-auto no-scrollbar py-1">
                 {suggestions.map((s, i) => {
@@ -305,7 +305,7 @@ function FilterModal({
         onClick={onClose}
         className="absolute inset-0 bg-heirloom-ink/[0.35] backdrop-blur-sm"
       />
-      <div className="relative w-full sm:max-w-md sm:mx-4 max-h-[85vh] flex flex-col rounded-t-2xl sm:rounded-lg border border-heirloom-gold/[0.35] bg-heirloom-paper shadow-[0_-12px_40px_-12px_hsl(var(--heirloom-ink)/0.3)] sm:shadow-[0_20px_50px_-15px_hsl(var(--heirloom-ink)/0.3)] animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
+      <div className="relative w-full sm:max-w-md sm:mx-4 max-h-[85vh] flex flex-col rounded-t-2xl sm:rounded-lg border border-heirloom-gold/[0.35] bg-heirloom-paper shadow-heirloom-sheet sm:shadow-heirloom-dialog animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
         {/* Handle (mobile) */}
         <div className="flex justify-center pt-2 sm:hidden">
           <div className="h-1 w-10 rounded-full bg-heirloom-line" />

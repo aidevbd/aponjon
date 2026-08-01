@@ -19,7 +19,7 @@ export function LetterArrivedToast({ toastId, count, onOpen }: Props) {
   return (
     <div
       role="status"
-      className="pointer-events-auto flex w-[340px] max-w-[92vw] items-center gap-3 rounded-full border border-heirloom-gold/[0.4] bg-[hsl(var(--card))]/95 py-2 pl-2 pr-2.5 shadow-[0_6px_20px_-10px_hsl(var(--heirloom-ink)/0.35)] backdrop-blur-sm animate-fade-in"
+      className="pointer-events-auto flex w-[340px] max-w-[92vw] items-center gap-3 rounded-full border border-heirloom-gold/[0.4] bg-card/95 py-2 pl-2 pr-2.5 shadow-heirloom-toast backdrop-blur-sm animate-fade-in"
     >
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-heirloom-gold/[0.15] ring-1 ring-heirloom-gold/[0.35]">
         <Mail className="h-4 w-4 text-heirloom-gold" strokeWidth={1.8} />

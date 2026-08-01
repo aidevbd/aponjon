@@ -295,7 +295,7 @@ export function ContactForm() {
                 aria-label={`ধাপ ${s}`}
                 className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all ${
                   s === step
-                    ? "bg-heirloom-gold-deep text-heirloom-bg shadow-[0_2px_8px_hsl(var(--heirloom-gold-deep)/0.35)]"
+                    ? "bg-heirloom-gold-deep text-heirloom-bg shadow-heirloom-chip"
                     : s < step
                     ? "bg-heirloom-gold/25 text-heirloom-gold-deep"
                     : "bg-heirloom-line/40 text-heirloom-ink-mute"

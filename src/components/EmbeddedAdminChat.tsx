@@ -933,7 +933,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
         ) : (
           <motion.div key="thread" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
             {/* Thread Header */}
-            <div className="sticky top-0 z-50 -mx-1 flex items-center gap-2 px-3 py-2.5 border-b border-heirloom-line bg-heirloom-bg pt-[max(0.625rem,env(safe-area-inset-top))] shadow-[0_8px_18px_-18px_hsl(var(--heirloom-ink)/0.35)]">
+            <div className="sticky top-0 z-50 -mx-1 flex items-center gap-2 px-3 py-2.5 border-b border-heirloom-line bg-heirloom-bg pt-[max(0.625rem,env(safe-area-inset-top))] shadow-heirloom-sticky">
               <button
                 onClick={() => { setSelectedUser(null); selectedUserRef.current = null; setSearchOpen(false); setSearchQuery(""); }}
                 className="lg:hidden flex items-center justify-center h-9 w-9 -ml-1 rounded-full text-foreground hover:bg-primary/10 hover:text-primary transition-colors shrink-0"

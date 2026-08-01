@@ -200,7 +200,7 @@ export function MessageActionSheet({
   if (isMobile) {
     return createPortal(
       <div
-        className="fixed inset-0 z-[100] flex flex-col justify-end bg-black/40 animate-in fade-in-0 duration-150"
+        className="fixed inset-0 z-[100] flex flex-col justify-end bg-heirloom-ink/40 animate-in fade-in-0 duration-150"
         onClick={close}
       >
         <div

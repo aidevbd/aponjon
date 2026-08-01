@@ -397,7 +397,7 @@ const MyInfo = () => {
             {/* Active devices */}
 
 
-            <Collapsible open={sessionsOpen} onOpenChange={setSessionsOpen} className="mb-8 rounded-2xl border border-border/70 bg-card overflow-hidden shadow-[0_1px_0_hsl(var(--heirloom-gold)/0.1),0_8px_24px_-16px_hsl(var(--heirloom-gold)/0.25)]">
+            <Collapsible open={sessionsOpen} onOpenChange={setSessionsOpen} className="mb-8 rounded-2xl border border-border/70 bg-card overflow-hidden shadow-heirloom-card">
               <CollapsibleTrigger className="flex w-full items-center gap-3 p-4 text-left transition hover:bg-muted/40">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/15">
                   <Monitor className="h-4 w-4" />
@@ -428,7 +428,7 @@ const MyInfo = () => {
 
             <div className={`mb-8 rounded-2xl border border-border/70 overflow-hidden transition-all ${secretOpen
               ? "bg-destructive/[0.04] ring-1 ring-destructive/40 shadow-[0_8px_28px_-16px_hsl(var(--destructive)/0.35)]"
-              : "bg-card shadow-[0_1px_0_hsl(var(--heirloom-gold)/0.1),0_8px_24px_-16px_hsl(var(--heirloom-gold)/0.2)]"}`}>
+              : "bg-card shadow-heirloom-card"}`}>
 
               <div className="flex items-start justify-between gap-3 p-4">
                 <div className="flex items-start gap-3 min-w-0">
@@ -543,7 +543,7 @@ const MyInfo = () => {
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <button className="group w-full rounded-2xl border border-border/70 bg-card p-4 text-left transition hover:border-destructive/40 hover:bg-destructive/[0.03] shadow-[0_1px_0_hsl(var(--heirloom-gold)/0.08)]">
+                <button className="group w-full rounded-2xl border border-border/70 bg-card p-4 text-left transition hover:border-destructive/40 hover:bg-destructive/[0.03] shadow-heirloom-hairline">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-start gap-3 min-w-0">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground ring-1 ring-border transition group-hover:bg-destructive/10 group-hover:text-destructive group-hover:ring-destructive/25">

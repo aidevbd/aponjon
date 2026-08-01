@@ -194,7 +194,7 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
             <img
               src={value}
               alt="প্রোফাইল ফটো"
-              className="h-24 w-24 rounded-full object-cover border-2 border-heirloom-gold/50 shadow-[0_4px_12px_hsl(var(--heirloom-gold-deep)/0.15)]"
+              className="h-24 w-24 rounded-full object-cover border-2 border-heirloom-gold/50 shadow-heirloom-photo"
             />
             {isBusy && (
               <div className="absolute inset-0 flex items-center justify-center rounded-full bg-heirloom-ink/55 backdrop-blur-[1px]">
