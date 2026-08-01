@@ -27,6 +27,7 @@ import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 import { JumpToLatest } from "@/components/chat/JumpToLatest";
 import { useVisualViewportHeight } from "@/hooks/useVisualViewportHeight";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { swallow } from "@/lib/devLog";
 
 type ChatUser = { id: string; name: string; phone: string; photo_url: string | null; last_message_at: string | null };
 type Message = {
@@ -192,10 +193,10 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
     try {
       const raw = sessionStorage.getItem(DRAFTS_STORAGE_KEY);
       if (raw) draftsRef.current = JSON.parse(raw) || {};
-    } catch {}
+    } catch (e) { swallow("AdminChat.loadDrafts", e); }
   }, []);
   const persistDrafts = useCallback(() => {
-    try { sessionStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(draftsRef.current)); } catch {}
+    try { sessionStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(draftsRef.current)); } catch (e) { swallow("AdminChat.persistDrafts", e); }
   }, []);
 
 
@@ -242,7 +243,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
     if (!adminContactId) return;
     loadChatUsers();
     loadUnread();
-    const sendHeartbeat = async () => { try { await supabase.rpc("update_admin_presence"); } catch {} };
+    const sendHeartbeat = async () => { try { await supabase.rpc("update_admin_presence"); } catch (e) { swallow("AdminChat.update_admin_presence", e); } };
     sendHeartbeat();
     const heartbeat = setInterval(sendHeartbeat, 30000);
     return () => clearInterval(heartbeat);
@@ -260,7 +261,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
         const map: Record<string, { lastSeen: string; isOnline: boolean }> = {};
         (data as any[]).forEach((p) => { map[p.contact_id] = { lastSeen: p.last_seen_at, isOnline: p.is_online }; });
         setPresenceMap(map);
-      } catch {}
+      } catch (e) { swallow("AdminChat.fetchPresence", e); }
     };
     refresh();
     const poll = setInterval(refresh, 15000);
@@ -463,7 +464,7 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
       const map: Record<string, number> = {};
       (data || []).forEach((d: any) => { map[d.sender_id] = d.unread_count; });
       setUnreadMap(map);
-    } catch {}
+    } catch (e) { swallow("AdminChat.loadUnread", e); }
   };
 
   const loadMessages = useCallback(async (user: ChatUser) => {
@@ -475,8 +476,8 @@ export function EmbeddedAdminChat({ onUnreadChange, onActiveChatChange, fillHeig
       setMessages(reconcileMessages(signed));
       setUnreadMap(prev => { const n = { ...prev }; delete n[user.id]; return n; });
       void (async () => {
-        try { await supabase.rpc("mark_conversation_read_admin" as any, { p_other_id: user.id } as any); } catch {}
-        try { await supabase.rpc("mark_conversation_delivered_admin", { p_other_id: user.id } as any); } catch {}
+        try { await supabase.rpc("mark_conversation_read_admin" as any, { p_other_id: user.id } as any); } catch (e) { swallow("AdminChat.mark_conversation_read_admin", e); }
+        try { await supabase.rpc("mark_conversation_delivered_admin", { p_other_id: user.id } as any); } catch (e) { swallow("AdminChat.mark_conversation_delivered_admin", e); }
         loadUnread();
       })();
     } catch { toast.error("মেসেজ লোড করতে সমস্যা"); }
