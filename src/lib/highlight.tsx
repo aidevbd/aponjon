@@ -79,7 +79,7 @@ export function Highlight({
 
   const markClass =
     className ||
-    "bg-[hsl(var(--heirloom-gold)/0.28)] text-[hsl(var(--heirloom-ink))] rounded-[2px] px-0.5";
+    "bg-heirloom-gold/[0.28] text-heirloom-ink rounded-[2px] px-0.5";
 
   const nodes: React.ReactNode[] = [];
   let cursor = 0;

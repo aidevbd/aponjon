@@ -82,7 +82,7 @@ export function SessionsListSkeleton({ rows = 2 }: { rows?: number }) {
 export function HeirloomPageSkeleton() {
   return (
     <div
-      className="flex min-h-dvh flex-col bg-[hsl(var(--heirloom-bg))]"
+      className="flex min-h-dvh flex-col bg-heirloom-bg"
       aria-busy="true"
       aria-label="পাতাটি লোড হচ্ছে"
     >

@@ -29,16 +29,16 @@ export function DashboardHome({
     <div className="mx-auto w-full max-w-3xl">
       {/* Welcome header */}
       <div className="flex flex-col items-center text-center pt-4 sm:pt-8">
-        <h2 className="font-display text-3xl leading-[1.15] tracking-tight text-[hsl(var(--heirloom-ink))] sm:text-4xl">
+        <h2 className="font-display text-3xl leading-[1.15] tracking-tight text-heirloom-ink sm:text-4xl">
           আপনজন ড্যাশবোর্ড
         </h2>
 
-        <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
+        <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-heirloom-gold to-transparent" />
 
-        <p className="mt-5 max-w-md text-[15px] leading-[1.6] text-[hsl(var(--heirloom-ink-soft))] sm:text-base">
-          মোট <span className="font-medium text-[hsl(var(--heirloom-gold-deep))]">{stats.total}</span> জন কন্টাক্ট
-          {totalUnread > 0 && <> · <span className="font-medium text-[hsl(var(--heirloom-gold-deep))]">{totalUnread}</span> অপঠিত মেসেজ</>}
-          {upcomingBirthdays.length > 0 && <> · <span className="font-medium text-[hsl(var(--heirloom-gold-deep))]">{upcomingBirthdays.length}</span> আসন্ন জন্মদিন</>}
+        <p className="mt-5 max-w-md text-[15px] leading-[1.6] text-heirloom-ink-soft sm:text-base">
+          মোট <span className="font-medium text-heirloom-gold-deep">{stats.total}</span> জন কন্টাক্ট
+          {totalUnread > 0 && <> · <span className="font-medium text-heirloom-gold-deep">{totalUnread}</span> অপঠিত মেসেজ</>}
+          {upcomingBirthdays.length > 0 && <> · <span className="font-medium text-heirloom-gold-deep">{upcomingBirthdays.length}</span> আসন্ন জন্মদিন</>}
         </p>
       </div>
 
@@ -51,14 +51,14 @@ export function DashboardHome({
               <button
                 key={cat}
                 onClick={() => onCategoryClick(cat)}
-                className="group flex items-center gap-1.5 rounded-full border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.6)] px-3.5 py-1.5 transition-all duration-300 hover:border-[hsl(var(--heirloom-gold)/0.6)] hover:bg-[hsl(var(--heirloom-cream)/0.5)]"
+                className="group flex items-center gap-1.5 rounded-full border border-heirloom-line bg-heirloom-paper/[0.6] px-3.5 py-1.5 transition-all duration-300 hover:border-heirloom-gold/[0.6] hover:bg-heirloom-cream/[0.5]"
               >
                 <CategoryIcon
                   category={catInfo?.value}
-                  className="h-3.5 w-3.5 text-[hsl(var(--heirloom-gold-deep))]"
+                  className="h-3.5 w-3.5 text-heirloom-gold-deep"
                 />
-                <span className="text-[13px] text-[hsl(var(--heirloom-ink))]">{cat}</span>
-                <span className="text-[11px] text-[hsl(var(--heirloom-ink-soft))]">{count}</span>
+                <span className="text-[13px] text-heirloom-ink">{cat}</span>
+                <span className="text-[11px] text-heirloom-ink-soft">{count}</span>
               </button>
             );
           })}
@@ -68,19 +68,19 @@ export function DashboardHome({
       {/* Upcoming birthdays */}
       {upcomingBirthdays.length > 0 && (
         <div className="mt-10">
-          <div className="flex items-center justify-center gap-2 text-[hsl(var(--heirloom-ink-soft))]">
-            <Cake className="h-4 w-4 text-[hsl(var(--heirloom-gold-deep))]" />
+          <div className="flex items-center justify-center gap-2 text-heirloom-ink-soft">
+            <Cake className="h-4 w-4 text-heirloom-gold-deep" />
             <span className="text-[13px] tracking-wide uppercase">আসন্ন জন্মদিন</span>
           </div>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             {upcomingBirthdays.slice(0, 8).map(({ contact, daysUntil }) => (
               <div
                 key={contact.id}
-                className="flex items-center gap-2 rounded-full border border-[hsl(var(--heirloom-gold)/0.3)] bg-[hsl(var(--heirloom-cream)/0.4)] px-3 py-1.5"
+                className="flex items-center gap-2 rounded-full border border-heirloom-gold/[0.3] bg-heirloom-cream/[0.4] px-3 py-1.5"
               >
                 <span className="text-sm">{daysUntil === 0 ? "🎉" : "🎂"}</span>
-                <span className="text-[13px] text-[hsl(var(--heirloom-ink))]">{contact.name}</span>
-                <span className="text-[11px] text-[hsl(var(--heirloom-ink-soft))]">
+                <span className="text-[13px] text-heirloom-ink">{contact.name}</span>
+                <span className="text-[11px] text-heirloom-ink-soft">
                   {daysUntil === 0 ? "আজ" : `${daysUntil} দিন`}
                 </span>
               </div>
@@ -95,17 +95,17 @@ export function DashboardHome({
           <button
             key={label}
             onClick={onClick}
-            className="group relative flex items-center gap-3 rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.55)] px-4 py-3.5 text-left transition-all duration-300 hover:border-[hsl(var(--heirloom-gold)/0.6)] hover:bg-[hsl(var(--heirloom-cream)/0.5)]"
+            className="group relative flex items-center gap-3 rounded-sm border border-heirloom-line bg-heirloom-paper/[0.55] px-4 py-3.5 text-left transition-all duration-300 hover:border-heirloom-gold/[0.6] hover:bg-heirloom-cream/[0.5]"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.4)] bg-[hsl(var(--heirloom-gold)/0.08)]">
-              <Icon className="h-4 w-4 text-[hsl(var(--heirloom-gold-deep))]" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-heirloom-gold/[0.4] bg-heirloom-gold/[0.08]">
+              <Icon className="h-4 w-4 text-heirloom-gold-deep" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-[14px] text-[hsl(var(--heirloom-ink))]">{label}</div>
-              <div className="text-[12px] text-[hsl(var(--heirloom-ink-soft))]">{hint}</div>
+              <div className="text-[14px] text-heirloom-ink">{label}</div>
+              <div className="text-[12px] text-heirloom-ink-soft">{hint}</div>
             </div>
             {badge > 0 && (
-              <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[hsl(var(--heirloom-gold-deep))] px-1.5 text-[10px] font-medium text-[hsl(var(--heirloom-paper))]">
+              <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-heirloom-gold-deep px-1.5 text-micro font-medium text-heirloom-paper">
                 {badge}
               </span>
             )}

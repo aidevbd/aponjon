@@ -194,11 +194,11 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
             <img
               src={value}
               alt="প্রোফাইল ফটো"
-              className="h-24 w-24 rounded-full object-cover border-2 border-[hsl(var(--heirloom-gold))]/50 shadow-[0_4px_12px_hsl(var(--heirloom-gold-deep)/0.15)]"
+              className="h-24 w-24 rounded-full object-cover border-2 border-heirloom-gold/50 shadow-[0_4px_12px_hsl(var(--heirloom-gold-deep)/0.15)]"
             />
             {isBusy && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-[hsl(var(--heirloom-ink))]/55 backdrop-blur-[1px]">
-                <Loader2 className="h-6 w-6 animate-spin text-[hsl(var(--heirloom-bg))]" />
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-heirloom-ink/55 backdrop-blur-[1px]">
+                <Loader2 className="h-6 w-6 animate-spin text-heirloom-bg" />
               </div>
             )}
             {!disabled && !isBusy && (
@@ -206,7 +206,7 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
                 type="button"
                 onClick={() => setConfirmRemove(true)}
                 aria-label="ছবি সরান"
-                className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(var(--heirloom-ink))] text-[hsl(var(--heirloom-bg))] shadow-sm hover:opacity-90 transition-opacity"
+                className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-heirloom-ink text-heirloom-bg shadow-sm hover:opacity-90 transition-opacity"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -217,14 +217,14 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={isBusy || disabled}
-            className="flex h-24 w-24 flex-col items-center justify-center rounded-full border-2 border-dashed border-[hsl(var(--heirloom-gold))]/50 bg-[hsl(var(--heirloom-bg))] text-[hsl(var(--heirloom-gold-deep))] hover:bg-[hsl(var(--heirloom-gold))]/10 hover:border-[hsl(var(--heirloom-gold-deep))]/70 transition-colors disabled:opacity-60"
+            className="flex h-24 w-24 flex-col items-center justify-center rounded-full border-2 border-dashed border-heirloom-gold/50 bg-heirloom-bg text-heirloom-gold-deep hover:bg-heirloom-gold/10 hover:border-heirloom-gold-deep/70 transition-colors disabled:opacity-60"
           >
             {isBusy ? (
               <Loader2 className="h-6 w-6 animate-spin" />
             ) : (
               <>
                 <Camera className="h-6 w-6 mb-1" />
-                <span className="text-[10px] font-medium">ছবি দিন</span>
+                <span className="text-micro font-medium">ছবি দিন</span>
               </>
             )}
           </button>
@@ -240,13 +240,13 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
       />
 
       {isBusy && (
-        <p className="text-[11px] font-medium text-[hsl(var(--heirloom-gold-deep))]">
+        <p className="text-[11px] font-medium text-heirloom-gold-deep">
           {overlayLabel}
         </p>
       )}
 
       {!isBusy && !value && !disabled && (
-        <p className="text-[10px] text-[hsl(var(--heirloom-ink-mute))] text-center leading-tight">
+        <p className="text-micro text-heirloom-ink-mute text-center leading-tight">
           JPG, PNG, WebP · সর্বোচ্চ {MAX_SIZE_MB}MB
         </p>
       )}
@@ -256,11 +256,11 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="text-xs text-[hsl(var(--heirloom-gold-deep))] hover:underline"
+            className="text-xs text-heirloom-gold-deep hover:underline"
           >
             পরিবর্তন করুন
           </button>
-          <span className="text-[hsl(var(--heirloom-ink-mute))]/50">·</span>
+          <span className="text-heirloom-ink-mute/50">·</span>
           <button
             type="button"
             onClick={() => setConfirmRemove(true)}
@@ -279,7 +279,7 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
               ছবিটি টেনে সাজান — ঠিকভাবে ফিট হবে সব জায়গায়
             </DialogDescription>
           </DialogHeader>
-          <div className="relative w-full h-72 bg-[hsl(var(--heirloom-ink))]/90 rounded-md overflow-hidden">
+          <div className="relative w-full h-72 bg-heirloom-ink/90 rounded-md overflow-hidden">
             {cropSrc && (
               <Cropper
                 image={cropSrc}
@@ -294,14 +294,14 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
               />
             )}
             {isBusy && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[hsl(var(--heirloom-ink))]/60 backdrop-blur-[1px]">
-                <Loader2 className="h-6 w-6 animate-spin text-[hsl(var(--heirloom-bg))]" />
-                <span className="text-xs text-[hsl(var(--heirloom-bg))]">{overlayLabel}</span>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-heirloom-ink/60 backdrop-blur-[1px]">
+                <Loader2 className="h-6 w-6 animate-spin text-heirloom-bg" />
+                <span className="text-xs text-heirloom-bg">{overlayLabel}</span>
               </div>
             )}
           </div>
           <div className="flex items-center gap-3 px-1">
-            <ZoomIn className="h-4 w-4 text-[hsl(var(--heirloom-gold-deep))]" />
+            <ZoomIn className="h-4 w-4 text-heirloom-gold-deep" />
             <Slider
               value={[zoom]}
               min={1}

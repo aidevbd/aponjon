@@ -284,7 +284,7 @@ export function MessageBubble({
               </button>
             ))}
             {(msg.reactions?.length || 0) > 1 && (
-              <span className="text-[10px] text-muted-foreground ml-0.5">
+              <span className="text-micro text-muted-foreground ml-0.5">
                 {msg.reactions!.length}
               </span>
             )}
@@ -296,7 +296,7 @@ export function MessageBubble({
           <button
             onClick={(e) => { e.stopPropagation(); onShowEditHistory?.(msg); }}
             className={cn(
-              "text-[10px] mt-0.5 opacity-60 hover:underline",
+              "text-micro mt-0.5 opacity-60 hover:underline",
               isMine ? "mr-2" : "ml-2",
             )}
           >
@@ -317,7 +317,7 @@ export function MessageBubble({
           return (
             <button
               onClick={(e) => { e.stopPropagation(); onShowReceipts?.(msg); }}
-              className="mt-0.5 mr-2 flex items-center gap-1 text-[10px] text-muted-foreground"
+              className="mt-0.5 mr-2 flex items-center gap-1 text-micro text-muted-foreground"
               title={
                 (msg.is_read && readTime && `Seen ${readTime}`) ||
                 (msg.delivered_at && deliveredTime && `Delivered ${deliveredTime}`) ||

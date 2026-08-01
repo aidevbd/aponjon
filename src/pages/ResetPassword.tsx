@@ -123,7 +123,7 @@ const ResetPassword = () => {
     : "লিংক যাচাই হচ্ছে...";
 
   return (
-    <div className="flex min-h-app flex-col bg-[hsl(var(--heirloom-bg))]">
+    <div className="flex min-h-app flex-col bg-heirloom-bg">
       <Header />
 
       <main id="main-content" className="relative flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-10">
@@ -143,13 +143,13 @@ const ResetPassword = () => {
 
             <div className="relative">
               <div className="flex flex-col items-center text-center">
-                <h1 className="mt-8 font-display text-3xl leading-[1.15] tracking-tight text-[hsl(var(--heirloom-ink))] sm:mt-10 sm:text-4xl md:text-5xl">
+                <h1 className="mt-8 font-display text-3xl leading-[1.15] tracking-tight text-heirloom-ink sm:mt-10 sm:text-4xl md:text-5xl">
                   নতুন পাসওয়ার্ড
                 </h1>
 
-                <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
+                <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-heirloom-gold to-transparent" />
 
-                <p className="mt-5 max-w-md text-[15px] leading-[1.6] text-[hsl(var(--heirloom-ink-soft))] sm:text-base md:max-w-lg md:text-[17px]">
+                <p className="mt-5 max-w-md text-[15px] leading-[1.6] text-heirloom-ink-soft sm:text-base md:max-w-lg md:text-[17px]">
                   {subtitle}
                 </p>
               </div>
@@ -178,7 +178,7 @@ const ResetPassword = () => {
                 {ready && !error && (
                   <>
                     <div className="space-y-2">
-                      <label htmlFor="password" className="block text-sm text-[hsl(var(--heirloom-ink-soft))]">
+                      <label htmlFor="password" className="block text-sm text-heirloom-ink-soft">
                         নতুন পাসওয়ার্ড
                       </label>
                       <input
@@ -191,7 +191,7 @@ const ResetPassword = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label htmlFor="confirm" className="block text-sm text-[hsl(var(--heirloom-ink-soft))]">
+                      <label htmlFor="confirm" className="block text-sm text-heirloom-ink-soft">
                         পাসওয়ার্ড নিশ্চিত করুন
                       </label>
                       <input

@@ -43,7 +43,7 @@ export function ChatFloatingButton() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.4, opacity: 0 }}
               transition={{ type: "spring", stiffness: 380, damping: 18 }}
-              className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[hsl(var(--heirloom-gold))] px-1 text-[11px] font-semibold text-[hsl(var(--heirloom-ink))] shadow-md"
+              className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-heirloom-gold px-1 text-[11px] font-semibold text-heirloom-ink shadow-md"
             >
               {totalUnread > 99 ? "99+" : totalUnread}
             </motion.span>

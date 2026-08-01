@@ -24,7 +24,7 @@ export function EditHistoryDialog({ open, onOpenChange, history, currentContent,
             )}
             {history.map((h, i) => (
               <div key={i} className="bg-muted/40 border border-border rounded-lg p-3">
-                <p className="text-[10px] text-muted-foreground mb-1">
+                <p className="text-micro text-muted-foreground mb-1">
                   {new Date(h.edited_at).toLocaleString("bn-BD")}
                 </p>
                 <p className="text-sm whitespace-pre-wrap break-words">{h.previous_content}</p>
@@ -32,7 +32,7 @@ export function EditHistoryDialog({ open, onOpenChange, history, currentContent,
             ))}
             {currentContent !== null && (
               <div className="bg-primary/10 border border-primary/30 rounded-lg p-3">
-                <p className="text-[10px] text-primary mb-1">বর্তমান ভার্সন</p>
+                <p className="text-micro text-primary mb-1">বর্তমান ভার্সন</p>
                 <p className="text-sm whitespace-pre-wrap break-words">{currentContent}</p>
               </div>
             )}

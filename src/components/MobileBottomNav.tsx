@@ -96,7 +96,7 @@ export function MobileBottomNav() {
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 260, damping: 24 }}
       aria-label="প্রধান নেভিগেশন"
-      className="fixed inset-x-0 bottom-0 z-40 sm:hidden border-t border-[hsl(var(--heirloom-gold)/0.35)] bg-[hsl(var(--heirloom-bg)/0.96)] backdrop-blur-md"
+      className="fixed inset-x-0 bottom-0 z-40 sm:hidden border-t border-heirloom-gold/[0.35] bg-heirloom-bg/[0.96] backdrop-blur-md"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-around px-1">
@@ -111,7 +111,7 @@ export function MobileBottomNav() {
                   strokeWidth={isActive ? 2.25 : 1.75}
                 />
                 {badge > 0 && (
-                  <span className="absolute -right-2 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[hsl(var(--heirloom-gold))] px-1 text-[10px] font-semibold text-[hsl(var(--heirloom-ink))] shadow">
+                  <span className="absolute -right-2 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-heirloom-gold px-1 text-micro font-semibold text-heirloom-ink shadow">
                     {badge > 99 ? "99+" : badge}
                   </span>
                 )}
@@ -120,7 +120,7 @@ export function MobileBottomNav() {
               {isActive && (
                 <motion.span
                   layoutId="mobile-tab-indicator"
-                  className="absolute top-0 h-[3px] w-8 rounded-b-full bg-[hsl(var(--heirloom-gold))]"
+                  className="absolute top-0 h-[3px] w-8 rounded-b-full bg-heirloom-gold"
                   transition={{ type: "spring", stiffness: 380, damping: 30 }}
                 />
               )}
@@ -131,8 +131,8 @@ export function MobileBottomNav() {
             [
               "relative flex min-h-[3.75rem] flex-col items-center justify-center gap-1 py-2 text-[11px] font-medium transition-colors",
               isActive
-                ? "text-[hsl(var(--heirloom-seal))]"
-                : "text-[hsl(var(--heirloom-ink-mute))] hover:text-[hsl(var(--heirloom-ink))]",
+                ? "text-heirloom-seal"
+                : "text-heirloom-ink-mute hover:text-heirloom-ink",
             ].join(" ");
 
           return (

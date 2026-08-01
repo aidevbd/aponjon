@@ -41,7 +41,7 @@ export function VirtualContactList({
 
   if (!shouldVirtualize) {
     return (
-      <div className="rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.55)] overflow-hidden">
+      <div className="rounded-sm border border-heirloom-line bg-heirloom-paper/[0.55] overflow-hidden">
         {contacts.map((c, i) => (
           <ContactListItem
             key={c.id}
@@ -61,7 +61,7 @@ export function VirtualContactList({
   return (
     <div
       ref={parentRef}
-      className="max-h-[70vh] overflow-y-auto no-scrollbar rounded-sm border border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.55)]"
+      className="max-h-[70vh] overflow-y-auto no-scrollbar rounded-sm border border-heirloom-line bg-heirloom-paper/[0.55]"
     >
       <div
         style={{ height: virtualizer.getTotalSize(), width: "100%", position: "relative" }}

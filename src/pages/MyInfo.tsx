@@ -318,11 +318,11 @@ const MyInfo = () => {
 
             {/* OTP-auth banner — set secret code prompt */}
             {isOtpAuth && (
-              <div className="mb-4 flex items-start gap-2 rounded-xl border border-[hsl(var(--heirloom-gold)/0.35)] bg-[hsl(var(--heirloom-gold)/0.08)] p-3">
-                <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5 text-[hsl(var(--heirloom-gold-deep))]" />
-                <p className="text-xs text-[hsl(var(--heirloom-ink-soft))]">
+              <div className="mb-4 flex items-start gap-2 rounded-xl border border-heirloom-gold/[0.35] bg-heirloom-gold/[0.08] p-3">
+                <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5 text-heirloom-gold-deep" />
+                <p className="text-xs text-heirloom-ink-soft">
                   ভবিষ্যতে সহজে সাইন-ইন করতে একটি সিক্রেট কোড সেট করে রাখুন।{" "}
-                  <button onClick={startEdit} className="underline underline-offset-2 text-[hsl(var(--heirloom-gold-deep))]">এডিটে গিয়ে যোগ করুন</button>
+                  <button onClick={startEdit} className="underline underline-offset-2 text-heirloom-gold-deep">এডিটে গিয়ে যোগ করুন</button>
                 </p>
               </div>
             )}
@@ -380,13 +380,13 @@ const MyInfo = () => {
             {/* ============ SETTINGS ============ */}
             <div className="mt-14 mb-6">
               <div className="flex items-center gap-3">
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold)/0.35)] to-[hsl(var(--heirloom-gold)/0.6)]" />
-                <div className="flex items-center gap-2 text-[hsl(var(--heirloom-gold-deep))]">
-                  <span className="text-[10px] opacity-70">✦</span>
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-heirloom-gold/[0.35] to-heirloom-gold/[0.6]" />
+                <div className="flex items-center gap-2 text-heirloom-gold-deep">
+                  <span className="text-micro opacity-70">✦</span>
                   <span className="text-[11px] font-medium uppercase tracking-[0.28em]">সেটিংস</span>
-                  <span className="text-[10px] opacity-70">✦</span>
+                  <span className="text-micro opacity-70">✦</span>
                 </div>
-                <div className="h-px flex-1 bg-gradient-to-l from-transparent via-[hsl(var(--heirloom-gold)/0.35)] to-[hsl(var(--heirloom-gold)/0.6)]" />
+                <div className="h-px flex-1 bg-gradient-to-l from-transparent via-heirloom-gold/[0.35] to-heirloom-gold/[0.6]" />
               </div>
               <p className="mt-3 text-center text-xs text-muted-foreground/90 italic">
                 নিরাপত্তা ও সাইন-ইন ব্যবস্থাপনা
@@ -411,7 +411,7 @@ const MyInfo = () => {
                 <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${sessionsOpen ? "rotate-180" : ""}`} />
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="border-t border-border/70 bg-gradient-to-b from-[hsl(var(--heirloom-gold)/0.03)] to-transparent px-4 pt-3 pb-1">
+                <div className="border-t border-border/70 bg-gradient-to-b from-heirloom-gold/[0.03] to-transparent px-4 pt-3 pb-1">
                   <ActiveSessionsCard />
                 </div>
               </CollapsibleContent>
@@ -420,7 +420,7 @@ const MyInfo = () => {
             {/* ---- Tier 2: Sensitive — Secret code ---- */}
             <div className="mb-3 flex items-center gap-2 px-1">
               <ShieldAlert className="h-3 w-3 text-destructive/70" />
-              <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-destructive/80">
+              <span className="text-micro font-medium uppercase tracking-[0.22em] text-destructive/80">
                 সংবেদনশীল
               </span>
               <div className="h-px flex-1 bg-destructive/20" />
@@ -434,7 +434,7 @@ const MyInfo = () => {
                 <div className="flex items-start gap-3 min-w-0">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ring-1 ${secretOpen
                     ? "bg-destructive/10 text-destructive ring-destructive/25"
-                    : "bg-[hsl(var(--heirloom-gold-deep))]/10 text-[hsl(var(--heirloom-gold-deep))] ring-[hsl(var(--heirloom-gold-deep))]/20"}`}>
+                    : "bg-heirloom-gold-deep/10 text-heirloom-gold-deep ring-heirloom-gold-deep/20"}`}>
                     <KeyRound className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
@@ -452,7 +452,7 @@ const MyInfo = () => {
                     size="sm"
                     variant="outline"
                     onClick={() => setSecretOpen(true)}
-                    className="rounded-lg shrink-0 border-[hsl(var(--heirloom-gold-deep))]/40 text-[hsl(var(--heirloom-gold-deep))] hover:bg-[hsl(var(--heirloom-gold-deep))]/10"
+                    className="rounded-lg shrink-0 border-heirloom-gold-deep/40 text-heirloom-gold-deep hover:bg-heirloom-gold-deep/10"
                   >
                     {isOtpAuth ? "সেট করুন" : "বদলান"}
                   </Button>

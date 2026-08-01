@@ -154,7 +154,7 @@ export function ContactFilters({
     <>
       <div className="flex items-center gap-2">
         <div ref={wrapRef} className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[hsl(var(--heirloom-ink-mute))]" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-heirloom-ink-mute" />
           <input
             ref={inputRef}
             type="text"
@@ -171,7 +171,7 @@ export function ContactFilters({
             <button
               onClick={() => { onSearchChange(""); inputRef.current?.focus(); }}
               aria-label="সার্চ ক্লিয়ার"
-              className="absolute right-2 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full text-[hsl(var(--heirloom-ink-mute))] hover:text-[hsl(var(--heirloom-ink))]"
+              className="absolute right-2 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full text-heirloom-ink-mute hover:text-heirloom-ink"
             >
               <X className="h-3 w-3" />
             </button>
@@ -180,7 +180,7 @@ export function ContactFilters({
           {showSuggest && (
             <div
               role="listbox"
-              className="absolute left-0 right-0 top-full z-40 mt-1.5 overflow-hidden rounded-md border border-[hsl(var(--heirloom-gold)/0.35)] bg-[hsl(var(--heirloom-paper))] shadow-[0_12px_30px_-12px_hsl(var(--heirloom-ink)/0.3)] animate-in fade-in slide-in-from-top-1 duration-150"
+              className="absolute left-0 right-0 top-full z-40 mt-1.5 overflow-hidden rounded-md border border-heirloom-gold/[0.35] bg-heirloom-paper shadow-[0_12px_30px_-12px_hsl(var(--heirloom-ink)/0.3)] animate-in fade-in slide-in-from-top-1 duration-150"
             >
               <ul className="max-h-[320px] overflow-y-auto no-scrollbar py-1">
                 {suggestions.map((s, i) => {
@@ -196,42 +196,42 @@ export function ContactFilters({
                         onMouseEnter={() => setActiveIdx(i)}
                         onMouseDown={(e) => { e.preventDefault(); pick(s); }}
                         className={`flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors ${
-                          active ? "bg-[hsl(var(--heirloom-gold)/0.12)]" : "hover:bg-[hsl(var(--heirloom-cream)/0.5)]"
+                          active ? "bg-heirloom-gold/[0.12]" : "hover:bg-heirloom-cream/[0.5]"
                         }`}
                       >
                         {s.contact.photo_url ? (
-                          <img src={s.contact.photo_url} alt="" className="h-7 w-7 shrink-0 rounded-full object-cover border border-[hsl(var(--heirloom-gold)/0.3)]" />
+                          <img src={s.contact.photo_url} alt="" className="h-7 w-7 shrink-0 rounded-full object-cover border border-heirloom-gold/[0.3]" />
                         ) : (
-                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[hsl(var(--heirloom-gold)/0.4)] bg-[hsl(var(--heirloom-gold)/0.08)] text-[11px] text-[hsl(var(--heirloom-gold-deep))]">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-heirloom-gold/[0.4] bg-heirloom-gold/[0.08] text-[11px] text-heirloom-gold-deep">
                             {s.contact.name.charAt(0)}
                           </div>
                         )}
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-[13px] text-[hsl(var(--heirloom-ink))]">
+                          <div className="truncate text-[13px] text-heirloom-ink">
                             <Highlight text={s.contact.name} query={search} />
                           </div>
                           {s.label !== "নাম" && (
-                            <div className="truncate text-[11px] text-[hsl(var(--heirloom-ink-soft))]">
-                              <span className="text-[hsl(var(--heirloom-ink-mute))]">{s.label}: </span>
+                            <div className="truncate text-[11px] text-heirloom-ink-soft">
+                              <span className="text-heirloom-ink-mute">{s.label}: </span>
                               <Highlight text={s.value} query={search} />
                             </div>
                           )}
                         </div>
                         {Icon && (
-                          <span className="hidden sm:inline-flex shrink-0 items-center gap-1 rounded-full border border-[hsl(var(--heirloom-gold)/0.3)] bg-[hsl(var(--heirloom-gold)/0.06)] px-1.5 py-0.5 text-[10px] text-[hsl(var(--heirloom-gold-deep))]">
+                          <span className="hidden sm:inline-flex shrink-0 items-center gap-1 rounded-full border border-heirloom-gold/[0.3] bg-heirloom-gold/[0.06] px-1.5 py-0.5 text-micro text-heirloom-gold-deep">
                             <Icon className="h-2.5 w-2.5" strokeWidth={1.75} />
                             {cat?.value}
                           </span>
                         )}
                         {active && (
-                          <CornerDownLeft className="h-3 w-3 shrink-0 text-[hsl(var(--heirloom-ink-mute))]" />
+                          <CornerDownLeft className="h-3 w-3 shrink-0 text-heirloom-ink-mute" />
                         )}
                       </button>
                     </li>
                   );
                 })}
               </ul>
-              <div className="border-t border-[hsl(var(--heirloom-line))] px-3 py-1.5 text-[10px] tracking-wide text-[hsl(var(--heirloom-ink-mute))]">
+              <div className="border-t border-heirloom-line px-3 py-1.5 text-micro tracking-wide text-heirloom-ink-mute">
                 ↑↓ নেভিগেট · ↵ ওপেন · esc ক্লোজ
               </div>
             </div>
@@ -242,14 +242,14 @@ export function ContactFilters({
           onClick={() => setOpen(true)}
           className={`relative flex items-center gap-1.5 rounded-sm border px-3 py-2 text-[12px] transition-colors ${
             activeCount > 0
-              ? "border-[hsl(var(--heirloom-gold)/0.6)] bg-[hsl(var(--heirloom-gold)/0.1)] text-[hsl(var(--heirloom-gold-deep))]"
-              : "border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper)/0.6)] text-[hsl(var(--heirloom-ink-soft))] hover:border-[hsl(var(--heirloom-gold)/0.4)]"
+              ? "border-heirloom-gold/[0.6] bg-heirloom-gold/[0.1] text-heirloom-gold-deep"
+              : "border-heirloom-line bg-heirloom-paper/[0.6] text-heirloom-ink-soft hover:border-heirloom-gold/[0.4]"
           }`}
         >
           <SlidersHorizontal className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">ফিল্টার</span>
           {activeCount > 0 && (
-            <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[hsl(var(--heirloom-gold-deep))] text-[hsl(var(--heirloom-paper))] text-[10px] px-1">
+            <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-heirloom-gold-deep text-heirloom-paper text-micro px-1">
               {activeCount}
             </span>
           )}
@@ -303,41 +303,41 @@ function FilterModal({
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center animate-in fade-in duration-200">
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-[hsl(var(--heirloom-ink)/0.35)] backdrop-blur-sm"
+        className="absolute inset-0 bg-heirloom-ink/[0.35] backdrop-blur-sm"
       />
-      <div className="relative w-full sm:max-w-md sm:mx-4 max-h-[85vh] flex flex-col rounded-t-2xl sm:rounded-lg border border-[hsl(var(--heirloom-gold)/0.35)] bg-[hsl(var(--heirloom-paper))] shadow-[0_-12px_40px_-12px_hsl(var(--heirloom-ink)/0.3)] sm:shadow-[0_20px_50px_-15px_hsl(var(--heirloom-ink)/0.3)] animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
+      <div className="relative w-full sm:max-w-md sm:mx-4 max-h-[85vh] flex flex-col rounded-t-2xl sm:rounded-lg border border-heirloom-gold/[0.35] bg-heirloom-paper shadow-[0_-12px_40px_-12px_hsl(var(--heirloom-ink)/0.3)] sm:shadow-[0_20px_50px_-15px_hsl(var(--heirloom-ink)/0.3)] animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
         {/* Handle (mobile) */}
         <div className="flex justify-center pt-2 sm:hidden">
-          <div className="h-1 w-10 rounded-full bg-[hsl(var(--heirloom-line))]" />
+          <div className="h-1 w-10 rounded-full bg-heirloom-line" />
         </div>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-4 pb-3">
           <div>
-            <div className="text-[10px] tracking-[0.2em] uppercase text-[hsl(var(--heirloom-ink-mute))]">
+            <div className="text-micro tracking-[0.2em] uppercase text-heirloom-ink-mute">
               ছাঁকনি
             </div>
-            <h3 className="font-display text-lg text-[hsl(var(--heirloom-ink))]">
+            <h3 className="font-display text-lg text-heirloom-ink">
               ফিল্টার
             </h3>
           </div>
           <button
             onClick={onClose}
             aria-label="বন্ধ"
-            className="flex h-8 w-8 items-center justify-center rounded-full text-[hsl(var(--heirloom-ink-soft))] hover:bg-[hsl(var(--heirloom-gold)/0.1)] hover:text-[hsl(var(--heirloom-ink))]"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-heirloom-ink-soft hover:bg-heirloom-gold/[0.1] hover:text-heirloom-ink"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Gold divider */}
-        <div className="mx-5 h-px bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold)/0.5)] to-transparent" />
+        <div className="mx-5 h-px bg-gradient-to-r from-transparent via-heirloom-gold/[0.5] to-transparent" />
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto no-scrollbar px-5 py-5 space-y-4">
           {/* Category */}
           <section className="space-y-1.5">
-            <label className="text-[10px] tracking-[0.2em] uppercase text-[hsl(var(--heirloom-ink-mute))]">
+            <label className="text-micro tracking-[0.2em] uppercase text-heirloom-ink-mute">
               ক্যাটাগরি
             </label>
             <NativeSelect
@@ -359,7 +359,7 @@ function FilterModal({
 
           {/* Blood group */}
           <section className="space-y-1.5">
-            <label className="text-[10px] tracking-[0.2em] uppercase text-[hsl(var(--heirloom-ink-mute))]">
+            <label className="text-micro tracking-[0.2em] uppercase text-heirloom-ink-mute">
               রক্তের গ্রুপ
             </label>
             <NativeSelect
@@ -375,10 +375,10 @@ function FilterModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center gap-2 border-t border-[hsl(var(--heirloom-line))] bg-[hsl(var(--heirloom-paper))] px-5 py-3">
+        <div className="flex items-center gap-2 border-t border-heirloom-line bg-heirloom-paper px-5 py-3">
           <button
             onClick={onReset}
-            className="text-[12px] text-[hsl(var(--heirloom-ink-soft))] underline-offset-4 hover:underline hover:text-[hsl(var(--heirloom-gold-deep))]"
+            className="text-[12px] text-heirloom-ink-soft underline-offset-4 hover:underline hover:text-heirloom-gold-deep"
           >
             রিসেট
           </button>
@@ -413,7 +413,7 @@ function NativeSelect({
       >
         {children}
       </select>
-      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--heirloom-ink-mute))]" />
+      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-heirloom-ink-mute" />
     </div>
   );
 }

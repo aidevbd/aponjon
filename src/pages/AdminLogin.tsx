@@ -40,7 +40,7 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="flex min-h-app flex-col bg-[hsl(var(--heirloom-bg))]">
+    <div className="flex min-h-app flex-col bg-heirloom-bg">
       <Header />
 
       <main id="main-content" className="relative flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-10">
@@ -60,20 +60,20 @@ const AdminLogin = () => {
 
             <div className="relative">
               <div className="flex flex-col items-center text-center">
-                <h1 className="mt-8 font-display text-3xl leading-[1.15] tracking-tight text-[hsl(var(--heirloom-ink))] sm:mt-10 sm:text-4xl md:text-5xl">
+                <h1 className="mt-8 font-display text-3xl leading-[1.15] tracking-tight text-heirloom-ink sm:mt-10 sm:text-4xl md:text-5xl">
                   অ্যাডমিন লগইন
                 </h1>
 
-                <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-[hsl(var(--heirloom-gold))] to-transparent" />
+                <div aria-hidden className="mt-5 h-px w-28 bg-gradient-to-r from-transparent via-heirloom-gold to-transparent" />
 
-                <p className="mt-5 max-w-md text-[15px] leading-[1.6] text-[hsl(var(--heirloom-ink-soft))] sm:text-base md:max-w-lg md:text-[17px]">
+                <p className="mt-5 max-w-md text-[15px] leading-[1.6] text-heirloom-ink-soft sm:text-base md:max-w-lg md:text-[17px]">
                   আপনজন ডাইরেক্টরিতে প্রবেশ করুন।
                 </p>
               </div>
 
               <div className="mx-auto mt-10 w-full max-w-[420px] space-y-5 sm:mt-8">
                 <div className="space-y-2">
-                  <label htmlFor="email" className="block text-sm text-[hsl(var(--heirloom-ink-soft))]">
+                  <label htmlFor="email" className="block text-sm text-heirloom-ink-soft">
                     ইমেইল
                   </label>
                   <input
@@ -87,7 +87,7 @@ const AdminLogin = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="password" className="block text-sm text-[hsl(var(--heirloom-ink-soft))]">
+                  <label htmlFor="password" className="block text-sm text-heirloom-ink-soft">
                     পাসওয়ার্ড
                   </label>
                   <input
@@ -112,7 +112,7 @@ const AdminLogin = () => {
                 <div className="text-center">
                   <Link
                     to="/forgot-password"
-                    className="text-sm text-[hsl(var(--heirloom-ink-soft))] underline-offset-4 transition-colors hover:text-[hsl(var(--heirloom-gold-deep))] hover:underline"
+                    className="text-sm text-heirloom-ink-soft underline-offset-4 transition-colors hover:text-heirloom-gold-deep hover:underline"
                   >
                     পাসওয়ার্ড ভুলে গেছেন?
                   </Link>
