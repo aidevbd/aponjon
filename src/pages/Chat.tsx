@@ -124,14 +124,12 @@ const Chat = () => {
         return reconcileMessages([...(data as ChatMessage[]), ...survivors]);
       });
       const lastMessage = data[data.length - 1];
-      setContactPreviews((prev) => ({
-        ...prev,
-        [contact.id]: {
-          preview: lastMessage?.content || (lastMessage?.image_url ? "ছবি পাঠানো হয়েছে" : "এখনো কোনো মেসেজ নেই"),
-          time: lastMessage?.created_at || null,
-        },
-      }));
-      setUnreadMap((prev) => { const n = { ...prev }; delete n[contact.id]; return n; });
+      setPreviewFor(contact.id, {
+        preview: lastMessage?.content || (lastMessage?.image_url ? "ছবি পাঠানো হয়েছে" : "এখনো কোনো মেসেজ নেই"),
+        time: lastMessage?.created_at || null,
+      });
+      clearUnreadFor(contact.id);
+
       void (async () => { try { await supabase.rpc("mark_conversation_delivered", { p_token: session.token, p_other_id: contact.id } as any); } catch (e) { swallow("Chat.mark_conversation_delivered", e); } })();
     } catch (err) {
       console.error("[catch]", err);
