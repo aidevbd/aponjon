@@ -202,50 +202,6 @@ const Chat = () => {
     if (Date.now() - actions.recentSendAtRef.current < 1500) restoreInputFocus(true);
   }, [messages, restoreInputFocus, actions.recentSendAtRef]);
 
-  const loadContacts = async () => {
-    if (!session) return;
-    try {
-      const data = await getChatContacts(session.token);
-      if (data.length === 0) {
-        const { data: valid } = await supabase.rpc("validate_chat_session", { p_token: session.token });
-        if (!valid) {
-          clearChatSession();
-          setSession(null);
-          toast.error("সেশন শেষ হয়ে গেছে। আবার লগইন করুন। 🔒");
-          return;
-        }
-      }
-      setContacts(data);
-      const previewEntries = await Promise.all(
-        data.map(async (contact) => {
-          try {
-            const contactMessages = await getMessages(session.token, contact.id);
-            const lastMessage = contactMessages[contactMessages.length - 1];
-            return [contact.id, {
-              preview: lastMessage?.content || (lastMessage?.image_url ? "ছবি পাঠানো হয়েছে" : "ট্যাপ করে মেসেজ করুন"),
-              time: lastMessage?.created_at || null,
-            }] as const;
-          } catch {
-            return [contact.id, { preview: "ট্যাপ করে মেসেজ করুন", time: null }] as const;
-          }
-        }),
-      );
-      setContactPreviews(Object.fromEntries(previewEntries));
-    } catch (err) {
-      console.error("[catch]", err);
-      toast.error("কন্টাক্ট লোড করতে সমস্যা");
-    }
-  };
-
-  const loadUnread = async () => {
-    if (!session) return;
-    try {
-      const data = await getUnreadCounts(session.token);
-      const map: Record<string, number> = {};
-      data.forEach((d) => { map[d.sender_id] = d.unread_count; });
-      setUnreadMap(map);
-    } catch (e) { swallow("Chat.loadUnread", e); }
-  };
 
   const handleSelectContact = useCallback((contact: ChatContact) => {
     setSelectedContact(contact);
