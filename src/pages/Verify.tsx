@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, Lock, KeyRound, ArrowLeft, AlertTriangle, ShieldCheck } from "lucide-react";
+import { Phone, Lock, KeyRound, ArrowLeft, AlertTriangle, ShieldCheck, Mail, MailCheck } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,12 +12,19 @@ import {
   verifyAndGetContact,
   generateOtp,
   startOtpEditSession,
+  getContactEmailHint,
+  sendEmailVerifyLink,
+  startEmailVerifiedSession,
+  type ContactEmailHint,
 } from "@/lib/store";
+import { supabase } from "@/integrations/supabase/client";
 import { saveMeSession } from "@/lib/userSession";
 import { createChatSession } from "@/lib/chatSession";
+import { swallow } from "@/lib/devLog";
+import { HeirloomPageSkeleton } from "@/components/skeletons/LoadingSkeletons";
 
 type NextIntent = "view" | "edit" | "chat";
-type Step = "phone" | "secret" | "otp";
+type Step = "phone" | "secret" | "otp" | "email" | "email-sent";
 
 /**
  * Unified verify page — single auth surface for view / edit / chat.
@@ -26,7 +33,8 @@ type Step = "phone" | "secret" | "otp";
  * Flow:
  *   1. User enters phone number
  *   2. If contact has secret_code → ask for it
- *      Otherwise → send OTP and ask for code
+ *      Else if contact has an email → send a one-time link to that email
+ *      Otherwise → legacy OTP step
  *   3. On success:
  *      - save MeSession (for /me view + edit)
  *      - if secret auth, also try to create a ChatSession
@@ -36,6 +44,7 @@ const Verify = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const next = (params.get("next") as NextIntent) || "view";
+  const isEmailCallback = params.get("email") === "1";
 
   const [step, setStep] = useState<Step>("phone");
   const [phone, setPhone] = useState("");
@@ -44,6 +53,9 @@ const Verify = () => {
   const [otpToken, setOtpToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [trustDevice, setTrustDevice] = useState(true);
+  const [emailHint, setEmailHint] = useState<ContactEmailHint | null>(null);
+  const [exchanging, setExchanging] = useState(isEmailCallback);
+
 
   const intentLabel =
     next === "chat" ? "চ্যাট চালু করতে" :
