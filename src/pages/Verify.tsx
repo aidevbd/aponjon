@@ -101,12 +101,14 @@ const Verify = () => {
         } else {
           redirectAfterAuth();
         }
-
+      } catch (e) {
+        swallow("verify.emailCallback", e);
         if (!cancelled) {
           toast.error("যাচাই করা যায়নি", { description: "আবার চেষ্টা করুন।" });
           setExchanging(false);
         }
       }
+
     };
     run();
     return () => { cancelled = true; };
