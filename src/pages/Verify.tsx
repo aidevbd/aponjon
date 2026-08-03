@@ -68,6 +68,68 @@ const Verify = () => {
     else navigate("/me", { replace: true });
   };
 
+  // ---- Email link callback: exchange the auth session for a 15-min edit session ----
+  useEffect(() => {
+    if (!isEmailCallback) return;
+    let cancelled = false;
+
+    const run = async () => {
+      // Give the Supabase client a moment to parse the tokens from the URL
+      for (let i = 0; i < 20; i++) {
+        const { data } = await supabase.auth.getSession();
+        if (data.session) break;
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      try {
+        const res = await startEmailVerifiedSession();
+        // The auth session was only a proof of email ownership — drop it immediately.
+        await supabase.auth.signOut().catch((e) => swallow("verify.signOut", e));
+        if (cancelled) return;
+        if (!res.success || !res.contact || !res.session_token) {
+          toast.error("লিংকটি আর কাজ করছে না", { description: "আবার নতুন লিংক নিন।" });
+          setExchanging(false);
+          return;
+        }
+        saveMeSession(
+          { type: "otp", phone: res.contact.phone, sessionToken: res.session_token },
+          res.contact,
+        );
+        toast.success("ইমেইল যাচাই সফল! 🎉");
+        redirectAfterAuth();
+      } catch (e) {
+        swallow("verify.emailCallback", e);
+        if (!cancelled) {
+          toast.error("যাচাই করা যায়নি", { description: "আবার চেষ্টা করুন।" });
+          setExchanging(false);
+        }
+      }
+    };
+    run();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEmailCallback]);
+
+  const handleSendEmailLink = async (hint?: ContactEmailHint | null) => {
+    const h = hint ?? emailHint;
+    if (!h?.email) return;
+    setLoading(true);
+    try {
+      const redirectTo = `${window.location.origin}/verify?email=1&next=${next}`;
+      await sendEmailVerifyLink(h.email, redirectTo);
+      setStep("email-sent");
+      toast.success("ইমেইলে লিংক পাঠানো হয়েছে 💌");
+    } catch (e: any) {
+      const msg = String(e?.message || "");
+      if (msg.toLowerCase().includes("rate")) {
+        toast.error("একটু পরে আবার চেষ্টা করুন", { description: "অল্প সময়ে অনেকবার পাঠানো হয়েছে।" });
+      } else {
+        toast.error("ইমেইল পাঠানো যায়নি", { description: "একটু পর আবার চেষ্টা করুন।" });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePhoneNext = async () => {
     if (!phone.trim()) {
       toast.error("ফোন নম্বর দিন");
@@ -84,36 +146,50 @@ const Verify = () => {
         toast.error("এই নম্বরে কোনো তথ্য পাওয়া যায়নি");
         return;
       }
+
+      let hint: ContactEmailHint | null = null;
+      try {
+        hint = await getContactEmailHint(phone.trim());
+      } catch (e) {
+        swallow("verify.emailHint", e);
+      }
+      setEmailHint(hint);
+
       if (result.has_secret_code) {
         setStep("secret");
-      } else {
-        // No secret code — fall back to OTP
-        const otpRes = await generateOtp(phone.trim());
-        if (otpRes === "RATE_LIMITED") {
-          toast.error("অনেকবার চেষ্টা করেছেন। পরে আবার চেষ্টা করুন।");
-          return;
-        }
-        if (otpRes === "DAILY_LIMIT") {
-          toast.error("আজকের জন্য OTP সীমা শেষ। আগামীকাল আবার চেষ্টা করুন।");
-          return;
-        }
-        if (otpRes === "NOT_FOUND") {
-          toast.error("এই নম্বরে কোনো তথ্য পাওয়া যায়নি");
-          return;
-        }
-        if (otpRes === "SENT") {
-          toast.success("OTP পাঠানো হয়েছে। ফোনে পাওয়া কোডটি দিন।");
-          setStep("otp");
-          return;
-        }
-        toast.error("OTP পাঠাতে সমস্যা হয়েছে");
+        return;
       }
+      if (hint?.has_email) {
+        setStep("email");
+        return;
+      }
+
+      // No secret code and no email — legacy OTP step
+      const otpRes = await generateOtp(phone.trim());
+      if (otpRes === "RATE_LIMITED") {
+        toast.error("অনেকবার চেষ্টা করেছেন। পরে আবার চেষ্টা করুন।");
+        return;
+      }
+      if (otpRes === "DAILY_LIMIT") {
+        toast.error("আজকের জন্য OTP সীমা শেষ। আগামীকাল আবার চেষ্টা করুন।");
+        return;
+      }
+      if (otpRes === "NOT_FOUND") {
+        toast.error("এই নম্বরে কোনো তথ্য পাওয়া যায়নি");
+        return;
+      }
+      if (otpRes === "SENT") {
+        setStep("otp");
+        return;
+      }
+      toast.error("কোড পাঠাতে সমস্যা হয়েছে");
     } catch {
       toast.error("একটি সমস্যা হয়েছে");
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleSecretVerify = async () => {
     if (!secret.trim()) {
