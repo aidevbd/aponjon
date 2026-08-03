@@ -281,7 +281,19 @@ const Verify = () => {
     setOtp("");
   };
 
+  if (exchanging) {
+    return (
+      <div className="flex min-h-app flex-col bg-heirloom-bg">
+        <Header />
+        <main id="main-content" className="flex-1 px-4 py-8">
+          <HeirloomPageSkeleton />
+        </main>
+      </div>
+    );
+  }
+
   return (
+
     <div className="flex min-h-app flex-col bg-heirloom-bg">
       <Header />
       <main id="main-content" className="relative flex flex-1 items-center justify-center px-4 py-6 sm:px-6 sm:py-12">
