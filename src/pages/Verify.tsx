@@ -385,8 +385,76 @@ const Verify = () => {
                     <Button onClick={handleSecretVerify} variant="heirloom" className="w-full" disabled={loading}>
                       {loading ? "যাচাই হচ্ছে..." : "ভেরিফাই করুন"}
                     </Button>
+                    {emailHint?.has_email && (
+                      <button
+                        onClick={() => setStep("email")}
+                        className="mx-auto flex items-center gap-1.5 text-xs text-heirloom-gold-deep underline-offset-4 hover:underline"
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                        কোড মনে নেই? ইমেইলে লিংক নিন
+                      </button>
+                    )}
                   </motion.div>
                 )}
+
+                {step === "email" && (
+                  <motion.div key="email" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5">
+                    <button onClick={goBack} className="inline-flex items-center gap-1 text-xs text-heirloom-ink-soft hover:text-heirloom-ink">
+                      <ArrowLeft className="h-3.5 w-3.5" /> নম্বর বদলাব
+                    </button>
+                    <div className="heirloom-chip rounded-sm border p-4">
+                      <div className="flex items-start gap-2">
+                        <Mail className="mt-0.5 h-5 w-5 shrink-0 text-heirloom-gold-deep" />
+                        <div>
+                          <p className="text-sm font-medium">ইমেইলে যাচাই</p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            আপনার ইমেইলে একটি লিংক পাঠাব — সেটিতে চাপ দিলেই যাচাই সম্পন্ন।
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Mail className="h-3.5 w-3.5 text-heirloom-gold-deep" />
+                        আপনার ইমেইল
+                      </Label>
+                      <div className="rounded-sm border border-heirloom-line bg-card px-3 py-2.5 text-sm text-heirloom-ink">
+                        {emailHint?.masked ?? "—"}
+                      </div>
+                    </div>
+                    <Button onClick={() => handleSendEmailLink()} variant="heirloom" className="w-full" disabled={loading}>
+                      {loading ? "পাঠানো হচ্ছে..." : "ইমেইলে লিংক পাঠান 💌"}
+                    </Button>
+                  </motion.div>
+                )}
+
+                {step === "email-sent" && (
+                  <motion.div key="email-sent" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5 text-center">
+                    <div aria-hidden className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-heirloom-gold/[0.5] bg-heirloom-gold/[0.08]">
+                      <MailCheck className="h-5 w-5 text-heirloom-gold-deep" />
+                    </div>
+                    <div>
+                      <p className="font-display text-lg text-heirloom-ink">চিঠি পাঠানো হয়েছে</p>
+                      <p className="mt-2 text-[14px] leading-[1.7] text-heirloom-ink-soft">
+                        <span className="font-medium text-heirloom-ink">{emailHint?.masked}</span> — এই ইমেইলে
+                        যাওয়া লিংকে চাপ দিন। লিংকটি অল্প সময়ের জন্য কাজ করবে।
+                      </p>
+                      <p className="mt-3 text-xs text-muted-foreground">
+                        ইনবক্সে না পেলে স্প্যাম/প্রমোশন ফোল্ডারও দেখুন।
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Button onClick={() => handleSendEmailLink()} variant="outline" className="w-full" disabled={loading}>
+                        {loading ? "পাঠানো হচ্ছে..." : "আবার পাঠান"}
+                      </Button>
+                      <button onClick={goBack} className="mx-auto text-xs text-heirloom-ink-soft hover:text-heirloom-ink">
+                        অন্য নম্বর দিয়ে চেষ্টা করব
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+
 
                 {step === "otp" && (
                   <motion.div key="otp" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5">
