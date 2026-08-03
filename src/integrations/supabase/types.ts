@@ -487,6 +487,7 @@ export type Database = {
         Args: { p_action_type: string; p_key: string }
         Returns: boolean
       }
+      contact_email_hint: { Args: { p_phone: string }; Returns: Json }
       create_chat_session:
         | { Args: { p_phone: string; p_secret_code: string }; Returns: Json }
         | {
@@ -796,6 +797,7 @@ export type Database = {
         Args: { p_name: string; p_phone?: string }
         Returns: string
       }
+      start_email_verified_session: { Args: never; Returns: Json }
       start_otp_edit_session: {
         Args: { p_code: string; p_phone: string }
         Returns: Json

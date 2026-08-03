@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, Lock, KeyRound, ArrowLeft, AlertTriangle, ShieldCheck } from "lucide-react";
+import { Phone, Lock, KeyRound, ArrowLeft, AlertTriangle, ShieldCheck, Mail, MailCheck } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,12 +12,19 @@ import {
   verifyAndGetContact,
   generateOtp,
   startOtpEditSession,
+  getContactEmailHint,
+  sendEmailVerifyLink,
+  startEmailVerifiedSession,
+  type ContactEmailHint,
 } from "@/lib/store";
+import { supabase } from "@/integrations/supabase/client";
 import { saveMeSession } from "@/lib/userSession";
 import { createChatSession } from "@/lib/chatSession";
+import { swallow } from "@/lib/devLog";
+import { HeirloomPageSkeleton } from "@/components/skeletons/LoadingSkeletons";
 
 type NextIntent = "view" | "edit" | "chat";
-type Step = "phone" | "secret" | "otp";
+type Step = "phone" | "secret" | "otp" | "email" | "email-sent";
 
 /**
  * Unified verify page — single auth surface for view / edit / chat.
@@ -26,7 +33,8 @@ type Step = "phone" | "secret" | "otp";
  * Flow:
  *   1. User enters phone number
  *   2. If contact has secret_code → ask for it
- *      Otherwise → send OTP and ask for code
+ *      Else if contact has an email → send a one-time link to that email
+ *      Otherwise → legacy OTP step
  *   3. On success:
  *      - save MeSession (for /me view + edit)
  *      - if secret auth, also try to create a ChatSession
@@ -36,6 +44,7 @@ const Verify = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const next = (params.get("next") as NextIntent) || "view";
+  const isEmailCallback = params.get("email") === "1";
 
   const [step, setStep] = useState<Step>("phone");
   const [phone, setPhone] = useState("");
@@ -44,6 +53,10 @@ const Verify = () => {
   const [otpToken, setOtpToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [trustDevice, setTrustDevice] = useState(true);
+  const [emailHint, setEmailHint] = useState<ContactEmailHint | null>(null);
+  const [emailInput, setEmailInput] = useState("");
+  const [exchanging, setExchanging] = useState(isEmailCallback);
+
 
   const intentLabel =
     next === "chat" ? "চ্যাট চালু করতে" :
@@ -54,6 +67,79 @@ const Verify = () => {
     if (next === "chat") navigate("/chat", { replace: true });
     else if (next === "edit") navigate("/me?edit=1", { replace: true });
     else navigate("/me", { replace: true });
+  };
+
+  // ---- Email link callback: exchange the auth session for a 15-min edit session ----
+  useEffect(() => {
+    if (!isEmailCallback) return;
+    let cancelled = false;
+
+    const run = async () => {
+      // Give the Supabase client a moment to parse the tokens from the URL
+      for (let i = 0; i < 20; i++) {
+        const { data } = await supabase.auth.getSession();
+        if (data.session) break;
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      try {
+        const res = await startEmailVerifiedSession();
+        // The auth session was only a proof of email ownership — drop it immediately.
+        await supabase.auth.signOut().catch((e) => swallow("verify.signOut", e));
+        if (cancelled) return;
+        if (!res.success || !res.contact || !res.session_token) {
+          toast.error("লিংকটি আর কাজ করছে না", { description: "আবার নতুন লিংক নিন।" });
+          setExchanging(false);
+          return;
+        }
+        saveMeSession(
+          { type: "otp", phone: res.contact.phone, sessionToken: res.session_token },
+          res.contact,
+        );
+        toast.success("ইমেইল যাচাই সফল! 🎉");
+        if (next === "chat") {
+          toast.info("চ্যাট চালু করতে আগে সিক্রেট কোড সেট করে নিন।");
+          navigate("/me", { replace: true });
+        } else {
+          redirectAfterAuth();
+        }
+      } catch (e) {
+        swallow("verify.emailCallback", e);
+        if (!cancelled) {
+          toast.error("যাচাই করা যায়নি", { description: "আবার চেষ্টা করুন।" });
+          setExchanging(false);
+        }
+      }
+
+    };
+    run();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEmailCallback]);
+
+  const handleSendEmailLink = async () => {
+    const addr = emailInput.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(addr)) {
+      toast.error("ইমেইল ঠিকানা ঠিকভাবে লিখুন");
+      return;
+    }
+    setLoading(true);
+    try {
+      const redirectTo = `${window.location.origin}/verify?email=1&next=${next}`;
+      await sendEmailVerifyLink(addr, redirectTo);
+      setStep("email-sent");
+      toast.success("ইমেইলে লিংক পাঠানো হয়েছে 💌");
+    } catch (e: any) {
+      const msg = String(e?.message || "").toLowerCase();
+      if (msg.includes("rate") || msg.includes("limit")) {
+        toast.error("একটু পরে আবার চেষ্টা করুন", { description: "অল্প সময়ে অনেকবার পাঠানো হয়েছে।" });
+      } else if (msg.includes("invalid")) {
+        toast.error("ইমেইল ঠিকানাটি গ্রহণ করা যায়নি");
+      } else {
+        toast.error("ইমেইল পাঠানো যায়নি", { description: "একটু পর আবার চেষ্টা করুন।" });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePhoneNext = async () => {
@@ -72,36 +158,50 @@ const Verify = () => {
         toast.error("এই নম্বরে কোনো তথ্য পাওয়া যায়নি");
         return;
       }
+
+      let hint: ContactEmailHint | null = null;
+      try {
+        hint = await getContactEmailHint(phone.trim());
+      } catch (e) {
+        swallow("verify.emailHint", e);
+      }
+      setEmailHint(hint);
+
       if (result.has_secret_code) {
         setStep("secret");
-      } else {
-        // No secret code — fall back to OTP
-        const otpRes = await generateOtp(phone.trim());
-        if (otpRes === "RATE_LIMITED") {
-          toast.error("অনেকবার চেষ্টা করেছেন। পরে আবার চেষ্টা করুন।");
-          return;
-        }
-        if (otpRes === "DAILY_LIMIT") {
-          toast.error("আজকের জন্য OTP সীমা শেষ। আগামীকাল আবার চেষ্টা করুন।");
-          return;
-        }
-        if (otpRes === "NOT_FOUND") {
-          toast.error("এই নম্বরে কোনো তথ্য পাওয়া যায়নি");
-          return;
-        }
-        if (otpRes === "SENT") {
-          toast.success("OTP পাঠানো হয়েছে। ফোনে পাওয়া কোডটি দিন।");
-          setStep("otp");
-          return;
-        }
-        toast.error("OTP পাঠাতে সমস্যা হয়েছে");
+        return;
       }
+      if (hint?.has_email) {
+        setStep("email");
+        return;
+      }
+
+      // No secret code and no email — legacy OTP step
+      const otpRes = await generateOtp(phone.trim());
+      if (otpRes === "RATE_LIMITED") {
+        toast.error("অনেকবার চেষ্টা করেছেন। পরে আবার চেষ্টা করুন।");
+        return;
+      }
+      if (otpRes === "DAILY_LIMIT") {
+        toast.error("আজকের জন্য OTP সীমা শেষ। আগামীকাল আবার চেষ্টা করুন।");
+        return;
+      }
+      if (otpRes === "NOT_FOUND") {
+        toast.error("এই নম্বরে কোনো তথ্য পাওয়া যায়নি");
+        return;
+      }
+      if (otpRes === "SENT") {
+        setStep("otp");
+        return;
+      }
+      toast.error("কোড পাঠাতে সমস্যা হয়েছে");
     } catch {
       toast.error("একটি সমস্যা হয়েছে");
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleSecretVerify = async () => {
     if (!secret.trim()) {
@@ -187,7 +287,19 @@ const Verify = () => {
     setOtp("");
   };
 
+  if (exchanging) {
+    return (
+      <div className="flex min-h-app flex-col bg-heirloom-bg">
+        <Header />
+        <main id="main-content" className="flex-1 px-4 py-8">
+          <HeirloomPageSkeleton />
+        </main>
+      </div>
+    );
+  }
+
   return (
+
     <div className="flex min-h-app flex-col bg-heirloom-bg">
       <Header />
       <main id="main-content" className="relative flex flex-1 items-center justify-center px-4 py-6 sm:px-6 sm:py-12">
@@ -236,7 +348,7 @@ const Verify = () => {
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      যে নম্বর দিয়ে তথ্য যোগ করেছিলেন সেটাই দিন। সিক্রেট কোড না থাকলে আমরা OTP পাঠাব।
+                      যে নম্বর দিয়ে তথ্য যোগ করেছিলেন সেটাই দিন। সিক্রেট কোড না থাকলে আপনার ইমেইলে একটি লিংক পাঠাব।
                     </p>
                     <Button onClick={handlePhoneNext} variant="heirloom" className="w-full" disabled={loading}>
                       {loading ? "যাচাই হচ্ছে..." : "পরবর্তী →"}
@@ -279,8 +391,86 @@ const Verify = () => {
                     <Button onClick={handleSecretVerify} variant="heirloom" className="w-full" disabled={loading}>
                       {loading ? "যাচাই হচ্ছে..." : "ভেরিফাই করুন"}
                     </Button>
+                    {emailHint?.has_email && (
+                      <button
+                        onClick={() => setStep("email")}
+                        className="mx-auto flex items-center gap-1.5 text-xs text-heirloom-gold-deep underline-offset-4 hover:underline"
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                        কোড মনে নেই? ইমেইলে লিংক নিন
+                      </button>
+                    )}
                   </motion.div>
                 )}
+
+                {step === "email" && (
+                  <motion.div key="email" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5">
+                    <button onClick={goBack} className="inline-flex items-center gap-1 text-xs text-heirloom-ink-soft hover:text-heirloom-ink">
+                      <ArrowLeft className="h-3.5 w-3.5" /> নম্বর বদলাব
+                    </button>
+                    <div className="heirloom-chip rounded-sm border p-4">
+                      <div className="flex items-start gap-2">
+                        <Mail className="mt-0.5 h-5 w-5 shrink-0 text-heirloom-gold-deep" />
+                        <div>
+                          <p className="text-sm font-medium">ইমেইলে যাচাই</p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            আপনার ইমেইলে একটি লিংক পাঠাব — সেটিতে চাপ দিলেই যাচাই সম্পন্ন।
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Mail className="h-3.5 w-3.5 text-heirloom-gold-deep" />
+                        আপনার ইমেইল
+                      </Label>
+                      <Input
+                        type="email"
+                        placeholder={emailHint?.masked ?? "you@example.com"}
+                        value={emailInput}
+                        onChange={(e) => setEmailInput(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSendEmailLink()}
+                        className="bg-card"
+                        inputMode="email"
+                        autoFocus
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        আপনার তথ্যে সংরক্ষিত ইমেইলটি লিখুন — সেটি দেখতে এমন: <span className="font-medium text-heirloom-ink">{emailHint?.masked}</span>
+                      </p>
+                    </div>
+                    <Button onClick={handleSendEmailLink} variant="heirloom" className="w-full" disabled={loading}>
+                      {loading ? "পাঠানো হচ্ছে..." : "ইমেইলে লিংক পাঠান 💌"}
+                    </Button>
+                  </motion.div>
+                )}
+
+                {step === "email-sent" && (
+                  <motion.div key="email-sent" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5 text-center">
+                    <div aria-hidden className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-heirloom-gold/[0.5] bg-heirloom-gold/[0.08]">
+                      <MailCheck className="h-5 w-5 text-heirloom-gold-deep" />
+                    </div>
+                    <div>
+                      <p className="font-display text-lg text-heirloom-ink">চিঠি পাঠানো হয়েছে</p>
+                      <p className="mt-2 text-[14px] leading-[1.7] text-heirloom-ink-soft">
+                        <span className="font-medium text-heirloom-ink">{emailInput}</span> — এই ইমেইলে
+                        যাওয়া লিংকে চাপ দিন। লিংকটি অল্প সময়ের জন্য কাজ করবে।
+                      </p>
+                      <p className="mt-3 text-xs text-muted-foreground">
+                        ইনবক্সে না পেলে স্প্যাম/প্রমোশন ফোল্ডারও দেখুন।
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Button onClick={handleSendEmailLink} variant="outline" className="w-full" disabled={loading}>
+                        {loading ? "পাঠানো হচ্ছে..." : "আবার পাঠান"}
+                      </Button>
+                      <button onClick={goBack} className="mx-auto text-xs text-heirloom-ink-soft hover:text-heirloom-ink">
+                        অন্য নম্বর দিয়ে চেষ্টা করব
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+
 
                 {step === "otp" && (
                   <motion.div key="otp" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5">
