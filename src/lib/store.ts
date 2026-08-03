@@ -256,3 +256,33 @@ export async function setSecretViaOtpSession(sessionToken: string, newSecret: st
   return !!data;
 }
 
+
+// ---------- Email verification (magic link) ----------
+export interface ContactEmailHint {
+  has_email: boolean;
+  email?: string;
+  masked?: string;
+}
+
+/** Does this phone have an email on file? Returns a masked hint + the address to send to. */
+export async function getContactEmailHint(phone: string): Promise<ContactEmailHint> {
+  const { data, error } = await supabase.rpc("contact_email_hint" as any, { p_phone: phone });
+  if (error) throw error;
+  return (data || { has_email: false }) as unknown as ContactEmailHint;
+}
+
+/** Send a one-time sign-in link to the contact's email. */
+export async function sendEmailVerifyLink(email: string, redirectTo: string) {
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: redirectTo, shouldCreateUser: true },
+  });
+  if (error) throw error;
+}
+
+/** After the email link is clicked, exchange the auth session for a 15-min edit session. */
+export async function startEmailVerifiedSession(): Promise<OtpEditSessionResult> {
+  const { data, error } = await supabase.rpc("start_email_verified_session" as any);
+  if (error) throw error;
+  return (data || { success: false }) as unknown as OtpEditSessionResult;
+}
