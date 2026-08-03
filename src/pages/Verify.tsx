@@ -95,9 +95,13 @@ const Verify = () => {
           res.contact,
         );
         toast.success("ইমেইল যাচাই সফল! 🎉");
-        redirectAfterAuth();
-      } catch (e) {
-        swallow("verify.emailCallback", e);
+        if (next === "chat") {
+          toast.info("চ্যাট চালু করতে আগে সিক্রেট কোড সেট করে নিন।");
+          navigate("/me", { replace: true });
+        } else {
+          redirectAfterAuth();
+        }
+
         if (!cancelled) {
           toast.error("যাচাই করা যায়নি", { description: "আবার চেষ্টা করুন।" });
           setExchanging(false);
