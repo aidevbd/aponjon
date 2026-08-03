@@ -54,6 +54,7 @@ const Verify = () => {
   const [loading, setLoading] = useState(false);
   const [trustDevice, setTrustDevice] = useState(true);
   const [emailHint, setEmailHint] = useState<ContactEmailHint | null>(null);
+  const [emailInput, setEmailInput] = useState("");
   const [exchanging, setExchanging] = useState(isEmailCallback);
 
 
@@ -115,19 +116,24 @@ const Verify = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEmailCallback]);
 
-  const handleSendEmailLink = async (hint?: ContactEmailHint | null) => {
-    const h = hint ?? emailHint;
-    if (!h?.email) return;
+  const handleSendEmailLink = async () => {
+    const addr = emailInput.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(addr)) {
+      toast.error("ইমেইল ঠিকানা ঠিকভাবে লিখুন");
+      return;
+    }
     setLoading(true);
     try {
       const redirectTo = `${window.location.origin}/verify?email=1&next=${next}`;
-      await sendEmailVerifyLink(h.email, redirectTo);
+      await sendEmailVerifyLink(addr, redirectTo);
       setStep("email-sent");
       toast.success("ইমেইলে লিংক পাঠানো হয়েছে 💌");
     } catch (e: any) {
-      const msg = String(e?.message || "");
-      if (msg.toLowerCase().includes("rate")) {
+      const msg = String(e?.message || "").toLowerCase();
+      if (msg.includes("rate") || msg.includes("limit")) {
         toast.error("একটু পরে আবার চেষ্টা করুন", { description: "অল্প সময়ে অনেকবার পাঠানো হয়েছে।" });
+      } else if (msg.includes("invalid")) {
+        toast.error("ইমেইল ঠিকানাটি গ্রহণ করা যায়নি");
       } else {
         toast.error("ইমেইল পাঠানো যায়নি", { description: "একটু পর আবার চেষ্টা করুন।" });
       }
@@ -418,11 +424,21 @@ const Verify = () => {
                         <Mail className="h-3.5 w-3.5 text-heirloom-gold-deep" />
                         আপনার ইমেইল
                       </Label>
-                      <div className="rounded-sm border border-heirloom-line bg-card px-3 py-2.5 text-sm text-heirloom-ink">
-                        {emailHint?.masked ?? "—"}
-                      </div>
+                      <Input
+                        type="email"
+                        placeholder={emailHint?.masked ?? "you@example.com"}
+                        value={emailInput}
+                        onChange={(e) => setEmailInput(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSendEmailLink()}
+                        className="bg-card"
+                        inputMode="email"
+                        autoFocus
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        আপনার তথ্যে সংরক্ষিত ইমেইলটি লিখুন — সেটি দেখতে এমন: <span className="font-medium text-heirloom-ink">{emailHint?.masked}</span>
+                      </p>
                     </div>
-                    <Button onClick={() => handleSendEmailLink()} variant="heirloom" className="w-full" disabled={loading}>
+                    <Button onClick={handleSendEmailLink} variant="heirloom" className="w-full" disabled={loading}>
                       {loading ? "পাঠানো হচ্ছে..." : "ইমেইলে লিংক পাঠান 💌"}
                     </Button>
                   </motion.div>
@@ -436,7 +452,7 @@ const Verify = () => {
                     <div>
                       <p className="font-display text-lg text-heirloom-ink">চিঠি পাঠানো হয়েছে</p>
                       <p className="mt-2 text-[14px] leading-[1.7] text-heirloom-ink-soft">
-                        <span className="font-medium text-heirloom-ink">{emailHint?.masked}</span> — এই ইমেইলে
+                        <span className="font-medium text-heirloom-ink">{emailInput}</span> — এই ইমেইলে
                         যাওয়া লিংকে চাপ দিন। লিংকটি অল্প সময়ের জন্য কাজ করবে।
                       </p>
                       <p className="mt-3 text-xs text-muted-foreground">
@@ -444,7 +460,7 @@ const Verify = () => {
                       </p>
                     </div>
                     <div className="flex flex-col gap-2">
-                      <Button onClick={() => handleSendEmailLink()} variant="outline" className="w-full" disabled={loading}>
+                      <Button onClick={handleSendEmailLink} variant="outline" className="w-full" disabled={loading}>
                         {loading ? "পাঠানো হচ্ছে..." : "আবার পাঠান"}
                       </Button>
                       <button onClick={goBack} className="mx-auto text-xs text-heirloom-ink-soft hover:text-heirloom-ink">
