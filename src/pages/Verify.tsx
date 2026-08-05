@@ -69,52 +69,129 @@ const Verify = () => {
     else navigate("/me", { replace: true });
   };
 
+  /** Turn a live Supabase auth session into our 15-min verified session. */
+  const finishEmailAuth = async (): Promise<boolean> => {
+    const res = await startEmailVerifiedSession();
+    // The auth session was only a proof of email ownership — drop it immediately.
+    await supabase.auth.signOut().catch((e) => swallow("verify.signOut", e));
+    if (!res.success || !res.contact || !res.session_token) return false;
+    saveMeSession(
+      { type: "otp", phone: res.contact.phone, sessionToken: res.session_token },
+      res.contact,
+    );
+    toast.success("ইমেইল যাচাই সফল! 🎉");
+    if (next === "chat") {
+      toast.info("চ্যাট চালু করতে আগে সিক্রেট কোড সেট করে নিন।");
+      navigate("/me", { replace: true });
+    } else {
+      redirectAfterAuth();
+    }
+    return true;
+  };
+
   // ---- Email link callback: exchange the auth session for a 15-min edit session ----
   useEffect(() => {
     if (!isEmailCallback) return;
     let cancelled = false;
 
     const run = async () => {
-      // Give the Supabase client a moment to parse the tokens from the URL
-      for (let i = 0; i < 20; i++) {
-        const { data } = await supabase.auth.getSession();
-        if (data.session) break;
-        await new Promise((r) => setTimeout(r, 250));
+      const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const errCode = params.get("error_code") || hash.get("error_code") || params.get("error") || hash.get("error");
+
+      if (errCode) {
+        const expired = /expired|invalid/i.test(errCode);
+        toast.error(expired ? "লিংকটির সময় শেষ" : "লিংকটি কাজ করছে না", {
+          description: "ইমেইলে আসা ৬ সংখ্যার কোড দিয়ে যাচাই করুন, বা নতুন লিংক নিন।",
+        });
+        setStep("email");
+        setExchanging(false);
+        return;
       }
+
       try {
-        const res = await startEmailVerifiedSession();
-        // The auth session was only a proof of email ownership — drop it immediately.
-        await supabase.auth.signOut().catch((e) => swallow("verify.signOut", e));
+        // 1. PKCE style: ?code=...
+        const code = params.get("code");
+        if (code) {
+          await supabase.auth.exchangeCodeForSession(code).catch((e) => swallow("verify.pkce", e));
+        }
+
+        // 2. token_hash style: ?token_hash=...&type=magiclink|email|signup
+        const tokenHash = params.get("token_hash") || params.get("token");
+        const type = (params.get("type") || "email") as "magiclink" | "email" | "signup" | "recovery";
+        if (tokenHash) {
+          await supabase.auth
+            .verifyOtp({ token_hash: tokenHash, type })
+            .catch((e) => swallow("verify.tokenHash", e));
+        }
+
+        // 3. Implicit style (#access_token=...) — the client parses it on its own.
+        let hasSession = false;
+        for (let i = 0; i < 20; i++) {
+          const { data } = await supabase.auth.getSession();
+          if (data.session) {
+            hasSession = true;
+            break;
+          }
+          await new Promise((r) => setTimeout(r, 250));
+        }
         if (cancelled) return;
-        if (!res.success || !res.contact || !res.session_token) {
-          toast.error("লিংকটি আর কাজ করছে না", { description: "আবার নতুন লিংক নিন।" });
+
+        if (!hasSession) {
+          toast.error("লিংকটি আর কাজ করছে না", {
+            description: "ইমেইলে আসা ৬ সংখ্যার কোড দিয়ে যাচাই করুন, বা নতুন লিংক নিন।",
+          });
+          setStep("email");
           setExchanging(false);
           return;
         }
-        saveMeSession(
-          { type: "otp", phone: res.contact.phone, sessionToken: res.session_token },
-          res.contact,
-        );
-        toast.success("ইমেইল যাচাই সফল! 🎉");
-        if (next === "chat") {
-          toast.info("চ্যাট চালু করতে আগে সিক্রেট কোড সেট করে নিন।");
-          navigate("/me", { replace: true });
-        } else {
-          redirectAfterAuth();
+
+        const ok = await finishEmailAuth();
+        if (cancelled) return;
+        if (!ok) {
+          toast.error("এই ইমেইলের সাথে মিল পাওয়া যায়নি", {
+            description: "আপনার তথ্যে সংরক্ষিত ইমেইল দিয়েই চেষ্টা করুন।",
+          });
+          setStep("email");
+          setExchanging(false);
         }
       } catch (e) {
         swallow("verify.emailCallback", e);
         if (!cancelled) {
           toast.error("যাচাই করা যায়নি", { description: "আবার চেষ্টা করুন।" });
+          setStep("email");
           setExchanging(false);
         }
       }
-
     };
     run();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEmailCallback]);
+
+  const handleEmailCodeVerify = async () => {
+    const addr = emailInput.trim().toLowerCase();
+    const code = emailCode.trim();
+    if (!/^\d{6}$/.test(code)) {
+      toast.error("৬ সংখ্যার কোডটি লিখুন");
+      return;
+    }
+    setLoading(true);
+    try {
+      await verifyEmailCode(addr, code);
+      const ok = await finishEmailAuth();
+      if (!ok) {
+        toast.error("এই ইমেইলের সাথে মিল পাওয়া যায়নি", {
+          description: "আপনার তথ্যে সংরক্ষিত ইমেইল দিয়েই চেষ্টা করুন।",
+        });
+      }
+    } catch (e: any) {
+      swallow("verify.emailCode", e);
+      toast.error("কোডটি মিলছে না", { description: "নতুন কোড নিয়ে আবার চেষ্টা করুন।" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const handleSendEmailLink = async () => {
     const addr = emailInput.trim().toLowerCase();
