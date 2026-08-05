@@ -271,7 +271,7 @@ export async function getContactEmailHint(phone: string): Promise<ContactEmailHi
   return (data || { has_email: false }) as unknown as ContactEmailHint;
 }
 
-/** Send a one-time sign-in link to the contact's email. */
+/** Send a one-time sign-in link (and 6-digit code) to the contact's email. */
 export async function sendEmailVerifyLink(email: string, redirectTo: string) {
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -279,6 +279,17 @@ export async function sendEmailVerifyLink(email: string, redirectTo: string) {
   });
   if (error) throw error;
 }
+
+/** Fallback for when the emailed link gets consumed by a mail scanner: verify the 6-digit code. */
+export async function verifyEmailCode(email: string, code: string) {
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token: code,
+    type: "email",
+  });
+  if (error) throw error;
+}
+
 
 /** After the email link is clicked, exchange the auth session for a 15-min edit session. */
 export async function startEmailVerifiedSession(): Promise<OtpEditSessionResult> {
