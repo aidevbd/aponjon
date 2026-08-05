@@ -538,7 +538,28 @@ const Verify = () => {
                         ইনবক্সে না পেলে স্প্যাম/প্রমোশন ফোল্ডারও দেখুন।
                       </p>
                     </div>
+
+                    <div className="space-y-2 text-left">
+                      <Label className="flex items-center gap-2">
+                        <KeyRound className="h-3.5 w-3.5 text-heirloom-gold-deep" />
+                        লিংক কাজ না করলে — ইমেইলের ৬ সংখ্যার কোড
+                      </Label>
+                      <Input
+                        placeholder="৬ সংখ্যার কোড"
+                        value={emailCode}
+                        onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        onKeyDown={(e) => e.key === "Enter" && handleEmailCodeVerify()}
+                        maxLength={6}
+                        className="bg-card text-center text-lg tracking-widest"
+                        inputMode="numeric"
+                      />
+                      <Button onClick={handleEmailCodeVerify} variant="heirloom" className="w-full" disabled={loading}>
+                        {loading ? "যাচাই হচ্ছে..." : "কোড দিয়ে যাচাই করুন"}
+                      </Button>
+                    </div>
+
                     <div className="flex flex-col gap-2">
+
                       <Button onClick={handleSendEmailLink} variant="outline" className="w-full" disabled={loading}>
                         {loading ? "পাঠানো হচ্ছে..." : "আবার পাঠান"}
                       </Button>
