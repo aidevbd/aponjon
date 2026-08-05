@@ -15,6 +15,7 @@ import {
   getContactEmailHint,
   sendEmailVerifyLink,
   startEmailVerifiedSession,
+  verifyEmailCode,
   type ContactEmailHint,
 } from "@/lib/store";
 import { supabase } from "@/integrations/supabase/client";
@@ -55,6 +56,7 @@ const Verify = () => {
   const [trustDevice, setTrustDevice] = useState(true);
   const [emailHint, setEmailHint] = useState<ContactEmailHint | null>(null);
   const [emailInput, setEmailInput] = useState("");
+  const [emailCode, setEmailCode] = useState("");
   const [exchanging, setExchanging] = useState(isEmailCallback);
 
 
