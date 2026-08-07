@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import { emailAuth } from "@/lib/emailAuthClient";
+
 
 export interface ContactRow {
   id: string;
