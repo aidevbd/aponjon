@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import { emailAuth } from "@/lib/emailAuthClient";
+
 
 export interface ContactRow {
   id: string;
@@ -273,7 +275,7 @@ export async function getContactEmailHint(phone: string): Promise<ContactEmailHi
 
 /** Send a one-time sign-in link (and 6-digit code) to the contact's email. */
 export async function sendEmailVerifyLink(email: string, redirectTo: string) {
-  const { error } = await supabase.auth.signInWithOtp({
+  const { error } = await emailAuth.auth.signInWithOtp({
     email,
     options: { emailRedirectTo: redirectTo, shouldCreateUser: true },
   });
@@ -282,7 +284,7 @@ export async function sendEmailVerifyLink(email: string, redirectTo: string) {
 
 /** Fallback for when the emailed link gets consumed by a mail scanner: verify the 6-digit code. */
 export async function verifyEmailCode(email: string, code: string) {
-  const { error } = await supabase.auth.verifyOtp({
+  const { error } = await emailAuth.auth.verifyOtp({
     email,
     token: code,
     type: "email",
@@ -293,7 +295,8 @@ export async function verifyEmailCode(email: string, code: string) {
 
 /** After the email link is clicked, exchange the auth session for a 15-min edit session. */
 export async function startEmailVerifiedSession(): Promise<OtpEditSessionResult> {
-  const { data, error } = await supabase.rpc("start_email_verified_session" as any);
+  const { data, error } = await emailAuth.rpc("start_email_verified_session" as any);
   if (error) throw error;
   return (data || { success: false }) as unknown as OtpEditSessionResult;
 }
+

@@ -18,7 +18,7 @@ import {
   verifyEmailCode,
   type ContactEmailHint,
 } from "@/lib/store";
-import { supabase } from "@/integrations/supabase/client";
+import { emailAuth } from "@/lib/emailAuthClient";
 import { saveMeSession } from "@/lib/userSession";
 import { createChatSession } from "@/lib/chatSession";
 import { swallow } from "@/lib/devLog";
@@ -75,7 +75,7 @@ const Verify = () => {
   const finishEmailAuth = async (): Promise<boolean> => {
     const res = await startEmailVerifiedSession();
     // The auth session was only a proof of email ownership — drop it immediately.
-    await supabase.auth.signOut().catch((e) => swallow("verify.signOut", e));
+    await emailAuth.auth.signOut().catch((e) => swallow("verify.signOut", e));
     if (!res.success || !res.contact || !res.session_token) return false;
     saveMeSession(
       { type: "otp", phone: res.contact.phone, sessionToken: res.session_token },
@@ -111,25 +111,33 @@ const Verify = () => {
       }
 
       try {
-        // 1. PKCE style: ?code=...
-        const code = params.get("code");
-        if (code) {
-          await supabase.auth.exchangeCodeForSession(code).catch((e) => swallow("verify.pkce", e));
+        // 1. Implicit style (#access_token=...&refresh_token=...) — works from any browser.
+        const accessToken = hash.get("access_token");
+        const refreshToken = hash.get("refresh_token");
+        if (accessToken) {
+          await emailAuth.auth
+            .setSession({ access_token: accessToken, refresh_token: refreshToken || accessToken })
+            .catch((e) => swallow("verify.implicit", e));
         }
 
-        // 2. token_hash style: ?token_hash=...&type=magiclink|email|signup
+        // 2. PKCE style: ?code=... (only works in the browser that requested the link)
+        const code = params.get("code");
+        if (!accessToken && code) {
+          await emailAuth.auth.exchangeCodeForSession(code).catch((e) => swallow("verify.pkce", e));
+        }
+
+        // 3. token_hash style: ?token_hash=...&type=magiclink|email|signup
         const tokenHash = params.get("token_hash") || params.get("token");
         const type = (params.get("type") || "email") as "magiclink" | "email" | "signup" | "recovery";
-        if (tokenHash) {
-          await supabase.auth
+        if (!accessToken && !code && tokenHash) {
+          await emailAuth.auth
             .verifyOtp({ token_hash: tokenHash, type })
             .catch((e) => swallow("verify.tokenHash", e));
         }
 
-        // 3. Implicit style (#access_token=...) — the client parses it on its own.
         let hasSession = false;
         for (let i = 0; i < 20; i++) {
-          const { data } = await supabase.auth.getSession();
+          const { data } = await emailAuth.auth.getSession();
           if (data.session) {
             hasSession = true;
             break;
@@ -146,6 +154,7 @@ const Verify = () => {
           setExchanging(false);
           return;
         }
+
 
         const ok = await finishEmailAuth();
         if (cancelled) return;
