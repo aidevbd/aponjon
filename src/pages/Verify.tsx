@@ -18,7 +18,7 @@ import {
   verifyEmailCode,
   type ContactEmailHint,
 } from "@/lib/store";
-import { supabase } from "@/integrations/supabase/client";
+import { emailAuth } from "@/lib/emailAuthClient";
 import { saveMeSession } from "@/lib/userSession";
 import { createChatSession } from "@/lib/chatSession";
 import { swallow } from "@/lib/devLog";
