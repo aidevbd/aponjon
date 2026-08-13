@@ -273,14 +273,21 @@ export async function getContactEmailHint(phone: string): Promise<ContactEmailHi
   return (data || { has_email: false }) as unknown as ContactEmailHint;
 }
 
-/** Send a one-time sign-in link (and 6-digit code) to the contact's email. */
-export async function sendEmailVerifyLink(email: string, redirectTo: string) {
+/**
+ * Send a 6-digit one-time code (OTP) to the contact's email.
+ * `redirectTo` is still passed so the same email keeps a working fallback link,
+ * but the primary flow is the code the user types in.
+ */
+export async function sendEmailOtp(email: string, redirectTo?: string) {
   const { error } = await emailAuth.auth.signInWithOtp({
     email,
     options: { emailRedirectTo: redirectTo, shouldCreateUser: true },
   });
   if (error) throw error;
 }
+
+/** @deprecated use sendEmailOtp */
+export const sendEmailVerifyLink = sendEmailOtp;
 
 /** Fallback for when the emailed link gets consumed by a mail scanner: verify the 6-digit code. */
 export async function verifyEmailCode(email: string, code: string) {
