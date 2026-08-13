@@ -13,7 +13,7 @@ import {
   generateOtp,
   startOtpEditSession,
   getContactEmailHint,
-  sendEmailVerifyLink,
+  sendEmailOtp,
   startEmailVerifiedSession,
   verifyEmailCode,
   type ContactEmailHint,
@@ -103,7 +103,7 @@ const Verify = () => {
       if (errCode) {
         const expired = /expired|invalid/i.test(errCode);
         toast.error(expired ? "লিংকটির সময় শেষ" : "লিংকটি কাজ করছে না", {
-          description: "ইমেইলে আসা ৬ সংখ্যার কোড দিয়ে যাচাই করুন, বা নতুন লিংক নিন।",
+          description: "ইমেইলে আসা ৬ সংখ্যার কোড দিয়ে যাচাই করুন, বা নতুন কোড নিন।",
         });
         setStep("email");
         setExchanging(false);
@@ -148,7 +148,7 @@ const Verify = () => {
 
         if (!hasSession) {
           toast.error("লিংকটি আর কাজ করছে না", {
-            description: "ইমেইলে আসা ৬ সংখ্যার কোড দিয়ে যাচাই করুন, বা নতুন লিংক নিন।",
+            description: "ইমেইলে আসা ৬ সংখ্যার কোড দিয়ে যাচাই করুন, বা নতুন কোড নিন।",
           });
           setStep("email");
           setExchanging(false);
@@ -213,9 +213,9 @@ const Verify = () => {
     setLoading(true);
     try {
       const redirectTo = `${window.location.origin}/verify?email=1&next=${next}`;
-      await sendEmailVerifyLink(addr, redirectTo);
+      await sendEmailOtp(addr, redirectTo);
       setStep("email-sent");
-      toast.success("ইমেইলে লিংক পাঠানো হয়েছে 💌");
+      toast.success("ইমেইলে ৬ সংখ্যার কোড পাঠানো হয়েছে 💌");
     } catch (e: any) {
       const msg = String(e?.message || "").toLowerCase();
       if (msg.includes("rate") || msg.includes("limit")) {
@@ -485,7 +485,7 @@ const Verify = () => {
                         className="mx-auto flex items-center gap-1.5 text-xs text-heirloom-gold-deep underline-offset-4 hover:underline"
                       >
                         <Mail className="h-3.5 w-3.5" />
-                        কোড মনে নেই? ইমেইলে লিংক নিন
+                        সিক্রেট কোড ভুলে গেছেন? ইমেইলে OTP নিন
                       </button>
                     )}
                   </motion.div>
