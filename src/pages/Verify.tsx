@@ -500,9 +500,9 @@ const Verify = () => {
                       <div className="flex items-start gap-2">
                         <Mail className="mt-0.5 h-5 w-5 shrink-0 text-heirloom-gold-deep" />
                         <div>
-                          <p className="text-sm font-medium">ইমেইলে যাচাই</p>
+                          <p className="text-sm font-medium">ইমেইলে ৬ সংখ্যার কোড</p>
                           <p className="mt-1 text-xs text-muted-foreground">
-                            আপনার ইমেইলে একটি লিংক পাঠাব — সেটিতে চাপ দিলেই যাচাই সম্পন্ন।
+                            আপনার ইমেইলে একটি ৬ সংখ্যার কোড পাঠাব — সেটি এখানে লিখলেই যাচাই সম্পন্ন।
                           </p>
                         </div>
                       </div>
@@ -527,7 +527,7 @@ const Verify = () => {
                       </p>
                     </div>
                     <Button onClick={handleSendEmailLink} variant="heirloom" className="w-full" disabled={loading}>
-                      {loading ? "পাঠানো হচ্ছে..." : "ইমেইলে লিংক পাঠান 💌"}
+                      {loading ? "পাঠানো হচ্ছে..." : "ইমেইলে কোড পাঠান 💌"}
                     </Button>
                   </motion.div>
                 )}
@@ -538,10 +538,10 @@ const Verify = () => {
                       <MailCheck className="h-5 w-5 text-heirloom-gold-deep" />
                     </div>
                     <div>
-                      <p className="font-display text-lg text-heirloom-ink">চিঠি পাঠানো হয়েছে</p>
+                      <p className="font-display text-lg text-heirloom-ink">কোড পাঠানো হয়েছে</p>
                       <p className="mt-2 text-[14px] leading-[1.7] text-heirloom-ink-soft">
                         <span className="font-medium text-heirloom-ink">{emailInput}</span> — এই ইমেইলে
-                        যাওয়া লিংকে চাপ দিন। লিংকটি অল্প সময়ের জন্য কাজ করবে।
+                        আসা ৬ সংখ্যার কোডটি নিচে লিখুন। কোডটি অল্প সময়ের জন্য কাজ করবে।
                       </p>
                       <p className="mt-3 text-xs text-muted-foreground">
                         ইনবক্সে না পেলে স্প্যাম/প্রমোশন ফোল্ডারও দেখুন।
@@ -551,7 +551,7 @@ const Verify = () => {
                     <div className="space-y-2 text-left">
                       <Label className="flex items-center gap-2">
                         <KeyRound className="h-3.5 w-3.5 text-heirloom-gold-deep" />
-                        লিংক কাজ না করলে — ইমেইলের ৬ সংখ্যার কোড
+                        ইমেইলে আসা ৬ সংখ্যার কোড
                       </Label>
                       <Input
                         placeholder="৬ সংখ্যার কোড"
@@ -561,6 +561,7 @@ const Verify = () => {
                         maxLength={6}
                         className="bg-card text-center text-lg tracking-widest"
                         inputMode="numeric"
+                        autoFocus
                       />
                       <Button onClick={handleEmailCodeVerify} variant="heirloom" className="w-full" disabled={loading}>
                         {loading ? "যাচাই হচ্ছে..." : "কোড দিয়ে যাচাই করুন"}
@@ -570,7 +571,7 @@ const Verify = () => {
                     <div className="flex flex-col gap-2">
 
                       <Button onClick={handleSendEmailLink} variant="outline" className="w-full" disabled={loading}>
-                        {loading ? "পাঠানো হচ্ছে..." : "আবার পাঠান"}
+                        {loading ? "পাঠানো হচ্ছে..." : "নতুন কোড পাঠান"}
                       </Button>
                       <button onClick={goBack} className="mx-auto text-xs text-heirloom-ink-soft hover:text-heirloom-ink">
                         অন্য নম্বর দিয়ে চেষ্টা করব
