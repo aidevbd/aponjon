@@ -542,41 +542,52 @@ const Verify = () => {
                       <MailCheck className="h-5 w-5 text-heirloom-gold-deep" />
                     </div>
                     <div>
-                      <p className="font-display text-lg text-heirloom-ink">কোড পাঠানো হয়েছে</p>
+                      <p className="font-display text-lg text-heirloom-ink">যাচাই লিংক পাঠানো হয়েছে</p>
                       <p className="mt-2 text-[14px] leading-[1.7] text-heirloom-ink-soft">
                         <span className="font-medium text-heirloom-ink">{emailInput}</span> — এই ইমেইলে
-                        আসা ৬ সংখ্যার কোডটি নিচে লিখুন। কোডটি অল্প সময়ের জন্য কাজ করবে।
+                        যাওয়া যাচাই লিংকে ক্লিক করুন। লিংকটি অল্প সময়ের জন্য কাজ করবে।
                       </p>
                       <p className="mt-3 text-xs text-muted-foreground">
                         ইনবক্সে না পেলে স্প্যাম/প্রমোশন ফোল্ডারও দেখুন।
                       </p>
                     </div>
 
-                    <div className="space-y-2 text-left">
-                      <Label className="flex items-center gap-2">
-                        <KeyRound className="h-3.5 w-3.5 text-heirloom-gold-deep" />
-                        ইমেইলে আসা ৬ সংখ্যার কোড
-                      </Label>
-                      <Input
-                        placeholder="৬ সংখ্যার কোড"
-                        value={emailCode}
-                        onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                        onKeyDown={(e) => e.key === "Enter" && handleEmailCodeVerify()}
-                        maxLength={6}
-                        className="bg-card text-center text-lg tracking-widest"
-                        inputMode="numeric"
-                        autoFocus
-                      />
-                      <Button onClick={handleEmailCodeVerify} variant="heirloom" className="w-full" disabled={loading}>
-                        {loading ? "যাচাই হচ্ছে..." : "কোড দিয়ে যাচাই করুন"}
-                      </Button>
-                    </div>
-
                     <div className="flex flex-col gap-2">
-
                       <Button onClick={handleSendEmailLink} variant="outline" className="w-full" disabled={loading}>
-                        {loading ? "পাঠানো হচ্ছে..." : "নতুন কোড পাঠান"}
+                        {loading ? "পাঠানো হচ্ছে..." : "নতুন লিংক পাঠান"}
                       </Button>
+                      {!showCodeFallback ? (
+                        <button
+                          onClick={() => setShowCodeFallback(true)}
+                          className="mx-auto text-xs text-heirloom-gold-deep underline-offset-4 hover:underline"
+                        >
+                          লিংক কাজ করছে না? ৬ সংখ্যার কোড লিখি
+                        </button>
+                      ) : (
+                        <div className="mt-1 space-y-2 border-t border-heirloom-line pt-4 text-left">
+                          <Label className="flex items-center gap-2 text-xs">
+                            <KeyRound className="h-3.5 w-3.5 text-heirloom-gold-deep" />
+                            ইমেইলে আসা ৬ সংখ্যার কোড
+                          </Label>
+                          <Input
+                            placeholder="৬ সংখ্যার কোড"
+                            value={emailCode}
+                            onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                            onKeyDown={(e) => e.key === "Enter" && handleEmailCodeVerify()}
+                            maxLength={6}
+                            className="bg-card text-center text-lg tracking-widest"
+                            inputMode="numeric"
+                            autoFocus
+                          />
+                          <Button onClick={handleEmailCodeVerify} variant="heirloom" className="w-full" disabled={loading}>
+                            {loading ? "যাচাই হচ্ছে..." : "কোড দিয়ে যাচাই করুন"}
+                          </Button>
+                        </div>
+                      )}
+                      <button onClick={goBack} className="mx-auto text-xs text-heirloom-ink-soft hover:text-heirloom-ink">
+                        অন্য নম্বর দিয়ে চেষ্টা করব
+                      </button>
+
                       <button onClick={goBack} className="mx-auto text-xs text-heirloom-ink-soft hover:text-heirloom-ink">
                         অন্য নম্বর দিয়ে চেষ্টা করব
                       </button>
