@@ -531,7 +531,7 @@ const Verify = () => {
                       </p>
                     </div>
                     <Button onClick={handleSendEmailLink} variant="heirloom" className="w-full" disabled={loading}>
-                      {loading ? "পাঠানো হচ্ছে..." : "ইমেইলে কোড পাঠান 💌"}
+                      {loading ? "পাঠানো হচ্ছে..." : "ইমেইলে যাচাই লিংক পাঠান 💌"}
                     </Button>
                   </motion.div>
                 )}
