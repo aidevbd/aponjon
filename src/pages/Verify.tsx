@@ -503,10 +503,11 @@ const Verify = () => {
                       <div className="flex items-start gap-2">
                         <Mail className="mt-0.5 h-5 w-5 shrink-0 text-heirloom-gold-deep" />
                         <div>
-                          <p className="text-sm font-medium">ইমেইলে ৬ সংখ্যার কোড</p>
+                          <p className="text-sm font-medium">ইমেইলে যাচাই লিংক পাঠাব</p>
                           <p className="mt-1 text-xs text-muted-foreground">
-                            আপনার ইমেইলে একটি ৬ সংখ্যার কোড পাঠাব — সেটি এখানে লিখলেই যাচাই সম্পন্ন।
+                            আপনার ইমেইলে একটি যাচাই লিংক যাবে — লিংকে ক্লিক করলেই যাচাই সম্পন্ন। লিংক কাজ না করলে ইমেইলের ৬ সংখ্যার কোডও ব্যবহার করা যাবে।
                           </p>
+
                         </div>
                       </div>
                     </div>
