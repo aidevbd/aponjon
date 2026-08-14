@@ -215,7 +215,10 @@ const Verify = () => {
       const redirectTo = `${window.location.origin}/verify?email=1&next=${next}`;
       await sendEmailOtp(addr, redirectTo);
       setStep("email-sent");
-      toast.success("ইমেইলে ৬ সংখ্যার কোড পাঠানো হয়েছে 💌");
+      toast.success("ইমেইলে যাচাই লিংক পাঠানো হয়েছে 💌", {
+        description: "ইমেইল খুলে “Verify email” লিংকে ক্লিক করুন।",
+      });
+
     } catch (e: any) {
       const msg = String(e?.message || "").toLowerCase();
       if (msg.includes("rate") || msg.includes("limit")) {
