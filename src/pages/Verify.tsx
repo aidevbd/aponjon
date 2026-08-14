@@ -488,7 +488,7 @@ const Verify = () => {
                         className="mx-auto flex items-center gap-1.5 text-xs text-heirloom-gold-deep underline-offset-4 hover:underline"
                       >
                         <Mail className="h-3.5 w-3.5" />
-                        সিক্রেট কোড ভুলে গেছেন? ইমেইলে OTP নিন
+                        সিক্রেট কোড ভুলে গেছেন? ইমেইলে যাচাই লিংক নিন
                       </button>
                     )}
                   </motion.div>
