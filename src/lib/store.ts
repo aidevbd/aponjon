@@ -274,17 +274,21 @@ export async function getContactEmailHint(phone: string): Promise<ContactEmailHi
 }
 
 /**
- * Send a 6-digit one-time code (OTP) to the contact's email.
- * `redirectTo` is still passed so the same email keeps a working fallback link,
- * but the primary flow is the code the user types in.
+ * Send an email ownership proof to the contact's email.
+ * Primary flow = the magic link in the email (works in any browser thanks to the
+ * implicit-flow client). The same email also contains a 6-digit code as fallback.
+ * `emailRedirectTo` is ALWAYS provided so the link lands back on /verify.
  */
 export async function sendEmailOtp(email: string, redirectTo?: string) {
+  const fallback =
+    typeof window !== "undefined" ? `${window.location.origin}/verify?email=1` : undefined;
   const { error } = await emailAuth.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: redirectTo, shouldCreateUser: true },
+    options: { emailRedirectTo: redirectTo || fallback, shouldCreateUser: true },
   });
   if (error) throw error;
 }
+
 
 /** @deprecated use sendEmailOtp */
 export const sendEmailVerifyLink = sendEmailOtp;
