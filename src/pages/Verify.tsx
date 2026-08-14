@@ -57,6 +57,8 @@ const Verify = () => {
   const [emailHint, setEmailHint] = useState<ContactEmailHint | null>(null);
   const [emailInput, setEmailInput] = useState("");
   const [emailCode, setEmailCode] = useState("");
+  const [showCodeFallback, setShowCodeFallback] = useState(false);
+
   const [exchanging, setExchanging] = useState(isEmailCallback);
 
 
