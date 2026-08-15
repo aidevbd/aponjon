@@ -57,7 +57,6 @@ const Verify = () => {
   const [emailHint, setEmailHint] = useState<ContactEmailHint | null>(null);
   const [emailInput, setEmailInput] = useState("");
   const [emailCode, setEmailCode] = useState("");
-  const [showCodeFallback, setShowCodeFallback] = useState(false);
 
   const [exchanging, setExchanging] = useState(isEmailCallback);
 
@@ -441,7 +440,7 @@ const Verify = () => {
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      যে নম্বর দিয়ে তথ্য যোগ করেছিলেন সেটাই দিন। সিক্রেট কোড না থাকলে আপনার ইমেইলে যাচাই লিংক পাঠাব।
+                      যে নম্বর দিয়ে তথ্য যোগ করেছিলেন সেটাই দিন। সিক্রেট কোড না থাকলে আপনার ইমেইলে ৬ সংখ্যার কোড পাঠাব।
                     </p>
                     <Button onClick={handlePhoneNext} variant="heirloom" className="w-full" disabled={loading}>
                       {loading ? "যাচাই হচ্ছে..." : "পরবর্তী →"}
