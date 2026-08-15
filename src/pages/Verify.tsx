@@ -217,8 +217,8 @@ const Verify = () => {
       const redirectTo = `${window.location.origin}/verify?email=1&next=${next}`;
       await sendEmailOtp(addr, redirectTo);
       setStep("email-sent");
-      toast.success("ইমেইলে যাচাই লিংক পাঠানো হয়েছে 💌", {
-        description: "ইমেইল খুলে “Verify email” লিংকে ক্লিক করুন।",
+      toast.success("ইমেইলে ৬ সংখ্যার কোড পাঠানো হয়েছে 💌", {
+        description: "ইমেইল খুলে কোডটি নিচে লিখুন।",
       });
 
     } catch (e: any) {
@@ -490,7 +490,7 @@ const Verify = () => {
                         className="mx-auto flex items-center gap-1.5 text-xs text-heirloom-gold-deep underline-offset-4 hover:underline"
                       >
                         <Mail className="h-3.5 w-3.5" />
-                        সিক্রেট কোড ভুলে গেছেন? ইমেইলে যাচাই লিংক নিন
+                        সিক্রেট কোড ভুলে গেছেন? ইমেইলে কোড নিন
                       </button>
                     )}
                   </motion.div>
