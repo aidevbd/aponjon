@@ -148,7 +148,7 @@ export function PhotoUpload({ value, onChange, disabled }: PhotoUploadProps) {
     try {
       const blob = await getCroppedWebp(cropSrc, croppedArea);
       setBusy(mode);
-      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
+      const fileName = `intake/${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
       const { error } = await supabase.storage
         .from("contact-photos")
         .upload(fileName, blob, { contentType: "image/webp" });
